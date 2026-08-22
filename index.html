@@ -3685,7 +3685,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.152';
+var APPV='v4.153';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5760,7 +5760,12 @@ function mkBindCards(){
         try{if(navigator.vibrate)navigator.vibrate(14);}catch(e){}
         // belt and braces: drop any selection the press already started before the sheet lands
         try{var s=window.getSelection();if(s&&s.removeAllRanges)s.removeAllRanges();}catch(e){}
-        if(xid)mkActionsX(xid);else mkActions(base);
+        if(xid)mkActionsX(xid);
+        else{
+          // which DAY the held card stands on, so the sheet can offer to clear just that one
+          var db=el.closest?el.closest('.daybox'):null;
+          mkActions(base,db?db.getAttribute('data-day'):null);
+        }
       },520);
     });
     el.addEventListener('pointermove',function(ev){
@@ -5901,17 +5906,35 @@ function mkDuplicate(id){
 // behind WORKOUT SETTINGS - deleting a workout was "tricky" in exactly those words. The
 // hold now opens a small sheet: edit, take it off the week, delete. One extra tap on the
 // edit path buys a visible way out for everything else.
-function mkActions(id){
+function mkActions(id,dk){
   var mine=!!(DB.custom&&DB.custom[id]);
   var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'This workout';
-  var onWeek=DAYS.some(function(d){return (DB.days[d.k]||[]).indexOf(id)>=0;});
+  var onDays=DAYS.filter(function(d){return (DB.days[d.k]||[]).indexOf(id)>=0;});
+  var held=null;onDays.forEach(function(d){if(d.k===dk)held=d;});
   document.getElementById('mkActTtl').textContent=nm;
   document.getElementById('mkActSub').textContent='';
+  // A workout standing on several days is ONE workout - that is what keeps a level-up on
+  // Monday setting Friday's target, and a "from now on" edit reaching every day. So removal
+  // scopes instead of copying: clear the day you held, or clear the whole week, and only
+  // DELETE destroys the workout itself - saying out loud how many days it takes with it.
   document.getElementById('mkActBody').innerHTML=
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')">EDIT THIS WORKOUT</div>'+
-    (onWeek?'<div class="btn" onclick="mkRestore(\''+id+'\')">TAKE IT OFF THE WEEK</div>':'')+
+    (held&&onDays.length>1?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">TAKE IT OFF '+held.n.toUpperCase()+'</div>':'')+
+    (onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">TAKE IT OFF THE WEEK</div>':'')+
     (mine?'<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDelete(\''+id+'\')">DELETE THIS WORKOUT</div>':'');
   openHeld('mkActOvl');
+}
+// Off ONE day, everything else untouched. If that was its last placement it lands on the
+// shelf like anything else that leaves the week, so there is always a card and a way back.
+function planDropDay(id,dk){
+  if(openHere(id)){closeOvl('mkActOvl');mkNote(MOVE_BUSY);return;}
+  var arr=DB.days[dk]||[];
+  var i=arr.indexOf(id);
+  if(i>=0)arr.splice(i,1);
+  if(!onPlan(id))shelve(id);
+  saveDB();mergeCustom();
+  closeOvl('mkActOvl');renderHome();
+  try{sfxLog();}catch(e){}
 }
 function mkActionsX(id){
   var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'This workout';
@@ -5973,7 +5996,13 @@ function mkDelete(id){
   if(openHere(id)){mkNote('There is an open session on this day. Finish it first.');return;}
   var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'this day';
   closeOvl('mkActOvl');
-  ask('Delete '+nm+'? Sessions you already logged stay in your history.',
+  // Deleting a workout that stands on several days takes every placement with it - which is
+  // exactly the surprise worth naming before it happens, next to the gentler way out.
+  var on=DAYS.filter(function(d){return (DB.days[d.k]||[]).indexOf(id)>=0;}).map(function(d){return d.n;});
+  var msg=on.length>1
+    ? nm+' stands on '+on.join(', ')+' — deleting removes it from every one of them. To clear a single day, hold its card and take it off that day instead. Sessions you already logged stay in your history.'
+    : 'Delete '+nm+'? Sessions you already logged stay in your history.';
+  ask(msg,
     function(){
       planDropSilent(id);                    // out of whichever day held it, and off the rack
       if(DB.custom)delete DB.custom[id];
