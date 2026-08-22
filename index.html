@@ -2906,7 +2906,7 @@ body.wcon{overflow:hidden;}
          one dial (how loud), because those are the two a gym actually forces. -->
     <div class="sfx-lbl" style="margin-top:4px"><span>Sounds</span></div>
     <div id="sfxKeys"></div>
-    <div class="sfx-lbl"><span>Alert volume</span></div>
+    <div class="sfx-lbl"><span>Volume</span></div>
     <div class="slider-row" id="alertLvl">
       <input type="range" id="alertRange" min="0" max="10" step="1"
         oninput="setAlertLvl(this.value,true)" onchange="setAlertLvl(this.value)">
@@ -3685,7 +3685,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.151';
+var APPV='v4.152';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8199,13 +8199,21 @@ function drawUnitRow(){
   }).join('');
 }
 var ALERT_MAX=10;
+// One dial for every sound the app makes (decided Aug 22). The name and the storage key are
+// from when it governed only the rest alert - kept so nobody's saved level moves. 6 is the
+// default and means "exactly the loudness every sound was hand-tuned to"; below it the whole
+// app comes down together, above it everything is pushed (the compressors catch the peaks),
+// and 0 is silence, alert included. The alert keeps its own louder curve on its own bus, so
+// the RELATIVE balance - alert above ticks above page turns - never changes, only the size.
 var ALERT_LVL=(function(){try{var v=parseInt(localStorage.getItem('arc_alert10'));return isNaN(v)?6:Math.max(0,Math.min(ALERT_MAX,v));}catch(e){return 6;}})();
 function alertGain(n){return n<=0?0:3.2*n/ALERT_MAX;}
+function sndFactor(){return ALERT_LVL/6;}
 function alertMuted(){return ALERT_LVL<=0;}
 function setAlertLvl(n,quiet){
   ALERT_LVL=Math.max(0,Math.min(ALERT_MAX,parseInt(n)||0));
   try{localStorage.setItem('arc_alert10',ALERT_LVL);}catch(e){}
   if(abus)abus.gain.value=alertGain(ALERT_LVL);
+  if(mbus)mbus.gain.value=1.55*sndFactor();
   drawAlertLvl();
   // Dragging fires this on every notch; playing the phrase each time would be a stutter, so
   // the sample waits until the finger comes off.
@@ -8293,7 +8301,7 @@ function initAudio(){
       actx=new AC();
       var comp=actx.createDynamicsCompressor();
       comp.threshold.value=-9;comp.knee.value=6;comp.ratio.value=6;comp.attack.value=0.003;comp.release.value=0.14;
-      mbus=actx.createGain();mbus.gain.value=1.55;
+      mbus=actx.createGain();mbus.gain.value=1.55*sndFactor();
       mbus.connect(comp);comp.connect(actx.destination);
       // stone-chamber tail: everything on the bus gets a long dark decay
       var rev=actx.createConvolver();
@@ -9235,7 +9243,9 @@ function RA(){
 }
 function nativeSound(secs){
   var ra=RA();if(!ra)return false;
-  try{ra.schedule({seconds:secs,theme:curTheme()});return true;}catch(e){return false;}
+  // vol rides along so the native clip honors the same dial as everything else. It can only
+  // scale DOWN from the clip's ceiling - Android will not let an app climb above the stream.
+  try{ra.schedule({seconds:secs,theme:curTheme(),vol:Math.max(0,Math.min(1,ALERT_LVL/6))});return true;}catch(e){return false;}
 }
 function nativeSoundCancel(){var ra=RA();if(ra)try{ra.cancel();}catch(e){}}
 // The rest, live in the shade. Android draws the countdown itself from the target time, so this
