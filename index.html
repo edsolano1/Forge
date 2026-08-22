@@ -3049,7 +3049,7 @@ body.wcon{overflow:hidden;}
 // climb from there. Aligned with EZ_W (the wizard's starters) where both name a lift.
 var EX = {
   bench:    {name:"Barbell Bench Press",wraps:1,note:"Flat bench, grip just outside shoulder-width, controlled descent",sets:"65x8\n65x8\n65x8\n65x8",rest:"3 min"},
-  incdb:    {name:"Incline DB Press",wraps:1,note:"30-45 degree incline, slow 3 second lower",sets:"25x10\n25x10\n25x10",rest:"2 min"},
+  incdb:    {name:"Incline Dumbbell Press",wraps:1,note:"30-45 degree incline, slow 3 second lower",sets:"25x10\n25x10\n25x10",rest:"2 min"},
   mbench:   {name:"Machine Bench Press",wraps:1,note:"Seat set so the handles sit level with mid chest, full lockout without flaring",sets:"60x10\n60x10\n60x10",rest:"90 sec"},
   xover:    {name:"Cable Crossover",note:"Handles at shoulder height, slight stagger, squeeze at the middle rather than swinging",sets:"10x12\n10x12\n10x12",rest:""},
   vbar:     {name:"V-Bar Cable Pushdown",note:"V-bar attachment - elbows pinned to sides, no swinging",sets:"30x12\n30x12\n30x12",rest:"60 sec"},
@@ -3062,7 +3062,7 @@ var EX = {
   row:      {name:"Cable Seated Row",note:"Close-grip V-bar - pull to lower chest, squeeze shoulder blades",sets:"60x10\n60x10\n60x10",rest:"90 sec"},
   sapd:     {name:"Straight Arm Pulldown",note:"Slight bend in elbows only - hinge at shoulder, arms do not curl",sets:"25x12\n25x12\n25x12",rest:"90 sec"},
   preacher: {name:"Preacher Curl Machine",note:"Machine only - full extension at bottom, squeeze at top",sets:"25x12\n25x12\n25x12",rest:""},
-  sdbcurl:  {name:"Seated DB Curl",note:"Two dumbbells, seated - squeeze at the top",sets:"20x10\n20x10\n20x10",rest:"60 sec"},
+  sdbcurl:  {name:"Seated Dumbbell Curl",note:"Two dumbbells, seated - squeeze at the top",sets:"20x10\n20x10\n20x10",rest:"60 sec"},
   hammer:   {name:"Hammer Curl",note:"Palms facing each other throughout - no rotation",sets:"15x12\n15x12\n15x12",rest:""},
   cbcurl:   {name:"Cable Bicep Curl",note:"Straight bar attachment on lowest pulley",sets:"20x12\n20x12\n20x12",rest:"60 sec"},
   legraise: {bw:1,name:"Leg Raise",note:"Flat bench - hands under lower back, legs straight, slow descent",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
@@ -3081,13 +3081,13 @@ var EX = {
   scalfr:   {name:"Machine Seated Calf Raise",note:"Pads on thighs, heels hanging off platform edge",sets:"70x15\n70x15\n70x15\n70x15",rest:"45 sec"},
   hipraise: {bw:1,name:"Parallel Bar Hip Raise",note:"Captain's chair - lift knees to chest, slow descent",sets:"0x15\n0x15\n0x15",rest:""},
   plank:    {name:"Plank",note:"Forearms on floor - brace abs hard before starting",sets:"60 sec\n60 sec\n60 sec",rest:"45 sec after round"},
-  dblat:    {name:"DB Lateral Raise",note:"Slight elbow bend, raise to shoulder height, lead with elbows",sets:"10x12\n10x12\n10x12\n10x12",rest:"60 sec"},
+  dblat:    {name:"Dumbbell Lateral Raise",note:"Slight elbow bend, raise to shoulder height, lead with elbows",sets:"10x12\n10x12\n10x12\n10x12",rest:"60 sec"},
   clat:     {name:"Cable Lateral Raise",note:"Single arm, low pulley - all reps one side, then switch",sets:"5x12\n5x12\n5x12",rest:"60 sec"},
   revfly:   {name:"Machine Reverse Fly",note:"Rear delt - face the pad, arms out, pull handles back",sets:"45x12\n45x12\n45x12\n45x12",rest:"60 sec"},
-  skull:    {name:"DB Skull Crusher",note:"Lie flat, one DB both hands - lower behind head, press back up",sets:"20x12\n20x12\n20x12",rest:"60 sec"},
+  skull:    {name:"Dumbbell Skull Crusher",note:"Lie flat, one DB both hands - lower behind head, press back up",sets:"20x12\n20x12\n20x12",rest:"60 sec"},
   mfly:     {name:"Machine Fly",note:"Pec deck - slight bend in elbows, squeeze at the front",sets:"60x12\n60x12\n60x12",rest:"60 sec"},
   lowchest: {name:"Cable Lower Chest Raise",note:"Low-to-high - arm mostly straight, 10-15 degree bend only",sets:"10x12\n10x12\n10x12",rest:"60 sec"},
-  pullover: {name:"DB Pullover",note:"One DB, both hands under top plate - lie across bench, lower behind head",sets:"25x10\n25x10\n25x10",rest:"60 sec"},
+  pullover: {name:"Dumbbell Pullover",note:"One DB, both hands under top plate - lie across bench, lower behind head",sets:"25x10\n25x10\n25x10",rest:"60 sec"},
   walk:     {cardio:1,name:"Power Walk",note:"30 minutes minimum - outdoor preferred, hilly route. Zone 2: conversational pace",sets:"30+ min",rest:""},
   hipflex:  {name:"Hip Flexor Stretch (kneeling)",note:"One knee on floor, other foot forward - sink hips forward and down",sets:"90 sec each",rest:""},
   chestdr:  {name:"Chest Doorway Stretch",note:"Arms at 90 degrees against doorframe, lean forward gently",sets:"2 min",rest:""},
@@ -3168,10 +3168,10 @@ for(var __k in ALT){EX[__k]=ALT[__k];}
 
 // Pump day - separate IDs so light high-rep work never shows up as "Last" on your heavy days
 var PUMP={
-  p_inc:  {name:"Incline DB Press",wraps:1,note:"Light and controlled - squeeze at the top, never grind",sets:"15x15\n15x15\n15x15",rest:"45 sec"},
+  p_inc:  {name:"Incline Dumbbell Press",wraps:1,note:"Light and controlled - squeeze at the top, never grind",sets:"15x15\n15x15\n15x15",rest:"45 sec"},
   p_xover:{name:"Cable Crossover",note:"Hold the squeeze a beat at the front of every rep",sets:"10x15\n10x15\n10x15",rest:"45 sec"},
   p_fly:  {name:"Machine Fly",note:"Full stretch at the back, hard squeeze at the front",sets:"30x15\n30x15\n30x15",rest:"45 sec"},
-  p_lat:  {name:"DB Lateral Raise",note:"Light - this is for width and blood, not load. Lead with the elbows",sets:"5x15\n5x15\n5x15",rest:"30 sec"},
+  p_lat:  {name:"Dumbbell Lateral Raise",note:"Light - this is for width and blood, not load. Lead with the elbows",sets:"5x15\n5x15\n5x15",rest:"30 sec"},
   p_curl: {name:"Cable Bicep Curl",note:"Constant tension - do not let the stack rest at the bottom",sets:"15x15\n15x15\n15x15",rest:""},
   p_hammer:{name:"Hammer Curl",note:"Palms facing in - builds the outer arm thickness",sets:"10x15\n10x15",rest:""},
   p_rope: {name:"Rope Pushdown",note:"Split the rope hard at the bottom, full lockout - do this one right after curls, then rest",sets:"15x15\n15x15\n15x15",rest:"30 sec"},
@@ -3685,7 +3685,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.149';
+var APPV='v4.150';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
