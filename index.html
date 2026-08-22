@@ -3000,6 +3000,7 @@ body.wcon{overflow:hidden;}
   <div class="sheet">
     <h3>Swap exercise</h3>
     <p>Machine taken or broken? Comparable options are listed first. Applies to this session only.</p>
+    <input class="mk-in" id="swapSearch" placeholder="Search exercises" autocomplete="off" oninput="swapList()" style="margin-bottom:10px">
     <div class="swaplist" id="swapList"></div>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('swapOvl')">CANCEL</div>
@@ -3684,7 +3685,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.148';
+var APPV='v4.149';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5467,21 +5468,36 @@ function swapItem(k){
 }
 function openSwap(id){
   swapTarget=id;
+  var si=document.getElementById('swapSearch');if(si)si.value='';
+  swapList();
+  document.getElementById('swapOvl').classList.add('on');
+}
+// "Everything else" used to come out in library-storage order - which reads as no order at
+// all - and a specific machine could only be found by scrolling the whole list. Both halves
+// are alphabetical now, and the search bar filters them live.
+function swapList(){
+  var id=swapTarget;if(!id)return;
+  var q=((document.getElementById('swapSearch')||{}).value||'').trim().toLowerCase();
   var g=grpOf(id),same=[],other=[],isPump=id.indexOf('p_')===0;
   Object.keys(EX).forEach(function(k){
     if(k===id)return;
     if((k.indexOf('p_')===0)!==isPump)return;   // pump day stays in pump day
+    if(q&&EX[k].name.toLowerCase().indexOf(q)<0)return;
     (grpOf(k)===g?same:other).push(k);
   });
-  var html='<div class="swapitem" onclick="doSwap(null)" style="border-color:#3a3a3c">Keep '+EX[id].name+'<small>remove any swap</small></div>';
+  var by=function(a,b){return EX[a].name.toLowerCase()<EX[b].name.toLowerCase()?-1:1;};
+  same.sort(by);other.sort(by);
+  var html=q?'':'<div class="swapitem" onclick="doSwap(null)" style="border-color:#3a3a3c">Keep '+EX[id].name+'<small>remove any swap</small></div>';
   if(same.length){
     html+='<div class="swaphead">Comparable &mdash; '+(GLABEL[g]||g)+'</div>';
     same.forEach(function(k){html+=swapItem(k);});
   }
-  html+='<div class="swaphead">Everything else</div>';
-  other.forEach(function(k){html+=swapItem(k);});
+  if(other.length){
+    html+='<div class="swaphead">Everything else</div>';
+    other.forEach(function(k){html+=swapItem(k);});
+  }
+  if(!same.length&&!other.length)html+='<div class="pg-note" style="padding:14px 4px">Nothing matches that.</div>';
   document.getElementById('swapList').innerHTML=html;
-  document.getElementById('swapOvl').classList.add('on');
 }
 function doSwap(k){
   var A=DB.active[CUR],prev=A.swaps[swapTarget]||swapTarget,next=k||swapTarget;
