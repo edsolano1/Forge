@@ -3684,7 +3684,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.147';
+var APPV='v4.148';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -6093,24 +6093,15 @@ function mkRender(){
     making?'New workout':(MK.rows.reduce(function(a,r){return a+(r.n||0);},0)+' sets');
   if(!shell){
     h+='<div class="mk-head"><span class="mk-head-n">'+(mkEsc(MK.name)||'Untitled workout')+'</span>'+
-       '<span class="mk-head-k">'+(MK.kind==='cardio'?'Cardio':'Lifting')+'</span>'+
        '<button class="mk-head-b" onclick="mkShell(true)">WORKOUT SETTINGS</button></div>';
   }
   if(shell){
   h+='<div class="mk-lbl">Name</div>'+
      '<input class="mk-in" placeholder="Name this workout" value="'+mkEsc(MK.name)+'" oninput="MK.name=this.value">';
-  // What KIND of work this is, asked once for the whole workout rather than per exercise. Lifting
-  // is counted in weight, reps or a hold; cardio is counted in minutes or calories. Those are two
-  // different questions and mixing them inside one workout was what put minutes on a set picker.
-  // Nothing is lost by splitting: a weekday holds up to DAY_MAX workouts, so a day that was lifts
-  // then a Stairmaster becomes two entries on the same day, in order, which is also how it is
-  // actually done - the shipped d4 already called its last section "Cardio finisher".
-  h+='<div class="mk-lbl">What kind</div><div class="mk-kinds" style="--mkc:'+MK.color+'">';
-  MK_KINDS.forEach(function(k){
-    h+='<div class="mk-kind'+(MK.kind===k[0]?' sel':'')+'" onclick="mkSetKind(\''+k[0]+'\')">'+
-       '<b>'+k[1]+'</b><small>'+k[2]+'</small></div>';
-  });
-  h+='</div>';
+  // The "What kind" chooser is gone (Aug 22): with measures living on each ROW, a workout
+  // has no kind to declare - one build flow, no factions. MK.kind survives as an inferred
+  // flavor (mkKindOf reads it off the rows) that only orders the picker and defaults new
+  // custom exercises; nobody is asked.
   // Seven weekday chips and an OFF became two: a day is either on the plan or waiting in the
   // bank. Where it sits in the order is set by moving it, not by picking a weekday here.
   // What you DO with the day, up here under its name, rather than three full-width buttons at the

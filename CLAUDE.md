@@ -163,10 +163,12 @@ writes through — `mkTouch()`, debounced 500ms. There is no "unsaved" state in 
    - **Plate-math fallback is unit-aware** — shipped v4.144 (`plateNext`): level-up steps of
      2.5/5 kg in kg mode, landing on the kg lattice; learned machine lattices unchanged.
    - Storage stays canonical-lb throughout — no data migration, ever.
-4. **Lift/cardio merged at the row level** (v4.144). A workout's `kind` is its flavor, not a
-   law: each row carries its own measure (`mkRowCardio` → `mkMeasures(r)`), the picker leads
-   with the kind's half of the library and lists the other under its own heading, and the
-   custom-exercise sheet asks lift/cardio (default = workout flavor, frozen after creation).
+4. **Lift/cardio merged at the row level** (v4.144), and the creation-time "What kind"
+   chooser removed outright in v4.148 — one build flow, no factions. `MK.kind` is now purely
+   inferred (`mkKindOf` reads the rows): each row carries its own measure (`mkRowCardio` →
+   `mkMeasures(r)`), the picker leads with the inferred half of the library and lists the
+   other under its own heading, and the custom-exercise sheet asks lift/cardio (default =
+   inferred flavor, frozen after creation).
    Level-ups were already safe: cardio lines pass through `levelPlan` unchanged and are
    filtered as no-ops.
 5. **First-run wizard pinned until v5** (Aug 22). `EZ_ON=false` in `offerStart` skips the
