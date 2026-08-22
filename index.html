@@ -3684,7 +3684,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.146';
+var APPV='v4.147';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4952,10 +4952,14 @@ function walkStatus(){
 function renderSides(){
   var el=document.getElementById('sides');if(!el)return;
   var open=loggedCount('pump');
+  // The walk button retired (Aug 22): cardio lives inside workouts now, so a walk is a row
+  // on a day - or the Power Walk piece on the shelf - not a separate door. The sheet only
+  // resurfaces while a walk's clock is actually RUNNING, so nobody's live walk is stranded
+  // with no way to stop it. Walk history and the streak still show in Progress.
   el.innerHTML=
-    '<div class="side'+(walkRunning()?' going':'')+'" id="sideWalk" onclick="openWalk()">'+
-      '<span class="side-i">'+WALK_ICON_SVG+'</span><b>Log a walk</b>'+
-      '<small>'+walkStatus()+'</small></div>'+
+    (walkRunning()?'<div class="side going" id="sideWalk" onclick="openWalk()">'+
+      '<span class="side-i">'+WALK_ICON_SVG+'</span><b>Walking</b>'+
+      '<small>'+walkStatus()+'</small></div>':'')+
     '<div class="side" id="sidePump" onclick="openPump()">'+
       '<span class="side-i" style="color:var(--gold)">'+pumpIconSvg()+'</span><b>Pump day</b>'+
       '<small>'+(open?'OPEN \u00b7 '+open+'/'+totalSets('pump'):'Bonus \u00b7 30-40 min')+'</small></div>';
@@ -5038,7 +5042,9 @@ function renderHome(){
   mkBindCards();
   cardBind();
   syncPumpBtn();
-  document.getElementById('weekHint').textContent=MKTXT().hint;
+  // The "hold a workout to edit it" hint retired (Aug 22): the tutorial teaches the hold,
+  // and a permanent instruction on the week screen was furniture, not help.
+  document.getElementById('weekHint').style.display='none';
   var fg=FG();
   // The footer's icons stay with the world; its WORDS go through the generic gate like every
   // other string. These were the last place still saying "Pieces finished" and "Work measured"
@@ -11414,8 +11420,14 @@ function tutOffer(){
 // an empty one to build. Asked once, on the launch after ownProgram found nothing to preserve,
 // and it always hands over to the tour offer afterwards - whichever way it is answered, that is
 // still the first launch and the tour is still worth offering.
+// Pinned until v5 (decided Aug 22): the first-run "build one for me?" question and the
+// forging ritual behind it are parked for a deeper pass rather than shipped as-is. While
+// the pin is in, a first run lands directly on its empty week with the tour offer, and the
+// welcome + wizard code stays whole underneath, waiting.
+var EZ_ON=false;
 function offerStart(){
   STARTPEND=false;
+  if(!EZ_ON){renderHome();window.scrollTo(0,0);setTimeout(tutOffer,650);return;}
   var w=document.getElementById('welcome');
   if(!w){installStarter();renderHome();setTimeout(tutOffer,600);return;}   // never strand a first run
   // The same mark the launch just showed, from the same definition - the welcome is the second

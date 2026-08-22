@@ -169,3 +169,10 @@ writes through — `mkTouch()`, debounced 500ms. There is no "unsaved" state in 
    custom-exercise sheet asks lift/cardio (default = workout flavor, frozen after creation).
    Level-ups were already safe: cardio lines pass through `levelPlan` unchanged and are
    filtered as no-ops.
+5. **First-run wizard pinned until v5** (Aug 22). `EZ_ON=false` in `offerStart` skips the
+   welcome question and the forging ritual — a first run lands on its empty week with the
+   tour offer. All welcome/wizard code stays whole underneath; the pin comes out when the
+   wizard gets its deeper pass alongside v5. The sandbox replays the pinned behavior too.
+   Also retired from the home screen the same day: the "Log a walk" side button (cardio
+   lives in workouts now; the walk sheet only resurfaces while a walk's clock is running,
+   and walk history/streak still show in Progress) and the "hold a workout" week hint.
