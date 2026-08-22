@@ -3685,7 +3685,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.153';
+var APPV='v4.154';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5919,10 +5919,32 @@ function mkActions(id,dk){
   // DELETE destroys the workout itself - saying out loud how many days it takes with it.
   document.getElementById('mkActBody').innerHTML=
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')">EDIT THIS WORKOUT</div>'+
+    (held&&mine&&onDays.length>1?'<div class="btn" onclick="forkDay(\''+id+'\',\''+held.k+'\')">GIVE '+held.n.toUpperCase()+' ITS OWN COPY</div>':'')+
     (held&&onDays.length>1?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">TAKE IT OFF '+held.n.toUpperCase()+'</div>':'')+
     (onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">TAKE IT OFF THE WEEK</div>':'')+
     (mine?'<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDelete(\''+id+'\')">DELETE THIS WORKOUT</div>':'');
   openHeld('mkActOvl');
+}
+// The clean exit from "edits reach every day": one tap forks the held day off the shared
+// workout. The day gets a full copy under its own name, standing exactly where the original
+// stood, and the builder opens on it - from that moment its targets, edits and level-ups
+// are its own. The other days keep the original, still linked to each other.
+function forkDay(id,dk){
+  if(openHere(id)){closeOvl('mkActOvl');mkNote(MOVE_BUSY);return;}
+  var src=DB.custom[id];if(!src)return;
+  var copy;
+  try{copy=JSON.parse(JSON.stringify(src));}catch(e){mkNote('That workout could not be copied.');return;}
+  var dn=null;DAYS.forEach(function(d){if(d.k===dk)dn=d.n;});
+  copy.name=(copy.name||'Workout').replace(/^Optional: /,'')+(dn?' — '+dn:' copy');
+  copy.custom=1;copy.made=Date.now();
+  var nid='cus'+Date.now().toString(36)+Math.floor(Math.random()*99).toString(36);
+  DB.custom[nid]=copy;
+  var arr=DB.days[dk]||[],i=arr.indexOf(id);
+  if(i>=0)arr[i]=nid;else arr.push(nid);
+  saveDB();mergeCustom();
+  closeOvl('mkActOvl');renderHome();
+  openMake(nid,nid);
+  mkNote((dn||'This day')+' now runs its own copy. Changes here stay here — the other days keep the original.','Its own piece now');
 }
 // Off ONE day, everything else untouched. If that was its last placement it lands on the
 // shelf like anything else that leaves the week, so there is always a card and a way back.
@@ -6137,7 +6159,12 @@ function mkRender(){
   document.getElementById('mkSub').textContent=
     making?'New workout':(MK.rows.reduce(function(a,r){return a+(r.n||0);},0)+' sets');
   if(!shell){
+    // The old kind chip's seat now carries the one fact an editor of a shared workout needs
+    // in view the whole time: every day this workout stands on. Changes made here reach all
+    // of them - and the chip is what says so before anyone is surprised.
+    var onD=DAYS.filter(function(d){return (DB.days[d.k]||[]).indexOf(MK.open||MK.id)>=0;});
     h+='<div class="mk-head"><span class="mk-head-n">'+(mkEsc(MK.name)||'Untitled workout')+'</span>'+
+       (onD.length>1?'<span class="mk-head-k" title="This workout stands on every one of these days — changes here reach them all">'+onD.map(function(d){return d.n.slice(0,3).toUpperCase();}).join(' · ')+'</span>':'')+
        '<button class="mk-head-b" onclick="mkShell(true)">WORKOUT SETTINGS</button></div>';
   }
   if(shell){
