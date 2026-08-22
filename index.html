@@ -3685,7 +3685,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.150';
+var APPV='v4.151';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8914,8 +8914,10 @@ function sfxPage(){
     glass(t,392,0.5,0.075,0.17);
     breath(t,0.42,0.03,1400,700);
   });
-  // The recording carries the whole gesture, so nothing is layered under it.
-  if(FG()&&grdBuf)return sfx(function(t){playClip(grdBuf,t+0.01,{vol:0.5,bus:BUS||mbus});});
+  // The recording carries the whole gesture, so nothing is layered under it. Pulled well
+  // back (0.5 -> 0.28, Aug 22): a transition is scenery, not an event, and at the old level
+  // opening a day announced itself like a logged set.
+  if(FG()&&grdBuf)return sfx(function(t){playClip(grdBuf,t+0.01,{vol:0.28,bus:BUS||mbus});});
   if(FG())return sfx(function(t){
     var s=actx.createBufferSource();s.buffer=nbuf;
     var f=actx.createBiquadFilter();f.type='bandpass';
@@ -8924,13 +8926,13 @@ function sfxPage(){
     f.Q.value=2.2;
     var g=actx.createGain();
     g.gain.setValueAtTime(0.0001,t);
-    g.gain.exponentialRampToValueAtTime(0.15,t+0.05);
+    g.gain.exponentialRampToValueAtTime(0.09,t+0.05);
     g.gain.exponentialRampToValueAtTime(0.0001,t+0.40);
     s.connect(f);f.connect(g);g.connect(BUS||mbus);
     s.start(t);s.stop(t+0.45);
-    pt(t,58,0.34,0.10,'sawtooth',0.7);       // the mass under it
-    nz(t+0.33,2400,1.6,0.05,0.16);           // the stop
-    nz(t+0.33,620,1.1,0.07,0.13);
+    pt(t,58,0.34,0.06,'sawtooth',0.7);       // the mass under it
+    nz(t+0.33,2400,1.6,0.05,0.09);           // the stop
+    nz(t+0.33,620,1.1,0.07,0.08);
   });
   sfx(function(t){
   var s=actx.createBufferSource();s.buffer=nbuf;
