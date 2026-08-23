@@ -400,8 +400,10 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
    be reading the rest of. The ring does the pointing; the scrim only has to say "not this bit". */
 #tutHole > i{position:fixed;display:block;background:rgba(4,5,7,.58);pointer-events:none;}
 /* One step (the rest pill) asks for deeper dark: the pill floats over the session's own
-   rows, and the normal scrim left them loud enough to fight it. */
-#tutHole.deep > i{background:rgba(4,5,7,.82);}
+   rows, and the normal scrim left them loud enough to fight it. Near-black on purpose:
+   at .82 the violet glow of a freshly graded set still bled through (seen on the device),
+   which read as unfinished rather than as focus. */
+#tutHole.deep > i{background:rgba(4,5,7,.95);}
 #tutHole.on{opacity:1;}
 /* A one-shot entrance: the highlight is planted around the whole viewport and closes onto the
    step's target, so the week is taken in whole before any one day is singled out. Geometry
@@ -3769,7 +3771,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.188';
+var APPV='v4.189';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
