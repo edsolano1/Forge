@@ -527,14 +527,16 @@ body.tut #exportOvl .sheet{transform:scale(.84);transform-origin:50% 0;}
 /* The exercise sheet gets the same treatment for the same reason: it must fit in the
    space above the anchored card, save row included. */
 body.tut #exEditOvl .sheet{transform:scale(.82);transform-origin:50% 0;}
-/* Scroll room. The finish button and the unlock button live at the very end of their
-   flows, which is exactly where the anchored card stands - this padding lets the tour
-   scroll them up into clear view instead. */
-body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:44vh;}
-body.tut #sBody{padding-bottom:44vh;}
-/* The rest pill normally floats at the foot of the screen - the anchored card's seat.
-   For the tour's length it docks at the head instead, and its step's spotlight follows. */
-body.tut .timer-pill{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));}
+/* Scroll room, measured not generous (user note, Aug 23: 44vh floated the finish button to
+   the middle of the screen over a gulf of nothing). 28vh is just enough that the scroll
+   runs out with the button resting a little above the anchored card - it reads as the page
+   scrolling down to it, because that is all that happens. */
+body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:28vh;}
+body.tut #sBody{padding-bottom:28vh;}
+/* The rest pill normally floats at the very foot of the screen - the anchored card's seat.
+   For the tour it sits directly ABOVE the card instead (--tutch is the card's live height,
+   written by tutPlace): same corner of the world it always lives in, just lifted clear. */
+body.tut .timer-pill{bottom:calc(26px + env(safe-area-inset-bottom,0px) + var(--tutch,200px));}
 /* The alert control, borrowed into the card. Narrower than the Settings one because it shares a
    row with its own label and value rather than sitting under a heading. */
 .tut-fine{margin-top:7px;font-size:11.5px;line-height:1.5;color:var(--txt3);}
@@ -3734,7 +3736,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.170';
+var APPV='v4.171';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10966,11 +10968,11 @@ var TUT_ALL=[
   {sel:'#editOvl .edsheet',pad:10,ovl:'editOvl',hit:'#editOvl .edsheet|#w-dbbench-0',ping:'#editOvl .btn-go',
    reopen:true,w:'Waiting for 25 or more',nudge:'It has to reach 25 before DONE will take it.',
    when:function(){return !tutOn('editOvl')&&tutW()>=25;}},
-  // The whole workout stays in view while a set is logged (user note, Aug 22): the spotlight
-  // used to cut down to the one row - "the two numbers" - and the day it belonged to went
-  // black. The opening now spans the session; the pulsing box on the ROW keeps the emphasis
-  // where the words point, and the sigil stays the only thing the fence lets through.
-  {sel:'#sBody',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',once:true,
+  // The opening frames the one EXERCISE, not the whole session (user note, Aug 23: a hole
+  // the size of the screen dims nothing, which reads as no emphasis at all). The rest of
+  // the workout stays readable behind the scrim, the pulsing box on the ROW keeps the
+  // emphasis where the words point, and the anvil stays the only thing the fence lets through.
+  {sel:'#exc-dbbench',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',once:true,
    w:'Waiting for the anvil',nudge:'Tap the anvil at the end of the highlighted row.',
    when:function(){var e=document.getElementById('sr-dbbench-0');return !!(e&&e.classList.contains('done'));}},
   // The only step whose subject can leave on its own: the rest runs out, the pill hides itself
@@ -11643,6 +11645,9 @@ function tutPlace(){
   var ping=document.getElementById('tutPing');
   if(st.hide&&st.hide()){hole.classList.remove('on');ping.classList.remove('on');card.style.opacity='0';return;}
   card.style.opacity='';
+  // the card's live height, published for the pieces of the scene that sit above it
+  var ch=card.offsetHeight;
+  if(window.__tutch!==ch){window.__tutch=ch;document.documentElement.style.setProperty('--tutch',ch+'px');}
   var el=tutEls(st.sel)[0];
   var pel=tutEls(st.ping)[0];
   if(pel&&pel.offsetHeight)tutBox(pel,ping,5);else ping.classList.remove('on');
