@@ -3701,7 +3701,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.157';
+var APPV='v4.158';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5426,9 +5426,12 @@ function renderSession(){
   });
   html+='<div class="mk-new" onclick="exEdAdd()" style="margin-top:22px">'+PLUS+'ADD AN EXERCISE</div>';
   html+='<div class="notebox"><div class="sect-t">Session notes</div><textarea id="noteBox" >'+(A.note||'')+'</textarea></div>';
-  html+='<div class="finish-inline"><button class="finishbtn" onclick="finishSession()">Finish &amp; export</button>'+
-        '<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--txt3);line-height:1.55;text-wrap:pretty">Every set saves the moment you tap it. Hold an exercise to change its rest or its sets. Leave whenever you like \u2014 this day stays open until you finish it.</div>'+
-        '<div style="text-align:center;margin-top:14px"><span class="btn" onclick="clearSession()">Reset this session</span></div></div>';
+  // The foot used to carry three sentences of reassurance and a RESET button. Both gone
+  // (Aug 22): the tour teaches autosave, holds and safe leaving - and the app proves all
+  // three the first time you walk away and come back - while Reset was bulk-undo for
+  // something that already undoes per set (tapping a logged row unchecks it). A standing
+  // destructive button cost more trust than the rare wrong-day accident it saved.
+  html+='<div class="finish-inline"><button class="finishbtn" onclick="finishSession()">Finish &amp; export</button></div>';
   document.getElementById('sBody').innerHTML=html;
   document.getElementById('sBody').style.setProperty('--c',dayC(wk));
   bindExHold();blkBind();
@@ -5580,14 +5583,6 @@ function updateProg(){
   document.getElementById('ringBar').setAttribute('stroke-dashoffset',C-C*pct);
   document.getElementById('ringLbl').textContent=done+'/'+tot;
   document.getElementById('ring').classList.toggle('full',done>0&&done===tot);
-}
-function clearSession(){
-  ask('Unchecks every set you logged in this session so you can start it over. Your saved history from past sessions is not touched.',function(){
-    var wkDay=(DB.active[CUR]||{}).wk;   // the reset day is still the same weekday's day
-    delete DB.active[CUR];
-    DB.active[CUR]={date:today(),entries:{},note:'',swaps:{},wk:wkDay||dayGuess(CUR)};
-    saveDB();stopHold();renderSession();stopTimer();
-  },'Reset this session?','RESET');
 }
 document.getElementById('sBack').onclick=function(){
   leaveSession();
