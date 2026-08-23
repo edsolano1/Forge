@@ -526,7 +526,10 @@ body:not(:has(#session.on)) #timerPill{display:none;}
    is one you skim. Scaled down for the length of the tour it fits in a screen, which is all this
    step needs - it is showing you that the thing exists and what is in it, not asking you to read
    the text of a session you just did. */
-body.tut #exportOvl .sheet{transform:scale(.84);transform-origin:50% 0;}
+/* .76, down from .84 (user note, Aug 23): at .84 the sheet's last rows tucked behind the
+   anchored card, cutting off the caption and the COPY and CLOSE buttons. At .76 the whole
+   sheet stands clear above the card. */
+body.tut #exportOvl .sheet{transform:scale(.76);transform-origin:50% 0;}
 /* The exercise sheet gets the same treatment for the same reason: it must fit in the
    space above the anchored card, save row included. */
 body.tut #exEditOvl .sheet{transform:scale(.82);transform-origin:50% 0;}
@@ -3723,7 +3726,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.176';
+var APPV='v4.177';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10927,14 +10930,12 @@ var TUT_ALL=[
   // bench four steps ago, so the button reads "already logged today" and does nothing. Ringing a
   // dead control and asking someone to take it in is the wrong lesson. It sits on the two save
   // buttons instead, which is the thing about this sheet worth knowing.
-  // The user taps the sheet's own JUST TODAY to move on (user note, Aug 23): the tour
-  // button here used to say DONE, and a DONE inside the tour window reads as "the tour is
-  // done" with six steps still to go. Tapping the real control also teaches the sheet the
-  // way the rest of the tour teaches: by doing. Nothing changed, so just-today is a no-op.
+  // A plain NEXT in the tour window closes the sheet (user note, Aug 23, second pass):
+  // forcing a tap on the sheet's own JUST TODAY made the step feel like homework, and the
+  // earlier DONE label read as "the tour is done". NEXT promises only the next step, which
+  // is exactly what it delivers. The ping stays on the save row, where the lesson lives.
   {sel:'#exEditOvl .sheet',pad:10,ovl:'exEditOvl',top:true,ping:'#exEditOvl .sheet-btns',
-   hit:'#exEditOvl .sheet-btns .btn-go',once:true,
-   w:'Waiting for JUST TODAY',nudge:'Tap JUST TODAY to close the sheet.',
-   when:function(){return !tutOn('exEditOvl');}},
+   nudge:'Tap NEXT to carry on.',act:function(){closeOvl('exEditOvl');}},
   // Your own notes. Placed here because the exercise sheet has just closed, so the day is back
   // on screen with the links row visible and nothing else competing for the highlight.
   // The spotlight was on the links row alone, which showed a pair of buttons floating with no
@@ -10999,10 +11000,10 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the highlight.'},
   {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
   {t:'How many sets',b:'Add or drop a set. The targets underneath follow along.'},
-  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Those two buttons are how a change is saved. Nothing changed just now, so tap JUST TODAY to close the sheet.</p>'},
+  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Those two buttons are how a change is saved. Nothing changed just now, so NEXT closes the sheet.</p>'},
   {t:'Your own notes',b:'Tap Add note on the bench.'},
   {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a cue that keeps your form honest. It shows up on that exercise every time it comes around.'},
-  {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is plenty for the tour.'},
+  {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is fine for the tour.'},
   {t:'Logged and saved',b:'Your session is already saved in the app. History lives on this phone, not in a cloud. COPY takes the plain text, to send to anyone or paste into a chat. Closing this changes nothing.'},
   {t:'Locked in',b:'Push Day is locked in. It stays that way until the week turns over, so you work through the other days instead of repeating one.<p>Everything you logged is already in your history.</p>'},
   {t:'Unlock the week',b:'Each day you finish locks until the week turns over. This button unlocks every locked day at once, if you want another round early. Nothing is deleted either way.'}]};
