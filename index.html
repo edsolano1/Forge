@@ -3731,7 +3731,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.180';
+var APPV='v4.181';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7686,17 +7686,30 @@ function saveTextFile(txt,name,type){
   var C=window.Capacitor,native=false;
   try{native=!!(C&&C.isNativePlatform&&C.isNativePlatform());}catch(e){}
   if(native&&C.Plugins&&C.Plugins.Filesystem&&C.Plugins.Share){
-    // A real file, written to the app's own cache and handed to the system share sheet -
-    // Files, Drive, a chat, wherever it gets pointed. Plain text both platforms understand.
-    // Cancelling the sheet is a choice, not a failure; only a write or share that never
-    // happened falls back to the clipboard, and that path explains itself.
-    C.Plugins.Filesystem.writeFile({path:name,data:txt,directory:'CACHE',encoding:'utf8'})
-      .then(function(r){return C.Plugins.Share.share({title:name,url:r.uri});})
-      .catch(function(e){
-        if(/cancel/i.test(String((e&&e.message)||e||'')))return;
-        clipCopy(txt);
-        ask('Sharing did not work here, so it was copied to your clipboard instead. Paste it into a note or a document to keep it.',null,'Copied instead');
-      });
+    // Documents FIRST, share second (user note, Aug 23): the share sheet only lists apps,
+    // so "save to this phone" was never on offer - now every export lands in
+    // Documents/Forge before the sheet even opens, and cancelling the sheet loses nothing.
+    // Plain text is shared AS TEXT rather than as a file: Samsung Notes and Keep refused
+    // the file as corrupted, and both take shared text happily. The backup stays a real
+    // file (from the app cache, the share plugin's home turf), which is what Drive and
+    // email want. Only a share that never opened falls back to the clipboard.
+    var docP=C.Plugins.Filesystem.writeFile({path:'Forge/'+name,data:txt,directory:'DOCUMENTS',encoding:'utf8',recursive:true})
+      .then(function(){return true;}).catch(function(){return false;});
+    docP.then(function(saved){
+      return C.Plugins.Filesystem.writeFile({path:name,data:txt,directory:'CACHE',encoding:'utf8'})
+        .then(function(r){
+          var p=(type==='text/plain')
+            ?C.Plugins.Share.share({title:name,text:txt})
+            :C.Plugins.Share.share({title:name,url:r.uri});
+          return p.catch(function(e){if(!/cancel/i.test(String((e&&e.message)||e||'')))throw e;});
+        })
+        .then(function(){
+          if(saved)mkNote('Saved on this phone: Documents/Forge/'+name,'Saved');
+        });
+    }).catch(function(e){
+      clipCopy(txt);
+      ask('Saving did not work here, so it was copied to your clipboard instead. Paste it into a note or a document to keep it.',null,'Copied instead');
+    });
     return 'share';
   }
   if(!native){
@@ -7794,7 +7807,7 @@ function openBackup(){
 // which (user question, Aug 23): the backup file is the machine-readable everything and the
 // ONLY thing restore can take back; plain text is for human eyes and cannot be restored.
 function exportAsk(){
-  ask('A backup file holds everything and can be restored. Plain text is easy to read anywhere, but cannot be restored.',
+  ask('A backup file holds everything and can be restored. Plain text is easy to read anywhere, but cannot be restored. Either way, a copy is saved on this phone in Documents, and the share sheet opens for sending it further.',
     function(){doBackup();},
     'Export which?','BACKUP FILE',null,
     {label:'PLAIN TEXT',fn:function(){exportAll();}});
