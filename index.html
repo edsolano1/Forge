@@ -2704,23 +2704,19 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="backupOvl">
   <div class="sheet">
     <h3>Backup &amp; restore</h3>
-    <!-- The raw JSON no longer greets anyone (user note, Aug 23): a wall of machine text
-         read as daunting and as breakable, though editing it never touched stored data.
-         COPY TEXT builds the backup on demand; the paste box appears only when a restore
-         asks for it, empty and clearly an input. -->
-    <p>Your logs live on this device and nowhere else. Clearing the app or its data erases them. Keep a copy somewhere safe, and you can bring it back any time.</p>
+    <!-- No machine text anywhere on this sheet (user notes, Aug 23): COPY TEXT copies the
+         history in plain English for pasting into notes, documents or email, and restore
+         takes a picked backup file only. The paste-a-backup box is retired: a person
+         pasting plain words would have been refused by a JSON parser they never heard of. -->
+    <p>Your logs live on this phone and nowhere else. Clearing the app or its data erases them. The safest copy is one that leaves the phone: export a backup file and send it to Google Drive, or email it to yourself. RESTORE brings a backup file back whole.</p>
+    <p style="margin-top:8px">COPY TEXT puts your whole history on the clipboard in plain English, ready to paste into a note, a document, or an email. It is for reading, not restoring.</p>
     <div class="sheet-btns">
-      <div class="btn btn-go" id="bkCopy" onclick="copyBackupText()">COPY TEXT</div>
+      <div class="btn btn-go" id="bkCopy" onclick="copyHistoryText()">COPY TEXT</div>
       <div class="btn" onclick="exportAsk()">EXPORT FILE</div>
     </div>
     <div class="sheet-btns" style="margin-top:8px">
-      <div class="btn" onclick="restoreAsk()">RESTORE</div>
+      <div class="btn" onclick="pickRestore()">RESTORE</div>
       <div class="btn" onclick="closeOvl('backupOvl')">CLOSE</div>
-    </div>
-    <div id="bkPaste" style="display:none">
-      <p style="margin-top:14px">Paste a backup below. Nothing changes until you tap RESTORE FROM TEXT, and it asks first.</p>
-      <textarea id="backupTxt" spellcheck="false" placeholder="Paste a backup here"></textarea>
-      <div class="sheet-btns"><div class="btn btn-go" onclick="restoreBackup()">RESTORE FROM TEXT</div></div>
     </div>
   </div>
 </div>
@@ -3739,7 +3735,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.183';
+var APPV='v4.184';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7664,7 +7660,7 @@ function backupBlob(){
   try{s[TKEY]=curTheme();}catch(e){}
   return JSON.stringify({arcanum:1,app:APPV,at:new Date().toISOString(),db:DB,settings:s});
 }
-function backupName(){return 'arcanum-backup-'+today()+'.json';}
+function backupName(){return 'forge-backup-'+today()+'.json';}
 // A generated download only works where the browser honours it. The Android app does not:
 // the WebView swallows the click without throwing, so a catch around it never fires and the
 // button just looks dead - which is exactly how EXPORT FILE presented on the phone. Whether
@@ -7803,11 +7799,6 @@ function copyEl(id,btn){
   var b=document.getElementById(btn),o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);
 }
 function openBackup(){
-  // The paste box starts hidden and empty: it appears only when a restore asks for it, so
-  // the sheet never opens on a wall of machine text. Editing that box, when it does show,
-  // touches nothing stored; it is read once, at RESTORE FROM TEXT, behind a confirm.
-  var w=document.getElementById('bkPaste');if(w)w.style.display='none';
-  var t=document.getElementById('backupTxt');if(t)t.value='';
   document.getElementById('backupOvl').classList.add('on');
 }
 // Export is two different artifacts for two different jobs, and the chooser says which is
@@ -7823,7 +7814,7 @@ function exportAsk(){
 // SAVE TO PHONE was tapped, and SEND writes nothing outside the app.
 function exportDest(kind){
   if(kind==='text'&&!DB.logs.length){ask('Finish a session first.',null,'Nothing to export');return;}
-  ask('Save it on this phone, in Documents under a Forge folder, or send it to another app?',
+  ask('Save it on this phone, in Documents under a Forge folder, or send it off the phone? Google Drive or an email to yourself makes the safest backup.',
     function(){exportGo(kind,'save');},
     'Where should it go?','SAVE TO PHONE',null,
     {label:'SEND',fn:function(){exportGo(kind,'send');}});
@@ -7835,39 +7826,18 @@ function exportGo(kind,dest){
   if(dest==='save')saveToPhone(txt,name,isText);
   else sendOut(txt,name,isText);
 }
-function copyBackupText(){
-  clipCopy(JSON.stringify(DB));
+// Plain English on the clipboard, never machine text (user note, Aug 23): the old button
+// copied raw JSON, which read as scary and was useful to nobody without the paste-restore
+// that is now retired. What lands here pastes cleanly into a note, a document, or an email.
+function copyHistoryText(){
+  if(!DB.logs.length){ask('Finish a session first.',null,'Nothing to copy');return;}
+  clipCopy(historyText());
   var b=document.getElementById('bkCopy');
   if(b){var o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);}
 }
-// Restore takes a saved backup file, or the text pasted into the box. Both are JSON; the
-// plain-text history has no structure to rebuild from and is refused with an explanation.
-function restoreAsk(){
-  ask('Restore from a saved backup file, or paste backup text in?',
-    function(){pickRestore();},
-    'Restore from where?','PICK A FILE',null,
-    {label:'PASTE TEXT',fn:function(){
-      var w=document.getElementById('bkPaste');
-      if(w)w.style.display='';
-      var t=document.getElementById('backupTxt');
-      if(t)t.focus();
-    }});
-}
-function restoreBackup(){
-  var raw=document.getElementById('backupTxt').value.trim();
-  if(!raw){ask('Paste a backup into the box first.',null,'Nothing to restore');return;}
-  var d;
-  try{d=JSON.parse(raw);}catch(e){ask('That text is not a valid backup. Paste the whole thing, starting with { and ending with }. The plain-text history cannot be restored, only read.',null,'Could not read backup');return;}
-  // An exported backup FILE wraps the data in an envelope (db, settings, date). Pasting
-  // that file's text into the box used to be refused on the shape alone; unwrap it instead.
-  if(d&&d.db&&d.db.logs)d=d.db;
-  if(!d||!d.logs){ask('That JSON does not look like a FORGE backup.',null,'Could not read backup');return;}
-  ask('This replaces everything currently stored with the backup you pasted ('+d.logs.length+' sessions).',function(){
-    DB=d;if(!DB.active)DB.active={};
-    saveDB();closeOvl('backupOvl');renderHome();
-    ask('Restored '+d.logs.length+' sessions.',null,'Done');
-  },'Restore this backup?','RESTORE');
-}
+// Paste-restore is retired (user note, Aug 23): a person pasting plain words would have
+// been refused by a JSON parser they never heard of. Restore is a picked backup file,
+// full stop; pickRestore and doRestore carry the whole flow, confirm included.
 /* ===== PROGRESS REVIEW =====
    Two comparisons per exercise, because they answer different questions:
    vs LAST is "am I fading right now", vs BEST is "am I below my ceiling".
