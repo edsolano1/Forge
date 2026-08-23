@@ -342,7 +342,13 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 /* Where it will land, and whether it can. */
 .daybox.dropok,#extraCards.dropok{border-color:var(--go);background:color-mix(in srgb,var(--go) 9%,transparent);}
 .daybox.dropfull,#extraCards.dropfull{border-color:var(--bad,#c2554a);background:color-mix(in srgb,#c2554a 10%,transparent);}
-#extraCards{border-radius:14px;padding:2px;transition:border-color .15s,background .15s;border:1px solid transparent;min-height:16px;}
+/* The bank is a real place now: a box of its own under the week, dashed where the day
+   boxes are solid so it reads as storage rather than another day, and always present so
+   there is always somewhere visible to drag a workout out of the week. */
+#extraCards{border-radius:14px;padding:7px 8px 1px;transition:border-color .15s,background .15s;
+  border:1px dashed color-mix(in srgb,var(--go) 30%,var(--line));
+  background:color-mix(in srgb,var(--go) 3%,transparent);min-height:16px;}
+.bank-empty{font-size:12px;color:var(--txt3);text-align:center;padding:13px 10px;line-height:1.55;margin-bottom:6px;}
 .blk.dragging{z-index:60;opacity:.94;transition:none;}
 .blk.dragging .exc{box-shadow:0 20px 44px -14px rgba(0,0,0,.65);}
 /* While a block is being dragged the whole list collapses to name rows: a three-deep
@@ -2631,8 +2637,8 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="pumpOvl">
   <div class="sheet" style="max-width:400px">
     <h3>Pump day</h3>
-    <p>For pool days, going out, or any time you want to look your best in a few hours. High reps, light weight, short rest. Chest, shoulders, arms, core &mdash; the parts that show.</p>
-    <p style="color:var(--txt2)">Runs about 30 to 40 minutes. It does not replace a training day and its numbers stay separate, so nothing here affects your real progression.</p>
+    <p>An all-over pump &mdash; high reps, light weight, short rest &mdash; that fills every muscle with blood and accentuates everything you have been building. For whenever you want to look and feel your best.</p>
+    <p style="color:var(--txt2)">Runs about 35 to 45 minutes. It does not replace a training day and its numbers stay separate, so nothing here affects your real progression.</p>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('pumpOvl')">Not now</div>
       <div class="btn btn-go" onclick="closeOvl('pumpOvl');openW('pump')">Start</div>
@@ -2659,7 +2665,7 @@ body.wcon{overflow:hidden;}
       <!-- SAVE & EXIT is gone. The day was sealed and written the moment Finish was
            confirmed; this button saved nothing, and standing next to CLOSE it implied
            CLOSE might not - the exact anxiety a finished workout should never produce. -->
-      <div class="btn" onclick="closeOvl('exportOvl')">CLOSE</div>
+      <div class="btn" onclick="closeOvl('exportOvl');offerReopen()">CLOSE</div>
     </div>
   </div>
 </div>
@@ -3175,11 +3181,17 @@ var PUMP={
   p_rope: {name:"Rope Pushdown",note:"Split the rope hard at the bottom, full lockout - do this one right after curls, then rest",sets:"15x15\n15x15\n15x15",rest:"30 sec"},
   p_dip:  {bw:1,name:"Bench Dip",note:"Bodyweight - burn out the back of the arm - right after hammer curls, then rest",sets:"0x18\n0x18",rest:"30 sec"},
   p_bike: {bw:1,name:"Bicycle Crunch",note:"Slow and controlled, full rotation. Both twists = one rep",sets:"0x20\n0x20\n0x20",rest:""},
-  p_hollow:{name:"Hollow Body Hold",note:"Lower back pressed flat - hold until it shakes - right after crunches, then rest",sets:"25 sec\n25 sec\n25 sec",rest:"30 sec"}
+  p_hollow:{name:"Hollow Body Hold",note:"Lower back pressed flat - hold until it shakes - right after crunches, then rest",sets:"25 sec\n25 sec\n25 sec",rest:"30 sec"},
+  // The all-around additions (v4.157): back and legs, so the pump covers the whole frame
+  // rather than just the mirror muscles - still light, still quick, two sets each.
+  p_pdown:{name:"Straight-Arm Pulldown",note:"Arms long, sweep the bar to your thighs - feel the lats fan out wide",sets:"20x15\n20x15",rest:"30 sec"},
+  p_lext: {name:"Leg Extension",note:"Light - pause a beat at the top and let the quads fill",sets:"30x15\n30x15",rest:""},
+  p_lcurl:{name:"Seated Leg Curl",note:"Smooth, no slamming - right after extensions, then rest",sets:"30x15\n30x15",rest:"30 sec"}
 };
 for(var __p in PUMP){EX[__p]=PUMP[__p];}
 var PUMPGRP={p_inc:'chest-press',p_xover:'chest-fly',p_fly:'chest-fly',p_lat:'delt-side',
-  p_curl:'biceps',p_hammer:'biceps',p_rope:'triceps',p_dip:'triceps',p_bike:'core',p_hollow:'core'};
+  p_curl:'biceps',p_hammer:'biceps',p_rope:'triceps',p_dip:'triceps',p_bike:'core',p_hollow:'core',
+  p_pdown:'back-vertical',p_lext:'quad',p_lcurl:'hamstring'};
 var ALTGRP={lvchest:'chest-press',dbbench:'chest-press',smbench:'chest-press',pushup:'chest-press',
   dbfly:'chest-fly',machrow:'back-horizontal',dbrow:'back-horizontal',machpd:'back-vertical',
   bbcurl:'biceps',inccurl:'biceps',dip:'triceps',bdip:'triceps',
@@ -3370,12 +3382,14 @@ var W = {
     ]
   },
   pump: {
-    name:"Pump Day",tag:"Bonus",color:"#e0b667",time:"30-40 min",
+    name:"Pump Day",tag:"Bonus",color:"#e0b667",time:"35-45 min",
     sections:[
       {title:"Chest - blood in, no grinding",ss:false,rows:["p_inc","p_xover","p_fly"]},
       {title:"Shoulders - width",ss:false,rows:["p_lat"]},
+      {title:"Back - fan the lats out",ss:false,rows:["p_pdown"]},
       {title:"Arms superset - alternate, 30 sec after both",ss:true,rows:["p_curl","p_rope"]},
       {title:"Arms burnout - alternate, 30 sec after both",ss:true,rows:["p_hammer","p_dip"]},
+      {title:"Legs superset - light and quick",ss:true,rows:["p_lext","p_lcurl"]},
       {title:"Core superset - tighten the midsection",ss:true,rows:["p_bike","p_hollow"]}
     ]
   },
@@ -3519,11 +3533,11 @@ var THEMES_ON=0;
 var ONE_THEME='forge';
 var GENERIC=1;
 var GEN_TXT={
-  done:      'Completed',
-  unsealBtn: 'Reopen the week',
-  unsealMsg: 'Every completed day opens again so you can repeat it. Nothing is deleted — all of it stays in your history.',
-  unsealTtl: 'Reopen the week?',
-  unsealYes: 'REOPEN',
+  done:      'Locked in',
+  unsealBtn: 'Unlock the week',
+  unsealMsg: 'Every locked day opens again so you can run it again. Nothing is deleted — all of it stays in your history.',
+  unsealTtl: 'Unlock the week?',
+  unsealYes: 'UNLOCK',
   sealTtl1:  'Close out the open session?',
   sealTtlN:  'Close out the open sessions?',
   sealYes:   'CLOSE OUT & CONTINUE',
@@ -3687,7 +3701,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.156';
+var APPV='v4.157';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4609,6 +4623,7 @@ function markDayDone(id){
   delete DB.active[id];
   saveDB();renderHome();
   if(typeof mkRender==='function'&&document.getElementById('make').classList.contains('on'))mkRender();
+  offerReopen();                                 // marking the last open day locks the week too
 }
 // Ticks toggle. Both of these were asking before they would change, which for a control you can
 // simply press again is a dialog in the way of a decision you have not made yet.
@@ -4646,16 +4661,16 @@ function weekAllDone(){
 // the week itself, so next week's finish asks again.
 var REOPENKEY='arc_reopenasked';
 function offerReopen(){
-  if(TUTON)return;
+  if(TUTON||SANDBOX)return;                      // both run on a swapped-in DB
   if(document.querySelector('.ovl.on'))return;   // never on top of something already open
   if(!weekAllDone())return;
   var wk=String(weekStartTs()),seen='';
   try{seen=localStorage.getItem(REOPENKEY)||'';}catch(e){}
   if(seen===wk)return;
   try{localStorage.setItem(REOPENKEY,wk);}catch(e){}
-  ask('Every day on your week is done. Reopen them all to go round again, or leave it and the week starts fresh on its own.',
+  ask('Every day on your week is locked in. Unlock them all to go round again, or leave it — the week starts fresh on its own when it turns over.',
       function(){sfxUnseal();runWipe(doUnseal);},
-      'That is the week',TXT('unsealYes'));
+      'The whole week, locked in',TXT('unsealYes'));
 }
 // Service worker - what makes Chrome on Android and Edge on Windows offer "Install app".
 // Only registers on your own host, in a top-level window. Anywhere else (design previews,
@@ -5081,7 +5096,7 @@ function renderSides(){
       '<small>'+walkStatus()+'</small></div>':'')+
     '<div class="side" id="sidePump" onclick="openPump()">'+
       '<span class="side-i" style="color:var(--gold)">'+pumpIconSvg()+'</span><b>Pump day</b>'+
-      '<small>'+(open?'OPEN \u00b7 '+open+'/'+totalSets('pump'):'Bonus \u00b7 30-40 min')+'</small></div>';
+      '<small>'+(open?'OPEN \u00b7 '+open+'/'+totalSets('pump'):'Bonus \u00b7 35-45 min')+'</small></div>';
 }
 function renderPumpIcon(){renderSides();
 }
@@ -5148,16 +5163,16 @@ function renderHome(){
   }).join('');
   document.getElementById('mkNewBtn').innerHTML=PLUS+MKTXT().mk;
   var xs=extraIds();
-  document.getElementById('extraCards').innerHTML=xs.map(xcard).join('');
   // The bank used to hide itself when it was empty, which is exactly when it needed explaining -
-  // there was no way to find out the place existed, so nothing ever went in it. It stands under
-  // the week now whether or not it holds anything, and says what it is for when it is empty.
+  // there was no way to find out the place existed, so nothing ever went in it. It is a real
+  // box now (v4.157), dashed against the week's solid days so it reads as storage, standing
+  // whether or not it holds anything - and when it is empty the box itself says what it is for.
+  document.getElementById('extraCards').innerHTML=xs.length?xs.map(xcard).join('')
+    :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here — drag one down, or hold it and SAVE FOR LATER.</div>';
   document.getElementById('extraLabel').textContent=MKTXT().xl;
   document.getElementById('extraLabel').style.display='';
-  document.getElementById('extraHint').style.display='';
-  document.getElementById('extraHint').innerHTML=xs.length
-    ? 'Not part of the week &mdash; open one whenever you want it'
-    : 'A new workout starts here until you give it days. You can also hold a day above to '+mkEsc(MKTXT().xa.charAt(0).toLowerCase()+MKTXT().xa.slice(1))+'.';
+  document.getElementById('extraHint').style.display=xs.length?'':'none';
+  document.getElementById('extraHint').innerHTML='Not part of the week — open one whenever you want it';
   mkBindCards();
   cardBind();
   syncPumpBtn();
@@ -5258,7 +5273,7 @@ function openW(wk,dk){
     var names=open.map(function(k){return W[k].name.replace('Optional: ','');});
     var n1=loggedCount(open[0]);
     var msg=(open.length===1?names[0]+' is still open with '+n1+(n1===1?' set':' sets')+' on it.':open.length+' other sessions are still open: '+names.join(', ')+'.')+
-      TXT('sealLine')+(open.length===1?'':'s')+'. Every set you logged is saved to your history \u2014 nothing is lost \u2014 but the day will not show as COMPLETED: only finishing a session from inside it does that.'+
+      TXT('sealLine')+(open.length===1?'':'s')+'. Every set you logged is saved to your history \u2014 nothing is lost \u2014 but the day will not show as LOCKED IN: only finishing a session from inside it does that.'+
       (open.length===1?TXT('sealMore'):'');
     ask(msg,function(){
       open.forEach(sealAway);
@@ -6018,7 +6033,7 @@ function mkDuplicate(id){
   if(DB.extra.indexOf(nid)<0)DB.extra.push(nid);
   saveDB();renderHome();
   openMake(null,nid);
-  mkNote('Copied. It is on the shelf until you put it on a day.','Copy made');
+  mkNote('Copied. It waits in Saved workouts until you put it on a day.','Copy made');
 }
 // A hold used to jump straight into the editor, which buried Delete two screens deep
 // behind WORKOUT SETTINGS - deleting a workout was "tricky" in exactly those words. The
@@ -6033,13 +6048,14 @@ function mkActions(id,dk){
   document.getElementById('mkActSub').textContent='';
   // Three buttons, never more (decided Aug 22 after the sheet briefly grew to five). One
   // removal action, aimed at the day that was held. Under the day-to-day model (v4.156) a
-  // workout stands on one day, so coming off it is coming off the week - to the shelf,
-  // where there is always a card and a way back. The built-in rest day is the one thing
-  // still allowed to stand on several days, and the same button takes it off just the
-  // held one. DELETE stays the only destroyer.
+  // workout stands on one day, so coming off it is coming off the week - to the bank,
+  // where there is always a card and a way back. The button names the DESTINATION (SAVE
+  // FOR LATER, v4.157) because that is the reassuring half of the move. Built-ins have no
+  // bank card to land on (the rest day just comes off, Pump Day lives on its own button),
+  // so for them the honest label is still the removal. DELETE stays the only destroyer.
   var off=held
-    ?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">TAKE IT OFF '+held.n.toUpperCase()+'</div>'
-    :(onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">TAKE IT OFF THE WEEK</div>':'');
+    ?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">'+(mine?'SAVE FOR LATER':'TAKE IT OFF '+held.n.toUpperCase())+'</div>'
+    :(onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">'+(mine?'SAVE FOR LATER':'TAKE IT OFF THE WEEK')+'</div>':'');
   document.getElementById('mkActBody').innerHTML=
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')">EDIT THIS WORKOUT</div>'+
     off+
@@ -10963,7 +10979,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a cue that keeps your form honest. It stays on that exercise every time it comes round.'},
   {t:'Finish the day',b:'Tap Finish when the last set is in.'},
   {t:'The export',b:'What you just did, as tiles and as plain text underneath. Save it, send it on, or paste it into a chat. Closing it changes nothing.'},
-  {t:'Completed',b:'Tuesday is done. It stays that way until the week turns over, so you work through the others rather than repeating one.<p>Everything you logged is already in your history.</p>'},
+  {t:'Locked in',b:'Tuesday is locked in. It stays that way until the week turns over, so you work through the others rather than repeating one.<p>Everything you logged is already in your history.</p>'},
   {t:'Going round again',b:'This reopens every completed day at once, if you want another round before the week is out. Nothing is deleted either way.'}]};
 function TUTC(){
   var t=curTheme();

@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v4.156** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v4.157** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -16,7 +16,7 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 
 | Area | State |
 |---|---|
-| Week board | Seven days, up to 3 workouts each; per-day completion; quenched (finished) styling |
+| Week board | Seven days, up to 3 workouts each; per-day completion ("locked in"); a visible Saved workouts box under the week; when the last day locks, the app offers to unlock the week (v4.157) |
 | Sessions | Write-through logging, grading, PR flare, rest timers, molten-bar notification (Android) |
 | Builder | The one editor for everything — per-set targets, supersets, per-row lift/cardio measures |
 | Mid-session edits | Hold an exercise → the real builder opens → one question at Finish: *add permanently, or just today?* |
