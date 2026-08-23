@@ -446,7 +446,15 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
    past the top of the viewport and lose its first lines with no way to get them back. It can be
    as long as it likes now; past this it scrolls, and the insets keep it clear of the system bars
    at both ends rather than only the notch. */
-#tutCard{position:fixed;z-index:401;left:50%;transform:translateX(-50%);top:40vh;
+/* The card is ANCHORED, not placed: bottom edge pinned to the foot of the screen in CSS,
+   and no script ever writes its position. Every attempt to move it gracefully - fades,
+   settle gates, seat rules - still read as "the window keeps moving" on the device,
+   because it kept moving. Now it cannot. Content changes grow it upward from a fixed
+   bottom edge, and the SCENE arranges itself around the card instead: targets scroll to
+   the upper part, the rest pill docks at the top for the tour, and the tall sheets wear
+   a tour scale. */
+#tutCard{position:fixed;z-index:401;left:50%;transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
   transition:opacity .16s ease;
   width:min(430px,calc(100vw - 26px));border-radius:var(--r);padding:16px 17px 14px;display:none;
   max-height:calc(100vh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
@@ -516,7 +524,17 @@ body:not(:has(#session.on)) #timerPill{display:none;}
    step needs - it is showing you that the thing exists and what is in it, not asking you to read
    the text of a session you just did. */
 body.tut #exportOvl .sheet{transform:scale(.84);transform-origin:50% 0;}
-body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:30px;}
+/* The exercise sheet gets the same treatment for the same reason: it must fit in the
+   space above the anchored card, save row included. */
+body.tut #exEditOvl .sheet{transform:scale(.82);transform-origin:50% 0;}
+/* Scroll room. The finish button and the unlock button live at the very end of their
+   flows, which is exactly where the anchored card stands - this padding lets the tour
+   scroll them up into clear view instead. */
+body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:44vh;}
+body.tut #sBody{padding-bottom:44vh;}
+/* The rest pill normally floats at the foot of the screen - the anchored card's seat.
+   For the tour's length it docks at the head instead, and its step's spotlight follows. */
+body.tut .timer-pill{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px));}
 /* The alert control, borrowed into the card. Narrower than the Settings one because it shares a
    row with its own label and value rather than sitting under a heading. */
 .tut-fine{margin-top:7px;font-size:11.5px;line-height:1.5;color:var(--txt3);}
@@ -3716,7 +3734,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.169';
+var APPV='v4.170';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11276,7 +11294,6 @@ function tutEnd(){
 }
 function tutGo(i){
   TUTI=i;if(i>TUTMAX)TUTMAX=i;
-  TUTFREEZE=0;                     // a new step decides its own parking; never inherit one
   TUTHIT=false;                    // each step gets its one action back
   // The demo rest is a prop for ONE step - the pill's own - and belongs on no other.
   // Two previous attempts at this both tied it to identity rather than to the rule. "i>8" tied
@@ -11367,21 +11384,10 @@ function tutGo(i){
     // tutSweep is left defined and unused rather than deleted; if a step is ever built that
     // genuinely arrives from nothing, it is there to call.
     tutGlide();
-    // Measured BEFORE the pan starts, the same numbers tutScroll is about to use, so the
-    // card can be parked at its destination for the whole ride. See TUTFREEZE.
-    var pel=tutEls(st.sel)[0];
-    if(pel&&!st.top){
-      var pr=pel.getBoundingClientRect(),pw=pr.top-window.innerHeight*0.30;
-      if(Math.abs(pw)>=50)tutCardHold(pel,pw,PAN+80);
-    }
+    // The card is CSS-anchored and never parks or travels - only the page and the light move.
     tutScroll(false,PAN);
   }else{
     tutGlide();
-    var qel=tutEls(st.sel)[0];
-    if(qel&&!st.top){
-      var qr=qel.getBoundingClientRect(),qw=qr.top-window.innerHeight*0.30;
-      if(Math.abs(qw)>=50)tutCardHold(qel,qw,600);
-    }
     tutScroll();
   }
   // And again once the layout has settled. The board is rebuilt underneath several of these
@@ -11560,16 +11566,6 @@ var TUTSW=null,TUTSC=null,TUTSW2=null,TUTGL=null;
 // between its above/below positions as the target's rect streamed past the thresholds:
 // one-frame jumps, caught on a 120fps recording of the tour (v4.120). Until this stamp
 // passes, tutPlace leaves the card's top alone.
-var TUTFREEZE=0;
-function tutCardHold(el,delta,ms){
-  var card=document.getElementById('tutCard');
-  if(!el||!card)return;
-  var si=safeIns(),ch=card.offsetHeight,vh=window.innerHeight-si.b;
-  var r=el.getBoundingClientRect(),p=TUT_STEPS[TUTI].pad==null?8:TUT_STEPS[TUTI].pad;
-  var top=r.top-delta,bottom=r.bottom-delta;
-  tutTop(card,tutSeat(top-p,bottom+p,ch,si,vh)+'px');
-  TUTFREEZE=performance.now()+ms;
-}
 // Back to the zero size the stylesheet starts them at. _k is the placement cache and has to go
 // with them, or the next tour compares against geometry that is no longer on the element and
 // skips the first write.
@@ -11613,10 +11609,6 @@ function tutScrim(t,l,w,h){
   n[2].style.cssText='left:0;top:'+t+'px;width:'+Math.max(0,l)+'px;height:'+h+'px';
   n[3].style.cssText='left:'+rt+'px;right:0;top:'+t+'px;height:'+h+'px';
 }
-function tutTop(card,v){
-  if(card._t===v)return;
-  card._t=v;card.style.top=v;
-}
 // Steps that pin their card to the top are explaining a sheet that also starts at the top, so
 // the card came down on the very thing it was pointing at. The sheet is given a top padding
 // the height of the card instead, which moves it clear without moving it off screen. Only one
@@ -11643,65 +11635,22 @@ function safeIns(){
   var cs=getComputedStyle(SAFEPROBE);
   return {t:parseFloat(cs.paddingTop)||0,b:parseFloat(cs.paddingBottom)||0};
 }
-// The card shows itself only once the scene has stopped moving, and it NEVER moves while
-// visible. Two lessons from frame recordings on the device (Aug 23): the fade-OUT was the
-// giveaway - on every step change the card repositioned while still half-visible, a 195px
-// teleport caught mid-fade - so hiding is INSTANT (transition off) and only the fade-in
-// animates. And the card's own HEIGHT is part of the settle signature: a late font metric
-// re-seated a fully visible card by 52px at 630ms with the hole dead still, which only a
-// height term catches. Three identical frames is "settled"; then it fades in, seated.
-var TUTSTABS='',TUTSTABN=0;
-function tutStab(card,ch){
-  var hole=document.getElementById('tutHole');
-  var sig=TUTI+'|'+(card._t||'')+'|'+(ch|0)+'|'+(hole.classList.contains('on')?(hole._k||''):'off');
-  if(sig===TUTSTABS)TUTSTABN++;else{TUTSTABS=sig;TUTSTABN=0;}
-  if(TUTSTABN>=3){
-    if(card.style.opacity!==''){card.style.transition='';card.style.opacity='';}
-  }else if(card.style.opacity!=='0'){
-    card.style.transition='none';card.style.opacity='0';
-  }
-}
+// The card is CSS-anchored to the foot of the screen and this function never touches its
+// position - see the #tutCard comment. All that is placed here is the LIGHT: the hole,
+// the ping, and the one deliberate get-out-of-the-way fade for steps that hide.
 function tutPlace(){
   var st=TUT_STEPS[TUTI],hole=document.getElementById('tutHole'),card=document.getElementById('tutCard');
   var ping=document.getElementById('tutPing');
-  if(st.hide&&st.hide()){hole.classList.remove('on');ping.classList.remove('on');card.style.transition='none';card.style.opacity='0';TUTSTABS='';TUTSTABN=0;tutShift(null);return;}
-  var si=safeIns();
-  var el=tutEls(st.sel)[0],ch=card.offsetHeight,vh=window.innerHeight-si.b;
-  // Before anything is measured: a sheet that has to move must move first, or the spotlight
-  // is cut around where it used to be and the hole sits above the sheet by the same gap.
-  // The sheet is pushed down to exactly where the card ENDS, plus a gap. This used to be ch+26,
-  // measured from the top of the screen while the card itself started at 14 - which worked until
-  // the card moved down by the status bar inset and the sheet did not follow. On anything with a
-  // status bar the two then overlapped by however tall that bar is, and the step was written over
-  // the exercises it was describing. Both now come off the same number.
-  tutShift(st.top&&st.ovl?document.getElementById(st.ovl):null,(14+si.t+ch+12)+'px');
+  if(st.hide&&st.hide()){hole.classList.remove('on');ping.classList.remove('on');card.style.opacity='0';return;}
+  card.style.opacity='';
+  var el=tutEls(st.sel)[0];
   var pel=tutEls(st.ping)[0];
   if(pel&&pel.offsetHeight)tutBox(pel,ping,5);else ping.classList.remove('on');
   if(!el||!el.offsetHeight){
     hole.classList.remove('on');
-    if(performance.now()>=TUTFREEZE)tutTop(card,tutSeat(null,0,ch,si,vh)+'px');
-    tutStab(card,ch);
     return;
   }
   tutBox(el,hole,st.pad==null?8:st.pad);
-  var r=el.getBoundingClientRect(),p=st.pad==null?8:st.pad;
-  if(st.top){tutTop(card,(14+si.t)+'px');tutStab(card,ch);return;}   // instructions first, then the thing itself
-  if(performance.now()<TUTFREEZE){tutStab(card,ch);return;}          // parked for a pan - see tutCardHold
-  tutTop(card,tutSeat(r.top-p,r.bottom+p,ch,si,vh)+'px');
-  tutStab(card,ch);
-}
-// One dock, not a dance (Aug 23, watched on the device): the card used to live wherever
-// the hole left room - under it here, above it there, mid-screen next - so every step
-// change LOOKED like the window travelling even after all sliding was cured. It docks at
-// the FOOT of the screen now, every step; the scroll already carries each target to the
-// upper third, so the foot is almost always clear. A hole that itself owns the foot (the
-// unlock button) sends the card to the head instead - unless the hole owns both ends (the
-// whole-workout opening), where the foot dock stands and the small overlap is accepted.
-// Sheet steps keep the head seat they always had: one block, one seat.
-function tutSeat(hTop,hBottom,ch,si,vh){
-  var dock=Math.max(12+si.t,vh-ch-14),head=14+si.t;
-  if(hTop!=null&&hBottom>dock-6&&hTop>head+ch+10)return head;
-  return dock;
 }
 // scrollIntoView drags whatever ancestor it likes; walk to the real scroller instead.
 // A pan we time ourselves. behavior:'smooth' is whatever pace the browser feels like, which on
