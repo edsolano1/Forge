@@ -2614,7 +2614,7 @@ body.wcon{overflow:hidden;}
   <!-- label, hint and cards are one thing to look at, so the tour can light them as one -->
   <div id="extraWrap">
     <div class="sec-label" id="extraLabel" style="display:none;margin-top:26px">Kept days</div>
-    <div class="mk-hint" id="extraHint" style="display:none">Not part of the week &mdash; open one whenever you want it</div>
+    <div class="mk-hint" id="extraHint" style="display:none">Not part of the week. Open one whenever you want it.</div>
     <div id="extraCards"></div>
   </div>
   <div class="sides" id="sides"></div>
@@ -2654,7 +2654,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="pumpOvl">
   <div class="sheet" style="max-width:400px">
     <h3>Pump day</h3>
-    <p>An all-over pump &mdash; high reps, light weight, short rest &mdash; that fills every muscle with blood and accentuates everything you have been building. For whenever you want to look and feel your best.</p>
+    <p>An all-over pump: high reps, light weight, short rest. It fills every muscle with blood and accentuates everything you have been building. For whenever you want to look and feel your best.</p>
     <p style="color:var(--txt2)">Runs about 35 to 45 minutes. It does not replace a training day and its numbers stay separate, so nothing here affects your real progression.</p>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('pumpOvl')">Not now</div>
@@ -2704,10 +2704,13 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="backupOvl">
   <div class="sheet">
     <h3>Backup &amp; restore</h3>
-    <p>Your logs live on this device and nowhere else &mdash; clearing the app or browser data erases them. Copy this text somewhere safe (notes app, email to yourself) and you can paste it back any time.</p>
+    <p>Your logs live on this device and nowhere else. Clearing the app or its data erases them. Copy this text somewhere safe, or export it as a file, and you can bring it back any time.</p>
     <textarea id="backupTxt" spellcheck="false"></textarea>
     <div class="sheet-btns">
-      <div class="btn btn-go" onclick="copyEl('backupTxt','bkCopy')" id="bkCopy">COPY BACKUP</div>
+      <div class="btn btn-go" onclick="copyEl('backupTxt','bkCopy')" id="bkCopy">COPY TEXT</div>
+      <div class="btn" onclick="doBackup()">EXPORT FILE</div>
+    </div>
+    <div class="sheet-btns" style="margin-top:8px">
       <div class="btn" onclick="restoreBackup()">RESTORE</div>
       <div class="btn" onclick="closeOvl('backupOvl')">CLOSE</div>
     </div>
@@ -2941,7 +2944,7 @@ body.wcon{overflow:hidden;}
         oninput="setAlertLvl(this.value,true)" onchange="setAlertLvl(this.value)">
       <span class="slider-num num" id="alertNum"></span>
     </div>
-    <div class="sfx-lbl" style="margin-top:14px"><span>Rest alert</span></div>
+    <div class="sfx-lbl" style="margin-top:14px"><span>Rest over alert</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="sfxKeys"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Motion</span></div>
     <div class="presets" id="motionRow"></div>
@@ -2984,7 +2987,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="mkSlotOvl">
   <div class="sheet" style="max-width:420px">
     <h3 id="mkSlotTtl">Which day does it take?</h3>
-    <p>The week keeps its seven slots. Your day replaces what is on the one you pick &mdash; the original can be put back any time.</p>
+    <p>The week keeps its seven slots. Your day replaces what is on the one you pick, and the original can be put back any time.</p>
     <div class="lvl-list" id="mkSlotBody"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('mkSlotOvl')">CANCEL</div></div>
   </div>
@@ -3728,7 +3731,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.178';
+var APPV='v4.179';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4102,14 +4105,22 @@ function levelPlan(wk){
     var id=rf.exId;
     var tg=rf.data.sets.split('\n').map(parseTarget);
     if(!isReady(id,tg))return;
+    var L=lastFor(id);
     var lines=rf.data.sets.split('\n');
     var est=false;
-    var next=lines.map(function(s){
-      var t=parseTarget(s);
+    // The raise steps from the EVIDENCE, not from the old target (Aug 23, the hack squat
+    // that asked three times): a log that beat the target by several plate-steps used to
+    // climb one step per accept, re-lighting the arrow after each. The base is now the
+    // better of target and what was actually done, so one accept always clears the log.
+    var next=lines.map(function(s,i){
+      var t=parseTarget(s),ls=L&&L.sets[i];
       // A timed hold levels by TIME: five seconds a step, and it stops at two minutes -
       // past that, longer is endurance theatre, not progress worth chasing.
       if(t.type!=='wr'){
-        if(t.unit==='sec'&&t.r>0&&t.r<120)return Math.min(120,t.r+5)+' sec';
+        if(t.unit==='sec'&&t.r>0&&t.r<120){
+          var sr=Math.max(t.r,(ls&&ls.unit==='sec'&&ls.r)||0);
+          return Math.min(120,sr+5)+' sec';
+        }
         return s;
       }
       // A zero-weight lift levels by REPS, whatever flag it carries: there is no bar to
@@ -4118,22 +4129,27 @@ function levelPlan(wk){
       // advice is a harder variant, not a longer count, so the offer simply stops coming.
       if(t.w===0){
         if(t.r>=30)return s;
-        return '0x'+Math.min(30,t.r+2);
+        var rr=Math.max(t.r,(ls&&ls.r)||0);
+        return '0x'+Math.min(30,rr+2);
       }
       // Assisted work levels DOWN, and never past zero - no assistance at all is the end of the
-      // progression, and the lift becomes an unassisted one at that point.
+      // progression, and the lift becomes an unassisted one at that point. Down-steps base on
+      // the LESSER of target and logged weight, the mirror of the rule above.
       // A learned lattice wins outright - the raise lands on a weight the machine actually
       // has. Without one, plate math guesses and the offer is marked as an estimate, which
       // the sheet renders as editable-with-a-caveat rather than as a fact.
-      var down=!!invEx(id),ln=latticeNext(id,t.w,down);
+      var down=!!invEx(id);
+      var lw=(ls&&typeof ls.w==='number')?ls.w:t.w;
+      var base=down?Math.min(t.w,lw):Math.max(t.w,lw);
+      var ln=latticeNext(id,base,down);
       var nw;
       if(ln!=null)nw=ln;
       else{
         // A learned machine lattice is unit-agnostic and steps by itself; plain plate
         // math steps in the display unit's own plates (2.5/5 lb, or 2.5/5 kg in kg mode).
-        var st=stepFor(id,t.w),plate=(t.w>=40?5:2.5);
-        if(st!==plate)nw=down?Math.max(0,t.w-st):t.w+st;
-        else nw=plateNext(t.w,down);
+        var st=stepFor(id,base),plate=(base>=40?5:2.5);
+        if(st!==plate)nw=down?Math.max(0,base-st):base+st;
+        else nw=plateNext(base,down);
         // Only a lift with NO usable history is an estimate. A barbell whose logged
         // weights already sit on plate steps has confirmed plate math - marking it ~
         // would hedge about the one thing the history corroborates.
@@ -4215,7 +4231,7 @@ function lvlRender(){
   // doubting everything; scoped to the lifts that have not shown their machine yet, it is
   // simply honest about which numbers are calibration and which are knowledge.
   (plan.some(function(p){return p.est;})?
-    '<div class="footnote" style="margin-top:10px">~ is an estimated jump &mdash; this lift has not shown the app its machine\u2019s steps yet. If your equipment\u2019s next weight is different, tap the number and set it. Stacks are learned from what you log.</div>':'');
+    '<div class="footnote" style="margin-top:10px">~ is an estimated jump: this lift has not shown the app its machine\u2019s steps yet. If your equipment\u2019s next weight is different, tap the number and set it. Stacks are learned from what you log.</div>':'');
 }
 function lvlEdit(pi,gi){
   if(LVLBUSY)return;
@@ -4631,7 +4647,10 @@ function dayGuess(wk){
 }
 // break every seal for the week - the logs stay exactly where they are
 function unsealAll(){
-  if(!Object.keys(loggedThisWeek()).length){sfxUnseal();runWipe(function(){});return;}
+  // Nothing locked means nothing to do: the tap is simply inert (Aug 23). The button
+  // already wears its idle face, and playing the wipe over an unchanged week implied
+  // something had happened.
+  if(!Object.keys(loggedThisWeek()).length)return;
   ask(TXT('unsealMsg'),function(){
     sfxUnseal();
     runWipe(doUnseal);
@@ -4687,6 +4706,26 @@ function weekAllDone(){
     if(!lwOn(lw,id,d.k))ok=false;            // every PLACEMENT must be done, not every workout
   });});
   return any&&ok;
+}
+// A new week greets you unlocked (user note, Aug 23): the locks expire silently at the
+// turnover, and without a word that quiet reset could read as lost work. Said once per
+// week, and only when last week actually ended with locked days.
+function weekHello(){
+  if(TUTON||SANDBOX)return;
+  if(document.querySelector('.ovl.on'))return;
+  var ws=String(weekStartTs()),seen='';
+  try{seen=localStorage.getItem('arc_wkhello')||'';}catch(e){}
+  if(seen===ws)return;
+  try{localStorage.setItem('arc_wkhello',ws);}catch(e){}
+  if(!seen)return;                        // the very first run has no last week to speak of
+  var prev=+seen,any=false;
+  (DB.logs||[]).forEach(function(l){
+    if(!l.sealed||l.unsealed)return;
+    var t=new Date(l.date+'T12:00:00').getTime();
+    if(t>=prev&&t<+ws)any=true;
+  });
+  if(!any)return;
+  ask('The week turned over. Every day is unlocked and ready to go, and last week is saved in your history.',null,'A new week','OK');
 }
 // Offered once per week, and only after the last day is done. Finishing the week left you with
 // nothing to do and a button you had to know about; this says the round is over and offers the
@@ -5178,7 +5217,7 @@ function renderHome(){
       '<div class="card-top">'+dayLbl('PUMP DAY &middot; OPEN')+
       '<span style="display:flex;gap:0"><span class="pill pill-live">Resume '+loggedCount('pump')+'/'+totalSets('pump')+'</span></span></div>'+
       '<div class="card-name">'+W.pump.name+'</div>'+
-      '<div class="card-meta">Still open &mdash; pick up where you left off</div></div>':'';
+      '<div class="card-meta">Still open. Pick up where you left off</div></div>':'';
   var pnx=nextUpDay(),n0=0;
   document.getElementById('weekCards').innerHTML=pumpOpen+DAYS.map(function(d){
     var h=dayBox(d,pnx,n0);n0+=(DB.days[d.k]||[]).length;return h;
@@ -5652,7 +5691,7 @@ function swapList(){
   same.sort(by);other.sort(by);
   var html=q?'':'<div class="swapitem" onclick="doSwap(null)" style="border-color:#3a3a3c">Keep '+EX[id].name+'<small>remove any swap</small></div>';
   if(same.length){
-    html+='<div class="swaphead">Comparable &mdash; '+(GLABEL[g]||g)+'</div>';
+    html+='<div class="swaphead">Comparable · '+(GLABEL[g]||g)+'</div>';
     same.forEach(function(k){html+=swapItem(k);});
   }
   if(other.length){
@@ -7868,8 +7907,8 @@ function progDetail(id){
   var h='';
   if(k==='wr')h+='<div class="pg-1rm"><span>EST 1RM</span><b>'+Math.round(dspW(best))+'</b><i>'+wUnitName()+' best</i><b>'+Math.round(dspW(last))+'</b><i>latest</i></div>'+
     '<div class="pg-cap">Estimated one-rep max per session, from each session&rsquo;s top set</div>';
-  else if(k==='inv')h+='<div class="pg-1rm"><span>ASSISTANCE</span><b>'+fmtW(last)+'</b><i>'+wUnitName()+' latest &mdash; less is more here</i></div>'+
-    '<div class="pg-cap">Assistance weight per session &mdash; the line falling is the progress</div>';
+  else if(k==='inv')h+='<div class="pg-1rm"><span>ASSISTANCE</span><b>'+fmtW(last)+'</b><i>'+wUnitName()+' latest, less is more here</i></div>'+
+    '<div class="pg-cap">Assistance weight per session. The line falling is the progress</div>';
   else h+='<div class="pg-1rm"><span>BEST</span><b>'+best+'</b><i>'+(k==='sec'?'sec':'reps')+' ever</i><b>'+last+'</b><i>latest</i></div>'+
     '<div class="pg-cap">Best '+(k==='sec'?'hold':'set')+' per session</div>';
   h+=progChart(S);
@@ -8340,7 +8379,7 @@ var SFX_ON=1;
 // a quiet gym, the tick on every logged set, the fanfare on every record.
 // There is no MUTE ALL here on purpose. Alert volume already goes to zero, and a second control
 // that silences everything would be two switches for one decision.
-var SFX_KEYS=[['rest','Rest alert','When a rest runs out'],
+var SFX_KEYS=[['rest','Rest over alert','When a rest runs out'],
               ['log','Set logged','The tick when a set is kept'],
               ['pr','Record','The flourish when you beat one']];
 var SFX_OFF=(function(){
@@ -11984,6 +12023,7 @@ function sbEnd(){
     DB.walks.push({date:iso(new Date()),min:Math.max(1,Math.round((Date.now()-DB.walkRun.start)/60000)),dist:null,steps:null,feel:null,ts:Date.now()});
     DB.walkRun=null;try{saveDB();}catch(e){}
   }
+  setTimeout(weekHello,900);
   initBack();
   // Android 13 and up will not deliver a notification until the app has asked, and unlike the web
   // this ask needs no tap behind it. Written once and never called, which is why the first build
