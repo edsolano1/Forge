@@ -528,11 +528,11 @@ body.tut #exportOvl .sheet{transform:scale(.84);transform-origin:50% 0;}
    space above the anchored card, save row included. */
 body.tut #exEditOvl .sheet{transform:scale(.82);transform-origin:50% 0;}
 /* Scroll room, measured not generous (user note, Aug 23: 44vh floated the finish button to
-   the middle of the screen over a gulf of nothing). 28vh is just enough that the scroll
-   runs out with the button resting a little above the anchored card - it reads as the page
-   scrolling down to it, because that is all that happens. */
-body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:28vh;}
-body.tut #sBody{padding-bottom:28vh;}
+   the middle of the screen over a gulf of nothing). 90px was tuned LIVE on the device: the
+   scroll runs out with the button resting 40px above the anchored card - it reads as the
+   page scrolling down to it, because that is all that happens. */
+body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:90px;}
+body.tut #sBody{padding-bottom:90px;}
 /* The rest pill normally floats at the very foot of the screen - the anchored card's seat.
    For the tour it sits directly ABOVE the card instead (--tutch is the card's live height,
    written by tutPlace): same corner of the world it always lives in, just lifted clear. */
@@ -3736,7 +3736,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.171';
+var APPV='v4.172';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
