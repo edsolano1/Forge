@@ -2913,6 +2913,7 @@ body.wcon{overflow:hidden;}
     <div class="wc-mark" id="wcMark"></div>
     <div class="wc-rule"></div>
     <h1 class="wc-t">Welcome to the Forge</h1>
+    <p class="wc-s" id="wcIntro"></p>
     <p class="wc-s" id="wcS"></p>
     <div class="wc-picks" id="wcPicks"></div>
   </div>
@@ -3745,7 +3746,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.191';
+var APPV='v4.192';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11743,8 +11744,11 @@ var EZ_ON=false;
 // The two questions, each a full page of the welcome screen. Swapping stages drops .on,
 // forces a reflow and puts it back, so the mark, rule, title and new picks all rise again:
 // the second question arrives the way the first did. Motion Off skips the rise (CSS).
-function wcStage(sub,picks){
+function wcStage(sub,picks,intro){
   var w=document.getElementById('welcome');
+  var wi=document.getElementById('wcIntro');
+  wi.textContent=intro||'';
+  wi.style.display=intro?'':'none';
   document.getElementById('wcS').textContent=sub;
   document.getElementById('wcPicks').innerHTML=picks;
   w.classList.remove('on');void w.offsetWidth;
@@ -11766,7 +11770,8 @@ function showFirstRun(){
     '<button class="wc-pick" onclick="frStart(true)"><b>A basic week</b>'+
     '<small>Push, pull and legs on three days. The weights are yours to write in.</small></button>'+
     '<button class="wc-pick" onclick="frStart(false)"><b>An empty week</b>'+
-    '<small>Build your own from nothing.</small></button>');
+    '<small>Build your own from nothing.</small></button>',
+    'A workout log that works offline, with no account and no server. Everything you write stays on your phone.');
 }
 function frStart(basic){
   if(basic){installStarter();renderHome();}
