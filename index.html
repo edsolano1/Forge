@@ -542,15 +542,12 @@ body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bot
    look like a footnote - and someone who wants out of a tour wants to SEE the way out. It takes
    the same red the app already uses for anything that undoes or removes, per theme, so it reads
    as the exit without shouting over NEXT. Each world's value is the one its own .btn-bad uses. */
-.tut-skiprow{margin-top:11px;text-align:center;}
-.tut-skip{font-size:11.5px;cursor:pointer;letter-spacing:.04em;white-space:nowrap;
-  --bad:#e0736b;color:var(--bad);
-  border:1px solid color-mix(in srgb,var(--bad) 42%,var(--line));border-radius:8px;
-  padding:7px 12px;background:color-mix(in srgb,var(--bad) 8%,transparent);display:inline-block;}
-.tut-skip:hover{color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--surface));
-  border-color:color-mix(in srgb,var(--bad) 72%,var(--line));}
-body.forge .tut-skip{--bad:#f0645a;}
-body.light .tut-skip{--bad:#b1332c;}
+.tut-x{position:absolute;top:8px;right:8px;width:32px;height:32px;display:flex;align-items:center;
+  justify-content:center;border-radius:9px;color:var(--txt3);cursor:pointer;transition:.14s;}
+.tut-x:hover{color:#e0736b;background:color-mix(in srgb,#e0736b 10%,transparent);}
+.tut-x svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;}
+/* The exit confirm has to stand over the tour's own chrome, which lives at 400+. */
+body.tut #askOvl{z-index:402;}
 .tut-wait{font-size:11.5px;color:var(--go);letter-spacing:.04em;display:flex;align-items:center;gap:8px;}
 .tut-wait::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--go);animation:tutp 1.25s infinite;}
 @keyframes tutp{0%,100%{opacity:.25;transform:scale(.75)}50%{opacity:1;transform:scale(1.2)}}
@@ -2790,6 +2787,10 @@ body.wcon{overflow:hidden;}
 <div id="tutHole"><i></i><i></i><i></i><i></i></div>
 <div id="tutPing"></div>
 <div id="tutCard">
+  <!-- The way out is the pattern every app uses: a quiet X in the top corner, there from
+       the first frame. It asks before it acts (tutAskEnd) - one accidental tap must not
+       throw the tour away. -->
+  <div class="tut-x" id="tutX" onclick="tutAskEnd()" title="End the tour"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></div>
   <div class="tut-step" id="tutStep"></div>
   <div class="tut-t" id="tutT"></div>
   <div class="tut-b" id="tutB"></div>
@@ -2815,7 +2816,6 @@ body.wcon{overflow:hidden;}
     <div class="btn" id="tutSfx" onclick="tutSample()" style="display:none">HEAR IT</div>
     <div class="btn btn-go" id="tutNext" onclick="tutAdvance()">NEXT</div>
   </div>
-  <div class="tut-skiprow"><span class="tut-skip" id="tutSkip" onclick="tutEnd()">End tour</span></div>
 </div>
 
 <div class="ovl" id="askOvl">
@@ -3716,7 +3716,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.167';
+var APPV='v4.168';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10981,8 +10981,11 @@ var TUT_ALL=[
   // bench four steps ago, so the button reads "already logged today" and does nothing. Ringing a
   // dead control and asking someone to take it in is the wrong lesson. It sits on the two save
   // buttons instead, which is the thing about this sheet worth knowing.
+  // The tour button says DONE because that is the word that saves-and-leaves everywhere in
+  // this app - the sheet here, and the full editor's own DONE on your real workouts. The
+  // ping stays on the sheet's save row, which is where the choice actually lives.
   {sel:'#exEditOvl .sheet',pad:10,ovl:'exEditOvl',top:true,ping:'#exEditOvl .sheet-btns',
-   next:'SAVE AND GO ON',nudge:'Tap SAVE AND GO ON to carry on.',act:function(){closeOvl('exEditOvl');}},
+   next:'DONE',nudge:'Tap DONE to carry on.',act:function(){closeOvl('exEditOvl');}},
   // Your own notes. Placed here because the exercise sheet has just closed, so the day is back
   // on screen with the links row visible and nothing else competing for the highlight.
   // The spotlight was on the links row alone, which showed a pair of buttons floating with no
@@ -11047,7 +11050,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the ring.'},
   {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
   {t:'How many sets',b:'Add or drop a set. The targets underneath follow along.'},
-  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY means this day carries the change from now on</li></ul><p>Remove this exercise takes it off the day. It greys out once a set is logged, so nothing you already did can be thrown away.</p>'},
+  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Those two buttons are how a change is really saved. On your own workouts, holding an exercise opens the full editor — its DONE button at the foot saves the same way.</p>'},
   {t:'Your own notes',b:'Tap Add note on the bench.'},
   {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a cue that keeps your form honest. It shows up on that exercise every time it comes around.'},
   {t:'Finish the day',b:'Tap Finish. One logged set is plenty for the tour.'},
@@ -11151,6 +11154,7 @@ function tutGuard(e){
   var t=e.target;
   if(!t||!t.closest)return;
   if(t.closest('#tutCard'))return;
+  if(TUTASK&&t.closest('#askOvl'))return;   // the exit confirm's own buttons must work
   var st=TUT_STEPS[TUTI];
   // A step whose target is a whole card hands over everything inside it, including controls it
   // never meant to offer: the weights opened the number sheet, the sigils logged sets that were
@@ -11188,7 +11192,17 @@ function tutGuard(e){
   document.addEventListener(ev,tutGuard,true);
 });
 var tutNT=null;
-var TUTWT=0;
+var TUTWT=0,TUTASK=0;
+// One accidental tap on the X must not throw the tour away, so it asks first. The last
+// card is the natural end - asking there would be double-checking a finished thing.
+function tutAskEnd(){
+  if(!TUTON)return;
+  if(tutLast()){tutEnd();return;}
+  TUTASK=1;
+  ask('Leave the tour? You can run it again any time from Settings.',
+    function(){TUTASK=0;tutEnd();},
+    'End the tour?','LEAVE');
+}
 function tutNudge(){
   var c=document.getElementById('tutCard'),n=document.getElementById('tutNudge');
   c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');
@@ -11307,7 +11321,6 @@ function tutGo(i){
   // thing itself - which is the question you are actually asking when you look at it.
   var nb=document.getElementById('tutNext');
   if(nb)nb.textContent=st.next||(tutLast()?'DONE':'NEXT');
-  document.getElementById('tutSkip').textContent=tutLast()?'Close':'End tour';
   // A sweep step TRAVELS to its target and then closes on it. The page scrolls smoothly, the hole
   // rides along with it because placement runs every frame, and only once it has arrived does the
   // highlight sweep shut. Jumping there instantly and sweeping in the same breath told you where
@@ -11480,6 +11493,9 @@ var TUT_STRAY=['editOvl','exEditOvl','exNoteOvl','exAddOvl','exJoinOvl','swapOvl
 function tutStray(i){
   var keep=TUT_STEPS[i==null?TUTI:i].ovl||'';
   TUT_STRAY.forEach(function(id){
+    // the exit confirm is the one ask the tour itself raises - the sweep leaves it be,
+    // and the flag clears itself once the sheet is answered either way
+    if(id==='askOvl'&&TUTASK){if(!tutOn('askOvl'))TUTASK=0;return;}
     if(id!==keep&&document.getElementById(id)&&tutOn(id))closeOvl(id);
   });
 }
@@ -11628,23 +11644,28 @@ function safeIns(){
   var cs=getComputedStyle(SAFEPROBE);
   return {t:parseFloat(cs.paddingTop)||0,b:parseFloat(cs.paddingBottom)||0};
 }
-// The card shows itself only once the scene has stopped moving. Scenes MOVE on the way
-// into a step - the deck scales at tour start, sheets open, pans travel - and a card
-// placed against a moving target visibly rode along and re-seated on nearly every
-// transition (reported twice from the device). Geometry is sampled each frame; three
-// identical frames is "settled", and only then does the card fade in, already seated.
+// The card shows itself only once the scene has stopped moving, and it NEVER moves while
+// visible. Two lessons from frame recordings on the device (Aug 23): the fade-OUT was the
+// giveaway - on every step change the card repositioned while still half-visible, a 195px
+// teleport caught mid-fade - so hiding is INSTANT (transition off) and only the fade-in
+// animates. And the card's own HEIGHT is part of the settle signature: a late font metric
+// re-seated a fully visible card by 52px at 630ms with the hole dead still, which only a
+// height term catches. Three identical frames is "settled"; then it fades in, seated.
 var TUTSTABS='',TUTSTABN=0;
-function tutStab(card){
+function tutStab(card,ch){
   var hole=document.getElementById('tutHole');
-  var sig=TUTI+'|'+(card._t||'')+'|'+(hole.classList.contains('on')?(hole._k||''):'off');
+  var sig=TUTI+'|'+(card._t||'')+'|'+(ch|0)+'|'+(hole.classList.contains('on')?(hole._k||''):'off');
   if(sig===TUTSTABS)TUTSTABN++;else{TUTSTABS=sig;TUTSTABN=0;}
-  var op=TUTSTABN>=3?'':'0';
-  if(card.style.opacity!==op)card.style.opacity=op;
+  if(TUTSTABN>=3){
+    if(card.style.opacity!==''){card.style.transition='';card.style.opacity='';}
+  }else if(card.style.opacity!=='0'){
+    card.style.transition='none';card.style.opacity='0';
+  }
 }
 function tutPlace(){
   var st=TUT_STEPS[TUTI],hole=document.getElementById('tutHole'),card=document.getElementById('tutCard');
   var ping=document.getElementById('tutPing');
-  if(st.hide&&st.hide()){hole.classList.remove('on');ping.classList.remove('on');card.style.opacity='0';TUTSTABS='';TUTSTABN=0;tutShift(null);return;}
+  if(st.hide&&st.hide()){hole.classList.remove('on');ping.classList.remove('on');card.style.transition='none';card.style.opacity='0';TUTSTABS='';TUTSTABN=0;tutShift(null);return;}
   var si=safeIns();
   var el=tutEls(st.sel)[0],ch=card.offsetHeight,vh=window.innerHeight-si.b;
   // Before anything is measured: a sheet that has to move must move first, or the spotlight
@@ -11660,16 +11681,16 @@ function tutPlace(){
   if(!el||!el.offsetHeight){
     hole.classList.remove('on');
     if(performance.now()>=TUTFREEZE)tutTop(card,Math.max(14+si.t,(vh-ch)/2)+'px');
-    tutStab(card);
+    tutStab(card,ch);
     return;
   }
   tutBox(el,hole,st.pad==null?8:st.pad);
   var r=el.getBoundingClientRect(),p=st.pad==null?8:st.pad;
-  if(st.top){tutTop(card,(14+si.t)+'px');tutStab(card);return;}   // instructions first, then the thing itself
-  if(performance.now()<TUTFREEZE){tutStab(card);return;}          // parked for a pan - see tutCardHold
+  if(st.top){tutTop(card,(14+si.t)+'px');tutStab(card,ch);return;}   // instructions first, then the thing itself
+  if(performance.now()<TUTFREEZE){tutStab(card,ch);return;}          // parked for a pan - see tutCardHold
   var below=r.bottom+p+14,above=r.top-p-14-ch;
   tutTop(card,(below+ch<vh-12?below:(above>12+si.t?above:Math.max(12+si.t,vh-ch-14)))+'px');
-  tutStab(card);
+  tutStab(card,ch);
 }
 // scrollIntoView drags whatever ancestor it likes; walk to the real scroller instead.
 // A pan we time ourselves. behavior:'smooth' is whatever pace the browser feels like, which on
