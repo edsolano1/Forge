@@ -3746,7 +3746,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.192';
+var APPV='v4.193';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10883,7 +10883,7 @@ function bindExHold(){
 // is what lets the tour run over the real screens instead of a mock-up of them.
 var TUTON=false,TUTI=0,TUTMAX=0,TUTDB=null,TUTPOLL=null,TUTRAF=0,TUTARM=true;
 // Whether the one action a step asks for has already been taken. See the latch in tutGuard.
-var TUTHIT=false;
+var TUTHIT=false,TUTDW=0;
 // A step already walked is a step already done, so going back cannot re-trigger it: below
 // the furthest point reached the tour is a read-only replay - no gates, no reopening
 // sheets, NEXT always available - and normal gating resumes at the frontier.
@@ -10996,7 +10996,11 @@ var TUT_ALL=[
   // the size of the screen dims nothing, which reads as no emphasis at all). The rest of
   // the workout stays readable behind the scrim, the pulsing box on the ROW keeps the
   // emphasis where the words point, and the anvil stays the only thing the fence lets through.
-  {sel:'#exc-dbbench',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',once:true,
+  // No once here: the anvil is a TOGGLE. Stepping back and tapping it off spent the one
+  // allowed tap, and the fence then refused the tap that would have turned it back on
+  // (user note, Aug 23). dwell holds the page for a moment after the set is marked, so the
+  // grade the tap just earned is actually seen before the timer step arrives.
+  {sel:'#exc-dbbench',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',dwell:1500,
    w:'Waiting for the anvil',nudge:'Tap the anvil at the end of the highlighted row.',
    when:function(){var e=document.getElementById('sr-dbbench-0');return !!(e&&e.classList.contains('done'));}},
   // The only step whose subject can leave on its own: the rest runs out, the pill hides itself
@@ -11325,6 +11329,7 @@ function tutEnd(){
 function tutGo(i){
   TUTI=i;if(i>TUTMAX)TUTMAX=i;
   TUTHIT=false;                    // each step gets its one action back
+  TUTDW=0;                         // and a fresh dwell clock
   // The demo rest is a prop for ONE step - the pill's own - and belongs on no other.
   // Two previous attempts at this both tied it to identity rather than to the rule. "i>8" tied
   // it to a step number, so inserting a step moved which one killed the timer. Flagging the
@@ -11560,7 +11565,15 @@ function tutTick(){
   // Checked BEFORE the stray sweep, because for four of the six steps the thing the step is
   // waiting for IS a sheet, and the sweep would shut it in the same tick that should advance.
   if(st.when){
-    if(TUTARM&&st.when()){tutGo(TUTI+1);return;}
+    if(TUTARM&&st.when()){
+      // A step can ask for a beat between the thing being done and the page turning
+      // (dwell, in ms). Without it the anvil step advanced on the very next tick and
+      // the grade the tap had just earned was gone before it registered.
+      if(st.dwell){
+        if(!TUTDW)TUTDW=Date.now();
+        if(Date.now()-TUTDW>=st.dwell){TUTDW=0;tutGo(TUTI+1);return;}
+      }else{tutGo(TUTI+1);return;}
+    }else if(TUTDW)TUTDW=0;   // toggled back off mid-dwell: the clock starts over
     if(!TUTARM&&!st.when())TUTARM=true;
   }
   tutStray();
