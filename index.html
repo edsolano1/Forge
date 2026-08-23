@@ -546,6 +546,10 @@ body.tut #sBody{padding-bottom:90px;}
    pixels wider than the pill, and that undimmed fringe let the graded row behind peek
    through at the pill's edge. The ring fills the gap with solid dark, corner curves and
    all, so the opening reads as one finished piece. */
+/* The anvil step starts the rest clock, but its pill arriving mid-step got cut by the card
+   and the opening (user note, Aug 23). The step that STARTS the timer hides it; the step
+   ABOUT the timer is where it appears, whole. */
+body.tut-nopill .timer-pill{display:none!important;}
 body.tut .timer-pill{bottom:calc(26px + env(safe-area-inset-bottom,0px) + var(--tutch,200px));
   box-shadow:0 0 0 9px rgb(4,5,7),0 10px 34px rgba(0,0,0,.55);}
 /* The alert control, borrowed into the card. Narrower than the Settings one because it shares a
@@ -3746,7 +3750,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.193';
+var APPV='v4.194';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11000,7 +11004,7 @@ var TUT_ALL=[
   // allowed tap, and the fence then refused the tap that would have turned it back on
   // (user note, Aug 23). dwell holds the page for a moment after the set is marked, so the
   // grade the tap just earned is actually seen before the timer step arrives.
-  {sel:'#exc-dbbench',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',dwell:1500,
+  {sel:'#exc-dbbench',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',dwell:1500,hidePill:1,
    w:'Waiting for the anvil',nudge:'Tap the anvil at the end of the highlighted row.',
    when:function(){var e=document.getElementById('sr-dbbench-0');return !!(e&&e.classList.contains('done'));}},
   // The only step whose subject can leave on its own: the rest runs out, the pill hides itself
@@ -11324,12 +11328,14 @@ function tutEnd(){
   document.getElementById('tutHole').classList.remove('on');
   document.getElementById('tutPing').classList.remove('on');
   document.getElementById('tutNudge').classList.remove('on');
+  document.body.classList.remove('tut-nopill');
   mergeCustom();renderHome();window.scrollTo(0,0);
 }
 function tutGo(i){
   TUTI=i;if(i>TUTMAX)TUTMAX=i;
   TUTHIT=false;                    // each step gets its one action back
   TUTDW=0;                         // and a fresh dwell clock
+  document.body.classList.toggle('tut-nopill',!!TUT_STEPS[i].hidePill);
   // The demo rest is a prop for ONE step - the pill's own - and belongs on no other.
   // Two previous attempts at this both tied it to identity rather than to the rule. "i>8" tied
   // it to a step number, so inserting a step moved which one killed the timer. Flagging the
