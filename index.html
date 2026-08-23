@@ -399,6 +399,9 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
    step points at one control and wrong when it points at one SECTION of a sheet you are meant to
    be reading the rest of. The ring does the pointing; the scrim only has to say "not this bit". */
 #tutHole > i{position:fixed;display:block;background:rgba(4,5,7,.58);pointer-events:none;}
+/* One step (the rest pill) asks for deeper dark: the pill floats over the session's own
+   rows, and the normal scrim left them loud enough to fight it. */
+#tutHole.deep > i{background:rgba(4,5,7,.82);}
 #tutHole.on{opacity:1;}
 /* A one-shot entrance: the highlight is planted around the whole viewport and closes onto the
    step's target, so the week is taken in whole before any one day is singled out. Geometry
@@ -2036,7 +2039,9 @@ body.forge .daybox.quenched{border-color:#2c2c2b;background:rgba(23,23,22,.42);}
 body.forge .daybox.quenched .dayhead{color:#84827f;}
 body.forge .daybox.quenched .dayglow{display:none;}
 body.forge .daybox.today.quenched{border-color:#3a3a38;}
-.pill-done{background:transparent;border:1px solid color-mix(in srgb,var(--gold) 42%,transparent);color:var(--gold);}
+.pill-done{background:transparent;border:1px solid color-mix(in srgb,var(--gold) 42%,transparent);color:var(--gold);
+  display:inline-flex;align-items:center;gap:4px;}
+.pill-done svg{width:10px;height:10px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;}
 body.light .card.sealed{background:var(--surface2);border-color:var(--line);}
 body.light .card.sealed::after{opacity:.35;background:repeating-linear-gradient(135deg,rgba(60,72,96,.07) 0 2px,transparent 2px 6px);}
 body.light .card.sealed .card-name,body.light .card.sealed .card-day{color:var(--txt2);}
@@ -2667,7 +2672,7 @@ body.wcon{overflow:hidden;}
   <div class="sheet">
     <h3>Session logged</h3>
     <div class="sum" id="sumCard"></div>
-    <p>Plain text &mdash; save it anywhere, send it to anyone, or paste it into any chat for a review.</p>
+    <p>Plain text. Save it anywhere, send it to anyone, or paste it into any chat for a review.</p>
     <textarea id="exportTxt" readonly></textarea>
     <div class="sheet-btns">
       <div class="btn btn-go" onclick="copyExport()" id="copyBtn">COPY</div>
@@ -3552,7 +3557,7 @@ var GENERIC=1;
 var GEN_TXT={
   done:      'Locked in',
   unsealBtn: 'Unlock the week',
-  unsealMsg: 'Every locked day opens again so you can run it again. Nothing is deleted — all of it stays in your history.',
+  unsealMsg: 'Every locked day opens again so you can run it again. Nothing is deleted. All of it stays in your history.',
   unsealTtl: 'Unlock the week?',
   unsealYes: 'UNLOCK',
   sealTtl1:  'Close out the open session?',
@@ -3570,7 +3575,7 @@ var GEN_TXT={
   restTtl:   'Rest over',
   restBody:  'Next set is ready.',
   closeTtl:  'Close Forge?',
-  closeMsg:  'Forge closes. Your session stays exactly where it is — nothing is lost.'
+  closeMsg:  'Forge closes. Your session stays exactly where it is. Nothing is lost.'
 };
 function TXT(k){
   if(GENERIC)return GEN_TXT[k];
@@ -3718,7 +3723,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.174';
+var APPV='v4.175';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4017,6 +4022,9 @@ function readyCount(wk){
   return n;
 }
 var ARROW='<svg viewBox="0 0 20 20"><path d="M10 15.5V5M10 5l-4.6 4.6M10 5l4.6 4.6"/></svg>';
+// The closed padlock a locked-in day wears, so LOCKED IN and UNLOCK teach each other by
+// picture before anyone reads a word.
+var LOCKI='<svg viewBox="0 0 20 20"><rect x="5" y="9" width="10" height="7.5" rx="2"/><path d="M7.5 9V6.5a2.5 2.5 0 0 1 5 0V9"/></svg>';
 // Small jumps, held clean: 5 lb once a lift is heavy enough to carry it, 2.5 below that.
 // How far a raise moves. This was pure plate math - 2.5 under 40, 5 over - which is right
 // for a barbell and wrong for every weight stack that steps by its own amount: a 3lb-lattice
@@ -4160,7 +4168,7 @@ function openLevel(wk){
   LVLWK=wk;LVLED=null;
   LVLPLAN=levelPlan(wk);
   var plan=LVLPLAN,W1=W[wk];
-  document.getElementById('lvlTitle').textContent='Level up \u2014 '+(W1?W1.name:'');
+  document.getElementById('lvlTitle').textContent='Level up \u00b7 '+(W1?W1.name:'');
   var go=document.getElementById('lvlGo');
   document.getElementById('lvlSub').textContent=plan.length?
     'These lifts met every target last session. Press a new weight to change it, confirm to set the targets.':
@@ -4521,7 +4529,7 @@ function planCard(id,i,nx,dk){
   var up=(id+'@'+dk===nx);
   var pills='';
   if(live)pills+='<span class="pill pill-live">Resume '+loggedCount(id)+'/'+totalSets(id)+'</span>';
-  else if(sealed)pills+='<span class="pill pill-done">'+TXT('done')+'</span>';
+  else if(sealed)pills+='<span class="pill pill-done">'+LOCKI+TXT('done')+'</span>';
   else if(rdy)pills+='<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\''+id+'\')">'+ARROW+'</span>';
   // Compressed: the name sits on the top line, level with the grip, and the second line is just
   // the size of the day. The ADD-ON tag went because the meta already says Optional, and YOURS
@@ -4568,7 +4576,7 @@ function xcard(id,i){
   var sealed=!live&&!!loggedThisWeek()[id];
   var pills='';
   if(live)pills+='<span class="pill pill-live">Resume '+loggedCount(id)+'/'+totalSets(id)+'</span>';
-  else if(sealed)pills+='<span class="pill pill-done">'+TXT('done')+'</span>';
+  else if(sealed)pills+='<span class="pill pill-done">'+LOCKI+TXT('done')+'</span>';
   else if(rdy)pills+='<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\''+id+'\')">'+ARROW+'</span>';
   return '<div class="card'+(sealed?' sealed':'')+'" data-extra="'+id+'" style="--c:'+dayC(id)+';--gd:-'+(i*0.63).toFixed(2)+'s" onclick="mkTap(\''+id+'\')">'+
     (sealed?'<svg class="seal" viewBox="0 0 100 100">'+ouroboros('var(--gold)','var(--surface)',false)+'</svg>':'')+
@@ -4685,7 +4693,7 @@ function offerReopen(){
   try{seen=localStorage.getItem(REOPENKEY)||'';}catch(e){}
   if(seen===wk)return;
   try{localStorage.setItem(REOPENKEY,wk);}catch(e){}
-  ask('Every day on your week is locked in. Unlock them all to go round again, or leave it — the week starts fresh on its own when it turns over.',
+  ask('Every day on your week is locked in. Unlock them all to go round again, or leave it and the week starts fresh on its own when it turns over.',
       function(){sfxUnseal();runWipe(doUnseal);},
       'The whole week, locked in',TXT('unsealYes'));
 }
@@ -5175,12 +5183,12 @@ function renderHome(){
   // box now (v4.157), dashed against the week's solid days so it reads as storage, standing
   // whether or not it holds anything - and when it is empty the box itself says what it is for.
   document.getElementById('extraCards').innerHTML=(xs.length?xs.map(xcard).join('')
-    :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here — drag one down, or hold it and choose MOVE TO SAVED WORKOUTS.</div>')+
+    :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here. Drag one down, or hold it and choose MOVE TO SAVED WORKOUTS.</div>')+
     '<div class="bank-add" onclick="openNewSaved()" title="New saved workout">'+PLUS+'</div>';
   document.getElementById('extraLabel').textContent=MKTXT().xl;
   document.getElementById('extraLabel').style.display='';
   document.getElementById('extraHint').style.display=xs.length?'':'none';
-  document.getElementById('extraHint').innerHTML='Not part of the week — open one whenever you want it';
+  document.getElementById('extraHint').innerHTML='Not part of the week. Open one whenever you want it.';
   mkBindCards();
   cardBind();
   syncPumpBtn();
@@ -5211,7 +5219,7 @@ function renderHome(){
         :'<svg viewBox="0 0 20 20"><path d="M10 13V3M6.5 9.5L10 13l3.5-3.5M3.5 15.5h13"/></svg>')+
         (fgw?'Store<br>&amp; recover':'Backup<br>&amp; restore')+'</div>'+
     '</div>'+
-    '<div class="unsealbtn'+(Object.keys(loggedThisWeek()).length?'':' idle')+'" onclick="unsealAll()"><svg viewBox="0 0 20 20"><path d="M10 2.5c2.3 2.6 3.4 4.6 3.4 6.3 0 1.6-1.1 2.7-2.3 3.4M10 2.5c-2.3 2.6-3.4 4.6-3.4 6.3 0 2.4 1.5 3.6 3.4 4.6M6.6 13.5c0 2.2 1.5 4 3.4 4s3.4-1.8 3.4-4"/></svg>'+TXT('unsealBtn')+'</div>'+
+    '<div class="unsealbtn'+(Object.keys(loggedThisWeek()).length?'':' idle')+'" onclick="unsealAll()"><svg viewBox="0 0 20 20"><rect x="3.5" y="9.5" width="10.5" height="7.5" rx="2"/><path d="M11.5 9.5V6.5a3 3 0 0 1 6 0"/></svg>'+TXT('unsealBtn')+'</div>'+
     '<div style="text-align:center;margin-top:18px;font-size:11px;letter-spacing:.14em;opacity:.32">'+APPNAME()+' '+APPV+'</div>';
   // Saving to this device is the normal case and needs no announcement. The other two
   // do: synced storage is worth knowing about, and memory mode means nothing persists.
@@ -5425,7 +5433,7 @@ function renderSession(){
       });
       html+='</div>';
       // Mid-group rows say where the rest went instead of printing one they will not take.
-      if(ssMid)html+='<div class="ex-rest">Straight to the next — rest comes after the round</div>';
+      if(ssMid)html+='<div class="ex-rest">Straight to the next. Rest comes after the round</div>';
       else if(r.rest)html+='<div class="ex-rest">Rest '+r.rest+(sec.ss?' after the round':'')+'</div>';
       html+='</div>';
     });
@@ -5444,7 +5452,9 @@ function renderSession(){
   // three the first time you walk away and come back - while Reset was bulk-undo for
   // something that already undoes per set (tapping a logged row unchecks it). A standing
   // destructive button cost more trust than the rare wrong-day accident it saved.
-  html+='<div class="finish-inline"><button class="finishbtn" onclick="finishSession()">Finish &amp; export</button></div>';
+  // The button stopped saying "export" (Aug 23): finishing LOGS the day, and the plain-text
+  // copy on the next sheet is an option, not an obligation the label implies.
+  html+='<div class="finish-inline"><button class="finishbtn" onclick="finishSession()">Finish the day</button></div>';
   document.getElementById('sBody').innerHTML=html;
   document.getElementById('sBody').style.setProperty('--c',dayC(wk));
   bindExHold();blkBind();
@@ -6007,7 +6017,7 @@ function mkShell(open){MK.shellOpen=!!open;mkRender();document.getElementById('m
 // legitimate state under this flow - it is what a day is for the seconds between naming it and
 // filling it - so mkSave's "add at least one exercise" no longer applies at this point.
 function mkCreate(){
-  if(!MK.name.trim()){mkNote('Name the workout first — it goes on the card.');return;}
+  if(!MK.name.trim()){mkNote('Name the workout first. It goes on the card.');return;}
   mkCommit(true);
   MK.shellOpen=false;
   mkRender();
@@ -6358,7 +6368,7 @@ function mkRender(){
        '<div style="font-size:12px;color:var(--txt3);line-height:1.55;margin:-4px 0 4px">'+
        (MK.fixDay
          ?'It goes on '+daysName(MK.fixDay)+'. Move it any time by dragging, or here in Workout Settings.'
-         :'It goes to Saved workouts — place it on a day whenever you want it.')+'</div>';
+         :'It goes to Saved workouts. Place it on a day whenever you want it.')+'</div>';
   }else{
   h+='<div class="mk-lbl">Where it lives</div><div class="mk-slots" style="--mkc:'+MK.color+'">';
   DAYS.forEach(function(d){
@@ -6904,7 +6914,7 @@ function mkJoinList(){
        (taken?'<small>Already running with another</small>':'<small>'+mkEsc(mkLine(r))+'</small>')+'</span>'+
        (mkJoinSel[j]?'<span class="mk-tick">&#10003;</span>':'')+'</div>';
   });
-  if(!any)h='<div class="mk-empty">Add another exercise first — there is nothing to run this with yet.</div>';
+  if(!any)h='<div class="mk-empty">Add another exercise first. There is nothing to run this with yet.</div>';
   document.getElementById('mkSSList').innerHTML=h;
   var n=1+Object.keys(mkJoinSel).length;
   document.getElementById('mkSSTtl').textContent='Run '+(EX[a.id]?EX[a.id].name:a.id)+' with';
@@ -7003,7 +7013,7 @@ function mkEditCex(id){
   // units the exercise no longer uses - so editing shows it as a fact, not a choice.
   var kr=document.getElementById('mkCexKindRow');if(kr)kr.innerHTML='';
   var kk=document.getElementById('mkCexKind');
-  if(kk)kk.textContent=x.cardio?'A cardio exercise — counted in minutes or calories.':'A lifting exercise — counted in weight, reps or a hold.';
+  if(kk)kk.textContent=x.cardio?'A cardio exercise, counted in minutes or calories.':'A lifting exercise, counted in weight, reps or a hold.';
   document.getElementById('mkCexName').value=x.name||'';
   document.getElementById('mkCexNote').value=x.note||'';
   document.getElementById('mkCexLink').value=x.link||'';
@@ -7147,7 +7157,7 @@ function mkCommit(stay){
 
 // ---------- finish + export ----------
 function buildExport(wk,A){
-  var w=W[wk],out=APPNAME()+' \u2014 '+w.name.replace('Optional: ','')+'\n'+pretty(A.date)+(UNIT_KG?'  \u00b7  weights in kg':'')+'\n\n';
+  var w=W[wk],out=APPNAME()+' \u00b7 '+w.name.replace('Optional: ','')+'\n'+pretty(A.date)+(UNIT_KG?'  \u00b7  weights in kg':'')+'\n\n';
   w.sections.forEach(function(sec){
     sec.rows.forEach(function(row){
       var rf=rowFor(A.swaps,row),id=rf.id,ent=(A.entries[id]||[]).filter(function(x){return x;});
@@ -7226,7 +7236,7 @@ function finishGate(){
   var wk=CUR;
   if(SESSEDIT&&SESSEDIT.wk===wk&&!TUTON&&JSON.stringify(DB.custom[wk]||null)!==SESSEDIT.snap){
     var snap=SESSEDIT.snap;
-    ask('You reshaped this workout mid-session. Today ran the new shape either way — should this day keep it for the weeks ahead? No other day is touched.',
+    ask('You reshaped this workout mid-session. Today ran the new shape either way. Should this day keep it for the weeks ahead? No other day is touched.',
       function(){SESSEDIT=null;finishNow();},
       'Keep the changes?','ADD PERMANENTLY',null,
       {label:'JUST TODAY',fn:function(){
@@ -7676,7 +7686,7 @@ function doRestore(input){
     var inN=d.db.logs.length,haveN=(DB.logs||[]).length;
     ask('The backup holds '+inN+' logged session'+(inN===1?'':'s')+', from '+(d.at||'an unknown date').slice(0,10)+
         '. Restoring replaces everything currently in this app'+
-        (haveN?' — including the '+haveN+' session'+(haveN===1?'':'s')+' here now':'')+'. This cannot be undone.',
+        (haveN?', including the '+haveN+' session'+(haveN===1?'':'s')+' here now':'')+'. This cannot be undone.',
       function(){
         DB=d.db;
         if(!DB.active)DB.active={};if(!DB.up)DB.up={};if(!DB.upSkip)DB.upSkip={};
@@ -10866,7 +10876,7 @@ var TUT_ALL=[
   // Tuesday", so Tuesday must be readable inside the light, not cut in half at its edge
   // (audit, Aug 22). Only the card itself stays tappable.
   {sel:'#weekCards .daybox[data-day="tue"]',hit:'#weekCards .card[data-base="t1"]',sweep:true,once:true,
-   w:'Waiting for Push Day',nudge:'Not that one — Push Day is the card in the highlight.',
+   w:'Waiting for Push Day',nudge:'Not that one. Push Day is the card in the highlight.',
    when:function(){return document.getElementById('session').classList.contains('on');}},
   // The whole exercise is lit, not the one row. Lighting a single set row left the grid floating
   // with no sign of which exercise it belonged to; the ring on the weight still says exactly
@@ -10887,7 +10897,10 @@ var TUT_ALL=[
   // The only step whose subject can leave on its own: the rest runs out, the pill hides itself
   // four seconds later, and the card is left describing a timer that is no longer on screen.
   // Nothing rebuilds it, because a pill is not an overlay - hence keep rather than ovl.
-  {sel:'#timerPill',pad:10,sample:true,keep:function(){tutRest();},
+  // dim:true deepens the scrim for this one step (user note, Aug 23): the pill floats over
+  // the session's own rows, and at the normal dimness the two fought for the eye. The pad
+  // is tight for the same reason - less of the busy backdrop inside the opening.
+  {sel:'#timerPill',pad:4,dim:true,sample:true,keep:function(){tutRest();},
    nudge:'Tap NEXT when you have had a look.'},
   // The ring sits on ex-body: the name AND the target/last/best under it, which is the region a
   // hold actually responds to. Around the whole block it read as "hold anywhere in here" when the
@@ -10897,7 +10910,7 @@ var TUT_ALL=[
   // handed-over card opened an external page in the middle of the tour.
   {sel:'#exc-dbbench',pad:6,hit:'#exc-dbbench',ping:'#exc-dbbench .ex-body',
    block:'input,button,textarea,a,.chk,.hold,.ex-swap,.lvl,.exdrag',
-   w:'Waiting for the hold',nudge:'Hold inside the ring — not the grip, the arrows, or the links.',
+   w:'Waiting for the hold',nudge:'Hold inside the highlight, away from the grip, the arrows and the links.',
    when:function(){return tutOn('exEditOvl');}},
   // One sheet, three steps. It used to be a single card listing all three things you can change,
   // which is a list to read rather than three controls to find. The sheet stays lit the whole way
@@ -10910,11 +10923,14 @@ var TUT_ALL=[
   // bench four steps ago, so the button reads "already logged today" and does nothing. Ringing a
   // dead control and asking someone to take it in is the wrong lesson. It sits on the two save
   // buttons instead, which is the thing about this sheet worth knowing.
-  // The tour button says DONE because that is the word that saves-and-leaves everywhere in
-  // this app - the sheet here, and the full editor's own DONE on your real workouts. The
-  // ping stays on the sheet's save row, which is where the choice actually lives.
+  // The user taps the sheet's own JUST TODAY to move on (user note, Aug 23): the tour
+  // button here used to say DONE, and a DONE inside the tour window reads as "the tour is
+  // done" with six steps still to go. Tapping the real control also teaches the sheet the
+  // way the rest of the tour teaches: by doing. Nothing changed, so just-today is a no-op.
   {sel:'#exEditOvl .sheet',pad:10,ovl:'exEditOvl',top:true,ping:'#exEditOvl .sheet-btns',
-   next:'DONE',nudge:'Tap DONE to carry on.',act:function(){closeOvl('exEditOvl');}},
+   hit:'#exEditOvl .sheet-btns .btn-go',once:true,
+   w:'Waiting for JUST TODAY',nudge:'Tap JUST TODAY to close the sheet.',
+   when:function(){return !tutOn('exEditOvl');}},
   // Your own notes. Placed here because the exercise sheet has just closed, so the day is back
   // on screen with the links row visible and nothing else competing for the highlight.
   // The spotlight was on the links row alone, which showed a pair of buttons floating with no
@@ -10923,7 +10939,7 @@ var TUT_ALL=[
   // Ringed and tappable. A ring around a button that does nothing when you press it teaches the
   // wrong thing about every other ring in the tour, so this one opens for real.
   {sel:'#exc-dbbench',pad:6,hit:'#exc-dbbench .unote-btn',ping:'#exc-dbbench .unote-btn',once:true,
-   w:'Waiting for Add note',nudge:'Tap Add note inside the ring.',
+   w:'Waiting for Add note',nudge:'Tap Add note inside the highlight.',
    when:function(){return tutOn('exNoteOvl');}},
   {sel:'#exNoteOvl .sheet',pad:10,ovl:'exNoteOvl',top:true,nudge:'Tap NEXT to carry on.',
    act:function(){closeOvl('exNoteOvl');}},
@@ -10931,7 +10947,7 @@ var TUT_ALL=[
   // remembers an hour later, so the key lives at the top of the day now, where it is there to be
   // glanced at on the tenth session as much as the first.
   {sel:'.finish-inline',pad:10,hit:'.finishbtn',ping:'.finishbtn',once:true,sweep:true,
-   w:'Waiting for Finish',nudge:'Tap Finish in the highlight.',
+   w:'Waiting for Finish',nudge:'Tap FINISH THE DAY in the highlight.',
    // Between the tap and the export sheet the day seals itself. Get out of the way.
    hide:function(){return !tutOn('exportOvl')&&!document.getElementById('session').classList.contains('on');},
    when:function(){return tutOn('exportOvl');}},
@@ -10970,22 +10986,22 @@ function tutW(){var e=document.getElementById('w-dbbench-0');return e?parseFloat
 var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   msg:'A quick walk through the real screens, using sample data. Your own logs stay untouched.',
   yes:'SHOW ME',steps:[
-  {t:'Your week',b:'Seven days, Sunday to Saturday. A day can hold a workout or stay empty — an empty day is just a day off. The + on any day starts a new workout right there.'},
+  {t:'Your week',b:'Seven days, Sunday to Saturday. A day can hold a workout or stay empty. An empty day is just a day off. The + on any day starts a new workout right there.'},
   {t:'Open a workout',b:'Tap Push Day, on Tuesday.'},
   {t:'The set grid',b:'Every row is one set: a weight, the reps, and an anvil at the end to log it. Tap the weight on the first row.'},
   {t:'Set the number',b:'Type 25 or more, then tap DONE.'},
   {t:'Log the set',b:'Tap the anvil at the end of the row.'},
-  {t:'The rest timer',b:'That set is saved, and your rest started on its own.<ul><li>−15 and +15 adjust it, SKIP ends it</li><li>It keeps counting with the screen off</li><li>It sounds at zero — silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Alert volume.</p>'},
-  {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the ring.'},
+  {t:'The rest timer',b:'That set is saved, and your rest started on its own.<ul><li>−15 and +15 adjust it, SKIP ends it</li><li>It keeps counting with the screen off</li><li>It sounds at zero, but stays silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Alert volume.</p>'},
+  {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the highlight.'},
   {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
   {t:'How many sets',b:'Add or drop a set. The targets underneath follow along.'},
-  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Those two buttons are how a change is really saved. On your own workouts, holding an exercise opens the full editor — its DONE button at the foot saves the same way.</p>'},
+  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Those two buttons are how a change is saved. Nothing changed just now, so tap JUST TODAY to close the sheet.</p>'},
   {t:'Your own notes',b:'Tap Add note on the bench.'},
   {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a cue that keeps your form honest. It shows up on that exercise every time it comes around.'},
-  {t:'Finish the day',b:'Tap Finish. One logged set is plenty for the tour.'},
-  {t:'The export',b:'Your session is already saved in the app — history lives on this phone, not in a cloud. COPY takes the plain text, to send to anyone or paste into a chat. Closing this changes nothing.'},
+  {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is plenty for the tour.'},
+  {t:'Logged and saved',b:'Your session is already saved in the app. History lives on this phone, not in a cloud. COPY takes the plain text, to send to anyone or paste into a chat. Closing this changes nothing.'},
   {t:'Locked in',b:'Push Day is locked in. It stays that way until the week turns over, so you work through the other days instead of repeating one.<p>Everything you logged is already in your history.</p>'},
-  {t:'Going round again',b:'This unlocks every locked day at once, if you want another round before the week is out. Nothing is deleted either way.'}]};
+  {t:'Unlock the week',b:'Each day you finish locks until the week turns over. This button unlocks every locked day at once, if you want another round early. Nothing is deleted either way.'}]};
 function TUTC(){
   var t=curTheme();
   var C={
@@ -11565,6 +11581,7 @@ function tutPlace(){
     return;
   }
   tutBox(el,hole,st.pad==null?8:st.pad);
+  hole.classList.toggle('deep',!!st.dim);
 }
 // scrollIntoView drags whatever ancestor it likes; walk to the real scroller instead.
 // A pan we time ourselves. behavior:'smooth' is whatever pace the browser feels like, which on

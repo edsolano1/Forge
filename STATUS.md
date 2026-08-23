@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v4.174** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v4.175** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -51,6 +51,7 @@ Smaller known trade-offs, accepted for now:
 
 Every word in the app should read as if one careful person wrote all of it. The standard, applied in the v4.163 sweep and binding on every future string:
 
+- **No em-dashes in anything a user reads.** They read as machine-written and corrode trust. Rewrite around them: a period, a comma, a colon, or parentheses always works. (Swept app-wide in v4.175; code comments are exempt.)
 - **Plain words, person to person.** Talk to the user like a person, not a client. No coaching voice, no fitness jargon beyond exercise names, no marketing adjectives (powerful, seamless), no filler (simply, just, easily), no exclamation marks, no "Let's".
 - **Instruction first.** Say the action, then at most two things worth knowing. Anything more becomes a short list, and lists are rare on purpose.
 - **Name what is on the screen** ("Tap the anvil at the end of the row"), never the concept behind it.
