@@ -2810,7 +2810,7 @@ body.wcon{overflow:hidden;}
        too loud. It is the real control - setAlertLvl, the same one Settings calls - so moving it
        here sticks, and the copy says where to find it again. -->
   <div class="tut-vol slider-row" id="tutVol" style="display:none">
-    <span class="tut-vol-l">Alert</span>
+    <span class="tut-vol-l">Volume</span>
     <input type="range" id="tutVolRange" min="0" max="10" step="1"
       oninput="setAlertLvl(this.value,true)" onchange="setAlertLvl(this.value)">
     <span class="slider-num num" id="tutVolNum"></span>
@@ -2933,14 +2933,16 @@ body.wcon{overflow:hidden;}
          on by default, and two switches nobody asked to flip were paying rent in words.
          The sheet keeps exactly one sound decision (does the rest alert sound at all) and
          one dial (how loud), because those are the two a gym actually forces. -->
-    <div class="sfx-lbl" style="margin-top:4px"><span>Sounds</span></div>
-    <div id="sfxKeys"></div>
-    <div class="sfx-lbl"><span>Volume</span></div>
+    <!-- Volume first, then the Rest alert as a two-button row beneath it (user note,
+         Aug 23): every row on the sheet now reads the same way as Motion and Units. -->
+    <div class="sfx-lbl" style="margin-top:4px"><span>Volume</span></div>
     <div class="slider-row" id="alertLvl">
       <input type="range" id="alertRange" min="0" max="10" step="1"
         oninput="setAlertLvl(this.value,true)" onchange="setAlertLvl(this.value)">
       <span class="slider-num num" id="alertNum"></span>
     </div>
+    <div class="sfx-lbl" style="margin-top:14px"><span>Rest alert</span></div>
+    <div class="presets" style="grid-template-columns:1fr 1fr" id="sfxKeys"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Motion</span></div>
     <div class="presets" id="motionRow"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Units</span></div>
@@ -3726,7 +3728,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.177';
+var APPV='v4.178';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8355,13 +8357,13 @@ function sfxToggle(k){
 }
 function drawSfxKeys(){
   var e=document.getElementById('sfxKeys');if(!e)return;
-  // One row on the sheet: the rest alert. The tick and the record flourish still exist and
-  // still honour any preference already stored - their SWITCHES left, not their sounds.
-  e.innerHTML=SFX_KEYS.filter(function(s){return s[0]==='rest';}).map(function(s){
-    var on=sfxAllowed(s[0]);
-    return '<div class="sfx-lbl"><span>'+s[1]+'</span>'+
-      '<span class="sfx-tog'+(on?' on':'')+'" onclick="sfxToggle(\''+s[0]+'\')">'+(on?'ON':'OFF')+'</span></div>';
-  }).join('');
+  // Two preset buttons in the Motion and Units mould (user note, Aug 23), so the whole
+  // sheet reads as parallel rows. Only the rest alert gets a switch; the tick and the
+  // record flourish still exist and still honour any preference already stored.
+  var on=sfxAllowed('rest');
+  e.innerHTML=
+    '<button class="preset sm'+(on?' on':'')+'" onclick="if(!sfxAllowed(\'rest\'))sfxToggle(\'rest\')">On</button>'+
+    '<button class="preset sm'+(on?'':' on')+'" onclick="if(sfxAllowed(\'rest\'))sfxToggle(\'rest\')">Off</button>';
 }
 // 0 low, 1 normal, 2 high, 3 mute. Only the rest alert uses this - the rest of the
 // palette stays where it is so the room still sounds like a room. Mute silences the
@@ -10996,7 +10998,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'The set grid',b:'Every row is one set: a weight, the reps, and an anvil at the end to log it. Tap the weight on the first row.'},
   {t:'Set the number',b:'Type 25 or more, then tap DONE.'},
   {t:'Log the set',b:'Tap the anvil at the end of the row.'},
-  {t:'The rest timer',b:'That set is saved, and your rest started on its own.<ul><li>−15 and +15 adjust it, SKIP ends it</li><li>It keeps counting with the screen off</li><li>It sounds at zero, but stays silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Alert volume.</p>'},
+  {t:'The rest timer',b:'That set is saved, and your rest started on its own.<ul><li>−15 and +15 adjust it, SKIP ends it</li><li>It keeps counting with the screen off</li><li>It sounds at zero, but stays silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Volume.</p>'},
   {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the highlight.'},
   {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
   {t:'How many sets',b:'Add or drop a set. The targets underneath follow along.'},
@@ -11052,7 +11054,7 @@ function TUTC(){
       {t:'The set grid',b:'Every row is one set: weight, reps, and a sigil to mark it. Tap the weight on the first bench set.'},
       {t:'Set the number',b:'Tap the number and type it straight in. Raise it to 150 or more, then tap DONE.'},
       {t:'Mark it',b:'Tap the sigil at the end of the row. The set is kept the instant you touch it, and the rest begins on its own.'},
-      {t:'The rest',b:'It begins when a set is kept.<ul><li>\u221215 and +15 nudge it, SKIP cancels it</li><li>Keeps counting with the screen dark</li><li>Sounds at zero \u2014 silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Alert volume.</p>'},
+      {t:'The rest',b:'It begins when a set is kept.<ul><li>\u221215 and +15 nudge it, SKIP cancels it</li><li>Keeps counting with the screen dark</li><li>Sounds at zero \u2014 silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Volume.</p>'},
       {t:'Change it on the spot',b:'Press and hold any exercise. The bench is highlighted.'},
       {t:'What you can change',b:'<ul><li>Rest between sets</li><li>How many sets it runs</li><li>Whether it is on the night at all</li></ul><p>Save it for tonight only and it clears when the night is kept. Keep it and every Tuesday carries the change.</p>'},
       {t:'Your own notes',b:'Tap Add note on any exercise to keep what only matters to you - a seat height, a pin number, a cue that holds your form. It stays with the lift every time it comes round.'},
