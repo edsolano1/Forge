@@ -515,7 +515,9 @@ body:not(:has(#session.on)) #timerPill{display:none;}
    is one you skim. Scaled down for the length of the tour it fits in a screen, which is all this
    step needs - it is showing you that the thing exists and what is in it, not asking you to read
    the text of a session you just did. */
-body.tut #exportOvl .sheet{transform:scale(.84);transform-origin:50% 0;}
+/* The 40px drop clears the one seat left for End tour on this step: the sheet plus the
+   card fill the screen, and the pill's only clean berth is the strip above the sheet. */
+body.tut #exportOvl .sheet{transform:scale(.84);transform-origin:50% 0;margin-top:40px;}
 body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:30px;}
 /* The alert control, borrowed into the card. Narrower than the Settings one because it shares a
    row with its own label and value rather than sitting under a heading. */
@@ -3718,7 +3720,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.165';
+var APPV='v4.166';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
