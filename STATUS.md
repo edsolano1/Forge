@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v4.173** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v4.174** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -38,10 +38,11 @@ In order of when we plan to touch it:
 3. **First-run wizard, deeper pass** — *pinned until v5.* The "build one for me?" question and the three-question forging ritual are fully built and working, but deliberately switched off (`EZ_ON` flag). We want to invest real design time there rather than ship it as-is. Until then, a first run lands on an empty week with the tour offer.
 4. **v5: the other themes return** — Obsidian, Frost, and Moonwell are frozen but intact. Forge-only until then.
 5. **Per-exercise instruction, after v5** — every exercise gets a real in-app explanation of how to perform it safely, built from one template applied across the whole library: setup, the movement itself, what to avoid. Today an exercise carries a one-line cue and an Instructions link out to the web; the template replaces the outsourcing with teaching the app owns. Ambitious and deliberately parked — this is the first big project of the post-v5 era, and the template gets designed once, then applied everywhere.
+6. **Device sync, after v5** — write finished sessions out to, and pull cardio in from, the platform health stores: **Health Connect** on Android, and **Apple Health (HealthKit)** if an iOS wrapper ever ships. This is the moment watches and rings start feeding the log — and the point where real-time cardio tracking becomes worth having at all, which is why the live walk clock could retire now (Aug 23) instead of limping along half-connected.
 
 Smaller known trade-offs, accepted for now:
 
-- The walk *streak* only counts walks logged through the walk sheet (which now only appears while a walk's clock is running). Cardio rows inside workouts count toward sessions and volume, not the streak.
+- The live walk clock is retired outright (Option A, Aug 23): walking is a cardio row inside a workout, logged in minutes like any other set. The old walk streak and history stay visible in Progress as a legacy record until 30 days after the last logged walk, then the strip retires itself. A clock left running at the moment of retirement is banked as a logged walk on next launch.
 - Plate-math level-up steps are unit-aware (2.5/5 lb or 2.5/5 kg), and learned machine lattices override them — but a machine needs two logged weights before its lattice is learned.
 
 ---

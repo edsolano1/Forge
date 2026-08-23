@@ -2640,26 +2640,8 @@ body.wcon{overflow:hidden;}
   </div>
   <div class="s-body" id="mkBody"></div>
 </div>
-<div class="ovl" id="walkOvl">
-  <div class="sheet" style="max-width:400px">
-    <h3 id="wkTtl">Walks</h3>
-    <div class="wk-clock" id="wkClock">0:00</div>
-    <div class="wk-hint" id="wkHint"></div>
-    <div class="wk-stats" id="wkStats"></div>
-    <div class="wk-grid">
-      <label class="wk-f"><span>Minutes</span><input class="wk-in" id="wkMin" type="number" inputmode="decimal" oninput="wkPace()"></label>
-      <label class="wk-f"><span id="wkDistLbl">Miles</span><input class="wk-in" id="wkDist" type="number" inputmode="decimal" step="0.01" oninput="wkPace()"></label>
-      <label class="wk-f"><span>Steps</span><input class="wk-in" id="wkSteps" type="number" inputmode="numeric"></label>
-    </div>
-    <div class="wk-pace" id="wkPace"></div>
-    <div class="wk-feel" id="wkFeel"></div>
-    <div class="sheet-btns">
-      <div class="btn" onclick="closeOvl('walkOvl')">CLOSE</div>
-      <div class="btn" id="wkTog" onclick="wkToggle()">START</div>
-      <div class="btn btn-go" onclick="saveWalk()">LOG IT</div>
-    </div>
-  </div>
-</div>
+<!-- The walk sheet is gone (Option A, Aug 23): walking is a cardio row inside a workout.
+     See the retirement note beside the old clock functions. -->
 
 <div class="ovl" id="pumpOvl">
   <div class="sheet" style="max-width:400px">
@@ -3736,7 +3718,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.173';
+var APPV='v4.174';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5111,24 +5093,12 @@ function pumpIconSvg(){
     ?'<svg viewBox="0 0 20 20" style="fill:currentColor"><path d="M14.8 13.2A6.6 6.6 0 016 4.4a6.9 6.9 0 108.8 8.8z"/></svg>'
     :PUMP_ICON_0;
 }
-var WALK_ICON_SVG='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17c3.4-.6 5.4-2.4 6-5.4.6-3 2.6-4.8 6-5.4" stroke-dasharray="2.6 2.4"/><path d="M15.5 6.2V2.6M15.5 3.1l3.2 1.1-3.2 1.1"/></svg>';
-// what the cardio row says on its right: the clock while you are out, the day's total after
-function walkStatus(){
-  if(walkRunning())return 'WALKING \u00b7 '+Math.floor(walkElapsed()/60)+'m';
-  var td=walkMin(iso(new Date()));
-  return td?td+' / '+WALK_TGT+' min today':'None today';
-}
 function renderSides(){
   var el=document.getElementById('sides');if(!el)return;
   var open=loggedCount('pump');
-  // The walk button retired (Aug 22): cardio lives inside workouts now, so a walk is a row
-  // on a day - or the Power Walk piece on the shelf - not a separate door. The sheet only
-  // resurfaces while a walk's clock is actually RUNNING, so nobody's live walk is stranded
-  // with no way to stop it. Walk history and the streak still show in Progress.
+  // The walk chip is gone with the walk clock (Option A, Aug 23): cardio lives inside
+  // workouts, and a walk is a row on a day - the Cardio piece, or any row you add.
   el.innerHTML=
-    (walkRunning()?'<div class="side going" id="sideWalk" onclick="openWalk()">'+
-      '<span class="side-i">'+WALK_ICON_SVG+'</span><b>Walking</b>'+
-      '<small>'+walkStatus()+'</small></div>':'')+
     '<div class="side" id="sidePump" onclick="openPump()">'+
       '<span class="side-i" style="color:var(--gold)">'+pumpIconSvg()+'</span><b>Pump day</b>'+
       '<small>'+(open?'OPEN \u00b7 '+open+'/'+totalSets('pump'):'Bonus \u00b7 35-45 min')+'</small></div>';
@@ -5463,7 +5433,12 @@ function renderSession(){
     html+='</div>';
   });
   html+='<div class="mk-new" onclick="exEdAdd()" style="margin-top:22px">'+PLUS+'ADD AN EXERCISE</div>';
-  html+='<div class="notebox"><div class="sect-t">Session notes</div><textarea id="noteBox" >'+(A.note||'')+'</textarea></div>';
+  // The empty note box collapses to a quiet ADD A NOTE bar (Aug 23) - the same dashed
+  // language as ADD AN EXERCISE above it. Tapped once, the day's box stays open for the
+  // visit, and a day already carrying words arrives open.
+  html+=(A.note&&A.note.trim())||NOTEO===wk
+    ?'<div class="notebox"><div class="sect-t">Session notes</div><textarea id="noteBox" >'+(A.note||'')+'</textarea></div>'
+    :'<div class="mk-new" style="margin-top:14px" onclick="noteShow()">'+PLUS+'ADD A NOTE</div>';
   // The foot used to carry three sentences of reassurance and a RESET button. Both gone
   // (Aug 22): the tour teaches autosave, holds and safe leaving - and the app proves all
   // three the first time you walk away and come back - while Reset was bulk-undo for
@@ -5474,9 +5449,12 @@ function renderSession(){
   document.getElementById('sBody').style.setProperty('--c',dayC(wk));
   bindExHold();blkBind();
   var nb=document.getElementById('noteBox');
-  nb.oninput=function(){DB.active[CUR].note=nb.value;saveSoon();};
+  if(nb)nb.oninput=function(){DB.active[CUR].note=nb.value;saveSoon();};
   updateProg();
 }
+// Which workout tapped ADD A NOTE, so its box stays open for the rest of the visit.
+var NOTEO=null;
+function noteShow(){NOTEO=CUR;renderSession();var nb=document.getElementById('noteBox');if(nb)nb.focus();}
 var edCtx=null;
 /* The +/- steppers are gone. They were six taps to cross a plate change and never matched
    the number you had in your head, so the field is typed directly instead. It is the only
@@ -7807,6 +7785,14 @@ function topSet(sets){
 // a row in the vs-last-session table.
 function walkStrip(){
   if(!(DB.walks||[]).length)return '';
+  // A legacy record now that the clock is retired: readable while the walks are recent,
+  // and it retires itself thirty days after the last one rather than showing zeros forever.
+  var last=0;
+  DB.walks.forEach(function(w){
+    var t=w.ts||((w.date&&new Date(w.date+'T12:00:00').getTime())||0);
+    if(t>last)last=t;
+  });
+  if(Date.now()-last>30*86400000)return '';
   var st=walkStreak(),wkm=walkWeek(),best=0,tot=0;
   DB.walks.forEach(function(w){tot+=(w.min||0);if((w.min||0)>best)best=w.min;});
   return '<div class="pg-sec">WALKS</div>'+
@@ -10095,14 +10081,17 @@ function stopTimer(){
 // days with no session at all. So it keeps its own log, and the clock is stored as a start
 // timestamp rather than a running counter - the screen can lock and the app can close, and
 // the elapsed time is still whatever the wall clock says it is.
-var WALK_TGT=60,WALKT=null,WKFEEL=null;
+var WALK_TGT=60;
 // local date, not UTC - toISOString would roll the day over at 7pm here
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function walkDay(d){return (DB.walks||[]).filter(function(w){return w.date===d;});}
 function walkMin(d){return walkDay(d).reduce(function(a,w){return a+(w.min||0);},0);}
-function walkRunning(){return !!(DB.walkRun&&DB.walkRun.start);}
-function walkElapsed(){return walkRunning()?Math.max(0,Math.floor((Date.now()-DB.walkRun.start)/1000)):0;}
-function mmss(s){var m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
+// The live walk clock is fully retired (Option A, Aug 23). Its door had already gone in
+// the Aug 22 side-button retirement - the sheet only opened from a chip that only showed
+// while a walk was running, so no walk could ever start again; this finishes the thought.
+// Walks are cardio rows inside workouts now, logged in minutes like any other set. The
+// streak and history stay readable in Progress as a legacy record (walkStrip) until they
+// age out, and a clock left genuinely running is banked as a logged walk at boot.
 // consecutive days meeting the target, counted back from today - or from yesterday, so the
 // streak does not read as broken before you have been out
 function walkStreak(){
@@ -10122,86 +10111,6 @@ function walkWeek(){
     if(!isNaN(ts)&&ts>=ws)t+=(w.min||0);
   });
   return t;
-}
-function syncWalkBtn(){
-  var r=document.getElementById('sideWalk');if(!r)return;
-  r.classList.toggle('going',walkRunning());
-  var s=r.querySelector('small');
-  if(s)s.innerHTML=walkStatus();
-}
-function wkTick(){
-  var c=document.getElementById('wkClock');
-  if(c&&document.getElementById('walkOvl').classList.contains('on')){
-    c.textContent=walkRunning()?mmss(walkElapsed()):mmss(0);
-    c.classList.toggle('going',walkRunning());
-  }
-  syncWalkBtn();
-  if(!walkRunning()&&WALKT){clearInterval(WALKT);WALKT=null;}
-}
-function wkArm(){if(!WALKT&&walkRunning())WALKT=setInterval(wkTick,1000);}
-function wkToggle(){
-  if(walkRunning()){
-    var mins=Math.max(1,Math.round(walkElapsed()/60));
-    document.getElementById('wkMin').value=mins;
-    DB.walkRun=null;saveDB();
-    try{sfxTick(false);}catch(e){}
-  }else{
-    DB.walkRun={start:Date.now()};saveDB();wkArm();
-    try{sfxTick(true);}catch(e){}
-  }
-  drawWalk();
-}
-function wkPace(){
-  var m=parseFloat(document.getElementById('wkMin').value),d=parseFloat(document.getElementById('wkDist').value);
-  var el=document.getElementById('wkPace');
-  if(m>0&&d>0){
-    var p=m/d,mm=Math.floor(p),ss=Math.round((p-mm)*60);
-    if(ss===60){mm++;ss=0;}
-    el.textContent=mm+':'+String(ss).padStart(2,'0')+(UNIT_KG?' per km':' per mile');
-  }else el.textContent='';
-}
-function wkSetFeel(f){WKFEEL=(WKFEEL===f?null:f);drawFeel();}
-function drawFeel(){
-  document.getElementById('wkFeel').innerHTML=['Easy','Steady','Hard'].map(function(f){
-    return '<div class="'+(WKFEEL===f?'sel':'')+'" onclick="wkSetFeel(\''+f+'\')">'+f+'</div>';
-  }).join('');
-}
-function drawWalk(){
-  var r=walkRunning(),td=walkMin(iso(new Date())),wkm=walkWeek(),st=walkStreak();
-  document.getElementById('wkClock').textContent=r?mmss(walkElapsed()):mmss(0);
-  document.getElementById('wkClock').classList.toggle('going',r);
-  document.getElementById('wkHint').textContent=r?'Walking \u2014 the clock keeps time with the screen off'
-    :(td?td+' min logged today':'Start the clock, or just type the minutes');
-  document.getElementById('wkTog').textContent=r?'STOP':'START';
-  document.getElementById('wkTog').className='btn'+(r?' btn-bad':'');
-  document.getElementById('wkStats').innerHTML=
-    '<div class="wk-s"><b>'+st+'<small>'+(st===1?'day':'days')+'</small></b><span>Streak at '+WALK_TGT+' min</span></div>'+
-    '<div class="wk-s"><b>'+wkm+'<small>/ '+(WALK_TGT*7)+'</small></b><span>Minutes this week</span></div>';
-  var dl=document.getElementById('wkDistLbl');
-  if(dl)dl.textContent=UNIT_KG?'Kilometers':'Miles';
-  drawFeel();wkPace();
-}
-function openWalk(){
-  WKFEEL=null;
-  document.getElementById('wkMin').value=walkRunning()?'':'';
-  document.getElementById('wkDist').value='';
-  document.getElementById('wkSteps').value='';
-  drawWalk();wkArm();
-  document.getElementById('walkOvl').classList.add('on');
-}
-function saveWalk(){
-  var m=parseFloat(document.getElementById('wkMin').value);
-  if(!(m>0)&&walkRunning())m=Math.max(1,Math.round(walkElapsed()/60));
-  if(!(m>0)){document.getElementById('wkHint').textContent='How many minutes? Start the clock or type it in.';return;}
-  var d=parseFloat(document.getElementById('wkDist').value),s=parseInt(document.getElementById('wkSteps').value,10);
-  DB.walks=DB.walks||[];
-  // distance is typed in the display unit and stored in miles, the same one-conversion-at-the-
-  // edge rule the weights follow - a metric walker types kilometers and never does the math
-  DB.walks.push({date:iso(new Date()),min:Math.round(m*10)/10,
-    dist:(d>0?Math.round((UNIT_KG?d/1.60934:d)*100)/100:null),steps:(s>0?s:null),feel:WKFEEL,ts:Date.now()});
-  DB.walkRun=null;saveDB();
-  try{sfxLog();}catch(e){}
-  closeOvl('walkOvl');renderHome();
 }
 function openPump(){
   if(loggedCount('pump')>0){openW('pump');return;}
@@ -11497,7 +11406,7 @@ function tutAdvance(){
 // A tap where a hold was meant used to open a sheet the step knew nothing about, and the
 // fence then locked every button on it. Anything the step did not ask for is closed.
 var TUT_STRAY=['editOvl','exEditOvl','exNoteOvl','exAddOvl','exJoinOvl','swapOvl','settingsOvl','themeOvl','timerOvl',
-  'pumpOvl','walkOvl','lvlOvl','mkActOvl','mkSlotOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl'];
+  'pumpOvl','lvlOvl','mkActOvl','mkSlotOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl'];
 function tutStray(i){
   var keep=TUT_STEPS[i==null?TUTI:i].ovl||'';
   TUT_STRAY.forEach(function(id){
@@ -12044,7 +11953,13 @@ function sbEnd(){
   // untouched for whenever the other three come back.
   applyTheme(THEMES_ON?(t||'dark'):ONE_THEME);
   renderHome();
-  wkArm();                                 // a walk left running keeps counting across a cold start
+  // The retired walk clock: anything still running when the feature ended becomes a
+  // logged walk instead of a stranded timer nobody can see or stop.
+  if(DB.walkRun&&DB.walkRun.start){
+    DB.walks=DB.walks||[];
+    DB.walks.push({date:iso(new Date()),min:Math.max(1,Math.round((Date.now()-DB.walkRun.start)/60000)),dist:null,steps:null,feel:null,ts:Date.now()});
+    DB.walkRun=null;try{saveDB();}catch(e){}
+  }
   initBack();
   // Android 13 and up will not deliver a notification until the app has asked, and unlike the web
   // this ask needs no tap behind it. Written once and never called, which is why the first build
