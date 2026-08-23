@@ -447,6 +447,7 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
    as long as it likes now; past this it scrolls, and the insets keep it clear of the system bars
    at both ends rather than only the notch. */
 #tutCard{position:fixed;z-index:401;left:50%;transform:translateX(-50%);top:40vh;
+  transition:opacity .16s ease;
   width:min(430px,calc(100vw - 26px));border-radius:var(--r);padding:16px 17px 14px;display:none;
   max-height:calc(100vh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
   overflow-y:auto;overscroll-behavior:contain;
@@ -531,16 +532,24 @@ body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bot
 .tut-nudge{display:none;margin-top:10px;font-size:12px;line-height:1.5;color:var(--gold);
   border-top:1px solid color-mix(in srgb,var(--gold) 30%,transparent);padding-top:9px;}
 .tut-nudge.on{display:block;}
-.tut-btns{display:flex;gap:9px;margin-top:15px;align-items:center;}
+.tut-btns{display:flex;gap:9px;margin-top:15px;align-items:center;justify-content:flex-end;}
 .tut-btns .btn{padding:10px 13px;background:var(--surface);white-space:nowrap;}
+/* BACK reads left-to-right as "go left": leftmost seat, arrow first. margin-right:auto pushes
+   everything else to the right edge whether or not the waiting pill is between them. */
+.tut-back{margin-right:auto;display:flex;align-items:center;gap:6px;}
+.tut-back svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 /* The way out. It was grey underlined text sitting next to a lit NEXT button, which made leaving
    look like a footnote - and someone who wants out of a tour wants to SEE the way out. It takes
    the same red the app already uses for anything that undoes or removes, per theme, so it reads
    as the exit without shouting over NEXT. Each world's value is the one its own .btn-bad uses. */
-.tut-skip{margin-right:auto;font-size:11.5px;cursor:pointer;letter-spacing:.04em;white-space:nowrap;
+/* Standing under the card rather than inside it, over the scrim - so it needs its own ground. */
+#tutSkipWrap{position:fixed;z-index:401;left:50%;transform:translateX(-50%);display:none;
+  transition:opacity .16s ease;}
+#tutSkipWrap.on{display:block;}
+.tut-skip{font-size:11.5px;cursor:pointer;letter-spacing:.04em;white-space:nowrap;
   --bad:#e0736b;color:var(--bad);
   border:1px solid color-mix(in srgb,var(--bad) 42%,var(--line));border-radius:8px;
-  padding:8px 11px;background:color-mix(in srgb,var(--bad) 8%,transparent);}
+  padding:8px 13px;background:color-mix(in srgb,var(--bad) 10%,var(--surface2));display:inline-block;}
 .tut-skip:hover{color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--surface));
   border-color:color-mix(in srgb,var(--bad) 72%,var(--line));}
 body.forge .tut-skip{--bad:#f0645a;}
@@ -2798,14 +2807,18 @@ body.wcon{overflow:hidden;}
       oninput="setAlertLvl(this.value,true)" onchange="setAlertLvl(this.value)">
     <span class="slider-num num" id="tutVolNum"></span>
   </div>
+  <!-- BACK sits on the left with an arrow, where a back control is expected and scanned for;
+       NEXT keeps the right edge. End tour is not in this row at all any more - it stands
+       OUTSIDE the card, just underneath it (see #tutSkipWrap and tutSkipPlace), so the card
+       holds only the ways forward and the way out is visibly a separate thing. -->
   <div class="tut-btns">
-    <span class="tut-skip" id="tutSkip" onclick="tutEnd()">End tour</span>
+    <div class="btn tut-back" id="tutBack" onclick="tutBack()" style="display:none"><svg viewBox="0 0 20 20"><path d="M12 4l-6 6 6 6"/></svg>BACK</div>
     <span class="tut-wait" id="tutWait" style="display:none"></span>
-    <div class="btn tut-back" id="tutBack" onclick="tutBack()" style="display:none">BACK</div>
     <div class="btn" id="tutSfx" onclick="tutSample()" style="display:none">HEAR IT</div>
     <div class="btn btn-go" id="tutNext" onclick="tutAdvance()">NEXT</div>
   </div>
 </div>
+<div id="tutSkipWrap"><span class="tut-skip" id="tutSkip" onclick="tutEnd()">End tour</span></div>
 
 <div class="ovl" id="askOvl">
   <div class="sheet" style="max-width:400px">
@@ -3705,7 +3718,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.163';
+var APPV='v4.164';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10923,7 +10936,7 @@ var TUT_ALL=[
   // anything to do. It is swallowed all the same - the next step is the one that opens a day.
   {sel:'#weekCards',pad:6,quiet:true,nudge:'Read this, then tap NEXT.'},
   {sel:'#weekCards .card[data-base="t1"]',hit:'#weekCards .card[data-base="t1"]',sweep:true,once:true,
-   w:'Waiting for Tuesday',nudge:'Not that day. Tuesday is the card in the highlight.',
+   w:'Waiting for Push Day',nudge:'Not that one — Push Day is the card in the highlight.',
    when:function(){return document.getElementById('session').classList.contains('on');}},
   // The whole exercise is lit, not the one row. Lighting a single set row left the grid floating
   // with no sign of which exercise it belonged to; the ring on the weight still says exactly
@@ -10939,7 +10952,7 @@ var TUT_ALL=[
   // black. The opening now spans the session; the pulsing box on the ROW keeps the emphasis
   // where the words point, and the sigil stays the only thing the fence lets through.
   {sel:'#sBody',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',once:true,
-   w:'Waiting for the sigil',nudge:'Tap the sigil at the end of the row.',
+   w:'Waiting for the anvil',nudge:'Tap the anvil at the end of the highlighted row.',
    when:function(){var e=document.getElementById('sr-dbbench-0');return !!(e&&e.classList.contains('done'));}},
   // The only step whose subject can leave on its own: the rest runs out, the pill hides itself
   // four seconds later, and the card is left describing a timer that is no longer on screen.
@@ -10954,7 +10967,7 @@ var TUT_ALL=[
   // handed-over card opened an external page in the middle of the tour.
   {sel:'#exc-dbbench',pad:6,hit:'#exc-dbbench',ping:'#exc-dbbench .ex-body',
    block:'input,button,textarea,a,.chk,.hold,.ex-swap,.lvl,.exdrag',
-   w:'Waiting for a long press',nudge:'Hold inside the ring. The grip, the arrows and the links are not part of it.',
+   w:'Waiting for the hold',nudge:'Hold inside the ring — not the grip, the arrows, or the links.',
    when:function(){return tutOn('exEditOvl');}},
   // One sheet, three steps. It used to be a single card listing all three things you can change,
   // which is a list to read rather than three controls to find. The sheet stays lit the whole way
@@ -10984,8 +10997,7 @@ var TUT_ALL=[
   // The grading step is gone. Three colours explained once during a tour is three colours nobody
   // remembers an hour later, so the key lives at the top of the day now, where it is there to be
   // glanced at on the tenth session as much as the first.
-  // pad 12, not 6 - kept from when RESET sat under Finish; the roomier highlight reads fine.
-  {sel:'.finish-inline',pad:12,hit:'.finishbtn',ping:'.finishbtn',once:true,sweep:true,
+  {sel:'.finish-inline',pad:10,hit:'.finishbtn',ping:'.finishbtn',once:true,sweep:true,
    w:'Waiting for Finish',nudge:'Tap Finish in the highlight.',
    // Between the tap and the export sheet the day seals itself. Get out of the way.
    hide:function(){return !tutOn('exportOvl')&&!document.getElementById('session').classList.contains('on');},
@@ -11025,21 +11037,21 @@ function tutW(){var e=document.getElementById('w-dbbench-0');return e?parseFloat
 var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   msg:'A quick walk through the real screens, using sample data. Your own logs stay untouched.',
   yes:'SHOW ME',steps:[
-  {t:'Your week',b:'Seven days, Sunday to Saturday. A day holds a workout, or stays empty — nothing is owed on an empty day. The + on any day starts a new workout right there.'},
-  {t:'Open a day',b:'Tap Tuesday.'},
-  {t:'The set grid',b:'Tap the weight on the first bench set. Every row here is one set: weight, reps, and a sigil to mark it.'},
-  {t:'Set the number',b:'Raise it to 25 or more, then tap DONE.'},
-  {t:'Log it',b:'Tap the sigil at the end of the row.'},
-  {t:'The rest timer',b:'That set is saved, and the rest started on its own.<ul><li>−15 and +15 nudge it, SKIP cancels it</li><li>It keeps counting with the screen off</li><li>It sounds at zero, but stays silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it is in Settings under Alert volume.</p>'},
-  {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the ring. The grip, the arrows and the links do other things.'},
+  {t:'Your week',b:'Seven days, Sunday to Saturday. A day can hold a workout or stay empty — an empty day is just a day off. The + on any day starts a new workout right there.'},
+  {t:'Open a workout',b:'Tap Push Day, on Tuesday.'},
+  {t:'The set grid',b:'Every row is one set: a weight, the reps, and an anvil at the end to log it. Tap the weight on the first row.'},
+  {t:'Set the number',b:'Type 25 or more, then tap DONE.'},
+  {t:'Log the set',b:'Tap the anvil at the end of the row.'},
+  {t:'The rest timer',b:'That set is saved, and your rest started on its own.<ul><li>−15 and +15 adjust it, SKIP ends it</li><li>It keeps counting with the screen off</li><li>It sounds at zero — silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Alert volume.</p>'},
+  {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the ring.'},
   {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
-  {t:'How many sets',b:'Add or drop a set. The targets underneath follow.'},
-  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY means Tuesday carries it from now on</li></ul><p>Remove this exercise takes it off the day. It greys out once you have logged a set on it, so a change here never throws away work you have already done.</p>'},
+  {t:'How many sets',b:'Add or drop a set. The targets underneath follow along.'},
+  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY means this day carries the change from now on</li></ul><p>Remove this exercise takes it off the day. It greys out once a set is logged, so nothing you already did can be thrown away.</p>'},
   {t:'Your own notes',b:'Tap Add note on the bench.'},
-  {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a cue that keeps your form honest. It stays on that exercise every time it comes round.'},
-  {t:'Finish the day',b:'Tap Finish when the last set is in.'},
-  {t:'The export',b:'What you just did, as tiles and as plain text underneath. Save it, send it on, or paste it into a chat. Closing it changes nothing.'},
-  {t:'Locked in',b:'Tuesday is locked in. It stays that way until the week turns over, so you work through the others rather than repeating one.<p>Everything you logged is already in your history.</p>'},
+  {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a cue that keeps your form honest. It shows up on that exercise every time it comes around.'},
+  {t:'Finish the day',b:'Tap Finish. One logged set is plenty for the tour.'},
+  {t:'The export',b:'What you just did — as tiles, and as plain text underneath. Save it, send it to someone, or paste it into a chat. Closing it changes nothing.'},
+  {t:'Locked in',b:'Push Day is locked in. It stays that way until the week turns over, so you work through the other days instead of repeating one.<p>Everything you logged is already in your history.</p>'},
   {t:'Going round again',b:'This unlocks every locked day at once, if you want another round before the week is out. Nothing is deleted either way.'}]};
 function TUTC(){
   var t=curTheme();
@@ -11137,7 +11149,7 @@ function tutGuard(e){
   if(!TUTON)return;
   var t=e.target;
   if(!t||!t.closest)return;
-  if(t.closest('#tutCard'))return;
+  if(t.closest('#tutCard')||t.closest('#tutSkipWrap'))return;
   var st=TUT_STEPS[TUTI];
   // A step whose target is a whole card hands over everything inside it, including controls it
   // never meant to offer: the weights opened the number sheet, the sigils logged sets that were
@@ -11175,6 +11187,7 @@ function tutGuard(e){
   document.addEventListener(ev,tutGuard,true);
 });
 var tutNT=null;
+var TUTWT=0;
 function tutNudge(){
   var c=document.getElementById('tutCard'),n=document.getElementById('tutNudge');
   c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');
@@ -11199,7 +11212,12 @@ function tutStart(core){
   if(CUR){document.getElementById('session').classList.remove('on');CUR=null;}
   stopTimer();stopHold();resetHoldState();
   renderHome();window.scrollTo(0,0);
-  document.getElementById('tutCard').classList.add('on');
+  // Invisible until the first placement frame has run. The card used to paint one frame at
+  // its CSS resting spot (40vh) and then jump to wherever tutPlace put it - the first thing
+  // anyone saw of the tour was furniture moving. It fades in already in position now.
+  var tc=document.getElementById('tutCard');
+  tc.style.opacity='0';
+  tc.classList.add('on');
   TUTPOLL=setInterval(tutTick,180);
   TUTRAF=requestAnimationFrame(tutFrame);
   tutGo(0);
@@ -11209,7 +11227,8 @@ function tutEnd(){
   TUTON=false;
   document.body.classList.remove('tut');
   tutShift(null);   // put back any sheet the tour pushed down
-  clearInterval(TUTPOLL);cancelAnimationFrame(TUTRAF);clearTimeout(tutNT);clearTimeout(TUTSW);clearTimeout(TUTSC);clearTimeout(TUTSW2);clearTimeout(TUTGL);cancelAnimationFrame(TUTPAN);
+  clearInterval(TUTPOLL);cancelAnimationFrame(TUTRAF);clearTimeout(tutNT);clearTimeout(TUTSW);clearTimeout(TUTSC);clearTimeout(TUTSW2);clearTimeout(TUTGL);clearTimeout(TUTWT);cancelAnimationFrame(TUTPAN);
+  document.getElementById('tutSkipWrap').classList.remove('on');
   document.getElementById('tutHole').classList.remove('sweep');
   document.getElementById('tutHole').classList.remove('glide');
   // Taking the .on class off makes these invisible, not absent. opacity:0 is still a painted,
@@ -11270,7 +11289,14 @@ function tutGo(i){
   document.getElementById('tutB').innerHTML=c.b;
   document.getElementById('tutNudge').classList.remove('on');
   var nx=document.getElementById('tutNext'),wt=document.getElementById('tutWait');
-  if(st.when&&!tutRev()){nx.style.display='none';wt.style.display='';wt.textContent=st.w||'Waiting for you';}
+  clearTimeout(TUTWT);
+  if(st.when&&!tutRev()){
+    nx.style.display='none';wt.style.display='none';wt.textContent=st.w||'Waiting for you';
+    // The waiting pill used to appear the instant the step did - announcing a wait before
+    // anyone had a chance to act. It holds off for five quiet seconds now, then fades in
+    // and points. Anyone moving at their own pace never sees it.
+    TUTWT=setTimeout(function(){if(TUTON&&TUT_STEPS[TUTI]===st)wt.style.display='';},5000);
+  }
   else{nx.style.display='';wt.style.display='none';nx.textContent=tutLast()?'DONE':'NEXT';}
   document.getElementById('tutBack').style.display=i>0?'':'none';
   document.getElementById('tutSfx').style.display=st.sample?'':'none';
@@ -11493,7 +11519,24 @@ function tutTick(){
 function tutFrame(){
   if(!TUTON)return;
   tutPlace();
+  tutSkipPlace();
   TUTRAF=requestAnimationFrame(tutFrame);
+}
+// End tour lives outside the card, just under it, and follows it frame by frame - same
+// cadence as the card itself, cached so an unmoved frame writes nothing. When the card is
+// pinned near the bottom there is no room underneath, so it steps above instead.
+function tutSkipPlace(){
+  var card=document.getElementById('tutCard'),sk=document.getElementById('tutSkipWrap');
+  if(!sk)return;
+  if(!TUTON||!card.classList.contains('on')){sk.classList.remove('on');return;}
+  sk.classList.add('on');
+  var si=safeIns(),vh=window.innerHeight-si.b,cr=card.getBoundingClientRect();
+  var y=cr.bottom+9;
+  if(y+34>vh)y=Math.max(12+si.t,cr.top-34);
+  y=y|0;
+  if(sk._t!==y){sk._t=y;sk.style.top=y+'px';}
+  var op=card.style.opacity==='0'?'0':'';
+  if(sk.style.opacity!==op)sk.style.opacity=op;
 }
 function tutBox(el,box,p){
   var r=el.getBoundingClientRect();
