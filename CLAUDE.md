@@ -108,6 +108,13 @@ finish it" is correct English about a different thing.
 - `DB` — everything the user owns. `logs`, `active` (open sessions), `custom` (their workouts),
   `cex` (their exercises), `days` (weekday → workout ids), `extra` (the shelf), `exNotes`, `walks`.
   Persisted through `Store` (artifact storage → localStorage → memory).
+- **The day-to-day invariant (v4.156): a workout id stands on at most ONE day.** `dayMap()`
+  enforces it on every pass — a duplicate placement gets its day an independent copy via
+  `wkCopy` (name kept, effective targets baked into rows, that weekday's logs re-pointed).
+  Exempt: the built-in `rest` day, and whatever the builder holds open (creation fills the
+  workout first; the split runs when the builder closes). `DB.up` (applied level-ups) now
+  scopes to built-ins and swapped-in lifts only — custom rows carry their own targets, baked
+  once under the `DB.upScoped` flag, and `R()` skips the table for custom workouts.
 - `EX` — the exercise library. `cardio:1` marks cardio; `inv:1` marks assisted (less weight is
   better, and grading, readiness and level-up all invert on it); `bw:1` marks bodyweight.
 - `W` — workout definitions. `sections:[{title, ss, rows}]` where a row is `[exId,{sets,rest}]`.
@@ -135,10 +142,12 @@ writes through — `mkTouch()`, debounced 500ms. There is no "unsaved" state in 
 1. **One editor** (resolved, v4.146). Holding an exercise mid-session — or tapping ADD AN
    EXERCISE — opens the real builder on the real workout (`sessionEdit`); backing out returns
    to the session with the new shape live. The one question this creates is asked ONCE at
-   Finish (`finishGate`): "keep for coming weeks, or just today?" — just-today restores the
-   pre-edit snapshot after sealing, so the log keeps what actually happened. `mkFlush` exists
-   because leaving the builder must not race the 500ms autosave. `exEditOvl` survives ONLY
-   for built-in days (Pump Day), which have no custom copy to edit.
+   Finish (`finishGate`): ADD PERMANENTLY or JUST TODAY (phrasing settled Aug 22 — the
+   "permanently" family everywhere, "from now on"/"every week" retired) — just-today restores
+   the pre-edit snapshot after sealing, so the log keeps what actually happened. Since v4.156
+   "permanently" scopes to that one day. `mkFlush` exists because leaving the builder must
+   not race the 500ms autosave. `exEditOvl` survives ONLY for built-in days (Pump Day),
+   which have no custom copy to edit.
 2. **Analysis features.** v1 shipped in v4.136 (per-exercise est 1RM, volume, line charts).
    v2 shipped in v4.146: "THE LAST 8 WEEKS" atop the Progress sheet — weekly weight-moved
    bars (gold = biggest week) plus plain this-week-vs-last rows for sessions, sets, and

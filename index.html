@@ -866,7 +866,7 @@ body.tut .bg-rules,body.tut .bg-rules > i,body.tut .bg-wm svg{animation-play-sta
 .sheet textarea{width:100%;min-height:230px;background:var(--bg);border:1px solid var(--line);border-radius:11px;color:var(--txt2);font-family:var(--mono);font-size:12px;padding:13px;line-height:1.65;resize:vertical;}
 .sheet-btns{display:flex;gap:8px;margin-top:16px;}
 /* Centred both ways. The row stretches every button to match the tallest, so as soon as one of
-   them wrapped to two lines - JUST TODAY, EVERY WEEK - the single-line CANCEL beside it kept its
+   them wrapped to two lines - JUST TODAY, ADD PERMANENTLY - the single-line CANCEL beside it kept its
    text up at the top of a box that had grown underneath it. */
 .sheet-btns .btn{flex:1;text-align:center;padding:13px;display:flex;align-items:center;justify-content:center;}
 .swaplist{max-height:calc(var(--usablevh) * .58);overflow-y:auto;}
@@ -1037,8 +1037,6 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-head{display:flex;align-items:center;gap:9px;padding:0 0 4px;margin-bottom:14px;
   border-bottom:1px solid var(--line);}
 .mk-head-n{font-size:16px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.mk-head-k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--txt3);border:1px solid var(--line);border-radius:5px;padding:2px 6px;flex-shrink:0;}
 .mk-head-b{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
   color:var(--txt3);background:transparent;border:1px solid var(--line);border-radius:7px;
   padding:6px 9px;cursor:pointer;transition:.14s;}
@@ -2726,16 +2724,16 @@ body.wcon{overflow:hidden;}
     <div class="exed-sub" id="exEdSub"></div>
     <div class="mk-acts" id="exEdGrp" style="margin-top:14px"></div>
     <!-- The question the two buttons answer, finally stated - two answers with no question
-         read as a guess. "EVERY WEEK" also read as scheduling ("add this to every week?")
-         rather than persistence; FROM NOW ON says persistence in time-language nobody
-         misreads. And the accent moved to the SAFE answer: the highlighted button was
-         nudging people toward mutating their routine, when the routine's protection is
-         the entire reason the today-only path exists. -->
+         read as a guess. PERMANENTLY-language (Aug 22): "EVERY WEEK" read as scheduling and
+         "FROM NOW ON" as a vow about time; SAVE PERMANENTLY says the thing that actually
+         happens, and JUST TODAY is its exact opposite. The accent stays on the SAFE answer:
+         the highlighted button was nudging people toward mutating their routine, when the
+         routine's protection is the entire reason the today-only path exists. -->
     <div class="exed-q">Keep this change?</div>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('exEditOvl')">CANCEL</div>
-      <div class="btn btn-go" onclick="exEdSave(false)">ONLY TODAY</div>
-      <div class="btn" onclick="exEdSave(true)">FROM NOW ON</div>
+      <div class="btn btn-go" onclick="exEdSave(false)">JUST TODAY</div>
+      <div class="btn" onclick="exEdSave(true)">SAVE PERMANENTLY</div>
     </div>
   </div>
 </div>
@@ -3300,9 +3298,13 @@ function R(ref,wk){
   // must not. Reported from a live session; the flag was in the library the entire time.
   var out = {name:e.name,note:e.note,sets:e.sets,rest:e.rest,bw:e.bw};
   if(ov){ for(var k in ov){ out[k]=ov[k]; } }
-  // a levelled target outranks the day's own override - it is the newer decision
+  // a levelled target outranks the day's own override - it is the newer decision.
+  // Custom workouts stopped listening (v4.156, the day-to-day model): their rows carry
+  // their own numbers, so a raise on one day's copy can never bleed into another day's.
+  // Built-ins and swapped-in lifts still read the global table - they have no row of
+  // their own to write a raise into.
   var up=(typeof DB!=='undefined'&&DB.up)?DB.up[id]:null;
-  if(up)out.sets=up;
+  if(up&&!(wk&&DB.custom&&DB.custom[wk]))out.sets=up;
   // a change made on the day itself is newer than either, so it lands last
   if(wk){
     var es=edGet(wk,id,'sets');if(es)out.sets=es;
@@ -3685,7 +3687,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.155';
+var APPV='v4.156';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4227,7 +4229,23 @@ function applyLevel(){
   LVLT=setTimeout(function(){
     LVLT=null;
     DB.up=DB.up||{};DB.upSkip=DB.upSkip||{};
-    plan.forEach(function(p){DB.up[p.id]=p.to.join('\n');delete DB.upSkip[p.id];});
+    // The raise lands in THIS workout's own rows - one day's copy, nobody else's. Only a
+    // lift with no row to carry it (swapped in, or standing on a built-in day) falls back
+    // to the global table, which is exactly the scope those two already live at.
+    plan.forEach(function(p){
+      var wrote=false,cw=DB.custom[LVLWK];
+      if(cw)(cw.sections||[]).forEach(function(sec){
+        (sec.rows||[]).forEach(function(row,ri){
+          var base=typeof row==='string'?row:row[0];
+          if(base!==p.id)return;
+          if(typeof row==='string')sec.rows[ri]=[base,{sets:p.to.join('\n')}];
+          else{row[1]=row[1]||{};row[1].sets=p.to.join('\n');}
+          wrote=true;
+        });
+      });
+      if(!wrote)DB.up[p.id]=p.to.join('\n');
+      delete DB.upSkip[p.id];
+    });
     saveDB();closeOvl('lvlOvl');renderHome();
     if(sessionOpen())renderSession();
   },(last+1.05)*1000);
@@ -4297,6 +4315,53 @@ function dayKeyOf(id){
   for(k in m)if((m[k]||[]).indexOf(id)>-1)return k;
   return null;
 }
+// The day-to-day model's stamp (v4.156): an independent copy of a workout as it stands
+// right now - same name, its numbers baked into its own rows - so the day it lands on
+// owns it outright. Copies come out custom whatever went in: a built-in gets its library
+// targets, its levelled weights and any kept overlay written into real rows, because the
+// copy stops listening to all three the moment it exists. A live session's just-today
+// edits are deliberately NOT baked - a copy is the plan, not today's exception.
+function wkCopy(id){
+  var src=DB.custom&&DB.custom[id],w=W[id],copy;
+  if(src){
+    try{copy=JSON.parse(JSON.stringify(src));}catch(e){return null;}
+  }else if(w){
+    var t=(DB.dayEdit&&DB.dayEdit[id])||{};
+    copy={name:w.name,custom:1,kind:w.kind||'lift',tag:'Yours',time:w.time||'',
+          color:w.color||'#e0b667',sections:[]};
+    (w.sections||[]).forEach(function(sec){
+      var rows=[];
+      (sec.rows||[]).forEach(function(row){
+        var base=typeof row==='string'?row:row[0];
+        if(!EX[base]||(t.hide&&t.hide[base]))return;
+        var ov=typeof row==='string'?null:row[1],e=EX[base];
+        var sets=(ov&&ov.sets)||e.sets||'',rest=(ov&&ov.rest!=null)?ov.rest:(e.rest!=null?e.rest:'');
+        if(DB.up&&DB.up[base])sets=DB.up[base];
+        if(t.sets&&t.sets[base])sets=t.sets[base];
+        if(t.rest&&t.rest[base]!=null)rest=t.rest[base];
+        rows.push([base,{sets:sets,rest:rest}]);
+      });
+      if(rows.length)copy.sections.push({title:sec.title,ss:!!sec.ss,rows:rows});
+    });
+    ((t.add)||[]).forEach(function(base){
+      if(!EX[base]||(t.hide&&t.hide[base]))return;
+      var e=EX[base];
+      var sets=(t.sets&&t.sets[base])||(DB.up&&DB.up[base])||e.sets||'';
+      var rest=(t.rest&&t.rest[base]!=null)?t.rest[base]:(e.rest!=null?e.rest:'');
+      copy.sections.push({title:'Straight sets',ss:false,rows:[[base,{sets:sets,rest:rest}]]});
+    });
+  }else return null;
+  copy.custom=1;copy.made=Date.now();
+  copy.name=String(copy.name||'Workout').replace(/^Optional: /,'');
+  var nid;
+  do{nid='cus'+Date.now().toString(36)+Math.floor(Math.random()*4680).toString(36);}while(DB.custom[nid]);
+  DB.custom[nid]=copy;
+  // required/optional travels with the copy - it is part of what the day IS
+  var e0=wkDefault(id),vv=(DB.vOvr&&DB.vOvr[id]!=null)?DB.vOvr[id]:((e0&&e0.v)||'');
+  if(vv){DB.vOvr=DB.vOvr||{};DB.vOvr[nid]=vv;}
+  mergeCustom();
+  return nid;
+}
 // Migration runs once, from whichever earlier shape this device is holding.
 function dayMap(){
   if(!DB.days||!Object.keys(DB.days).length){
@@ -4312,6 +4377,59 @@ function dayMap(){
   DAYS.forEach(function(d){
     DB.days[d.k]=(DB.days[d.k]||[]).filter(function(id){return !!W[id];}).slice(0,DAY_MAX);
   });
+  // ---- the day-to-day model (v4.156) ----
+  // A workout stands on ONE day. The same id found on a second day gets that day its own
+  // copy on the spot, so no edit, removal or level-up can ever reach a day it was not
+  // made on. Running inside dayMap makes this one pass both the migration for old data
+  // and the guard behind every placement path there is.
+  // Exempt: the built-in rest day (identical wherever it stands, and its optional default
+  // is keyed to its built-in id), and whatever the builder is holding open - a workout
+  // created onto several days lands on them empty, fills up, and is split into copies by
+  // the first pass after the builder closes.
+  var changed=false;
+  // One-time: levelled targets used to live in one global per-exercise table (DB.up) that
+  // every workout read through - the last hidden link between days. Baked into every
+  // custom row once; custom workouts stop reading the table from then on (see R).
+  if(!DB.upScoped){
+    if(DB.up&&DB.custom)for(var ck in DB.custom){
+      (DB.custom[ck].sections||[]).forEach(function(sec){
+        (sec.rows||[]).forEach(function(row,ri){
+          var base=typeof row==='string'?row:row[0];
+          if(!DB.up[base])return;
+          if(typeof row==='string')sec.rows[ri]=[base,{sets:DB.up[base]}];
+          else{row[1]=row[1]||{};row[1].sets=DB.up[base];}
+        });
+      });
+    }
+    DB.upScoped=1;changed=true;
+  }
+  var seen={},mkHeld=null;
+  // an open session pins its id to the day it is running on, so the split never pulls a
+  // live session's workout out from under it
+  for(var ak in (DB.active||{})){
+    var Aa=DB.active[ak];
+    if(Aa&&Aa.wk&&(DB.days[Aa.wk]||[]).indexOf(ak)>=0)seen[ak]=Aa.wk;
+  }
+  try{
+    if(typeof MK!=='undefined'&&MK&&(MK.id||MK.open)&&document.getElementById('make').classList.contains('on'))mkHeld=MK.id||MK.open;
+  }catch(e){}
+  DAYS.forEach(function(d){
+    var arr=DB.days[d.k]||[];
+    for(var i=0;i<arr.length;i++){
+      var id=arr[i];
+      if(id==='rest'||id===mkHeld)continue;
+      if(!seen[id]){seen[id]=d.k;continue;}
+      if(seen[id]===d.k)continue;
+      var nid=wkCopy(id);
+      if(!nid)continue;
+      arr[i]=nid;
+      // this weekday's sessions follow the day they were done on, so a day already
+      // finished this week stays finished after the split
+      (DB.logs||[]).forEach(function(l){if(l.day===id&&l.wk===d.k)l.day=nid;});
+      changed=true;
+    }
+  });
+  if(changed){try{saveDB();}catch(e){}}
   return DB.days;
 }
 // Flattened in weekday order - for anything that just wants "the week's workouts, in order".
@@ -5914,12 +6032,12 @@ function mkActions(id,dk){
   document.getElementById('mkActTtl').textContent=nm;
   document.getElementById('mkActSub').textContent='';
   // Three buttons, never more (decided Aug 22 after the sheet briefly grew to five). One
-  // removal action, scoped to what was actually held: a workout on several days comes off
-  // JUST the held day; on its last day it comes off the week to the shelf. DELETE stays the
-  // only destroyer, and its dialog still names every day it takes. The rarer moves - fully
-  // shelving a multi-day workout, or forking a day into its own copy - go through holds per
-  // day and Duplicate in Workout Settings, rather than renting a button here.
-  var off=held&&onDays.length>1
+  // removal action, aimed at the day that was held. Under the day-to-day model (v4.156) a
+  // workout stands on one day, so coming off it is coming off the week - to the shelf,
+  // where there is always a card and a way back. The built-in rest day is the one thing
+  // still allowed to stand on several days, and the same button takes it off just the
+  // held one. DELETE stays the only destroyer.
+  var off=held
     ?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">TAKE IT OFF '+held.n.toUpperCase()+'</div>'
     :(onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">TAKE IT OFF THE WEEK</div>':'');
   document.getElementById('mkActBody').innerHTML=
@@ -6000,12 +6118,9 @@ function mkDelete(id){
   if(openHere(id)){mkNote('There is an open session on this day. Finish it first.');return;}
   var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'this day';
   closeOvl('mkActOvl');
-  // Deleting a workout that stands on several days takes every placement with it - which is
-  // exactly the surprise worth naming before it happens, next to the gentler way out.
-  var on=DAYS.filter(function(d){return (DB.days[d.k]||[]).indexOf(id)>=0;}).map(function(d){return d.n;});
-  var msg=on.length>1
-    ? nm+' stands on '+on.join(', ')+' — deleting removes it from every one of them. To clear a single day, hold its card and take it off that day instead. Sessions you already logged stay in your history.'
-    : 'Delete '+nm+'? Sessions you already logged stay in your history.';
+  // Day-to-day model: a workout stands on one day, so a delete can only ever take the day
+  // you are looking at. No other day needs naming - none is touched.
+  var msg='Delete '+nm+'? Sessions you already logged stay in your history.';
   ask(msg,
     function(){
       planDropSilent(id);                    // out of whichever day held it, and off the rack
@@ -6141,12 +6256,9 @@ function mkRender(){
   document.getElementById('mkSub').textContent=
     making?'New workout':(MK.rows.reduce(function(a,r){return a+(r.n||0);},0)+' sets');
   if(!shell){
-    // The old kind chip's seat now carries the one fact an editor of a shared workout needs
-    // in view the whole time: every day this workout stands on. Changes made here reach all
-    // of them - and the chip is what says so before anyone is surprised.
-    var onD=DAYS.filter(function(d){return (DB.days[d.k]||[]).indexOf(MK.open||MK.id)>=0;});
+    // No shared-days chip any more: under the day-to-day model (v4.156) an edit here can
+    // only ever touch the one day this workout stands on, so there is nothing to warn about.
     h+='<div class="mk-head"><span class="mk-head-n">'+(mkEsc(MK.name)||'Untitled workout')+'</span>'+
-       (onD.length>1?'<span class="mk-head-k" title="This workout stands on every one of these days — changes here reach them all">'+onD.map(function(d){return d.n.slice(0,3).toUpperCase();}).join(' · ')+'</span>':'')+
        '<button class="mk-head-b" onclick="mkShell(true)">WORKOUT SETTINGS</button></div>';
   }
   if(shell){
@@ -6960,9 +7072,12 @@ function mkCommit(stay){
   DB.custom[id]=mkBuild();
   mergeCustom();
   // Already on a day: leave it where it is rather than moving it for having been edited.
-  // Off everywhere first, then onto every chosen day - the same workout can now stand on
-  // Monday AND Friday. Days that filled while the sheet was open are skipped rather than
-  // overstuffed; if nothing lands anywhere, the shelf catches it.
+  // Off everywhere first, then onto every chosen day. Under the day-to-day model the id
+  // itself only ever KEEPS one of those placements: the first dayMap pass after the
+  // builder closes hands every extra day its own independent copy (see dayMap), so a
+  // workout created across four days becomes four workouts the moment the making is done.
+  // Days that filled while the sheet was open are skipped rather than overstuffed; if
+  // nothing lands anywhere, the shelf catches it.
   planDropSilent(id);dayMap();
   if(MK.slots&&MK.slots.length){
     MK.slots.forEach(function(k){
@@ -7058,9 +7173,9 @@ function finishGate(){
   var wk=CUR;
   if(SESSEDIT&&SESSEDIT.wk===wk&&!TUTON&&JSON.stringify(DB.custom[wk]||null)!==SESSEDIT.snap){
     var snap=SESSEDIT.snap;
-    ask('You reshaped this workout mid-session. Today ran the new shape either way — should the coming weeks keep it too?',
+    ask('You reshaped this workout mid-session. Today ran the new shape either way — should this day keep it for the weeks ahead? No other day is touched.',
       function(){SESSEDIT=null;finishNow();},
-      'Keep the changes?','FROM NOW ON',null,
+      'Keep the changes?','ADD PERMANENTLY',null,
       {label:'JUST TODAY',fn:function(){
         DB.custom[wk]=JSON.parse(snap);mergeCustom();saveDB();
         SESSEDIT=null;finishNow();
@@ -10218,7 +10333,7 @@ function exEdRemove(){
   var n=document.getElementById('exEdName').textContent;
   ask('It comes off this day. Nothing already in your history is touched.',
     function(){exEdWrite(true,function(t){t.hide=t.hide||{};t.hide[e.id]=1;});},
-    'Remove '+n+'?','EVERY WEEK',null,
+    'Remove '+n+'?','REMOVE PERMANENTLY',null,
     {label:'JUST TODAY',fn:function(){exEdWrite(false,function(t){t.hide=t.hide||{};t.hide[e.id]=1;});}});
 }
 // A block that stops being a superset must lose the superset's heading too, or a lone
@@ -10323,7 +10438,7 @@ function exAddList(){
 }
 function exAddPick(id){
   ask(EX[id].name+' goes to the foot of the day with its usual targets.',
-    function(){exAddWrite(id,true);},'Add it every week?','EVERY WEEK',null,
+    function(){exAddWrite(id,true);},'Add it permanently?','ADD PERMANENTLY',null,
     {label:'JUST TODAY',fn:function(){exAddWrite(id,false);}});
 }
 function exAddWrite(id,keep){
@@ -10843,7 +10958,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the ring. The grip, the arrows and the links do other things.'},
   {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
   {t:'How many sets',b:'Add or drop a set. The targets underneath follow.'},
-  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>EVERY WEEK means Tuesday carries it from now on</li></ul><p>Remove this exercise takes it off the day. It greys out once you have logged a set on it, so a change here never throws away work you have already done.</p>'},
+  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY means Tuesday carries it from now on</li></ul><p>Remove this exercise takes it off the day. It greys out once you have logged a set on it, so a change here never throws away work you have already done.</p>'},
   {t:'Your own notes',b:'Tap Add note on the bench.'},
   {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a cue that keeps your form honest. It stays on that exercise every time it comes round.'},
   {t:'Finish the day',b:'Tap Finish when the last set is in.'},

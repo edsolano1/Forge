@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v4.155** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v4.156** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -19,8 +19,8 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 | Week board | Seven days, up to 3 workouts each; per-day completion; quenched (finished) styling |
 | Sessions | Write-through logging, grading, PR flare, rest timers, molten-bar notification (Android) |
 | Builder | The one editor for everything — per-set targets, supersets, per-row lift/cardio measures |
-| Mid-session edits | Hold an exercise → the real builder opens → one question at Finish: *from now on, or just today?* |
-| Level-ups | Per-workout targets, per-lift history; machine lattice learning; kg-native plate steps |
+| Mid-session edits | Hold an exercise → the real builder opens → one question at Finish: *add permanently, or just today?* |
+| Level-ups | Per-day targets, per-lift history; machine lattice learning; kg-native plate steps |
 | Progress | 8-week volume bars, this-week-vs-last rows, per-exercise est-1RM charts |
 | Units | lb/kg toggle (Settings); storage stays pounds forever; zero-drift round-tripping |
 | Library | Neutral starting weights (nobody's personal log), full names, searchable swap sheet |
@@ -45,33 +45,33 @@ Smaller known trade-offs, accepted for now:
 
 ---
 
-## The shared-workout question, settled
+## The day-to-day model, settled
 
-This is the issue we went back and forth on, written down once so it stays settled.
+v4.156 replaced the shared-workout model with this one, and it is written down once so it stays settled.
 
 ### The model
 
-**A workout placed on several days is one workout, not several copies.** Put "Test Day" on Monday through Thursday and there is exactly one Test Day recipe; four days point at it. This is a deliberate choice, and it's what makes the good things work:
+**Every day owns its workouts outright.** Put "Test Day" on Monday through Thursday and four independent copies exist, one per day. Editing Tuesday touches Tuesday. Adding an exercise to Monday adds it to Monday. Nothing you do to one day can ever reach another — so there is no link to warn about, and all the warning chrome (the shared-days chip, the multi-day delete dialog) is gone.
 
-- **Level up once, not four times.** Beat every target Monday, accept 65 → 70, and Tuesday through Thursday already ask for 70. With detached copies you'd re-accept the same raise on every day, every week.
-- **Edit once.** Change a rest timer, swap in a superset, add an exercise — the whole week updates together instead of drifting apart by accident.
-- **History is per-lift, not per-day.** Your bench press is one bench press. The Last/Best chips, grading, and readiness all read one stream, wherever the lift was done. (A *different* workout containing the same exercise keeps its own targets entirely — verified: leveling one never touches the other's numbers.)
+What makes this safe is that the things worth sharing were never stored in the workout at all:
 
-### What made it feel wrong — and what fixed each part
+- **History is per-lift.** Your bench press is one bench press, wherever it was done. Last/Best chips, grading, readiness and the est-1RM charts all read one stream.
+- **Level-ups are a live scan, not a stored flag.** Every render asks "did the last log of this lift beat this day's targets?" — so each day's copy raises its own arrow off the shared history. Beat 65 on Monday and accept 70: Tuesday's copy still says 65, sees the log that beat it, and lights its own arrow. Raise Monday again midweek and any day still behind lights again. The scan never stops, which is the whole progression story.
+- **Applied raises land in the day's own rows** (v4.156). The old global per-exercise table (`DB.up`) was the last hidden link between days; it was baked into every custom row once (`upScoped`), and custom workouts no longer read it. Built-ins and swapped-in lifts still do — they have no rows of their own to carry a raise.
 
-| The pain | The fix | Since |
-|---|---|---|
-| Finishing Monday marked Thursday finished too | Completion is per **day**, not per workout | v4.142 |
-| Deleting from one day silently deleted the whole series | The removal button aims at the day you held (**TAKE IT OFF WEDNESDAY**); DELETE names every day it will clear before it acts | v4.153–155 |
-| Editing reached every day with no warning | A quiet **MON · TUE · WED · THU** chip sits by the name the whole time you edit a shared workout | v4.154 |
-| "I only meant this change for today" | Mid-session edits get one question at Finish: **FROM NOW ON** or **JUST TODAY** (just-today keeps what you did in history, then puts the plan back) | v4.146 |
-| "I want this day to be different, permanently" | **Duplicate** (Workout Settings) → place the copy → it becomes its own workout with its own targets and level-ups | always |
+### How it is enforced
+
+`dayMap()` holds the invariant: a workout id stands on at most **one** day. Any pass that finds the same id on a second day stamps that day an independent copy on the spot (`wkCopy` — same name, effective targets baked in, this week's sealed logs for that weekday re-pointed so finished days stay finished). That one pass is both the migration for old data and the guard behind every placement path — the builder can place a new workout onto four days, and the first pass after it closes deals out the copies.
+
+Two exemptions: the built-in rest day (identical wherever it stands, and its optional default is keyed to its built-in id), and whatever the builder currently holds open (so creation can fill the workout before the split).
+
+### The words
+
+Mid-session edits still ask once at Finish — **ADD PERMANENTLY** or **JUST TODAY** — and "permanently" now scopes to the one day you were on. The built-in day editor says the same pair with the honest verb (SAVE PERMANENTLY, REMOVE PERMANENTLY). "From now on" and "every week" are retired: they read as time and scheduling, when what actually happens is persistence.
 
 ### The rule of thumb
 
-> **Same workout on many days = one thing, on purpose.**
-> Editing it changes every day it stands on — the chip tells you which.
-> Mid-session changes ask whether they outlive today.
-> A day that should become different isn't a modification — it's a new workout. Duplicate it.
-
-We tried the alternative (a fork button, a ladder of scoped options) and rolled it back the same day: three buttons on a hold, never more. Capability lives in the model; the menus stay small.
+> **A workout on a day belongs to that day.**
+> Want it on another day too? Place it there — that day gets its own copy.
+> Progress is shared because history belongs to the lift, not the day;
+> each day's copy earns and applies its own level-ups off that history.
