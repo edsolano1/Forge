@@ -2901,49 +2901,20 @@ body.wcon{overflow:hidden;}
      no carousel, no progress dots, nothing to dismiss. The gold rule and the framed mark are
      lifted straight off the launch, so the app the user just watched open is the app that is
      talking to them. -->
-<!-- The first run's two questions, on one calm sheet instead of a bare dialog (user note,
-     Aug 23): how to start, then whether to tour. The basic week is the starter that waited
-     behind the pinned wizard: push, pull and legs, with the numbers left for the owner. -->
-<div class="ovl" id="firstRun">
-  <div class="sheet" style="max-width:400px">
-    <div id="frMark" style="text-align:center;margin:2px 0 10px"></div>
-    <div id="fr1">
-      <h3>First time here</h3>
-      <p>How do you want to start?</p>
-      <div class="btn btn-go" onclick="frStart(true)">A BASIC WEEK</div>
-      <div class="footnote" style="margin:6px 2px 12px">Three workout days: push, pull and legs. The weights are yours to write in as you go.</div>
-      <div class="btn" onclick="frStart(false)">AN EMPTY WEEK</div>
-      <div class="footnote" style="margin:6px 2px 2px">Build your own from nothing.</div>
-    </div>
-    <div id="fr2" style="display:none">
-      <h3>Take the tour?</h3>
-      <p>A quick walk through the real screens, using sample data. Your own logs stay untouched.</p>
-      <div class="btn btn-go" onclick="frTour(1)">QUICK TOUR</div>
-      <div class="footnote" style="margin:6px 2px 12px">Seven short steps. A couple of minutes.</div>
-      <div class="btn" onclick="frTour(2)">FULL TOUR</div>
-      <div class="footnote" style="margin:6px 2px 12px">Everything, in sixteen steps.</div>
-      <div class="btn" onclick="frTour(0)">SKIP</div>
-      <div class="footnote" style="margin:6px 2px 2px">Head straight in. Both tours wait in Settings.</div>
-    </div>
-  </div>
-</div>
-
+<!-- The first run's two questions live in the welcome's own full screen (user note, Aug 23:
+     the sheet version read as an afterthought next to this). The mark, the rule and the big
+     title are the same arrival the launch just showed; the subtitle and the picks turn like
+     pages underneath them: how to start, then whether to tour. The basic week is the starter
+     that waited behind the pinned wizard: push, pull and legs, numbers left for the owner.
+     The picks are written by script (showFirstRun / frStart) so each question can replay the
+     rise; the wizard's old pair lives in offerStart's EZ branch, whole, for v5. -->
 <div id="welcome" aria-hidden="true">
   <div class="wc-in">
     <div class="wc-mark" id="wcMark"></div>
     <div class="wc-rule"></div>
     <h1 class="wc-t">Welcome to the Forge</h1>
-    <p class="wc-s">Where do you want to start?</p>
-    <div class="wc-picks">
-      <button class="wc-pick" onclick="wcPick(0)">
-        <b>I know what I'm building</b>
-        <small>Start with an empty week</small>
-      </button>
-      <button class="wc-pick" onclick="wcPick(1)">
-        <b>Build one for me</b>
-        <small>Answer three questions, get a week</small>
-      </button>
-    </div>
+    <p class="wc-s" id="wcS"></p>
+    <div class="wc-picks" id="wcPicks"></div>
   </div>
 </div>
 
@@ -3774,7 +3745,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.190';
+var APPV='v4.191';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11769,39 +11740,66 @@ function tutOffer(){
 // the pin is in, a first run lands directly on its empty week with the tour offer, and the
 // welcome + wizard code stays whole underneath, waiting.
 var EZ_ON=false;
+// The two questions, each a full page of the welcome screen. Swapping stages drops .on,
+// forces a reflow and puts it back, so the mark, rule, title and new picks all rise again:
+// the second question arrives the way the first did. Motion Off skips the rise (CSS).
+function wcStage(sub,picks){
+  var w=document.getElementById('welcome');
+  document.getElementById('wcS').textContent=sub;
+  document.getElementById('wcPicks').innerHTML=picks;
+  w.classList.remove('on');void w.offsetWidth;
+  w.setAttribute('aria-hidden','false');
+  w.classList.add('on');
+  document.body.classList.add('wcon');
+}
+function wcHide(){
+  var w=document.getElementById('welcome');
+  if(w){w.classList.remove('on');w.setAttribute('aria-hidden','true');}
+  document.body.classList.remove('wcon');
+}
 function showFirstRun(){
-  var m=document.getElementById('frMark');
-  if(m&&!m.innerHTML)m.innerHTML=logoSvg('fr-logo',56);
-  document.getElementById('fr1').style.display='';
-  document.getElementById('fr2').style.display='none';
-  document.getElementById('firstRun').classList.add('on');
+  // The same mark the launch just showed, from the same definition - the welcome is the
+  // second half of one arrival, not a different screen that happens to follow.
+  var m=document.getElementById('wcMark');
+  if(m)m.innerHTML=logoSvg('wc-logo',68);
+  wcStage('How do you want to start?',
+    '<button class="wc-pick" onclick="frStart(true)"><b>A basic week</b>'+
+    '<small>Push, pull and legs on three days. The weights are yours to write in.</small></button>'+
+    '<button class="wc-pick" onclick="frStart(false)"><b>An empty week</b>'+
+    '<small>Build your own from nothing.</small></button>');
 }
 function frStart(basic){
   if(basic){installStarter();renderHome();}
-  document.getElementById('fr1').style.display='none';
-  document.getElementById('fr2').style.display='';
+  wcStage('Take the tour?',
+    '<button class="wc-pick" onclick="frTour(1)"><b>Quick tour</b>'+
+    '<small>Seven short steps. A couple of minutes.</small></button>'+
+    '<button class="wc-pick" onclick="frTour(2)"><b>Full tour</b>'+
+    '<small>Everything, in sixteen steps.</small></button>'+
+    '<button class="wc-pick" onclick="frTour(0)"><b>Skip</b>'+
+    '<small>Head straight in. Both tours wait in Settings.</small></button>');
 }
 function frTour(kind){
   tutSeen();
-  closeOvl('firstRun');
+  wcHide();
   if(kind===1)tutStart(1);
   else if(kind===2)tutStart();
   else{renderHome();window.scrollTo(0,0);}
 }
 function offerStart(){
   STARTPEND=false;
-  // With the wizard pinned, a first run gets the calm two-question sheet: basic week or
+  // With the wizard pinned, a first run gets the welcome's two questions: basic week or
   // empty, then quick tour, full tour or skip.
   if(!EZ_ON){renderHome();window.scrollTo(0,0);setTimeout(showFirstRun,650);return;}
   var w=document.getElementById('welcome');
   if(!w){installStarter();renderHome();setTimeout(tutOffer,600);return;}   // never strand a first run
-  // The same mark the launch just showed, from the same definition - the welcome is the second
-  // half of one arrival, not a different screen that happens to follow.
   var m=document.getElementById('wcMark');
   if(m)m.innerHTML=logoSvg('wc-logo',68);
-  w.setAttribute('aria-hidden','false');
-  w.classList.add('on');
-  document.body.classList.add('wcon');
+  // The wizard's own pair, kept whole for v5: an empty week, or the forging ritual.
+  wcStage('Where do you want to start?',
+    '<button class="wc-pick" onclick="wcPick(0)"><b>I know what I\'m building</b>'+
+    '<small>Start with an empty week</small></button>'+
+    '<button class="wc-pick" onclick="wcPick(1)"><b>Build one for me</b>'+
+    '<small>Answer three questions, get a week</small></button>');
 }
 // 0 = their own week, 1 = one laid out for them. Both land on the same screen afterwards, and
 // both hand over to the tour offer - whichever they picked, this is still a first launch.
@@ -12090,7 +12088,7 @@ function sbEnd(){
   if(TUTON)tutEnd();                  // a tour inside the sandbox holds the sandbox DB; give it back first
   SANDBOX=false;
   document.body.classList.remove('sbx');
-  ['editOvl','exportOvl','askOvl','swapOvl','lvlOvl','exEditOvl','exNoteOvl','exAddOvl','settingsOvl','histOvl','progOvl','firstRun'].forEach(function(id){
+  ['editOvl','exportOvl','askOvl','swapOvl','lvlOvl','exEditOvl','exNoteOvl','exAddOvl','settingsOvl','histOvl','progOvl'].forEach(function(id){
     if(document.getElementById(id))closeOvl(id);
   });
   document.getElementById('session').classList.remove('on');
