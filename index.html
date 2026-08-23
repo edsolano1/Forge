@@ -2708,10 +2708,10 @@ body.wcon{overflow:hidden;}
     <textarea id="backupTxt" spellcheck="false"></textarea>
     <div class="sheet-btns">
       <div class="btn btn-go" onclick="copyEl('backupTxt','bkCopy')" id="bkCopy">COPY TEXT</div>
-      <div class="btn" onclick="doBackup()">EXPORT FILE</div>
+      <div class="btn" onclick="exportAsk()">EXPORT FILE</div>
     </div>
     <div class="sheet-btns" style="margin-top:8px">
-      <div class="btn" onclick="restoreBackup()">RESTORE</div>
+      <div class="btn" onclick="restoreAsk()">RESTORE</div>
       <div class="btn" onclick="closeOvl('backupOvl')">CLOSE</div>
     </div>
   </div>
@@ -3731,7 +3731,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.179';
+var APPV='v4.180';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7756,7 +7756,7 @@ function doRestore(input){
 }
 function exportAll(){
   if(!DB.logs.length){ask('Finish a session first.',null,'Nothing to export');return;}
-  var txt=APPNAME()+' \u2014 full history\n'+DB.logs.length+' sessions\n\n'+
+  var txt=APPNAME()+' \u00b7 full history\n'+DB.logs.length+' sessions\n\n'+
     DB.logs.slice().reverse().map(function(L){
       return buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{}});
     }).join('\n\n------------------------\n\n');
@@ -7790,11 +7790,31 @@ function openBackup(){
   document.getElementById('backupTxt').value=JSON.stringify(DB);
   document.getElementById('backupOvl').classList.add('on');
 }
+// Export is two different artifacts for two different jobs, and the chooser says which is
+// which (user question, Aug 23): the backup file is the machine-readable everything and the
+// ONLY thing restore can take back; plain text is for human eyes and cannot be restored.
+function exportAsk(){
+  ask('A backup file holds everything and can be restored. Plain text is easy to read anywhere, but cannot be restored.',
+    function(){doBackup();},
+    'Export which?','BACKUP FILE',null,
+    {label:'PLAIN TEXT',fn:function(){exportAll();}});
+}
+// Restore takes a saved backup file, or the text pasted into the box. Both are JSON; the
+// plain-text history has no structure to rebuild from and is refused with an explanation.
+function restoreAsk(){
+  ask('Restore from a saved backup file, or from text pasted into the box above?',
+    function(){pickRestore();},
+    'Restore from where?','PICK A FILE',null,
+    {label:'FROM THE BOX',fn:function(){restoreBackup();}});
+}
 function restoreBackup(){
   var raw=document.getElementById('backupTxt').value.trim();
   if(!raw){ask('Paste a backup into the box first.',null,'Nothing to restore');return;}
   var d;
-  try{d=JSON.parse(raw);}catch(e){ask('That text is not a valid backup. Paste the whole thing, starting with { and ending with }.',null,'Could not read backup');return;}
+  try{d=JSON.parse(raw);}catch(e){ask('That text is not a valid backup. Paste the whole thing, starting with { and ending with }. The plain-text history cannot be restored, only read.',null,'Could not read backup');return;}
+  // An exported backup FILE wraps the data in an envelope (db, settings, date). Pasting
+  // that file's text into the box used to be refused on the shape alone; unwrap it instead.
+  if(d&&d.db&&d.db.logs)d=d.db;
   if(!d||!d.logs){ask('That JSON does not look like a FORGE backup.',null,'Could not read backup');return;}
   ask('This replaces everything currently stored with the backup you pasted ('+d.logs.length+' sessions).',function(){
     DB=d;if(!DB.active)DB.active={};
