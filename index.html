@@ -3701,7 +3701,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.160';
+var APPV='v4.161';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5161,7 +5161,9 @@ function renderHome(){
   document.getElementById('weekCards').innerHTML=pumpOpen+DAYS.map(function(d){
     var h=dayBox(d,pnx,n0);n0+=(DB.days[d.k]||[]).length;return h;
   }).join('');
-  document.getElementById('mkNewBtn').innerHTML=PLUS+MKTXT().mk;
+  // Just the plus (user note, Aug 22): every day header already carries its own +, so the
+  // bar under the week says the same thing without words.
+  document.getElementById('mkNewBtn').innerHTML=PLUS;
   var xs=extraIds();
   // The bank used to hide itself when it was empty, which is exactly when it needed explaining -
   // there was no way to find out the place existed, so nothing ever went in it. It is a real
@@ -10901,7 +10903,11 @@ var TUT_ALL=[
   {sel:'#editOvl .edsheet',pad:10,ovl:'editOvl',hit:'#editOvl .edsheet|#w-dbbench-0',ping:'#editOvl .btn-go',
    reopen:true,w:'Waiting for 25 or more',nudge:'It has to reach 25 before DONE will take it.',
    when:function(){return !tutOn('editOvl')&&tutW()>=25;}},
-  {sel:'#sr-dbbench-0',hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0 .chk',once:true,
+  // The whole workout stays in view while a set is logged (user note, Aug 22): the spotlight
+  // used to cut down to the one row - "the two numbers" - and the day it belonged to went
+  // black. The opening now spans the session; the pulsing box on the ROW keeps the emphasis
+  // where the words point, and the sigil stays the only thing the fence lets through.
+  {sel:'#sBody',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',once:true,
    w:'Waiting for the sigil',nudge:'Tap the sigil at the end of the row.',
    when:function(){var e=document.getElementById('sr-dbbench-0');return !!(e&&e.classList.contains('done'));}},
   // The only step whose subject can leave on its own: the rest runs out, the pill hides itself
@@ -10953,7 +10959,9 @@ var TUT_ALL=[
    // Between the tap and the export sheet the day seals itself. Get out of the way.
    hide:function(){return !tutOn('exportOvl')&&!document.getElementById('session').classList.contains('on');},
    when:function(){return tutOn('exportOvl');}},
-  {sel:'#exportOvl .sheet',pad:10,ovl:'exportOvl',top:true,next:'CLOSE THE LOG',nudge:'Tap CLOSE THE LOG to carry on.',act:function(){closeOvl('exportOvl');}},
+  // No top:true here (user note, Aug 22): this is the one sheet that shows what YOU just did,
+  // so the results read first and the card takes the room underneath - instructions after.
+  {sel:'#exportOvl .sheet',pad:10,ovl:'exportOvl',next:'CLOSE THE LOG',nudge:'Tap CLOSE THE LOG to carry on.',act:function(){closeOvl('exportOvl');}},
   // Two steps, not one. What a completed day LOOKS like and what reopening the week DOES are
   // different facts, and the second only makes sense once you have seen the first.
   {sel:'#weekCards .card[data-base="t1"]',pad:6,sweep:true,
