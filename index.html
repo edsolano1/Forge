@@ -2704,15 +2704,23 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="backupOvl">
   <div class="sheet">
     <h3>Backup &amp; restore</h3>
-    <p>Your logs live on this device and nowhere else. Clearing the app or its data erases them. Copy this text somewhere safe, or export it as a file, and you can bring it back any time.</p>
-    <textarea id="backupTxt" spellcheck="false"></textarea>
+    <!-- The raw JSON no longer greets anyone (user note, Aug 23): a wall of machine text
+         read as daunting and as breakable, though editing it never touched stored data.
+         COPY TEXT builds the backup on demand; the paste box appears only when a restore
+         asks for it, empty and clearly an input. -->
+    <p>Your logs live on this device and nowhere else. Clearing the app or its data erases them. Keep a copy somewhere safe, and you can bring it back any time.</p>
     <div class="sheet-btns">
-      <div class="btn btn-go" onclick="copyEl('backupTxt','bkCopy')" id="bkCopy">COPY TEXT</div>
+      <div class="btn btn-go" id="bkCopy" onclick="copyBackupText()">COPY TEXT</div>
       <div class="btn" onclick="exportAsk()">EXPORT FILE</div>
     </div>
     <div class="sheet-btns" style="margin-top:8px">
       <div class="btn" onclick="restoreAsk()">RESTORE</div>
       <div class="btn" onclick="closeOvl('backupOvl')">CLOSE</div>
+    </div>
+    <div id="bkPaste" style="display:none">
+      <p style="margin-top:14px">Paste a backup below. Nothing changes until you tap RESTORE FROM TEXT, and it asks first.</p>
+      <textarea id="backupTxt" spellcheck="false" placeholder="Paste a backup here"></textarea>
+      <div class="sheet-btns"><div class="btn btn-go" onclick="restoreBackup()">RESTORE FROM TEXT</div></div>
     </div>
   </div>
 </div>
@@ -3731,7 +3739,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.181';
+var APPV='v4.182';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7679,59 +7687,57 @@ function clipCopy(txt){
   }catch(e){}
   if(navigator.clipboard){try{navigator.clipboard.writeText(txt).catch(function(){});}catch(e2){}}
 }
-// Returns 'file' when a real download was offered (browser), 'share' when the system share
-// sheet took it (app builds carrying Filesystem+Share), false when the text went to the
-// clipboard and the caller should say so.
-function saveTextFile(txt,name,type){
+// Nothing is written anywhere without being asked (user note, Aug 23): SAVE TO PHONE puts
+// the file in Documents, in a Forge folder, and says so; SEND opens the share sheet and
+// writes nothing outside the app. The earlier version quietly saved a copy on every
+// export, which is litter from the owner's point of view.
+function saveToPhone(txt,name,isText){
+  var C=window.Capacitor,native=false;
+  try{native=!!(C&&C.isNativePlatform&&C.isNativePlatform());}catch(e){}
+  // The BOM pins the text file to UTF-8. Without it a viewer guessing the encoding turned
+  // the multiplication signs into east-asian mojibake between the numbers, seen live in
+  // My Files on the device. The backup is machine-read and needs no hint.
+  var data=(isText?'﻿':'')+txt;
+  if(native&&C.Plugins&&C.Plugins.Filesystem){
+    C.Plugins.Filesystem.writeFile({path:'Forge/'+name,data:data,directory:'DOCUMENTS',encoding:'utf8',recursive:true})
+      .then(function(){mkNote('Saved to Documents, in the Forge folder, as '+name+'.','Saved');})
+      .catch(function(){
+        clipCopy(txt);
+        ask('Saving did not work here, so it was copied to your clipboard instead. Paste it into a note or a document to keep it.',null,'Copied instead');
+      });
+    return;
+  }
+  try{
+    var b=new Blob([data],{type:isText?'text/plain':'application/json'}),u=URL.createObjectURL(b);
+    var a=document.createElement('a');
+    a.href=u;a.download=name;
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u);},400);
+    return;
+  }catch(e){}
+  clipCopy(txt);
+  ask('Saving did not work here, so it was copied to your clipboard instead. Paste it into a note or a document to keep it.',null,'Copied instead');
+}
+function sendOut(txt,name,isText){
   var C=window.Capacitor,native=false;
   try{native=!!(C&&C.isNativePlatform&&C.isNativePlatform());}catch(e){}
   if(native&&C.Plugins&&C.Plugins.Filesystem&&C.Plugins.Share){
-    // Documents FIRST, share second (user note, Aug 23): the share sheet only lists apps,
-    // so "save to this phone" was never on offer - now every export lands in
-    // Documents/Forge before the sheet even opens, and cancelling the sheet loses nothing.
-    // Plain text is shared AS TEXT rather than as a file: Samsung Notes and Keep refused
-    // the file as corrupted, and both take shared text happily. The backup stays a real
-    // file (from the app cache, the share plugin's home turf), which is what Drive and
-    // email want. Only a share that never opened falls back to the clipboard.
-    var docP=C.Plugins.Filesystem.writeFile({path:'Forge/'+name,data:txt,directory:'DOCUMENTS',encoding:'utf8',recursive:true})
-      .then(function(){return true;}).catch(function(){return false;});
-    docP.then(function(saved){
-      return C.Plugins.Filesystem.writeFile({path:name,data:txt,directory:'CACHE',encoding:'utf8'})
-        .then(function(r){
-          var p=(type==='text/plain')
-            ?C.Plugins.Share.share({title:name,text:txt})
-            :C.Plugins.Share.share({title:name,url:r.uri});
-          return p.catch(function(e){if(!/cancel/i.test(String((e&&e.message)||e||'')))throw e;});
-        })
-        .then(function(){
-          if(saved)mkNote('Saved on this phone: Documents/Forge/'+name,'Saved');
-        });
-    }).catch(function(e){
+    // Plain text travels AS TEXT: notes apps refused the file version as corrupted and
+    // take shared text happily. The backup travels as a real file, which is what Drive
+    // and email want. Cancelling the sheet is a choice, not a failure.
+    var p=isText
+      ?C.Plugins.Share.share({title:name,text:txt})
+      :C.Plugins.Filesystem.writeFile({path:name,data:txt,directory:'CACHE',encoding:'utf8'})
+        .then(function(r){return C.Plugins.Share.share({title:name,url:r.uri});});
+    p.catch(function(e){
+      if(/cancel/i.test(String((e&&e.message)||e||'')))return;
       clipCopy(txt);
-      ask('Saving did not work here, so it was copied to your clipboard instead. Paste it into a note or a document to keep it.',null,'Copied instead');
+      ask('Sharing did not work here, so it was copied to your clipboard instead. Paste it into a note or a document to keep it.',null,'Copied instead');
     });
-    return 'share';
+    return;
   }
-  if(!native){
-    try{
-      var b=new Blob([txt],{type:type||'text/plain'}),u=URL.createObjectURL(b);
-      var a=document.createElement('a');
-      a.href=u;a.download=name;
-      document.body.appendChild(a);a.click();
-      setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u);},400);
-      return 'file';
-    }catch(e){}
-  }
-  // An app build from before the plugins, or a browser that refused the download.
-  clipCopy(txt);
-  return false;
-}
-function doBackup(){
-  var txt=backupBlob();
-  var r=saveTextFile(txt,backupName(),'application/json');
-  if(r==='file')mkNote('Backup saved: '+backupName());   // the share sheet announces itself
-  if(r)return;
-  ask('This app cannot save a file directly, so the backup was copied to your clipboard instead. Paste it into a note or a file and keep it safe.',null,'Copied instead');
+  // in a browser, a download is the send
+  saveToPhone(txt,name,isText);
 }
 function pickRestore(){var i=document.getElementById('restoreFile');if(i){i.value='';i.click();}}
 // Restoring REPLACES everything. It asks first, and says what it is about to overwrite, because
@@ -7767,14 +7773,11 @@ function doRestore(input){
   };
   rd.readAsText(f);
 }
-function exportAll(){
-  if(!DB.logs.length){ask('Finish a session first.',null,'Nothing to export');return;}
-  var txt=APPNAME()+' \u00b7 full history\n'+DB.logs.length+' sessions\n\n'+
+function historyText(){
+  return APPNAME()+' \u00b7 full history\n'+DB.logs.length+' sessions\n\n'+
     DB.logs.slice().reverse().map(function(L){
       return buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{}});
     }).join('\n\n------------------------\n\n');
-  if(saveTextFile(txt,APPNAME().toLowerCase()+'-history-'+today()+'.txt'))return;
-  ask('This app cannot save a file directly, so the whole history was copied to your clipboard instead. Paste it into a note or a document to keep it.',null,'Copied instead');
 }
 function copyExport(){copyEl('exportTxt','copyBtn');}
 function copyHist(){copyEl('histTxt','copyHistBtn');}
@@ -7800,25 +7803,55 @@ function copyEl(id,btn){
   var b=document.getElementById(btn),o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);
 }
 function openBackup(){
-  document.getElementById('backupTxt').value=JSON.stringify(DB);
+  // The paste box starts hidden and empty: it appears only when a restore asks for it, so
+  // the sheet never opens on a wall of machine text. Editing that box, when it does show,
+  // touches nothing stored; it is read once, at RESTORE FROM TEXT, behind a confirm.
+  var w=document.getElementById('bkPaste');if(w)w.style.display='none';
+  var t=document.getElementById('backupTxt');if(t)t.value='';
   document.getElementById('backupOvl').classList.add('on');
 }
 // Export is two different artifacts for two different jobs, and the chooser says which is
 // which (user question, Aug 23): the backup file is the machine-readable everything and the
 // ONLY thing restore can take back; plain text is for human eyes and cannot be restored.
 function exportAsk(){
-  ask('A backup file holds everything and can be restored. Plain text is easy to read anywhere, but cannot be restored. Either way, a copy is saved on this phone in Documents, and the share sheet opens for sending it further.',
-    function(){doBackup();},
+  ask('A backup file holds everything and can be restored. Plain text is easy to read anywhere, but cannot be restored.',
+    function(){exportDest('backup');},
     'Export which?','BACKUP FILE',null,
-    {label:'PLAIN TEXT',fn:function(){exportAll();}});
+    {label:'PLAIN TEXT',fn:function(){exportDest('text');}});
+}
+// The destination is a choice, never a side effect: nothing lands on the phone unless
+// SAVE TO PHONE was tapped, and SEND writes nothing outside the app.
+function exportDest(kind){
+  if(kind==='text'&&!DB.logs.length){ask('Finish a session first.',null,'Nothing to export');return;}
+  ask('Save it on this phone, in Documents under a Forge folder, or send it to another app?',
+    function(){exportGo(kind,'save');},
+    'Where should it go?','SAVE TO PHONE',null,
+    {label:'SEND',fn:function(){exportGo(kind,'send');}});
+}
+function exportGo(kind,dest){
+  var isText=kind==='text';
+  var txt=isText?historyText():backupBlob();
+  var name=isText?(APPNAME().toLowerCase()+'-history-'+today()+'.txt'):backupName();
+  if(dest==='save')saveToPhone(txt,name,isText);
+  else sendOut(txt,name,isText);
+}
+function copyBackupText(){
+  clipCopy(JSON.stringify(DB));
+  var b=document.getElementById('bkCopy');
+  if(b){var o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);}
 }
 // Restore takes a saved backup file, or the text pasted into the box. Both are JSON; the
 // plain-text history has no structure to rebuild from and is refused with an explanation.
 function restoreAsk(){
-  ask('Restore from a saved backup file, or from text pasted into the box above?',
+  ask('Restore from a saved backup file, or paste backup text in?',
     function(){pickRestore();},
     'Restore from where?','PICK A FILE',null,
-    {label:'FROM THE BOX',fn:function(){restoreBackup();}});
+    {label:'PASTE TEXT',fn:function(){
+      var w=document.getElementById('bkPaste');
+      if(w)w.style.display='';
+      var t=document.getElementById('backupTxt');
+      if(t)t.focus();
+    }});
 }
 function restoreBackup(){
   var raw=document.getElementById('backupTxt').value.trim();
