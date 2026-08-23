@@ -2586,7 +2586,6 @@ body.wcon{overflow:hidden;}
     <div class="mk-hint" id="extraHint" style="display:none">Not part of the week &mdash; open one whenever you want it</div>
     <div id="extraCards"></div>
   </div>
-  <div class="mk-new" id="mkNewBtn" onclick="openNewDay()"></div>
   <div class="sides" id="sides"></div>
   <div class="foot" id="foot"></div>
 </div>
@@ -3706,7 +3705,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.162';
+var APPV='v4.163';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5166,16 +5165,16 @@ function renderHome(){
   document.getElementById('weekCards').innerHTML=pumpOpen+DAYS.map(function(d){
     var h=dayBox(d,pnx,n0);n0+=(DB.days[d.k]||[]).length;return h;
   }).join('');
-  // Just the plus (user note, Aug 22): every day header already carries its own +, so the
-  // bar under the week says the same thing without words.
-  document.getElementById('mkNewBtn').innerHTML=PLUS;
+  // The wide new-workout bar is gone (Aug 22): every day carries its own + and so does
+  // Saved workouts, and two pluses stacked at the foot of the page read as a mistake.
+  // Multi-day placement lives on in Workout Settings, where the day grid still is.
   var xs=extraIds();
   // The bank used to hide itself when it was empty, which is exactly when it needed explaining -
   // there was no way to find out the place existed, so nothing ever went in it. It is a real
   // box now (v4.157), dashed against the week's solid days so it reads as storage, standing
   // whether or not it holds anything - and when it is empty the box itself says what it is for.
   document.getElementById('extraCards').innerHTML=(xs.length?xs.map(xcard).join('')
-    :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here — drag one down, or hold it and SAVE FOR LATER.</div>')+
+    :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here — drag one down, or hold it and choose MOVE TO SAVED WORKOUTS.</div>')+
     '<div class="bank-add" onclick="openNewSaved()" title="New saved workout">'+PLUS+'</div>';
   document.getElementById('extraLabel').textContent=MKTXT().xl;
   document.getElementById('extraLabel').style.display='';
@@ -5959,7 +5958,7 @@ function planDropSilent(id){
 function planDrop(id){
   planDropSilent(id);
   DB.extra=DB.extra||[];
-  if(DB.extra.length>=BANK_MAX){mkNote('The rack is full at '+BANK_MAX+'. Delete one first.');return false;}
+  if(DB.extra.length>=BANK_MAX){mkNote('Saved workouts is full at '+BANK_MAX+'. Delete one first.');return false;}
   DB.extra.push(id);
   return true;
 }
@@ -6061,18 +6060,19 @@ function mkActions(id,dk){
   var held=null;onDays.forEach(function(d){if(d.k===dk)held=d;});
   document.getElementById('mkActTtl').textContent=nm;
   document.getElementById('mkActSub').textContent='';
-  // Three buttons, never more (decided Aug 22 after the sheet briefly grew to five). One
-  // removal action, aimed at the day that was held. Under the day-to-day model (v4.156) a
-  // workout stands on one day, so coming off it is coming off the week - to the bank,
-  // where there is always a card and a way back. The button names the DESTINATION (SAVE
-  // FOR LATER, v4.157) because that is the reassuring half of the move. Built-ins have no
-  // bank card to land on (the rest day just comes off, Pump Day lives on its own button),
-  // so for them the honest label is still the removal. DELETE stays the only destroyer.
+  // Four buttons (Duplicate joined on request, Aug 22 - the three-button rule gave way to
+  // the move people actually reach for). One removal action, aimed at the day that was
+  // held; under the day-to-day model a workout stands on one day, so coming off it is
+  // coming off the week - and the button names the DESTINATION (MOVE TO SAVED WORKOUTS)
+  // because that is the reassuring half of the move. Built-ins have no saved card to land
+  // on (the rest day just comes off, Pump Day lives on its own button), so for them the
+  // honest label is still the removal. DELETE stays the only destroyer.
   var off=held
-    ?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">'+(mine?'SAVE FOR LATER':'TAKE IT OFF '+held.n.toUpperCase())+'</div>'
-    :(onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">'+(mine?'SAVE FOR LATER':'TAKE IT OFF THE WEEK')+'</div>':'');
+    ?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF '+held.n.toUpperCase())+'</div>'
+    :(onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF THE WEEK')+'</div>':'');
   document.getElementById('mkActBody').innerHTML=
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')">EDIT THIS WORKOUT</div>'+
+    '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     off+
     (mine?'<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDelete(\''+id+'\')">DELETE THIS WORKOUT</div>':'');
   openHeld('mkActOvl');
@@ -6095,6 +6095,7 @@ function mkActionsX(id){
   document.getElementById('mkActSub').textContent='';
   document.getElementById('mkActBody').innerHTML=
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(null,\''+id+'\')">EDIT THIS WORKOUT</div>'+
+    '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     '<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDeleteX(\''+id+'\')">DELETE THIS WORKOUT</div>';
   openHeld('mkActOvl');
 }
@@ -10631,7 +10632,7 @@ function cardEnd(){
     var here=(key&&key===d.from);
     if(bank){
       if((DB.extra||[]).length>=BANK_MAX&&(DB.extra||[]).indexOf(d.id)<0){
-        mkNote('The rack is full at '+BANK_MAX+'. Delete one first.');
+        mkNote('Saved workouts is full at '+BANK_MAX+'. Delete one first.');
       }else{
         planDropSilent(d.id);
         DB.extra=DB.extra||[];DB.extra.splice(Math.min(idx,DB.extra.length),0,d.id);
@@ -11024,7 +11025,7 @@ function tutW(){var e=document.getElementById('w-dbbench-0');return e?parseFloat
 var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   msg:'A quick walk through the real screens, using sample data. Your own logs stay untouched.',
   yes:'SHOW ME',steps:[
-  {t:'Your week',b:'Seven days, Sunday to Saturday. A day holds a workout, or stays empty — nothing is owed on an empty day.<ul><li>The + on a day starts a new workout right there</li><li>The + in Saved workouts starts one off the week</li><li>The wide + under everything can place one across several days</li></ul>'},
+  {t:'Your week',b:'Seven days, Sunday to Saturday. A day holds a workout, or stays empty — nothing is owed on an empty day. The + on any day starts a new workout right there.'},
   {t:'Open a day',b:'Tap Tuesday.'},
   {t:'The set grid',b:'Tap the weight on the first bench set. Every row here is one set: weight, reps, and a sigil to mark it.'},
   {t:'Set the number',b:'Raise it to 25 or more, then tap DONE.'},
