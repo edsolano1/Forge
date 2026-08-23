@@ -3742,7 +3742,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.186';
+var APPV='v4.187';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4712,7 +4712,8 @@ function unmarkDayDone(id){
 function weekAllDone(){
   var lw=loggedThisWeek(),any=false,ok=true;
   DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){
-    if(wkVar(id)==='rest')return;            // a rest day is not something you finish
+    if(wkVar(id))return;                     // rest is not something you finish, and an
+                                             // OPTIONAL day skipped is not a week left open
     any=true;
     if(!lwOn(lw,id,d.k))ok=false;            // every PLACEMENT must be done, not every workout
   });});
