@@ -3742,7 +3742,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.185';
+var APPV='v4.186';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7703,7 +7703,10 @@ function saveToPhone(txt,name,isText){
   var data=(isText?'﻿':'')+txt;
   if(native&&C.Plugins&&C.Plugins.Filesystem){
     C.Plugins.Filesystem.writeFile({path:'Forge/'+name,data:data,directory:'DOCUMENTS',encoding:'utf8',recursive:true})
-      .then(function(){mkNote('Saved to Documents, in the Forge folder, as '+name+'.','Saved');})
+      // Opening the folder for them is not reliably possible from here (no intent plugin
+      // in the wrapper, and Android has no universal open-this-folder call), so the note
+      // walks them there instead, in the words their phone uses.
+      .then(function(){mkNote('Saved as '+name+'. Find it in My Files, under Documents, in the Forge folder.','Saved');})
       .catch(function(){
         clipCopy(txt);
         ask('Saving did not work here, so it was copied to your clipboard instead. Paste it into a note or a document to keep it.',null,'Copied instead');
