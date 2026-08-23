@@ -3077,7 +3077,7 @@ body.wcon{overflow:hidden;}
     <textarea id="histTxt" readonly style="position:fixed;left:-9999px;top:0;width:10px;height:10px;opacity:0"></textarea>
     <div class="sheet-btns">
       <div class="btn btn-go" onclick="copyHist()" id="copyHistBtn">COPY ALL</div>
-      <div class="btn" onclick="exportAll()">EXPORT FILE</div>
+      <div class="btn" onclick="exportDest('text')">EXPORT FILE</div>
       <div class="btn" onclick="closeOvl('histOvl')">CLOSE</div>
     </div>
   </div>
@@ -3739,7 +3739,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.182';
+var APPV='v4.183';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
