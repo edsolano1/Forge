@@ -3716,7 +3716,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.168';
+var APPV='v4.169';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11567,8 +11567,7 @@ function tutCardHold(el,delta,ms){
   var si=safeIns(),ch=card.offsetHeight,vh=window.innerHeight-si.b;
   var r=el.getBoundingClientRect(),p=TUT_STEPS[TUTI].pad==null?8:TUT_STEPS[TUTI].pad;
   var top=r.top-delta,bottom=r.bottom-delta;
-  var below=bottom+p+14,above=top-p-14-ch;
-  tutTop(card,(below+ch<vh-12?below:(above>12+si.t?above:Math.max(12+si.t,vh-ch-14)))+'px');
+  tutTop(card,tutSeat(top-p,bottom+p,ch,si,vh)+'px');
   TUTFREEZE=performance.now()+ms;
 }
 // Back to the zero size the stylesheet starts them at. _k is the placement cache and has to go
@@ -11680,7 +11679,7 @@ function tutPlace(){
   if(pel&&pel.offsetHeight)tutBox(pel,ping,5);else ping.classList.remove('on');
   if(!el||!el.offsetHeight){
     hole.classList.remove('on');
-    if(performance.now()>=TUTFREEZE)tutTop(card,Math.max(14+si.t,(vh-ch)/2)+'px');
+    if(performance.now()>=TUTFREEZE)tutTop(card,tutSeat(null,0,ch,si,vh)+'px');
     tutStab(card,ch);
     return;
   }
@@ -11688,9 +11687,21 @@ function tutPlace(){
   var r=el.getBoundingClientRect(),p=st.pad==null?8:st.pad;
   if(st.top){tutTop(card,(14+si.t)+'px');tutStab(card,ch);return;}   // instructions first, then the thing itself
   if(performance.now()<TUTFREEZE){tutStab(card,ch);return;}          // parked for a pan - see tutCardHold
-  var below=r.bottom+p+14,above=r.top-p-14-ch;
-  tutTop(card,(below+ch<vh-12?below:(above>12+si.t?above:Math.max(12+si.t,vh-ch-14)))+'px');
+  tutTop(card,tutSeat(r.top-p,r.bottom+p,ch,si,vh)+'px');
   tutStab(card,ch);
+}
+// One dock, not a dance (Aug 23, watched on the device): the card used to live wherever
+// the hole left room - under it here, above it there, mid-screen next - so every step
+// change LOOKED like the window travelling even after all sliding was cured. It docks at
+// the FOOT of the screen now, every step; the scroll already carries each target to the
+// upper third, so the foot is almost always clear. A hole that itself owns the foot (the
+// unlock button) sends the card to the head instead - unless the hole owns both ends (the
+// whole-workout opening), where the foot dock stands and the small overlap is accepted.
+// Sheet steps keep the head seat they always had: one block, one seat.
+function tutSeat(hTop,hBottom,ch,si,vh){
+  var dock=Math.max(12+si.t,vh-ch-14),head=14+si.t;
+  if(hTop!=null&&hBottom>dock-6&&hTop>head+ch+10)return head;
+  return dock;
 }
 // scrollIntoView drags whatever ancestor it likes; walk to the real scroller instead.
 // A pan we time ourselves. behavior:'smooth' is whatever pace the browser feels like, which on
