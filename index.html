@@ -3718,7 +3718,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.164';
+var APPV='v4.165';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10935,7 +10935,10 @@ var TUT_ALL=[
   // taking the week in used to shake the card and tell you off before you had been given
   // anything to do. It is swallowed all the same - the next step is the one that opens a day.
   {sel:'#weekCards',pad:6,quiet:true,nudge:'Read this, then tap NEXT.'},
-  {sel:'#weekCards .card[data-base="t1"]',hit:'#weekCards .card[data-base="t1"]',sweep:true,once:true,
+  // The opening spans the whole DAY BOX, weekday label included - the copy says "on
+  // Tuesday", so Tuesday must be readable inside the light, not cut in half at its edge
+  // (audit, Aug 22). Only the card itself stays tappable.
+  {sel:'#weekCards .daybox[data-day="tue"]',hit:'#weekCards .card[data-base="t1"]',sweep:true,once:true,
    w:'Waiting for Push Day',nudge:'Not that one — Push Day is the card in the highlight.',
    when:function(){return document.getElementById('session').classList.contains('on');}},
   // The whole exercise is lit, not the one row. Lighting a single set row left the grid floating
@@ -11007,7 +11010,7 @@ var TUT_ALL=[
   {sel:'#exportOvl .sheet',pad:10,ovl:'exportOvl',next:'CLOSE THE LOG',nudge:'Tap CLOSE THE LOG to carry on.',act:function(){closeOvl('exportOvl');}},
   // Two steps, not one. What a completed day LOOKS like and what reopening the week DOES are
   // different facts, and the second only makes sense once you have seen the first.
-  {sel:'#weekCards .card[data-base="t1"]',pad:6,sweep:true,
+  {sel:'#weekCards .daybox[data-day="tue"]',pad:6,sweep:true,
    nudge:'Tap NEXT to carry on.'},
   // Ends here. Dragging a workout between days and the rack underneath were both steps once, and
   // both came out: a grip you drag is close enough to self-evident that spending two of sixteen
@@ -11523,16 +11526,34 @@ function tutFrame(){
   TUTRAF=requestAnimationFrame(tutFrame);
 }
 // End tour lives outside the card, just under it, and follows it frame by frame - same
-// cadence as the card itself, cached so an unmoved frame writes nothing. When the card is
-// pinned near the bottom there is no room underneath, so it steps above instead.
+// cadence as the card itself, cached so an unmoved frame writes nothing.
+// Its seat must clash with NOTHING: not the card, and not the spotlight opening - the
+// first version simply flipped above the card when the bottom was tight, and the audit
+// caught it sitting on the Dumbbell Fly heading, on a sheet's title, and squarely on the
+// FINISH button one step asked to be tapped. So the seat is chosen from a shortlist -
+// under the card, under the opening, top of the screen, foot of the screen - and the
+// first one that touches neither wins. Sheet steps (st.top) prefer the foot, because
+// their card owns the top and their sheet owns the middle.
 function tutSkipPlace(){
   var card=document.getElementById('tutCard'),sk=document.getElementById('tutSkipWrap');
   if(!sk)return;
   if(!TUTON||!card.classList.contains('on')){sk.classList.remove('on');return;}
   sk.classList.add('on');
+  var st=TUT_STEPS[TUTI]||{};
   var si=safeIns(),vh=window.innerHeight-si.b,cr=card.getBoundingClientRect();
-  var y=cr.bottom+9;
-  if(y+34>vh)y=Math.max(12+si.t,cr.top-34);
+  var hl=document.getElementById('tutHole');
+  var hr=hl.classList.contains('on')?hl.getBoundingClientRect():null;
+  function ok(t){
+    if(t<si.t+8||t+34>vh)return false;
+    if(t+34>cr.top&&t<cr.bottom)return false;
+    if(hr&&t+34>hr.top&&t<hr.bottom)return false;
+    return true;
+  }
+  var cands=st.top?[vh-42,12+si.t,cr.bottom+9]
+                  :[cr.bottom+9,(hr?hr.bottom+9:vh+99),12+si.t,vh-42];
+  var y=null;
+  for(var ci=0;ci<cands.length;ci++)if(ok(cands[ci])){y=cands[ci];break;}
+  if(y==null)y=st.top?vh-42:12+si.t;   // nothing clean on a crowded frame: least harmful seat
   y=y|0;
   if(sk._t!==y){sk._t=y;sk.style.top=y+'px';}
   var op=card.style.opacity==='0'?'0':'';

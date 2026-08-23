@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v4.164** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v4.165** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -52,7 +52,7 @@ Every word in the app should read as if one careful person wrote all of it. The 
 
 - **Plain words, person to person.** Talk to the user like a person, not a client. No coaching voice, no fitness jargon beyond exercise names, no marketing adjectives (powerful, seamless), no filler (simply, just, easily), no exclamation marks, no "Let's".
 - **Instruction first.** Say the action, then at most two things worth knowing. Anything more becomes a short list, and lists are rare on purpose.
-- **Name what is on the screen** ("Tap the sigil at the end of the row"), never the concept behind it.
+- **Name what is on the screen** ("Tap the anvil at the end of the row"), never the concept behind it.
 - **Calm about consequences.** Every destructive or surprising action states what survives it ("Sessions you already logged stay in your history"). Reassurance is a fact, not a feeling — "nothing is lost," never "don't worry!".
 - **The app's nouns are fixed:** workout, day, session, Saved workouts, locked in / unlock, level up, permanently / just today. New copy uses these, never synonyms ("the rack," "kept days" and "reopen" are retired from the generic voice).
 - **Buttons are short, verb-first, uppercase,** and they name the destination or the outcome, not the mechanism (MOVE TO SAVED WORKOUTS, ADD PERMANENTLY, UNLOCK).
