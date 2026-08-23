@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v4.158** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v4.159** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -33,10 +33,11 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 
 In order of when we plan to touch it:
 
-1. **Tutorial rewrite** — *parked until the very end, on purpose.* The tour's script must teach the app as it now is: per-day completion, superset rest pacing, the Units setting, the one-editor flow. Writing it earlier would have meant rewriting it after every change above.
+1. **Tutorial rewrite** — *parked until the very end, on purpose.* The tour's script must teach the app as it now is: per-day completion, superset rest pacing, the Units setting, the one-editor flow. Writing it earlier would have meant rewriting it after every change above. *(Started v4.159: the sample week itself was rebuilt light — three workouts instead of a filled board, one of them cardio, and the demo lift is now a dumbbell bench at 20 lb raised to 25, so the example excludes nobody. The script pass is still to come.)*
 2. **Remove the sandbox from Settings** — *the last step before shipping.* It's a development tool for replaying the first-run experience; real users don't need it.
 3. **First-run wizard, deeper pass** — *pinned until v5.* The "build one for me?" question and the three-question forging ritual are fully built and working, but deliberately switched off (`EZ_ON` flag). We want to invest real design time there rather than ship it as-is. Until then, a first run lands on an empty week with the tour offer.
 4. **v5: the other themes return** — Obsidian, Frost, and Moonwell are frozen but intact. Forge-only until then.
+5. **Per-exercise instruction, after v5** — every exercise gets a real in-app explanation of how to perform it safely, built from one template applied across the whole library: setup, the movement itself, what to avoid. Today an exercise carries a one-line cue and an Instructions link out to the web; the template replaces the outsourcing with teaching the app owns. Ambitious and deliberately parked — this is the first big project of the post-v5 era, and the template gets designed once, then applied everywhere.
 
 Smaller known trade-offs, accepted for now:
 

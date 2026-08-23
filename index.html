@@ -3701,7 +3701,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.158';
+var APPV='v4.159';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10804,26 +10804,47 @@ function tutRev(){return TUTI<TUTMAX;}
 function tutSeed(){
   function d(n){var x=new Date();x.setDate(x.getDate()-n);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
   function S(a){return a.map(function(p){return {w:p[0],r:p[1],unit:'',g:'match'};});}
+  // Three workouts, not a filled week (Aug 22). A board with something on all seven days read
+  // as "this is what the app expects of you"; two lifting days and a cardio day say the same
+  // things lighter. The numbers are deliberately modest for the same reason: the old sample
+  // benched 140 and asked you to make it 150, and anyone nowhere near that read the example
+  // as a standard they had already failed. Dumbbell bench at 20 going to 25 teaches the
+  // identical lesson and excludes nobody.
+  // Dumbbell bench tops out at 20x10 two weeks in, so taking it to 25 during the tour is a
+  // real record against real stored history - the grading demo is not faked.
+  // The sample days are customs seeded here (t1-t3); mergeCustom copies them into W while
+  // the tour DB is live, and tutEnd lifts them back out - see the cleanup there.
   return {
-    // Bench tops out at 140x8 three weeks in, so taking it to 145 during the tour is a
-    // real record against real stored history - the grading demo is not faked.
     logs:[
-      {day:'d1',date:d(24),entries:{bench:S([[130,8],[130,8],[130,7],[130,7]]),incdb:S([[50,12],[50,12],[50,11]]),mbench:S([[150,10],[130,15],[130,14]])},note:'',swaps:{}},
-      {day:'d2',date:d(22),entries:{latpd:S([[115,10],[115,10],[115,9]]),row:S([[100,12],[100,12],[100,11]]),preacher:S([[50,10],[50,10],[50,9]]),hammer:S([[30,12],[30,12],[30,12]])},note:'',swaps:{}},
-      {day:'d3',date:d(20),entries:{hack:S([[180,10],[180,10],[180,9]]),lpress:S([[270,12],[270,12],[270,11]]),hthrust:S([[185,12],[185,12],[185,10]])},note:'',swaps:{}},
-      {day:'d1',date:d(17),entries:{bench:S([[135,8],[135,8],[135,8],[135,7]]),incdb:S([[55,12],[55,11],[55,11]]),mbench:S([[150,10],[130,15],[130,15]])},note:'',swaps:{}},
-      {day:'d2',date:d(15),entries:{latpd:S([[120,10],[120,10],[120,10]]),row:S([[105,12],[105,12],[105,11]]),preacher:S([[50,12],[50,11],[50,10]])},note:'',swaps:{}},
-      {day:'d1',date:d(10),entries:{bench:S([[140,8],[140,8],[140,7],[140,7]]),incdb:S([[55,12],[55,12],[55,12]]),mbench:S([[150,11],[130,15],[130,15]])},note:'Felt strong off the chest.',swaps:{}}
+      {day:'t1',date:d(16),entries:{dbbench:S([[15,10],[15,10],[15,9]]),dbfly:S([[10,12],[10,12],[10,11]]),dblat:S([[8,12],[8,12],[8,12]]),rope:S([[15,12],[15,12],[15,11]])},note:'',swaps:{}},
+      {day:'t3',date:d(14),entries:{latpd:S([[35,10],[35,10],[35,9]]),machrow:S([[35,10],[35,10],[35,10]]),bbcurl:S([[15,10],[15,10],[15,9]])},note:'',swaps:{}},
+      {day:'t1',date:d(9),entries:{dbbench:S([[20,8],[20,8],[20,7]]),dbfly:S([[15,12],[15,11],[15,11]]),dblat:S([[10,12],[10,12],[10,11]]),rope:S([[20,12],[20,11],[20,11]])},note:'',swaps:{}},
+      {day:'t3',date:d(7),entries:{latpd:S([[40,10],[40,10],[40,9]]),machrow:S([[40,10],[40,10],[40,9]]),bbcurl:S([[20,10],[20,9],[20,9]])},note:'',swaps:{}},
+      {day:'t1',date:d(2),entries:{dbbench:S([[20,10],[20,10],[20,10]]),dbfly:S([[15,12],[15,12],[15,12]]),dblat:S([[10,12],[10,12],[10,12]]),rope:S([[20,12],[20,12],[20,12]])},note:'Best push day yet.',swaps:{}}
     ],
     // The week is stated outright. This used to carry only the old {slots:{}} shape and the week
     // appeared at all because dayMap's migration happened to rebuild it from WEEK - and that
     // migration exists to be deleted one day. When it goes, a seed carrying the old shape opens
     // the tour on an empty week with no Tuesday to tap and no way to notice until it happens.
-    // Sunday is left empty and the optional day put on the rack on purpose: between them they
-    // put both things the arranging steps talk about on screen before those steps arrive.
-    days:{sun:[],mon:['opt6'],tue:['d1'],wed:['d2'],thu:['rest'],fri:['d3'],sat:['d4']},
-    extra:['opt5'],
-    active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},dayEdit:{},vOvr:{},exNotes:{},walks:[],walkRun:null
+    days:{sun:[],mon:[],tue:['t1'],wed:[],thu:['t2'],fri:[],sat:['t3']},
+    extra:[],
+    custom:{
+      t1:{name:'Push Day',custom:1,tag:'Yours',color:'#c8794a',time:'~40 min',
+        sections:[{title:'Chest, shoulders and triceps',ss:false,rows:[
+          ['dbbench',{sets:'20x10\n20x10\n20x10',rest:'90 sec'}],
+          ['dbfly',{sets:'15x12\n15x12\n15x12',rest:'60 sec'}],
+          ['dblat',{sets:'10x12\n10x12\n10x12',rest:'60 sec'}],
+          ['rope',{sets:'20x12\n20x12\n20x12',rest:'60 sec'}]]}]},
+      t2:{name:'Cardio',custom:1,kind:'cardio',tag:'Yours',color:'#4fb8a0',time:'~30 min',
+        sections:[{title:'Straight sets',ss:false,rows:[
+          ['walk',{sets:'30 min',rest:''}]]}]},
+      t3:{name:'Pull Day',custom:1,tag:'Yours',color:'#5b8fb9',time:'~40 min',
+        sections:[{title:'Back and biceps',ss:false,rows:[
+          ['latpd',{sets:'40x10\n40x10\n40x10',rest:'90 sec'}],
+          ['machrow',{sets:'40x10\n40x10\n40x10',rest:'90 sec'}],
+          ['bbcurl',{sets:'20x10\n20x10\n20x10',rest:'60 sec'}]]}]}
+    },
+    active:{},slots:{},plan:[],cex:{},up:{},upSkip:{},dayEdit:{},vOvr:{},exNotes:{},walks:[],walkRun:null
   };
 }
 
@@ -10862,21 +10883,21 @@ var TUT_ALL=[
   // taking the week in used to shake the card and tell you off before you had been given
   // anything to do. It is swallowed all the same - the next step is the one that opens a day.
   {sel:'#weekCards',pad:6,quiet:true,nudge:'Read this, then tap NEXT.'},
-  {sel:'#weekCards .card[data-base="d1"]',hit:'#weekCards .card[data-base="d1"]',sweep:true,once:true,
+  {sel:'#weekCards .card[data-base="t1"]',hit:'#weekCards .card[data-base="t1"]',sweep:true,once:true,
    w:'Waiting for Tuesday',nudge:'Not that day. Tuesday is the card in the highlight.',
    when:function(){return document.getElementById('session').classList.contains('on');}},
   // The whole exercise is lit, not the one row. Lighting a single set row left the grid floating
   // with no sign of which exercise it belonged to; the ring on the weight still says exactly
   // where to tap.
-  {sel:'#exc-bench',pad:6,hit:'#w-bench-0',ping:'#w-bench-0',once:true,
+  {sel:'#exc-dbbench',pad:6,hit:'#w-dbbench-0',ping:'#w-dbbench-0',once:true,
    w:'Waiting for the weight',nudge:'Tap the weight in the highlight.',
    when:function(){return tutOn('editOvl');}},
-  {sel:'#editOvl .edsheet',pad:10,ovl:'editOvl',hit:'#editOvl .edsheet|#w-bench-0',ping:'#editOvl .btn-go',
-   reopen:true,w:'Waiting for 150 or more',nudge:'It has to reach 150 before DONE will take it.',
-   when:function(){return !tutOn('editOvl')&&tutW()>=150;}},
-  {sel:'#sr-bench-0',hit:'#sr-bench-0 .chk',ping:'#sr-bench-0 .chk',once:true,
+  {sel:'#editOvl .edsheet',pad:10,ovl:'editOvl',hit:'#editOvl .edsheet|#w-dbbench-0',ping:'#editOvl .btn-go',
+   reopen:true,w:'Waiting for 25 or more',nudge:'It has to reach 25 before DONE will take it.',
+   when:function(){return !tutOn('editOvl')&&tutW()>=25;}},
+  {sel:'#sr-dbbench-0',hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0 .chk',once:true,
    w:'Waiting for the sigil',nudge:'Tap the sigil at the end of the row.',
-   when:function(){var e=document.getElementById('sr-bench-0');return !!(e&&e.classList.contains('done'));}},
+   when:function(){var e=document.getElementById('sr-dbbench-0');return !!(e&&e.classList.contains('done'));}},
   // The only step whose subject can leave on its own: the rest runs out, the pill hides itself
   // four seconds later, and the card is left describing a timer that is no longer on screen.
   // Nothing rebuilds it, because a pill is not an overlay - hence keep rather than ovl.
@@ -10888,7 +10909,7 @@ var TUT_ALL=[
   // exercise being changed, so the ring is drawn around the exercise's details.
   // 'a' is in the block list to match bindExHold. Without it a tap on Instructions inside the
   // handed-over card opened an external page in the middle of the tour.
-  {sel:'#exc-bench',pad:6,hit:'#exc-bench',ping:'#exc-bench .ex-body',
+  {sel:'#exc-dbbench',pad:6,hit:'#exc-dbbench',ping:'#exc-dbbench .ex-body',
    block:'input,button,textarea,a,.chk,.hold,.ex-swap,.lvl,.exdrag',
    w:'Waiting for a long press',nudge:'Hold inside the ring. The grip, the arrows and the links are not part of it.',
    when:function(){return tutOn('exEditOvl');}},
@@ -10912,7 +10933,7 @@ var TUT_ALL=[
   // button inside it, so you can see where Add note actually sits.
   // Ringed and tappable. A ring around a button that does nothing when you press it teaches the
   // wrong thing about every other ring in the tour, so this one opens for real.
-  {sel:'#exc-bench',pad:6,hit:'#exc-bench .unote-btn',ping:'#exc-bench .unote-btn',once:true,
+  {sel:'#exc-dbbench',pad:6,hit:'#exc-dbbench .unote-btn',ping:'#exc-dbbench .unote-btn',once:true,
    w:'Waiting for Add note',nudge:'Tap Add note inside the ring.',
    when:function(){return tutOn('exNoteOvl');}},
   {sel:'#exNoteOvl .sheet',pad:10,ovl:'exNoteOvl',top:true,nudge:'Tap NEXT to carry on.',
@@ -10920,8 +10941,7 @@ var TUT_ALL=[
   // The grading step is gone. Three colours explained once during a tour is three colours nobody
   // remembers an hour later, so the key lives at the top of the day now, where it is there to be
   // glanced at on the tenth session as much as the first.
-  // pad 12, not 6. Reset this session sits at the very bottom of this block and the tighter
-  // padding cut the highlight across it rather than around it.
+  // pad 12, not 6 - kept from when RESET sat under Finish; the roomier highlight reads fine.
   {sel:'.finish-inline',pad:12,hit:'.finishbtn',ping:'.finishbtn',once:true,sweep:true,
    w:'Waiting for Finish',nudge:'Tap Finish in the highlight.',
    // Between the tap and the export sheet the day seals itself. Get out of the way.
@@ -10930,7 +10950,7 @@ var TUT_ALL=[
   {sel:'#exportOvl .sheet',pad:10,ovl:'exportOvl',top:true,next:'CLOSE THE LOG',nudge:'Tap CLOSE THE LOG to carry on.',act:function(){closeOvl('exportOvl');}},
   // Two steps, not one. What a completed day LOOKS like and what reopening the week DOES are
   // different facts, and the second only makes sense once you have seen the first.
-  {sel:'#weekCards .card[data-base="d1"]',pad:6,sweep:true,
+  {sel:'#weekCards .card[data-base="t1"]',pad:6,sweep:true,
    nudge:'Tap NEXT to carry on.'},
   // Ends here. Dragging a workout between days and the rack underneath were both steps once, and
   // both came out: a grip you drag is close enough to self-evident that spending two of sixteen
@@ -10938,7 +10958,7 @@ var TUT_ALL=[
   {sel:'#foot .unsealbtn',pad:6,sweep:true,last:true,nudge:'Tap DONE to close the tour.'}
 ];
 function tutOn(id){var e=document.getElementById(id);return !!(e&&e.classList.contains('on'));}
-function tutW(){var e=document.getElementById('w-bench-0');return e?parseFloat(e.value)||0:0;}
+function tutW(){var e=document.getElementById('w-dbbench-0');return e?parseFloat(e.value)||0:0;}
 
 // The tour kept its own private set of words, which is how it came to be saying "Forged" and
 // "the rack" while the app - running generic - said "Completed" and "Kept days" on the very
@@ -10963,7 +10983,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Your week',b:'Seven days, Sunday to Saturday. A day holds a workout, or stays empty — nothing is owed on an empty day.'},
   {t:'Open a day',b:'Tap Tuesday.'},
   {t:'The set grid',b:'Tap the weight on the first bench set. Every row here is one set: weight, reps, and a sigil to mark it.'},
-  {t:'Set the number',b:'Raise it to 150 or more, then tap DONE.'},
+  {t:'Set the number',b:'Raise it to 25 or more, then tap DONE.'},
   {t:'Log it',b:'Tap the sigil at the end of the row.'},
   {t:'The rest timer',b:'That set is saved, and the rest started on its own.<ul><li>−15 and +15 nudge it, SKIP cancels it</li><li>It keeps counting with the screen off</li><li>It sounds at zero, but stays silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it is in Settings under Alert volume.</p>'},
   {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the ring. The grip, the arrows and the links do other things.'},
@@ -10975,7 +10995,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Finish the day',b:'Tap Finish when the last set is in.'},
   {t:'The export',b:'What you just did, as tiles and as plain text underneath. Save it, send it on, or paste it into a chat. Closing it changes nothing.'},
   {t:'Locked in',b:'Tuesday is locked in. It stays that way until the week turns over, so you work through the others rather than repeating one.<p>Everything you logged is already in your history.</p>'},
-  {t:'Going round again',b:'This reopens every completed day at once, if you want another round before the week is out. Nothing is deleted either way.'}]};
+  {t:'Going round again',b:'This unlocks every locked day at once, if you want another round before the week is out. Nothing is deleted either way.'}]};
 function TUTC(){
   var t=curTheme();
   var C={
@@ -11125,6 +11145,10 @@ function tutStart(core){
   tutSeen();
   tutBuild(core);                  // core on first run, the whole thing from Settings
   TUTDB=DB;DB=tutSeed();TUTON=true;TUTMAX=0;
+  // The sample days are customs now (t1-t3), and W only learns customs through mergeCustom.
+  // Without this, dayMap's !!W[id] filter would strip the seeded week before first paint,
+  // and the tour would open on an empty board with no Tuesday to tap.
+  mergeCustom();
   document.body.classList.add('tut');
   if(CUR){document.getElementById('session').classList.remove('on');CUR=null;}
   stopTimer();stopHold();resetHoldState();
@@ -11158,6 +11182,9 @@ function tutEnd(){
   document.getElementById('session').classList.remove('on');
   CUR=null;stopTimer();stopHold();resetHoldState();
   DB=TUTDB;TUTDB=null;
+  // The tour's sample days were merged into W while its DB was live; the real DB does not
+  // know them, so they are lifted back out before the real customs merge in below.
+  ['t1','t2','t3'].forEach(function(k){delete W[k];});
   document.getElementById('tutCard').classList.remove('on');
   document.getElementById('tutHole').classList.remove('on');
   document.getElementById('tutPing').classList.remove('on');
@@ -11301,15 +11328,15 @@ var TUT_SCENE_ALL=[
   function(){tutHome();},
   function(){tutHome();},
   function(){tutDay();},
-  function(){tutDay();if(!tutOn('editOvl'))openEdit('bench',0,'w');},
+  function(){tutDay();if(!tutOn('editOvl'))openEdit('dbbench',0,'w');},
   function(){tutDay();},
   function(){tutDay();tutRest();},
   function(){tutDay();},
-  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('bench');},   // rest
-  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('bench');},   // sets
-  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('bench');},   // on the day or not
+  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('dbbench');},   // rest
+  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('dbbench');},   // sets
+  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('dbbench');},   // on the day or not
   function(){tutDay();},                                    // tap Add note - the day, sheets closed
-  function(){tutDay();if(!tutOn('exNoteOvl'))openExNote('bench');},   // the note sheet itself
+  function(){tutDay();if(!tutOn('exNoteOvl'))openExNote('dbbench');},   // the note sheet itself
   function(){tutDay();},                                    // Finish
   function(){tutWeek();document.getElementById('exportOvl').classList.add('on');},
   function(){tutWeek();},                                   // what a completed day looks like
@@ -11323,7 +11350,7 @@ function tutHome(){
 }
 function tutDay(){
   tutUnseal();
-  if(CUR!=='d1'||!document.getElementById('session').classList.contains('on'))openWNow('d1');
+  if(CUR!=='t1'||!document.getElementById('session').classList.contains('on'))openWNow('t1');
 }
 // The rest the tour describes is started by the sigil on step five and stopped for good once
 // the week comes back, so stepping back onto the step whose whole subject is the pill found it
@@ -11333,7 +11360,8 @@ function tutDay(){
 function tutRest(){
   var p=document.getElementById('timerPill');
   if(p&&p.classList.contains('on'))return;
-  startTimer(parseRest(EX.bench.rest),EX.bench.name);
+  // the seeded t1 row carries 90 sec, so the rebuilt pill runs the same clock the sigil starts
+  startTimer(parseRest('90 sec'),EX.dbbench.name);
 }
 // past the finish the week is what you look at, and the day stays sealed
 function tutWeek(){
@@ -11395,9 +11423,9 @@ function tutRebuild(){
 function tutTick(){
   if(!TUTON)return;
   var st=TUT_STEPS[TUTI];
-  // Leaving the number sheet under 150 would strand the step, so it comes straight back.
-  if(st.reopen&&!tutOn('editOvl')&&tutW()<150){
-    tutNudge();openEdit('bench',0,'w');
+  // Leaving the number sheet under 25 would strand the step, so it comes straight back.
+  if(st.reopen&&!tutOn('editOvl')&&tutW()<25){
+    tutNudge();openEdit('dbbench',0,'w');
     return;
   }
   // The condition is only allowed to fire once it has been seen false - see TUTARM in tutGo.
