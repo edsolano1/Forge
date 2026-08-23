@@ -349,6 +349,11 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
   border:1px dashed color-mix(in srgb,var(--go) 30%,var(--line));
   background:color-mix(in srgb,var(--go) 3%,transparent);min-height:16px;}
 .bank-empty{font-size:12px;color:var(--txt3);text-align:center;padding:13px 10px;line-height:1.55;margin-bottom:6px;}
+.bank-add{display:flex;align-items:center;justify-content:center;padding:9px;margin:2px 0 6px;
+  border:1px dashed color-mix(in srgb,var(--go) 34%,var(--line));border-radius:11px;color:var(--go);
+  cursor:pointer;transition:background .15s;}
+.bank-add:hover{background:color-mix(in srgb,var(--go) 8%,transparent);}
+.bank-add svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;}
 .blk.dragging{z-index:60;opacity:.94;transition:none;}
 .blk.dragging .exc{box-shadow:0 20px 44px -14px rgba(0,0,0,.65);}
 /* While a block is being dragged the whole list collapses to name rows: a three-deep
@@ -3701,7 +3706,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.161';
+var APPV='v4.162';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5169,8 +5174,9 @@ function renderHome(){
   // there was no way to find out the place existed, so nothing ever went in it. It is a real
   // box now (v4.157), dashed against the week's solid days so it reads as storage, standing
   // whether or not it holds anything - and when it is empty the box itself says what it is for.
-  document.getElementById('extraCards').innerHTML=xs.length?xs.map(xcard).join('')
-    :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here — drag one down, or hold it and SAVE FOR LATER.</div>';
+  document.getElementById('extraCards').innerHTML=(xs.length?xs.map(xcard).join('')
+    :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here — drag one down, or hold it and SAVE FOR LATER.</div>')+
+    '<div class="bank-add" onclick="openNewSaved()" title="New saved workout">'+PLUS+'</div>';
   document.getElementById('extraLabel').textContent=MKTXT().xl;
   document.getElementById('extraLabel').style.display='';
   document.getElementById('extraHint').style.display=xs.length?'':'none';
@@ -5912,7 +5918,19 @@ var PLUS='<svg viewBox="0 0 20 20"><path d="M10 4.5v11M4.5 10h11"/></svg>';
 // takes. Same model as holding a card - this just makes it findable.
 // Straight into the editor. There is no weekday left to pick on the way in, and the editor
 // already carries the only choice that remains: on the plan, or in the bank.
-function openNewDay(k){openMake(null,null,false,k);MK.shellOpen=true;mkRender();}
+function openNewDay(k){
+  if(k&&dayFull(k)){mkNote('That day is full. Move something off it first.');return;}
+  openMake(null,null,false,k);
+  // A day's own + fixes the destination; the wide bar passes no day and keeps the chooser.
+  MK.fixDay=k||null;MK.fixBank=0;
+  MK.shellOpen=true;mkRender();
+}
+// The + inside Saved workouts: same minimal making screen, destination the bank.
+function openNewSaved(){
+  openMake(null,null,false,null);
+  MK.fixDay=null;MK.fixBank=1;
+  MK.shellOpen=true;mkRender();
+}
 // Lands in the first day with room. Without a free day there is nowhere to put it, and saying so
 // beats silently dropping it back on the rack.
 function planAdd(id,k){
@@ -6321,6 +6339,17 @@ function mkRender(){
   // to place it at, and PLAN meant "first slot with room", which is the app choosing the day for
   // you and then not telling you which. Seven days and a shelf: eight tiles, two even rows of
   // four in the grid this already uses.
+  // A + tapped on a specific day (or in Saved workouts) already answered the placement
+  // question, so the making screen asks only for a name and says where it is going (user
+  // note, Aug 22). Only the wide bar under the week - no day chosen - opens the full grid,
+  // and editing an existing workout always shows it.
+  if(making&&(MK.fixDay||MK.fixBank)){
+    h+='<div class="mk-lbl">Where it lives</div>'+
+       '<div style="font-size:12px;color:var(--txt3);line-height:1.55;margin:-4px 0 4px">'+
+       (MK.fixDay
+         ?'It goes on '+daysName(MK.fixDay)+'. Move it any time by dragging, or here in Workout Settings.'
+         :'It goes to Saved workouts — place it on a day whenever you want it.')+'</div>';
+  }else{
   h+='<div class="mk-lbl">Where it lives</div><div class="mk-slots" style="--mkc:'+MK.color+'">';
   DAYS.forEach(function(d){
     var on=MK.slots.indexOf(d.k)>=0;
@@ -6331,6 +6360,7 @@ function mkRender(){
   });
   h+='<div class="mk-slot'+(MK.slots.length?'':' sel')+'" onclick="MK.slots=[];mkRender()"><b>SAVED</b><small>'+T.xl+'</small></div>';
   h+='</div>';
+  }
   }
   // The colour picker is gone. Choosing one is a decision with no wrong answer, which is the
   // worst kind to put in front of somebody who came here to write down a workout - and it was
@@ -10994,7 +11024,7 @@ function tutW(){var e=document.getElementById('w-dbbench-0');return e?parseFloat
 var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   msg:'A quick walk through the real screens, using sample data. Your own logs stay untouched.',
   yes:'SHOW ME',steps:[
-  {t:'Your week',b:'Seven days, Sunday to Saturday. A day holds a workout, or stays empty — nothing is owed on an empty day.'},
+  {t:'Your week',b:'Seven days, Sunday to Saturday. A day holds a workout, or stays empty — nothing is owed on an empty day.<ul><li>The + on a day starts a new workout right there</li><li>The + in Saved workouts starts one off the week</li><li>The wide + under everything can place one across several days</li></ul>'},
   {t:'Open a day',b:'Tap Tuesday.'},
   {t:'The set grid',b:'Tap the weight on the first bench set. Every row here is one set: weight, reps, and a sigil to mark it.'},
   {t:'Set the number',b:'Raise it to 25 or more, then tap DONE.'},
