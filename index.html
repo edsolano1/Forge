@@ -3723,7 +3723,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.175';
+var APPV='v4.176';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4601,8 +4601,12 @@ function loggedThisWeek(){
   var ws=weekStartTs(),done={};
   DB.logs.forEach(function(l){
     if(l.unsealed)return;
-    if(!l.sealed)return; // only Finish & export seals a day; auto-closed sessions just keep their sets
-    var t=new Date(l.date).getTime();
+    if(!l.sealed)return; // only finishing seals a day; auto-closed sessions just keep their sets
+    // T12:00:00 parses LOCAL noon. A bare ISO date parses as UTC midnight, which in any
+    // American timezone is the previous local evening - so a session finished on SUNDAY,
+    // the week's first day, fell into last week and its day never showed LOCKED IN.
+    // Caught live on the device, on a Sunday, after every Saturday test had passed.
+    var t=new Date(l.date+'T12:00:00').getTime();
     if(!isNaN(t)&&t>=ws)(done[l.day]=done[l.day]||{})[l.wk||'*']=1;
   });
   return done;
@@ -4662,7 +4666,7 @@ function unmarkDayDone(id){
   for(var i=DB.logs.length-1;i>=0;i--){
     var l=DB.logs[i];
     if(l.day!==id||l.unsealed||!l.sealed)continue;
-    var t=new Date(l.date).getTime();
+    var t=new Date(l.date+'T12:00:00').getTime();   // local noon: see loggedThisWeek
     if(isNaN(t)||t<ws)continue;
     if(l.marked)DB.logs.splice(i,1); else l.unsealed=1;
     touched=true;
@@ -7877,7 +7881,7 @@ function weekBuckets(n){
   for(i=n-1;i>=0;i--)out.push({t0:ws-i*wk,vol:0,sets:0,sess:0});
   DB.logs.forEach(function(l){
     if(!l.entries)return;
-    var t=new Date(l.date).getTime();if(isNaN(t))return;
+    var t=new Date(l.date+'T12:00:00').getTime();if(isNaN(t))return;   // local noon: see loggedThisWeek
     for(i=0;i<out.length;i++){
       var b=out[i];
       if(t<b.t0||t>=b.t0+wk)continue;
