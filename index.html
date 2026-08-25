@@ -2096,8 +2096,10 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hrow-a{color:var(--txt3);font-size:15px;flex-shrink:0;}
 /* A walk in the history list: the same card as a session, told apart quietly - gold date
    line, a dashed edge, and no chevron because there is no deeper page behind it. */
-.hrow.hwalk{--hc:var(--gold);border-style:dashed;cursor:default;}
-.hrow.hwalk:hover{background:var(--surface);}
+.hrow.hwalk{--hc:var(--gold);border-style:dashed;}
+.hrow.hadd{justify-content:center;padding:10px 13px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.12em;color:var(--txt3);margin-bottom:8px;}
+.hrow.hadd:hover{color:var(--gold);}
 .hcal-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
 .hcal-t{font-family:'Marcellus',serif;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt);}
 .hnav{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--txt2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;}
@@ -3094,6 +3096,21 @@ body.wcon{overflow:hidden;}
   </div>
 </div>
 
+<!-- A walk written in by hand, for the ones the phone never recorded. Stacks over the
+     history sheet, which is where its button lives. -->
+<div class="ovl" id="walkAddOvl" style="z-index:300">
+  <div class="sheet" style="max-width:400px">
+    <h3>Add a walk</h3>
+    <p>For a walk the phone did not record. Steps are optional.</p>
+    <input class="mk-in" id="waDate" type="date">
+    <input class="mk-in" id="waMin" type="number" inputmode="numeric" placeholder="Minutes" style="margin-top:9px">
+    <input class="mk-in" id="waSteps" type="number" inputmode="numeric" placeholder="Steps (optional)" style="margin-top:9px">
+    <div class="sheet-btns">
+      <div class="btn" onclick="closeOvl('walkAddOvl')">CANCEL</div>
+      <div class="btn btn-go" onclick="walkAddSave()">ADD</div>
+    </div>
+  </div>
+</div>
 <div class="ovl" id="histOvl">
   <div class="sheet">
     <div class="hh">
@@ -3769,7 +3786,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.199';
+var APPV='v4.200';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8238,15 +8255,18 @@ function renderHist(){
     DB.logs.forEach(function(L,i){
       items.push({t:new Date(L.date+'T12:00:00').getTime(),log:i});
     });
-    (DB.walks||[]).forEach(function(wk){
-      items.push({t:wk.ts||new Date(wk.date+'T12:00:00').getTime(),walk:wk});
+    (DB.walks||[]).forEach(function(wk,wi){
+      items.push({t:wk.ts||new Date(wk.date+'T12:00:00').getTime(),walk:wk,wi:wi});
     });
     items.sort(function(a,b){return b.t-a.t;});
     out=items.map(function(it){
       if(it.walk){
         var wk=it.walk;
-        var meta=(wk.min||0)+' min'+(wk.steps?' &middot; '+Math.round(wk.steps).toLocaleString()+' steps':(wk.dist?' &middot; '+wk.dist+' mi':''));
-        return '<div class="hrow hwalk">'+
+        var meta=(wk.min||0)+' min'+
+          (wk.steps?' &middot; '+Math.round(wk.steps).toLocaleString()+' steps':(wk.dist?' &middot; '+wk.dist+' mi':''))+
+          (wk.kcal?' &middot; '+Math.round(wk.kcal)+' cal':'')+
+          (wk.bpm?' &middot; '+Math.round(wk.bpm)+' bpm':'');
+        return '<div class="hrow hwalk" onclick="walkRm('+it.wi+')">'+
           '<div class="hrow-b">'+
             '<div class="hrow-d">'+pretty(wk.date)+'</div>'+
             '<div class="hrow-n">Walk</div>'+
@@ -8263,7 +8283,9 @@ function renderHist(){
           '</div><div class="hrow-a">&rsaquo;</div>'+
         '</div>';
     }).join('');
-    body.innerHTML=walkStrip()+'<div class="hscroll">'+out+'</div>';
+    body.innerHTML=walkStrip()+
+      '<div class="hrow hwalk hadd" onclick="openWalkAdd()">+ ADD A WALK</div>'+
+      '<div class="hscroll">'+out+'</div>';
     return;
   }
   var m=HIST.mon||(HIST.mon=histLatestMon());
@@ -9711,6 +9733,32 @@ function hcConnect(){
     }).catch(function(){hcDraw();});
   }).catch(function(){});
 }
+// ---------- walks by hand ----------
+function openWalkAdd(){
+  document.getElementById('waDate').value=iso(new Date());
+  document.getElementById('waMin').value='';
+  document.getElementById('waSteps').value='';
+  document.getElementById('walkAddOvl').classList.add('on');
+}
+function walkAddSave(){
+  var d=document.getElementById('waDate').value,
+      m=parseInt(document.getElementById('waMin').value,10)||0,
+      s=parseInt(document.getElementById('waSteps').value,10)||0;
+  if(!d||m<1){ask('Give it a date and at least one minute.',null,'Not yet');return;}
+  (DB.walks=DB.walks||[]).push({date:d,min:m,dist:null,steps:s||null,feel:null,
+    ts:new Date(d+'T12:00:00').getTime()});
+  DB.walks.sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  saveDB();closeOvl('walkAddOvl');renderHist();
+}
+// Removing a synced walk leaves a tombstone (DB.walkGone), or the next sync would put it
+// straight back and the removal would look ignored.
+function walkRm(i){
+  var w=(DB.walks||[])[i];if(!w)return;
+  ask(pretty(w.date)+', '+(w.min||0)+' min. Sessions are untouched; only this walk goes.',function(){
+    if(w.hc){DB.walkGone=DB.walkGone||{};DB.walkGone[w.hc]=1;}
+    DB.walks.splice(i,1);saveDB();renderHist();
+  },'Remove this walk?','REMOVE');
+}
 function hcSync(manual){
   var hs=HS();if(!hs)return;
   if(SANDBOX||TUTON)return;   // never write borrowed data into a stand-in DB
@@ -9719,26 +9767,44 @@ function hcSync(manual){
   hs.granted().then(function(g){
     if(!g.granted)return;
     // The first pull reaches back ninety days; after that, from the last sync with a six
-    // hour overlap, so a walk that finished while the sync ran is caught next time.
-    var since=last?(last-6*3600000):(Date.now()-90*86400000);
+    // hour overlap, so a walk that finished while the sync ran is caught next time. The
+    // hcv2 flag forces one more full pull after the calorie and heart rate columns were
+    // added, so the walks already imported get theirs filled in.
+    var full=!localStorage.getItem(KEY+':hcv2');
+    var since=(!last||full)?(Date.now()-90*86400000):(last-6*3600000);
     hs.readWalks({sinceMs:since}).then(function(r){
-      var seen={};(DB.walks||[]).forEach(function(w){if(w.hc)seen[w.hc]=1;});
-      var add=0;
+      var seen={};(DB.walks||[]).forEach(function(w){if(w.hc)seen[w.hc]=w;});
+      var add=0,fill=0;
       (r.walks||[]).forEach(function(w){
-        if(!w.id||seen[w.id])return;
+        if(!w.id)return;
+        if(DB.walkGone&&DB.walkGone[w.id])return;   // removed by hand stays removed
+        var have=seen[w.id];
+        if(have){
+          // Already imported, but the record may know more than it did last time - the
+          // calorie and heart rate columns arrived after the first ten walks landed.
+          if(have.kcal==null&&w.kcal!=null){have.kcal=w.kcal;fill++;}
+          if(have.bpm==null&&w.bpm!=null){have.bpm=w.bpm;fill++;}
+          if(have.steps==null&&w.steps!=null){have.steps=w.steps;fill++;}
+          if(have.dist==null&&w.meters!=null){have.dist=Math.round(w.meters/1609.34*100)/100;fill++;}
+          return;
+        }
         (DB.walks=DB.walks||[]).push({
           date:iso(new Date(w.startMs)),
           min:w.minutes,
           dist:(w.meters!=null?Math.round(w.meters/1609.34*100)/100:null),
           steps:(w.steps!=null?w.steps:null),
+          kcal:(w.kcal!=null?w.kcal:null),
+          bpm:(w.bpm!=null?w.bpm:null),
           feel:null,ts:w.startMs,hc:w.id});
         add++;
       });
+      if(fill&&!add)saveDB();
       if(add){
         DB.walks.sort(function(a,b){return (a.ts||0)-(b.ts||0);});
         saveDB();
       }
       localStorage.setItem(KEY+':hcsync',String(Date.now()));
+      localStorage.setItem(KEY+':hcv2','1');
       if(manual){
         hcDraw();
         ask(add?('Brought in '+add+' walk'+(add===1?'':'s')+' from Health Connect. They show under WORKOUTS FINISHED.')
