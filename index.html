@@ -3786,7 +3786,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.202';
+var APPV='v4.203';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9787,13 +9787,20 @@ function hcSync(manual){
       // shorter one. Real back-to-back walks never overlap at all.
       function olap(aS,aE,bS,bE){var s=Math.max(aS,bS),e=Math.min(aE,bE),
         sh=Math.min(aE-aS,bE-bS);return sh>0&&(e-s)>=sh*0.5;}
-      // Under two calories a minute is not a walk, it is an app filing junk - the
-      // Google Fit era left totals like 71 for a 55 minute walk. Unknown beats wrong.
+      // Numbers no walk could produce are an app filing junk, not data - the Google
+      // Fit era left 71 calories for a 55 minute walk, and Samsung's July backfill
+      // left 504 steps against 58 minutes. Under two calories, thirty steps, or
+      // twenty meters a minute: unknown beats wrong.
       function kok(k,m){return k!=null&&k>=m*2;}
+      function sok(s,m){return s!=null&&s>=m*30;}
+      function dok(mt,m){return mt!=null&&mt>=m*20;}   // meters
       var seen={};(DB.walks||[]).forEach(function(w){if(w.hc)seen[w.hc]=w;});
       var add=0,fill=0;
       (DB.walks||[]).forEach(function(w){
-        if(w.kcal!=null&&w.min&&!kok(w.kcal,w.min)){w.kcal=null;fill++;}});
+        if(!w.hc||!w.min)return;   // hand-entered numbers are the user's to keep
+        if(w.kcal!=null&&!kok(w.kcal,w.min)){w.kcal=null;fill++;}
+        if(w.steps!=null&&!sok(w.steps,w.min)){w.steps=null;fill++;}
+        if(w.dist!=null&&w.dist<w.min*20/1609.34){w.dist=null;fill++;}});
       (r.walks||[]).forEach(function(w){
         if(!w.id)return;
         var wS=w.startMs,wE=w.endMs||(w.startMs+w.minutes*60000);
@@ -9808,8 +9815,8 @@ function hcSync(manual){
           // calorie and heart rate columns arrived after the first ten walks landed.
           if(have.kcal==null&&kok(w.kcal,w.minutes)){have.kcal=w.kcal;fill++;}
           if(have.bpm==null&&w.bpm!=null){have.bpm=w.bpm;fill++;}
-          if(have.steps==null&&w.steps!=null){have.steps=w.steps;fill++;}
-          if(have.dist==null&&w.meters!=null){have.dist=Math.round(w.meters/1609.34*100)/100;fill++;}
+          if(have.steps==null&&sok(w.steps,w.minutes)){have.steps=w.steps;fill++;}
+          if(have.dist==null&&dok(w.meters,w.minutes)){have.dist=Math.round(w.meters/1609.34*100)/100;fill++;}
           return;
         }
         // The same walk, told twice: with Google Fit and Samsung Health both writing,
@@ -9827,8 +9834,8 @@ function hcSync(manual){
             twin.date=iso(new Date(w.startMs));twin.min=w.minutes;
             if(kok(w.kcal,w.minutes))twin.kcal=w.kcal;
             if(w.bpm!=null)twin.bpm=w.bpm;
-            if(w.steps!=null)twin.steps=w.steps;
-            if(w.meters!=null)twin.dist=Math.round(w.meters/1609.34*100)/100;
+            if(sok(w.steps,w.minutes))twin.steps=w.steps;
+            if(dok(w.meters,w.minutes))twin.dist=Math.round(w.meters/1609.34*100)/100;
             seen[w.id]=twin;fill++;
           }
           return;
@@ -9836,8 +9843,8 @@ function hcSync(manual){
         (DB.walks=DB.walks||[]).push({
           date:iso(new Date(w.startMs)),
           min:w.minutes,
-          dist:(w.meters!=null?Math.round(w.meters/1609.34*100)/100:null),
-          steps:(w.steps!=null?w.steps:null),
+          dist:(dok(w.meters,w.minutes)?Math.round(w.meters/1609.34*100)/100:null),
+          steps:(sok(w.steps,w.minutes)?w.steps:null),
           kcal:(kok(w.kcal,w.minutes)?w.kcal:null),
           bpm:(w.bpm!=null?w.bpm:null),
           feel:null,ts:w.startMs,hc:w.id,src:w.app||null});
