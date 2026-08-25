@@ -2094,6 +2094,10 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hrow-m{font-family:var(--mono);font-size:10.5px;color:var(--txt3);margin-top:4px;}
 .hrow-m .pr{color:var(--gold);}
 .hrow-a{color:var(--txt3);font-size:15px;flex-shrink:0;}
+/* A walk in the history list: the same card as a session, told apart quietly - gold date
+   line, a dashed edge, and no chevron because there is no deeper page behind it. */
+.hrow.hwalk{--hc:var(--gold);border-style:dashed;cursor:default;}
+.hrow.hwalk:hover{background:var(--surface);}
 .hcal-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
 .hcal-t{font-family:'Marcellus',serif;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt);}
 .hnav{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--txt2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;}
@@ -3765,7 +3769,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.198';
+var APPV='v4.199';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7957,16 +7961,9 @@ function walkStrip(){
   if(Date.now()-last>30*86400000)return '';
   var st=walkStreak(),wkm=walkWeek(),best=0,tot=0;
   DB.walks.forEach(function(w){tot+=(w.min||0);if((w.min||0)>best)best=w.min;});
-  // The walks themselves, newest first. Summary rows alone were the whole strip once, and
-  // ten freshly synced walks arrived into a face of zeros (streak broken, quiet week) with
-  // no sign of the walks - which read as "they don't appear" (user, Aug 24). The record
-  // leads now; the totals follow it.
-  var rows=DB.walks.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,8).map(function(w){
-    var d=w.steps?Math.round(w.steps).toLocaleString()+' steps':(w.dist?w.dist+' mi':'');
-    return '<div class="pg-row"><div class="pg-n">'+pretty(w.date)+'</div><div class="pg-v">'+(w.min||0)+' min</div><div class="pg-d fl">'+d+'</div></div>';
-  }).join('');
-  var extra=DB.walks.length>8?'<div class="pg-note">'+(DB.walks.length-8)+' more before these.</div>':'';
-  return '<div class="pg-sec">WALKS</div>'+rows+extra+
+  // Totals only: the walks themselves live in the history list, shuffled among the
+  // sessions (user call, Aug 24). This strip is the running arithmetic above them.
+  return '<div class="pg-sec">WALKS</div>'+
     '<div class="pg-row"><div class="pg-n">Streak at '+WALK_TGT+' min</div><div class="pg-v">'+st+(st===1?' day':' days')+'</div><div class="pg-d '+(st?'up':'fl')+'">'+(st?'ON':'\u2014')+'</div></div>'+
     '<div class="pg-row"><div class="pg-n">This week</div><div class="pg-v">'+wkm+' / '+(WALK_TGT*7)+' min</div><div class="pg-d '+(wkm>=WALK_TGT*7?'up':'fl')+'">'+Math.round(wkm/(WALK_TGT*7)*100)+'%</div></div>'+
     '<div class="pg-row"><div class="pg-n">Longest walk</div><div class="pg-v">'+best+' min</div><div class="pg-d fl">'+Math.round(tot/60)+'h all time</div></div>';
@@ -8234,19 +8231,38 @@ function renderHist(){
   document.getElementById('hsegCal').className='hsegb'+(HIST.mode==='cal'?' on':'');
   if(HIST.mode==='list'){
     var out='';
+    // Sessions and walks shuffle into ONE list by date (user call, Aug 24): a walk wears
+    // the same card as a session, told apart by the gold date line, the dashed edge and
+    // having no page behind it.
+    var items=[];
     DB.logs.forEach(function(L,i){
-      var w=W[L.day],s=histSetsOf(L);
-      out=
-        '<div class="hrow" style="--hc:'+dayC(L.day)+'" onclick="histOpen('+i+')">'+
+      items.push({t:new Date(L.date+'T12:00:00').getTime(),log:i});
+    });
+    (DB.walks||[]).forEach(function(wk){
+      items.push({t:wk.ts||new Date(wk.date+'T12:00:00').getTime(),walk:wk});
+    });
+    items.sort(function(a,b){return b.t-a.t;});
+    out=items.map(function(it){
+      if(it.walk){
+        var wk=it.walk;
+        var meta=(wk.min||0)+' min'+(wk.steps?' &middot; '+Math.round(wk.steps).toLocaleString()+' steps':(wk.dist?' &middot; '+wk.dist+' mi':''));
+        return '<div class="hrow hwalk">'+
+          '<div class="hrow-b">'+
+            '<div class="hrow-d">'+pretty(wk.date)+'</div>'+
+            '<div class="hrow-n">Walk</div>'+
+            '<div class="hrow-m">'+meta+'</div>'+
+          '</div>'+
+        '</div>';
+      }
+      var i=it.log,L=DB.logs[i],w=W[L.day],s=histSetsOf(L);
+      return '<div class="hrow" style="--hc:'+dayC(L.day)+'" onclick="histOpen('+i+')">'+
           '<div class="hrow-b">'+
             '<div class="hrow-d">'+pretty(L.date)+'</div>'+
             '<div class="hrow-n">'+(w?w.name.replace('Optional: ',''):L.day)+'</div>'+
             '<div class="hrow-m">'+s.n+(s.n===1?' set':' sets')+(s.pr?' &middot; <span class="pr">'+s.pr+' record'+(s.pr>1?'s':'')+'</span>':'')+'</div>'+
           '</div><div class="hrow-a">&rsaquo;</div>'+
-        '</div>'+out;
-    });
-    // Walks lead the list: with Progress shelved, this sheet is where the synced record
-    // shows until the real metrics pass gives it a home of its own.
+        '</div>';
+    }).join('');
     body.innerHTML=walkStrip()+'<div class="hscroll">'+out+'</div>';
     return;
   }
