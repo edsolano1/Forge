@@ -3765,7 +3765,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.197';
+var APPV='v4.198';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7957,7 +7957,16 @@ function walkStrip(){
   if(Date.now()-last>30*86400000)return '';
   var st=walkStreak(),wkm=walkWeek(),best=0,tot=0;
   DB.walks.forEach(function(w){tot+=(w.min||0);if((w.min||0)>best)best=w.min;});
-  return '<div class="pg-sec">WALKS</div>'+
+  // The walks themselves, newest first. Summary rows alone were the whole strip once, and
+  // ten freshly synced walks arrived into a face of zeros (streak broken, quiet week) with
+  // no sign of the walks - which read as "they don't appear" (user, Aug 24). The record
+  // leads now; the totals follow it.
+  var rows=DB.walks.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,8).map(function(w){
+    var d=w.steps?Math.round(w.steps).toLocaleString()+' steps':(w.dist?w.dist+' mi':'');
+    return '<div class="pg-row"><div class="pg-n">'+pretty(w.date)+'</div><div class="pg-v">'+(w.min||0)+' min</div><div class="pg-d fl">'+d+'</div></div>';
+  }).join('');
+  var extra=DB.walks.length>8?'<div class="pg-note">'+(DB.walks.length-8)+' more before these.</div>':'';
+  return '<div class="pg-sec">WALKS</div>'+rows+extra+
     '<div class="pg-row"><div class="pg-n">Streak at '+WALK_TGT+' min</div><div class="pg-v">'+st+(st===1?' day':' days')+'</div><div class="pg-d '+(st?'up':'fl')+'">'+(st?'ON':'\u2014')+'</div></div>'+
     '<div class="pg-row"><div class="pg-n">This week</div><div class="pg-v">'+wkm+' / '+(WALK_TGT*7)+' min</div><div class="pg-d '+(wkm>=WALK_TGT*7?'up':'fl')+'">'+Math.round(wkm/(WALK_TGT*7)*100)+'%</div></div>'+
     '<div class="pg-row"><div class="pg-n">Longest walk</div><div class="pg-v">'+best+' min</div><div class="pg-d fl">'+Math.round(tot/60)+'h all time</div></div>';
