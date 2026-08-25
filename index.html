@@ -2742,6 +2742,15 @@ body.wcon{overflow:hidden;}
     <h3 id="exNoteName">Note</h3>
     <div class="footnote" style="margin:0 2px 8px">Yours, not the app's. Seat heights, pin numbers, a cue that keeps your form honest. It stays on this exercise every time it comes round.</div>
     <textarea id="exNoteBox" rows="5" placeholder="Seat 4, back pad 2. Keep elbows tucked."></textarea>
+    <!-- The one fact about an exercise the app cannot work out for itself, now settable on
+         EVERY exercise rather than only at custom creation: on an assisted machine the
+         number is how much it holds up for you, so progress runs down instead of up. -->
+    <div class="dayacts" style="margin-top:12px">
+      <button class="dayact" id="exNoteInv" onclick="exNoteInvToggle()">
+        <svg viewBox="0 0 20 20"><rect x="3.5" y="3.5" width="13" height="13" rx="3"/></svg>
+        Lower number is better</button>
+    </div>
+    <div class="footnote" style="margin:8px 2px 0">For assisted machines, where less weight means you did more of the work yourself. Grading, readiness and level-ups all follow it.</div>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('exNoteOvl')">CANCEL</div>
       <div class="btn btn-go" onclick="saveExNote()">SAVE</div>
@@ -3748,7 +3757,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.195';
+var APPV='v4.196';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -3835,13 +3844,33 @@ function openExNote(exId){
   var nm=(EX[exId]&&EX[exId].name)||'Note';
   document.getElementById('exNoteName').textContent=nm;
   document.getElementById('exNoteBox').value=(DB.exNotes||{})[exId]||'';
+  exNoteInvSet(invEx(exId));
   document.getElementById('exNoteOvl').classList.add('on');
+}
+// Same tick the custom-exercise sheet wears, same drawing. It commits on SAVE with the
+// note, so CANCEL cancels both together.
+function exNoteInvSet(v){
+  var b=document.getElementById('exNoteInv');if(!b)return;
+  b.classList.toggle('on',!!v);
+  b.querySelector('svg').innerHTML=v
+    ? '<rect x="3.5" y="3.5" width="13" height="13" rx="3"/><path d="M6.5 10.2l2.6 2.6 4.4-5"/>'
+    : '<rect x="3.5" y="3.5" width="13" height="13" rx="3"/>';
+}
+function exNoteInvToggle(){
+  var b=document.getElementById('exNoteInv');
+  exNoteInvSet(!b.classList.contains('on'));
 }
 function saveExNote(){
   if(!exNoteFor)return;
   var v=document.getElementById('exNoteBox').value.trim();
   if(!DB.exNotes)DB.exNotes={};
   if(v)DB.exNotes[exNoteFor]=v; else delete DB.exNotes[exNoteFor];  // empty clears it
+  // The override is only stored when it DIFFERS from the library's own flag, so ticking a
+  // machine back to its default leaves no residue behind.
+  var want=document.getElementById('exNoteInv').classList.contains('on');
+  var lib=!!(EX[exNoteFor]&&EX[exNoteFor].inv);
+  if(!DB.exInv)DB.exInv={};
+  if(want!==lib)DB.exInv[exNoteFor]=want?1:0; else delete DB.exInv[exNoteFor];
   saveDB();
   closeOvl('exNoteOvl');exNoteFor=null;
   renderSession();
@@ -4005,7 +4034,15 @@ function isPR(exId,set){return setGrade(exId,set)==='pr';}
 // and levelled the same way as everything else, a good session on one of these read as going
 // backwards and the app offered to make it easier still. inv is the flag; there are two of them
 // in the library, and any assisted machine added later wants it too.
-function invEx(exId){return !!(EX[exId]&&EX[exId].inv);}
+// The user's own say comes first: DB.exInv overrides the library's flag per exercise
+// (set from the note sheet), so a built-in machine can be marked assisted - or unmarked -
+// without touching the library. Every grading, readiness and level-up path reads through
+// here, which is what makes the override safe to have at all.
+function invEx(exId){
+  var o=DB&&DB.exInv?DB.exInv[exId]:undefined;
+  if(o!==undefined)return !!o;
+  return !!(EX[exId]&&EX[exId].inv);
+}
 function setGrade(exId,set){
   if(!set||(!set.w&&!set.r))return null;
   var b=bestEver(exId);
@@ -5103,7 +5140,9 @@ function renderBg(){
   // is the reason to be careful there, not the refresh rate - both screens do 120Hz. Size
   // carries the rest, so an ember reads the same size RELATIVE to the screen on either.
   var A=innerWidth*innerHeight;
-  var MN=Math.max(30,Math.min(56,Math.round(44*Math.sqrt(A/302400))));
+  // Trimmed from a 44-ember base (user call, Aug 23): Full motion kept its life but a third
+  // fewer separate animated layers ride the compositor for it.
+  var MN=Math.max(18,Math.min(36,Math.round(28*Math.sqrt(A/302400))));
   var MS=Math.max(1,Math.min(1.6,Math.min(innerWidth,innerHeight)/360));
   if(motesBuilt&&MOTEW===innerWidth)return;
   MOTEW=innerWidth;
@@ -6619,7 +6658,7 @@ function mkMeasureUI(r,i){
         return '<option value="'+m[0]+'"'+(u===m[0]?' selected':'')+'>'+m[1]+'</option>';
       }).join('')+
     '</select>'+
-    ((EX[r.id]&&EX[r.id].inv)
+    (invEx(r.id)
       ? '<span class="mk-inv" title="An assisted machine: the number is how much help you are taking, so less of it means you did more of the work">assisted &middot; less is more</span>'
       : '')+
     '</div>';
