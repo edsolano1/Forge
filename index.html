@@ -3786,7 +3786,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.201';
+var APPV='v4.202';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9758,7 +9758,10 @@ function walkAddSave(){
 function walkRm(i){
   var w=(DB.walks||[])[i];if(!w)return;
   ask(pretty(w.date)+', '+(w.min||0)+' min. Sessions are untouched; only this walk goes.',function(){
-    if(w.hc){DB.walkGone=DB.walkGone||{};DB.walkGone[w.hc]=1;}
+    // The tombstone keeps its time window now, not just its id: with two apps writing,
+    // the same outing can come back later under a different id, and a removal has to
+    // hold against the twin too.
+    if(w.hc){DB.walkGone=DB.walkGone||{};DB.walkGone[w.hc]=(w.ts?{t:w.ts,m:(w.min||0)}:1);}
     DB.walks.splice(i,1);saveDB();renderHist();
   },'Remove this walk?','REMOVE');
 }
@@ -9769,26 +9772,65 @@ function hcSync(manual){
   if(!manual&&Date.now()-last<600000)return;   // quiet syncs at most every ten minutes
   hs.granted().then(function(g){
     if(!g.granted)return;
-    // The first pull reaches back ninety days; after that, from the last sync with a six
-    // hour overlap, so a walk that finished while the sync ran is caught next time. The
-    // hcv2 flag forces one more full pull after the calorie and heart rate columns were
-    // added, so the walks already imported get theirs filled in.
-    var full=!localStorage.getItem(KEY+':hcv2');
-    var since=(!last||full)?(Date.now()-90*86400000):(last-6*3600000);
+    // A quiet sync reaches back six hours past the last one. A manual sync, the first
+    // ever, and one quiet sync a day go the full ninety days - Samsung Health delivers
+    // records late (the watch syncs when it syncs, and enabling its Health Connect
+    // toggle backfills days at once), and a record written yesterday ABOUT last week
+    // never lands inside the short window.
+    var full=manual
+      ||!localStorage.getItem(KEY+':hcv2')
+      ||(Date.now()-(+localStorage.getItem(KEY+':hcfull')||0)>86400000);
+    var since=full?(Date.now()-90*86400000):(last-6*3600000);
     hs.readWalks({sinceMs:since}).then(function(r){
+      var SAM='com.sec.android.app.shealth';
+      // Two windows telling of the same outing: overlapping for at least half of the
+      // shorter one. Real back-to-back walks never overlap at all.
+      function olap(aS,aE,bS,bE){var s=Math.max(aS,bS),e=Math.min(aE,bE),
+        sh=Math.min(aE-aS,bE-bS);return sh>0&&(e-s)>=sh*0.5;}
+      // Under two calories a minute is not a walk, it is an app filing junk - the
+      // Google Fit era left totals like 71 for a 55 minute walk. Unknown beats wrong.
+      function kok(k,m){return k!=null&&k>=m*2;}
       var seen={};(DB.walks||[]).forEach(function(w){if(w.hc)seen[w.hc]=w;});
       var add=0,fill=0;
+      (DB.walks||[]).forEach(function(w){
+        if(w.kcal!=null&&w.min&&!kok(w.kcal,w.min)){w.kcal=null;fill++;}});
       (r.walks||[]).forEach(function(w){
         if(!w.id)return;
-        if(DB.walkGone&&DB.walkGone[w.id])return;   // removed by hand stays removed
+        var wS=w.startMs,wE=w.endMs||(w.startMs+w.minutes*60000);
+        if(DB.walkGone){
+          if(DB.walkGone[w.id])return;   // removed by hand stays removed
+          for(var k in DB.walkGone){var v=DB.walkGone[k];
+            if(v&&v.t&&olap(v.t,v.t+(v.m||0)*60000,wS,wE))return;}   // ...twins included
+        }
         var have=seen[w.id];
         if(have){
           // Already imported, but the record may know more than it did last time - the
           // calorie and heart rate columns arrived after the first ten walks landed.
-          if(have.kcal==null&&w.kcal!=null){have.kcal=w.kcal;fill++;}
+          if(have.kcal==null&&kok(w.kcal,w.minutes)){have.kcal=w.kcal;fill++;}
           if(have.bpm==null&&w.bpm!=null){have.bpm=w.bpm;fill++;}
           if(have.steps==null&&w.steps!=null){have.steps=w.steps;fill++;}
           if(have.dist==null&&w.meters!=null){have.dist=Math.round(w.meters/1609.34*100)/100;fill++;}
+          return;
+        }
+        // The same walk, told twice: with Google Fit and Samsung Health both writing,
+        // one outing is two records with two ids. Overlapping an already-imported walk
+        // means it IS that walk - and the Samsung Health telling wins, because that is
+        // the app whose numbers the user actually reads.
+        var twin=null;
+        for(var i=0;i<(DB.walks||[]).length;i++){var x=DB.walks[i];
+          if(x.hc&&x.ts&&olap(x.ts,x.ts+(x.min||0)*60000,wS,wE)){twin=x;break;}}
+        if(twin){
+          if(w.app===SAM&&twin.src!==SAM){
+            DB.walkGone=DB.walkGone||{};DB.walkGone[twin.hc]=1;
+            delete seen[twin.hc];
+            twin.hc=w.id;twin.src=SAM;twin.ts=w.startMs;
+            twin.date=iso(new Date(w.startMs));twin.min=w.minutes;
+            if(kok(w.kcal,w.minutes))twin.kcal=w.kcal;
+            if(w.bpm!=null)twin.bpm=w.bpm;
+            if(w.steps!=null)twin.steps=w.steps;
+            if(w.meters!=null)twin.dist=Math.round(w.meters/1609.34*100)/100;
+            seen[w.id]=twin;fill++;
+          }
           return;
         }
         (DB.walks=DB.walks||[]).push({
@@ -9796,21 +9838,22 @@ function hcSync(manual){
           min:w.minutes,
           dist:(w.meters!=null?Math.round(w.meters/1609.34*100)/100:null),
           steps:(w.steps!=null?w.steps:null),
-          kcal:(w.kcal!=null?w.kcal:null),
+          kcal:(kok(w.kcal,w.minutes)?w.kcal:null),
           bpm:(w.bpm!=null?w.bpm:null),
-          feel:null,ts:w.startMs,hc:w.id});
+          feel:null,ts:w.startMs,hc:w.id,src:w.app||null});
         add++;
       });
-      if(fill&&!add)saveDB();
-      if(add){
+      if(add||fill){
         DB.walks.sort(function(a,b){return (a.ts||0)-(b.ts||0);});
         saveDB();
       }
       localStorage.setItem(KEY+':hcsync',String(Date.now()));
       localStorage.setItem(KEY+':hcv2','1');
+      if(full)localStorage.setItem(KEY+':hcfull',String(Date.now()));
       if(manual){
         hcDraw();
         ask(add?('Brought in '+add+' walk'+(add===1?'':'s')+' from Health Connect. They show under WORKOUTS FINISHED.')
+               :fill?'Checked Health Connect: no new walks, but existing ones picked up fresher numbers.'
                :'Checked Health Connect: no new walks since last time.',null,'Walks synced');
       }
     }).catch(function(){
