@@ -2978,6 +2978,14 @@ body.wcon{overflow:hidden;}
     <div class="presets" id="motionRow"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Units</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="unitRow"></div>
+    <!-- Walks flow in from Health Connect, the phone's own health vault - Samsung Health and
+         watch apps write into it, Forge reads walks back out. Only shown where the native
+         plugin exists (the Android app); the row hides itself on the open web. -->
+    <div class="sfx-lbl" id="hcLbl" style="display:none;margin-top:14px"><span>Walks</span></div>
+    <div class="presets" id="hcRow" style="display:none;grid-template-columns:1fr">
+      <button class="preset sm" id="hcBtn" onclick="hcConnect()">Connect to Health Connect</button>
+    </div>
+    <div class="footnote" id="hcNote" style="display:none;margin:6px 2px 0"></div>
     <!-- Backup is off the sheet for this release. doBackup/pickRestore/doRestore are untouched and
          the file input stays, so the pair is two lines of markup away from coming back. -->
     <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="doRestore(this)">
@@ -3757,7 +3765,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.196';
+var APPV='v4.197';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -3818,7 +3826,7 @@ function checkVersion(){
     }).catch(function(){});
 }
 document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='visible')checkVersion();
+  if(document.visibilityState==='visible'){checkVersion();try{hcSync(false);}catch(e){}}
 });
 window.addEventListener('focus',checkVersion);
 setTimeout(checkVersion,5000);
@@ -8228,7 +8236,9 @@ function renderHist(){
           '</div><div class="hrow-a">&rsaquo;</div>'+
         '</div>'+out;
     });
-    body.innerHTML='<div class="hscroll">'+out+'</div>';
+    // Walks lead the list: with Progress shelved, this sheet is where the synced record
+    // shows until the real metrics pass gives it a home of its own.
+    body.innerHTML=walkStrip()+'<div class="hscroll">'+out+'</div>';
     return;
   }
   var m=HIST.mon||(HIST.mon=histLatestMon());
@@ -9628,6 +9638,92 @@ function nativeTimer(secs){
   try{ra.showTimer({seconds:secs,title:TXT('restingTtl'),body:sub});}catch(e){}
 }
 function nativeTimerHide(){var ra=RA();if(ra)try{ra.hideTimer();}catch(e){}}
+// ---------- walks in from Health Connect ----------
+// Samsung Health (and any watch app) writes walks into Health Connect, the phone's own
+// health vault; Forge reads them back out. READ ONLY, walks only, nothing leaves the
+// phone - the same promise as everything else here. Each Health Connect record carries a
+// stable id, which is what makes the sync re-runnable without ever doubling a walk.
+function HS(){
+  try{
+    var C=window.Capacitor;
+    if(C&&C.Plugins&&C.Plugins.HealthSync)return C.Plugins.HealthSync;
+  }catch(e){}
+  return null;
+}
+function hcDraw(){
+  var hs=HS(),l=document.getElementById('hcLbl'),r=document.getElementById('hcRow'),
+      n=document.getElementById('hcNote'),b=document.getElementById('hcBtn');
+  if(!l||!r||!n||!b)return;
+  if(!hs){l.style.display='none';r.style.display='none';n.style.display='none';return;}
+  l.style.display='';r.style.display='';n.style.display='';
+  hs.status().then(function(s){
+    if(s.status!=='ok'){
+      b.textContent='Health Connect not available';
+      n.textContent=s.status==='update'
+        ?'The Health Connect app on this phone needs an update first.'
+        :'This phone does not have Health Connect.';
+      return;
+    }
+    hs.granted().then(function(g){
+      if(g.granted){
+        var got=(DB.walks||[]).filter(function(w){return w.hc;}).length;
+        b.textContent='Sync now';
+        n.textContent='Connected. '+(got?got+' walk'+(got===1?'':'s')+' brought in so far.':'Walks will flow in automatically.')+
+          ' If nothing arrives, open Samsung Health and allow it to sync with Health Connect.';
+      }else{
+        b.textContent='Connect to Health Connect';
+        n.textContent='Walks recorded by Samsung Health or your watch flow in automatically. Forge only reads them, and nothing leaves the phone.';
+      }
+    });
+  }).catch(function(){});
+}
+function hcConnect(){
+  var hs=HS();if(!hs)return;
+  hs.granted().then(function(g){
+    if(g.granted){hcSync(true);return;}
+    hs.request().then(function(r){
+      if(r.granted)hcSync(true);else hcDraw();
+    }).catch(function(){hcDraw();});
+  }).catch(function(){});
+}
+function hcSync(manual){
+  var hs=HS();if(!hs)return;
+  if(SANDBOX||TUTON)return;   // never write borrowed data into a stand-in DB
+  var last=+localStorage.getItem(KEY+':hcsync')||0;
+  if(!manual&&Date.now()-last<600000)return;   // quiet syncs at most every ten minutes
+  hs.granted().then(function(g){
+    if(!g.granted)return;
+    // The first pull reaches back ninety days; after that, from the last sync with a six
+    // hour overlap, so a walk that finished while the sync ran is caught next time.
+    var since=last?(last-6*3600000):(Date.now()-90*86400000);
+    hs.readWalks({sinceMs:since}).then(function(r){
+      var seen={};(DB.walks||[]).forEach(function(w){if(w.hc)seen[w.hc]=1;});
+      var add=0;
+      (r.walks||[]).forEach(function(w){
+        if(!w.id||seen[w.id])return;
+        (DB.walks=DB.walks||[]).push({
+          date:iso(new Date(w.startMs)),
+          min:w.minutes,
+          dist:(w.meters!=null?Math.round(w.meters/1609.34*100)/100:null),
+          steps:(w.steps!=null?w.steps:null),
+          feel:null,ts:w.startMs,hc:w.id});
+        add++;
+      });
+      if(add){
+        DB.walks.sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+        saveDB();
+      }
+      localStorage.setItem(KEY+':hcsync',String(Date.now()));
+      if(manual){
+        hcDraw();
+        ask(add?('Brought in '+add+' walk'+(add===1?'':'s')+' from Health Connect. They show under WORKOUTS FINISHED.')
+               :'Checked Health Connect: no new walks since last time.',null,'Walks synced');
+      }
+    }).catch(function(){
+      if(manual)ask('Health Connect did not answer. Try again in a moment.',null,'Could not sync');
+    });
+  }).catch(function(){});
+}
 function nativeAsk(){var ln=LN();if(ln)try{ln.requestPermissions();}catch(e){}}
 function nativeSchedule(secs){
   var ln=LN();if(!ln)return false;
@@ -10280,7 +10376,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();
+  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();hcDraw();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   // The two tour buttons say which LENGTH they are, so the theme's word for "Tutorial" no longer
@@ -12200,6 +12296,9 @@ function sbEnd(){
       else nativeAsk();
     }catch(e){}
   },1200);
+  // Walks catch up quietly on every launch - a no-op until Health Connect is connected
+  // from Settings, and throttled inside hcSync so it never becomes chatter.
+  setTimeout(function(){try{hcSync(false);}catch(e){}},3000);
   // A first run is asked how it wants to start, and that hands over to the tour offer itself.
   // Everyone else goes straight to the offer as before.
   setTimeout(function(){if(STARTPEND)offerStart();else tutOffer();},1600);
