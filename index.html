@@ -3786,7 +3786,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v4.203';
+var APPV='v4.204';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9811,12 +9811,16 @@ function hcSync(manual){
         }
         var have=seen[w.id];
         if(have){
-          // Already imported, but the record may know more than it did last time - the
-          // calorie and heart rate columns arrived after the first ten walks landed.
-          if(have.kcal==null&&kok(w.kcal,w.minutes)){have.kcal=w.kcal;fill++;}
-          if(have.bpm==null&&w.bpm!=null){have.bpm=w.bpm;fill++;}
-          if(have.steps==null&&sok(w.steps,w.minutes)){have.steps=w.steps;fill++;}
-          if(have.dist==null&&dok(w.meters,w.minutes)){have.dist=Math.round(w.meters/1609.34*100)/100;fill++;}
+          // A synced walk mirrors the vault, always. Records firm up LATE - Samsung
+          // deposits a walk's calorie total well after the walk ends - so a validated
+          // incoming number replaces the stored one, not just a blank. What fails the
+          // sanity floor leaves the stored value standing.
+          if(kok(w.kcal,w.minutes)&&have.kcal!==w.kcal){have.kcal=w.kcal;fill++;}
+          if(w.bpm!=null&&have.bpm!==w.bpm){have.bpm=w.bpm;fill++;}
+          if(sok(w.steps,w.minutes)&&have.steps!==w.steps){have.steps=w.steps;fill++;}
+          if(dok(w.meters,w.minutes)){var dmi=Math.round(w.meters/1609.34*100)/100;
+            if(have.dist!==dmi){have.dist=dmi;fill++;}}
+          if(w.minutes&&have.min!==w.minutes){have.min=w.minutes;fill++;}
           return;
         }
         // The same walk, told twice: with Google Fit and Samsung Health both writing,
