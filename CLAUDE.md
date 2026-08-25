@@ -20,8 +20,9 @@ main constraint on how to work in it. See **Traps** below before editing.
   worker will serve the old build otherwise. `v4.9` is followed by `v4.10`, not `v4.91`.
 - **End every reply with a TLDR and the build number** to look for.
 - **The user is not a coder.** Short answers by default; they will ask for detail.
-- **Only the Forge theme is in scope** until v5.0. Obsidian, Frost and Moonwell are frozen —
-  check whether a selector is theme-scoped before changing it.
+- **Only the Forge theme is in scope** until the themes get their own v5.x pass. Obsidian,
+  Frost and Moonwell stay frozen (`THEMES_ON=0`) — check whether a selector is theme-scoped
+  before changing it.
 
 ## Verifying
 
@@ -180,10 +181,11 @@ writes through — `mkTouch()`, debounced 500ms. There is no "unsaved" state in 
    inferred flavor, frozen after creation).
    Level-ups were already safe: cardio lines pass through `levelPlan` unchanged and are
    filtered as no-ops.
-5. **First-run wizard pinned until v5** (Aug 22). `EZ_ON=false` in `offerStart` skips the
-   welcome question and the forging ritual — a first run lands on its empty week with the
-   tour offer. All welcome/wizard code stays whole underneath; the pin comes out when the
-   wizard gets its deeper pass alongside v5. The sandbox replays the pinned behavior too.
+5. **First-run wizard unpinned in v5.0** (Aug 26). `EZ_ON=true`: a first run gets the
+   welcome question ("I know what I'm building" / "Build one for me") and the forging
+   ritual (level, days, goal → a generated week), then the tour offer. The v5.0 rollout
+   marks the start of the v5 cycle — the user's brothers are the first outside users, so
+   the fresh-install path is now a real surface, not a parked one. The sandbox replays it.
    Also retired from the home screen the same day: the "Log a walk" side button (cardio
    lives in workouts now; the walk sheet only resurfaces while a walk's clock is running,
    and walk history/streak still show in Progress) and the "hold a workout" week hint.
