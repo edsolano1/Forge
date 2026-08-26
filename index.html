@@ -2725,6 +2725,10 @@ body.wcon{overflow:hidden;}
          only inside the file it belongs to. -->
     <div id="bkMain">
       <p>Your logs live on this phone and nowhere else. Clearing the app or its data erases them. The safest copy is one that leaves the phone.</p>
+      <!-- Native app only (a browser cannot quietly write a file, and quietly is the point);
+           autoBkDraw shows it when the Filesystem bridge is really there. -->
+      <div class="btn" id="bkAuto" onclick="autoBkToggle()" style="display:none">AUTOMATIC SAFETY COPY: OFF</div>
+      <div class="footnote" id="bkAutoNote" style="display:none;margin:6px 2px 12px">A backup file that refreshes itself after every finished workout, in Documents under a Forge folder. It survives even deleting the app.</div>
       <div class="sheet-btns">
         <div class="btn btn-go" onclick="bkView(true)">BACKUP</div>
         <div class="btn" onclick="restoreAsk()">RESTORE</div>
@@ -3786,7 +3790,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.0';
+var APPV='v5.1';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4757,7 +4761,7 @@ function markDayDone(id){
   // decision that undoes itself.
   DB.logs.push({day:id,date:today(),entries:{},note:'',swaps:{},sealed:1,marked:1});
   delete DB.active[id];
-  saveDB();renderHome();
+  saveDB();try{autoBk();}catch(e){}renderHome();
   if(typeof mkRender==='function'&&document.getElementById('make').classList.contains('on'))mkRender();
   offerReopen();                                 // marking the last open day locks the week too
 }
@@ -7389,6 +7393,7 @@ function finishNow(){
   DB.logs.push({day:wk,date:A.date,entries:entries,note:A.note||'',swaps:A.swaps||{},sealed:1,wk:A.wk||dayGuess(wk)});
   delete DB.active[wk];
   saveDB();
+  try{autoBk();}catch(e){}
   syncPumpBtn();
   document.getElementById('exportTxt').value=txt;
   renderSummary(sum);
@@ -7734,7 +7739,7 @@ function igniteDiamond(cb){
 // guessed at.
 function backupBlob(){
   var s={};
-  ['arc_sfx','arc_alert10','arc_notif','arc_motion','arc_sfxoff'].forEach(function(k){
+  ['arc_sfx','arc_alert10','arc_notif','arc_motion','arc_sfxoff','arc_autobk','arc_bknudge','arc_lastbk'].forEach(function(k){
     try{var v=localStorage.getItem(k);if(v!==null)s[k]=v;}catch(e){}
   });
   try{s[TKEY]=curTheme();}catch(e){}
@@ -7828,15 +7833,20 @@ function doRestore(input){
   rd.onload=function(){
     var d=null;
     try{d=JSON.parse(String(rd.result));}catch(e){}
-    if(!d||!d.db||!d.db.logs){ask('That file is not a Forge backup.',null,'Could not read it');return;}
+    if(!d||!d.db||!Array.isArray(d.db.logs)){ask('That file is not a Forge backup. The one RESTORE needs is the forge-backup file ending in .json, made by BACKUP FILE.',null,'Could not read it');return;}
     var inN=d.db.logs.length,haveN=(DB.logs||[]).length;
     ask('The backup holds '+inN+' logged session'+(inN===1?'':'s')+', from '+(d.at||'an unknown date').slice(0,10)+
         '. Restoring replaces everything currently in this app'+
         (haveN?', including the '+haveN+' session'+(haveN===1?'':'s')+' here now':'')+'. This cannot be undone.',
       function(){
         DB=d.db;
+        // Backups from older builds lack keys that did not exist yet; every shape the
+        // app assumes gets filled, so a years-old file restores into today's app whole.
         if(!DB.active)DB.active={};if(!DB.up)DB.up={};if(!DB.upSkip)DB.upSkip={};
         if(!DB.extra)DB.extra=[];if(!DB.plan)DB.plan=[];if(!DB.walks)DB.walks=[];
+        if(!DB.days)DB.days={};if(!DB.custom)DB.custom={};if(!DB.cex)DB.cex={};
+        if(!DB.slots)DB.slots={};if(!DB.exNotes)DB.exNotes={};
+        if(!DB.dayEdit)DB.dayEdit={};if(!DB.vOvr)DB.vOvr={};
         if(DB.walkRun===undefined)DB.walkRun=null;
         var s=d.settings||{};
         Object.keys(s).forEach(function(k){
@@ -7883,7 +7893,64 @@ function copyEl(id,btn){
 }
 function openBackup(){
   bkView(false);
+  autoBkDraw();
   document.getElementById('backupOvl').classList.add('on');
+}
+// ---------- the automatic safety copy ----------
+// Opt-in, because nothing is written without being asked (user note, Aug 23) - the toggle
+// IS the asking. Once on, every sealed session rewrites a full backup into Documents/Forge,
+// alternating between two files so a write that dies mid-way can never eat the only copy.
+function autoBkOn(){try{return localStorage.getItem('arc_autobk')==='1';}catch(e){return false;}}
+function autoBkAvail(){
+  var C=window.Capacitor;
+  try{return !!(C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.Filesystem);}catch(e){return false;}
+}
+function autoBkDraw(){
+  var b=document.getElementById('bkAuto'),n=document.getElementById('bkAutoNote');
+  if(!b)return;
+  var ok=autoBkAvail();
+  b.style.display=ok?'':'none';if(n)n.style.display=ok?'':'none';
+  b.textContent='AUTOMATIC SAFETY COPY: '+(autoBkOn()?'ON':'OFF');
+  b.classList.toggle('btn-go',autoBkOn());
+}
+function autoBkToggle(){
+  var on=!autoBkOn();
+  try{localStorage.setItem('arc_autobk',on?'1':'0');}catch(e){}
+  autoBkDraw();
+  if(on)autoBk(true);
+}
+function autoBk(first){
+  if(SANDBOX||TUTON)return;   // never write borrowed data over a real safety copy
+  if(!autoBkOn()||!autoBkAvail())return;
+  var slot='a';
+  try{slot=localStorage.getItem('arc_autobk_slot')==='a'?'b':'a';localStorage.setItem('arc_autobk_slot',slot);}catch(e){}
+  try{
+    window.Capacitor.Plugins.Filesystem.writeFile({
+      path:'Forge/forge-backup-auto-'+slot+'.json',data:backupBlob(),
+      directory:'DOCUMENTS',encoding:'utf8',recursive:true
+    }).then(function(){
+      try{localStorage.setItem('arc_lastbk',String(Date.now()));}catch(e){}
+      if(first)mkNote('A safety copy now refreshes itself after every finished workout. It lives in My Files, under Documents, in the Forge folder.','Safety copy on');
+    }).catch(function(){});
+  }catch(e){}
+}
+// One nudge, once ever: real history, no backup of any kind, and this phone the only place
+// it exists. Whatever is answered, it never comes back - Settings holds the door open.
+function bkNudge(){
+  if(SANDBOX||TUTON)return;
+  try{
+    if(localStorage.getItem('arc_bknudge'))return;
+    if(autoBkOn()||localStorage.getItem('arc_lastbk'))return;
+    if((DB.logs||[]).length<5)return;
+    localStorage.setItem('arc_bknudge','1');
+  }catch(e){return;}
+  if(autoBkAvail()){
+    ask('Everything you have logged lives only on this phone. Turn on the automatic safety copy? A backup file will quietly refresh itself after every finished workout. Backup & restore in Settings is always there too.',
+      function(){try{localStorage.setItem('arc_autobk','1');}catch(e){}autoBk(true);},
+      'Guard your history?','TURN IT ON');
+  }else{
+    ask('Everything you have logged lives only on this phone. A backup that leaves the phone is the safe kind - Backup & restore in Settings makes one.',null,'Guard your history?');
+  }
 }
 // BACKUP turns the sheet's page to the three ways out, each with its explanation in
 // plain sight; CANCEL turns it back.
@@ -7912,6 +7979,7 @@ function exportGo(kind,dest){
   var isText=kind==='text';
   var txt=isText?historyText():backupBlob();
   var name=isText?(APPNAME().toLowerCase()+'-history-'+today()+'.txt'):backupName();
+  if(!isText)try{localStorage.setItem('arc_lastbk',String(Date.now()));}catch(e){}
   if(dest==='save')saveToPhone(txt,name,isText);
   else sendOut(txt,name,isText);
 }
@@ -12446,6 +12514,9 @@ function sbEnd(){
   // Walks catch up quietly on every launch - a no-op until Health Connect is connected
   // from Settings, and throttled inside hcSync so it never becomes chatter.
   setTimeout(function(){try{hcSync(false);}catch(e){}},3000);
+  // The one-time backup nudge waits for the app to settle; it refuses to fire inside the
+  // sandbox, a tour, or any life that already has a backup.
+  setTimeout(function(){try{bkNudge();}catch(e){}},6000);
   // A first run is asked how it wants to start, and that hands over to the tour offer itself.
   // Everyone else goes straight to the offer as before.
   setTimeout(function(){if(STARTPEND)offerStart();else tutOffer();},1600);
