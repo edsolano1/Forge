@@ -689,6 +689,10 @@ body.tut #askOvl{z-index:402;}
 .hold:hover{color:var(--txt);border-color:#3d434a;}
 .hold.running{background:var(--gold);border-color:var(--gold);color:#0b0c0e;}
 .hold.resume{border-color:var(--gold);color:var(--gold);}
+.ex-foot{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:2px 16px 13px;}
+.ex-foot .ex-rest{padding:0;}
+.ex-pr{font-size:10.5px;letter-spacing:.08em;color:var(--txt3);white-space:nowrap;flex:0 0 auto;}
+.ex-pr b{font-weight:600;color:color-mix(in srgb,var(--gold) 72%,var(--txt3));letter-spacing:0;font-size:11.5px;}
 .ex-rest{font-size:11.5px;color:var(--txt3);padding:2px 16px 13px;}
 
 .notebox{margin:24px 0 0;}
@@ -1233,6 +1237,9 @@ body.tut .dayhead-add{display:none;}
 .pl-lbl{font-size:10px;letter-spacing:.1em;color:var(--txt3);margin:12px 0 6px;}
 /* Plate chips: the whole chip adds, the corner circle takes one back off. Both are
    comfortably past a thumb's worth of target at gym speed. */
+.pl-typerow{display:flex;align-items:center;gap:8px;}
+.pl-type{flex:1;text-align:center;font-size:19px;font-weight:600;}
+.pl-tu{font-size:13px;color:var(--txt3);width:24px;}
 .pl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .pl-chip{position:relative;height:62px;border:1px solid var(--line);background:transparent;border-radius:12px;color:var(--txt);font-size:20px;font-weight:700;cursor:pointer;padding:0;font-variant-numeric:tabular-nums;}
 .pl-chip:active{background:rgba(255,255,255,.07);}
@@ -3165,7 +3172,15 @@ body.wcon{overflow:hidden;}
     <div class="pl-wrap"><div id="plArt"></div></div>
     <div class="pl-total" id="plTotal"></div>
     <div class="pl-read" id="plRead"></div>
-    <div class="pl-lbl">TAP TO ADD A PLATE &middot; ONE ON EACH END</div>
+    <!-- Two ways in, because both are natural: name the weight you want and let it load
+         the bar, or build it plate by plate. -->
+    <div class="pl-lbl">TYPE A WEIGHT AND IT LOADS THE BAR</div>
+    <div class="pl-typerow">
+      <input class="mk-in pl-type" id="plType" type="number" inputmode="decimal"
+             placeholder="e.g. 145" oninput="plTypeLoad(this.value)">
+      <span class="pl-tu" id="plTypeUnit">lb</span>
+    </div>
+    <div class="pl-lbl">OR TAP TO ADD A PLATE &middot; ONE ON EACH END</div>
     <div class="pl-grid" id="plGrid"></div>
     <div class="pl-acts">
       <button class="pl-act" onclick="plUndo()">UNDO</button>
@@ -3866,7 +3881,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.8';
+var APPV='v5.9';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4119,8 +4134,22 @@ function fmtSets(sets){
 }
 // Cleared clean = every target set matched or beaten last time
 // Best-ever set for an exercise: heaviest weight, then most reps at that weight
+// How much strength a set actually expressed, as one comparable number. The old test was
+// "heaviest weight wins, reps break the tie", and that is not what a set is worth: a real
+// 145x13 (est 192 -> 208) ranked BELOW a one-off 165x5 (192) purely because 165 is the
+// bigger number, so the heaviest day a person ever had became the bar every ordinary set
+// was held against. Weighted sets score by estimated 1RM, which is the standard way to
+// compare across rep ranges. Assisted machines still run backwards (less help is better),
+// and timed or bodyweight work scores on the count, since there is no weight to speak of.
+function setScore(exId,s){
+  if(!s)return -1;
+  var w=s.w||0,r=s.r||0;
+  if(s.unit==='sec'||!w)return r;
+  if(invEx(exId))return r/(w||1);          // less assistance, more reps: both push it up
+  return r>1?w*(1+r/30):w;                 // Epley
+}
 function bestEver(exId,excludeIdx){
-  var best=null;
+  var best=null,bs=-1;
   for(var i=0;i<DB.logs.length;i++){
     if(excludeIdx!==undefined&&i===excludeIdx)continue;
     var L=DB.logs[i],sets=null;
@@ -4129,7 +4158,8 @@ function bestEver(exId,excludeIdx){
     if(!sets)continue;
     for(var j=0;j<sets.length;j++){
       var x=sets[j];if(!x)continue;
-      if(!best||x.w>best.w||(x.w===best.w&&x.r>best.r))best={w:x.w,r:x.r,unit:x.unit||''};
+      var sc=setScore(exId,x);
+      if(!best||sc>bs){bs=sc;best={w:x.w,r:x.r,unit:x.unit||''};}
     }
   }
   return best;
@@ -4152,15 +4182,16 @@ function invEx(exId){
   if(o!==undefined)return !!o;
   return !!(EX[exId]&&EX[exId].inv);
 }
+// A record means you expressed more strength than ever before - at ANY rep count - not
+// that you put a bigger number on the bar. Scored, not compared digit by digit.
 function setGrade(exId,set){
   if(!set||(!set.w&&!set.r))return null;
   var b=bestEver(exId);
   if(!b)return 'first';                    // nothing to beat yet - set the baseline
-  var w=set.w||0,r=set.r||0,bw=b.w||0,br=b.r||0;
-  var better=invEx(exId)?(w<bw):(w>bw);
-  if(better||(w===bw&&r>br))return 'pr';
-  if(w===bw&&r===br)return 'match';
-  return 'under';
+  var s=setScore(exId,set),bs=setScore(exId,b);
+  if(s>bs+0.0001)return 'pr';
+  if(Math.abs(s-bs)<=0.0001)return 'match';
+  return 'under';                          // stored, never shown - see gradeClass
 }
 // A first-ever set is the best you have ever done it, so it reads like one: gold, and the record
 // cue. It used to land grey, which is a grade, and there is nothing to grade it against yet.
@@ -5610,10 +5641,12 @@ function renderSession(){
       var un=(DB.exNotes||{})[rf.exId]||'';
       if(r.note)html+='<div class="ex-note">'+r.note+'</div>';
       if(un)html+='<div class="ex-unote">'+esc(un)+'</div>';
+      // TARGET and LAST only. The personal record used to sit here as a third chip, which
+      // made a one-off heavy day look like the standard you were meant to hold every set
+      // to. It moved to the foot of the card, beside the rest - present, not prescriptive.
       html+='<div class="ex-stats">'+
             '<span class="ex-stat st-tgt">Target <b>'+r.sets.split('\n').map(fmtLine).join(', ')+'</b></span>'+
             (L?'<span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span>':'')+
-            (bst?'<span class="ex-stat st-best">Best <b>'+(bst.w?fmtW(bst.w)+'\u00d7'+bst.r:bst.r+(bst.unit?' '+bst.unit:''))+'</b></span>':'')+
             '</div></div>';   // closes ex-stats, then ex-body
       // The button sits beside the instructions because that is where you already look for
       // "how do I do this one".
@@ -5663,8 +5696,17 @@ function renderSession(){
       });
       html+='</div>';
       // Mid-group rows say where the rest went instead of printing one they will not take.
-      if(ssMid)html+='<div class="ex-rest">Straight to the next. Rest comes after the round</div>';
-      else if(r.rest)html+='<div class="ex-rest">Rest '+r.rest+(sec.ss?' after the round':'')+'</div>';
+      // The foot of the card: rest on the left, your record on the right. The record is
+      // here to be seen, not to be measured against - nothing above this line mentions it.
+      var restTxt=ssMid?'Straight to the next. Rest comes after the round'
+                       :(r.rest?'Rest '+r.rest+(sec.ss?' after the round':''):'');
+      var prTxt=bst?(bst.w?fmtW(bst.w)+'×'+bst.r:bst.r+(bst.unit?' '+bst.unit:'')):'';
+      if(restTxt||prTxt){
+        html+='<div class="ex-foot">'+
+              '<span class="ex-rest">'+restTxt+'</span>'+
+              (prTxt?'<span class="ex-pr" title="Your personal record on this lift">PR <b>'+prTxt+'</b></span>':'')+
+              '</div>';
+      }
       html+='</div>';
     });
     if(sec.ss)html+='</div>';
@@ -8275,7 +8317,13 @@ function plDraw(){
           '<br>'+plNum(per)+' + '+plNum(per))+
       ' = <b>'+plNum(tot)+' '+u+'</b>';
   }
+  // Own up when the bar cannot make the number that was typed.
+  if(PL.want!=null&&Math.abs(PL.want-tot)>0.001){
+    r+='<br><span class="pl-warn">'+(PL.want>tot?'Closest under ':'Nearest to ')+plNum(PL.want)+' '+u+
+       ' this bar can make'+(PL.want>tot?' — '+plNum(PL.want-tot)+' '+u+' short':'')+'.</span>';
+  }
   document.getElementById('plRead').innerHTML=r;
+  document.getElementById('plTypeUnit').textContent=u;
   // the plate buttons, each showing how many of it are already on
   var cnt={};PL.on.forEach(function(p){var k=plNum(p);cnt[k]=(cnt[k]||0)+1;});
   document.getElementById('plGrid').innerHTML=plPlates(PL.bar).map(function(p){
@@ -8307,19 +8355,30 @@ function plBarBtns(){
 // with plates already hanging on it - switch to the 35 and 5s had appeared by themselves.
 // Picking up a different bar means picking up a bare one; the plates go on after.
 function plPickBar(k){
-  PL.bar=k;
+  PL.bar=k;PL.want=null;
   // A bar chosen on a machine is not a barbell preference and must not be remembered.
   if(!PL.mach)try{localStorage.setItem('arc_bar',k);}catch(e){}
   PL.on=[];
   plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
-function plAdd(p){PL.on.push(p);plDraw();try{sfxTick&&sfxTick();}catch(e){}}
+// Name a weight, get a loaded bar. PL.want is remembered ONLY so the readout can own up
+// when the bar cannot make that exact number - no 1.25s means 138 is not reachable, and
+// silently loading 137.5 while the box says 138 would be the app lying by omission.
+function plTypeLoad(v){
+  var n=parseFloat(v);
+  if(v===''||isNaN(n)||n<0){PL.want=null;PL.on=[];plDraw();return;}
+  PL.want=n;
+  PL.on=plLoadFor(n);
+  plDraw();
+}
+function plAdd(p){PL.want=null;PL.on.push(p);plDraw();try{sfxTick&&sfxTick();}catch(e){}}
 function plSub(p){
+  PL.want=null;
   for(var i=PL.on.length-1;i>=0;i--)if(Math.abs(PL.on[i]-p)<0.001){PL.on.splice(i,1);break;}
   plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
-function plUndo(){PL.on.pop();plDraw();try{sfxTick&&sfxTick();}catch(e){}}
-function plClear(){PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(e){}}
+function plUndo(){PL.want=null;PL.on.pop();plDraw();try{sfxTick&&sfxTick();}catch(e){}}
+function plClear(){PL.want=null;PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(e){}}
 // Barbell and plate-loaded work only: a cable stack or a dumbbell has no bar to load.
 var PL_IDS={bench:1,bsquat:1,deadlift:1,bbcurl:1,bbthrust:1,smsquat:1,ohp:1,hack:1,lpress:1};
 // The plate-loaded machines among them. A leg press sled is not a 45 lb bar, so these
@@ -8346,7 +8405,13 @@ function openPlates(id,lb){
   // Set the bar OUTRIGHT rather than leaving whatever the last sheet held: a NO BAR
   // chosen on the leg press was still standing when the next barbell lift opened.
   PL.bar=PL.mach?'non':plBarPref();
-  PL.on=lb?plLoadFor(dspW(lb)):[];
+  // Opened from a lift, it arrives already loaded to that lift's target - the answer is
+  // on screen before anything is tapped. The typed box shows the same number, so it is
+  // obvious where the plates came from and it can be edited straight away.
+  var want=lb?dspW(lb):null;
+  PL.want=want;
+  PL.on=want?plLoadFor(want):[];
+  document.getElementById('plType').value=want?plNum(want):'';
   document.getElementById('plTitle').textContent=name||'Plate calculator';
   document.getElementById('plBars').style.display='none';
   plDraw();
