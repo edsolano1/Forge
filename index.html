@@ -3115,6 +3115,20 @@ body.wcon{overflow:hidden;}
     </div>
   </div>
 </div>
+<!-- A weigh-in, entered from the Progress sheet. Stored to the day: a second entry for
+     the same date replaces the first, and saving an empty weight removes that day's. -->
+<div class="ovl" id="bwOvl" style="z-index:300">
+  <div class="sheet" style="max-width:400px">
+    <h3>Log a weigh-in</h3>
+    <p>One number per day. Entering a date again replaces it; saving it empty removes it.</p>
+    <input class="mk-in" id="bwDate" type="date">
+    <input class="mk-in" id="bwW" type="number" inputmode="decimal" placeholder="Weight" style="margin-top:9px">
+    <div class="sheet-btns">
+      <div class="btn" onclick="closeOvl('bwOvl')">CANCEL</div>
+      <div class="btn btn-go" onclick="bwSave()">SAVE</div>
+    </div>
+  </div>
+</div>
 <div class="ovl" id="histOvl">
   <div class="sheet">
     <div class="hh">
@@ -3790,7 +3804,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.1';
+var APPV='v5.2';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7846,7 +7860,7 @@ function doRestore(input){
         if(!DB.extra)DB.extra=[];if(!DB.plan)DB.plan=[];if(!DB.walks)DB.walks=[];
         if(!DB.days)DB.days={};if(!DB.custom)DB.custom={};if(!DB.cex)DB.cex={};
         if(!DB.slots)DB.slots={};if(!DB.exNotes)DB.exNotes={};
-        if(!DB.dayEdit)DB.dayEdit={};if(!DB.vOvr)DB.vOvr={};
+        if(!DB.dayEdit)DB.dayEdit={};if(!DB.vOvr)DB.vOvr={};if(!DB.bw)DB.bw=[];
         if(DB.walkRun===undefined)DB.walkRun=null;
         var s=d.settings||{};
         Object.keys(s).forEach(function(k){
@@ -8053,6 +8067,56 @@ function walkStrip(){
     '<div class="pg-row"><div class="pg-n">This week</div><div class="pg-v">'+wkm+' / '+(WALK_TGT*7)+' min</div><div class="pg-d '+(wkm>=WALK_TGT*7?'up':'fl')+'">'+Math.round(wkm/(WALK_TGT*7)*100)+'%</div></div>'+
     '<div class="pg-row"><div class="pg-n">Longest walk</div><div class="pg-v">'+best+' min</div><div class="pg-d fl">'+Math.round(tot/60)+'h all time</div></div>';
 }
+// ---------- bodyweight ----------
+// The scale's number, one per day, canonical pounds like every other weight in the app.
+// It lives inside Progress with the rest of the arithmetic - not a new screen. Deltas are
+// deliberately neutral: whether the line should rise or fall is the owner's business.
+function bwList(){return (DB.bw=DB.bw||[]);}
+function fmtBw(lb){return String(UNIT_KG?Math.round(lb/LB_PER_KG*10)/10:Math.round(lb*10)/10);}
+function openBwAdd(){
+  var l=bwList(),w=document.getElementById('bwW');
+  document.getElementById('bwDate').value=iso(new Date());
+  w.value='';
+  w.placeholder='Weight in '+wUnitName()+(l.length?' · last '+fmtBw(l[l.length-1].lb):'');
+  document.getElementById('bwOvl').classList.add('on');
+}
+function bwSave(){
+  var d=document.getElementById('bwDate').value,
+      raw=document.getElementById('bwW').value,
+      l=bwList(),i;
+  if(!d){ask('Give it a date.',null,'Not yet');return;}
+  for(i=0;i<l.length;i++)if(l[i].date===d)break;
+  if(raw===''||!(parseFloat(raw)>0)){
+    if(i<l.length){l.splice(i,1);saveDB();}
+    closeOvl('bwOvl');showProgress();return;
+  }
+  var lb=Math.round(inW(raw)*100)/100;
+  if(lb<50||lb>1500){ask('That does not read like a body weight. Check the number and the unit.',null,'Check the number');return;}
+  if(i<l.length)l[i].lb=lb;else l.push({date:d,lb:lb});
+  l.sort(function(a,b){return a.date<b.date?-1:1;});
+  saveDB();closeOvl('bwOvl');showProgress();
+}
+function bwStrip(){
+  var l=bwList();
+  var head='<div class="pg-sec">BODYWEIGHT</div>';
+  var btn='<div class="pg-row" onclick="openBwAdd()"><div class="pg-n">Log a weigh-in</div><div class="pg-v">+</div><div class="pg-d fl">tap</div></div>';
+  if(!l.length)return head+btn;
+  var t=l[l.length-1],p=l.length>1?l[l.length-2]:null;
+  var cut=iso(new Date(Date.now()-30*86400000)),m=null;
+  for(var i=l.length-1;i>=0;i--)if(l[i].date<=cut){m=l[i];break;}
+  function dlt(a,b){
+    var d=UNIT_KG?Math.round((a-b)/LB_PER_KG*10)/10:Math.round((a-b)*10)/10;
+    return (d>0?'+':'')+d+' '+wUnitName();
+  }
+  var h=head;
+  h+='<div class="pg-row"><div class="pg-n">Current ('+pretty(t.date)+')</div><div class="pg-v">'+fmtBw(t.lb)+' '+wUnitName()+'</div><div class="pg-d fl">'+(p?dlt(t.lb,p.lb):'first')+'</div></div>';
+  if(m&&m!==t)h+='<div class="pg-row"><div class="pg-n">Vs 30 days ago</div><div class="pg-v">'+fmtBw(m.lb)+' '+wUnitName()+'</div><div class="pg-d fl">'+dlt(t.lb,m.lb)+'</div></div>';
+  if(l.length>=2){
+    h+=progChart(l.slice(-26).map(function(e){return {v:e.lb};}));
+    h+='<div class="pg-range"><span>'+pretty(l[Math.max(0,l.length-26)].date)+'</span><span>'+l.length+' weigh-ins</span><span>'+pretty(t.date)+'</span></div>';
+  }
+  return h+btn;
+}
 // ---------- the exercise, over time ----------
 // The roadmap's analysis step, in the order it was written: volume and estimated 1RM are
 // arithmetic over data already held, and the chart is one per exercise. All three live
@@ -8185,7 +8249,7 @@ function showProgress(){
   });
   var body=document.getElementById('progBody');
   if(!rows.length){
-    body.innerHTML=walkStrip()+'<div class="pg-empty">Nothing logged yet. Finish a session and this fills in.</div>';
+    body.innerHTML=bwStrip()+walkStrip()+'<div class="pg-empty">Nothing logged yet. Finish a session and this fills in.</div>';
   }else{
     function block(label,key){
       var sorted=rows.slice().sort(function(a,b){
@@ -8201,7 +8265,7 @@ function showProgress(){
       });
       return h;
     }
-    body.innerHTML=weekStrip()+walkStrip()+block('VS LAST SESSION','dLast')+block('VS YOUR BEST EVER','dBest');
+    body.innerHTML=weekStrip()+bwStrip()+walkStrip()+block('VS LAST SESSION','dLast')+block('VS YOUR BEST EVER','dBest');
   }
   document.getElementById('progSub').textContent=DB.logs.length+' session'+(DB.logs.length===1?'':'s')+' logged · tap a lift for its chart';
   document.getElementById('progOvl').classList.add('on');
@@ -11883,7 +11947,7 @@ function tutAdvance(){
 // A tap where a hold was meant used to open a sheet the step knew nothing about, and the
 // fence then locked every button on it. Anything the step did not ask for is closed.
 var TUT_STRAY=['editOvl','exEditOvl','exNoteOvl','exAddOvl','exJoinOvl','swapOvl','settingsOvl','themeOvl','timerOvl',
-  'pumpOvl','lvlOvl','mkActOvl','mkSlotOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl'];
+  'pumpOvl','lvlOvl','mkActOvl','mkSlotOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl','bwOvl'];
 function tutStray(i){
   var keep=TUT_STEPS[i==null?TUTI:i].ovl||'';
   TUT_STRAY.forEach(function(id){
@@ -12458,7 +12522,7 @@ function sbEnd(){
   if(TUTON)tutEnd();                  // a tour inside the sandbox holds the sandbox DB; give it back first
   SANDBOX=false;
   document.body.classList.remove('sbx');
-  ['editOvl','exportOvl','askOvl','swapOvl','lvlOvl','exEditOvl','exNoteOvl','exAddOvl','settingsOvl','histOvl','progOvl'].forEach(function(id){
+  ['editOvl','exportOvl','askOvl','swapOvl','lvlOvl','exEditOvl','exNoteOvl','exAddOvl','settingsOvl','histOvl','progOvl','bwOvl'].forEach(function(id){
     if(document.getElementById(id))closeOvl(id);
   });
   document.getElementById('session').classList.remove('on');
