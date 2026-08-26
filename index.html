@@ -3023,6 +3023,11 @@ body.wcon{overflow:hidden;}
     <div class="sfx-lbl" style="margin-top:14px"><span>Your bar</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="barRow"></div>
     <div class="footnote" style="margin:6px 2px 0">The plate calculator starts from this. Plate-loaded machines ignore it and load bare.</div>
+    <!-- Always reachable. On a barbell lift the calculator also sits on the exercise
+         itself, already loaded to that lift's target; this is the way in from anywhere. -->
+    <div class="presets" style="grid-template-columns:1fr;margin-top:8px">
+      <button class="preset sm" onclick="openPlates('',0)">Open the plate calculator</button>
+    </div>
     <!-- Walks flow in from Health Connect, the phone's own health vault - Samsung Health and
          watch apps write into it, Forge reads walks back out. Only shown where the native
          plugin exists (the Android app); the row hides itself on the open web. -->
@@ -3861,7 +3866,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.5';
+var APPV='v5.6';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8309,9 +8314,16 @@ var PL_IDS={bench:1,bsquat:1,deadlift:1,bbcurl:1,bbthrust:1,smsquat:1,ohp:1,hack
 // The plate-loaded machines among them. A leg press sled is not a 45 lb bar, so these
 // open bare - the saved bar is a barbell preference and does not belong here.
 var PL_MACH={hack:1,lpress:1};
+// The old test matched a bare "bar ", which put a plate calculator on the V-Bar Cable
+// Pushdown and the Parallel Bar Hip Raise - neither of which has a plate on it anywhere.
+// Only phrases that can ONLY mean a loadable bar or a plate-loaded machine count now.
+var PL_RX=/\bbarbell\b|\bez[- ]?(curl )?bar\b|\bdeadlift\b|\b(back|front|hack) squat\b|\bleg press\b|\bsmith machine\b|\btrap bar\b|\bt-?bar row\b|\bpendlay\b|\bpower (clean|snatch)\b/i;
 function plateEx(id,name){
   if(PL_IDS[id])return true;
-  return /\b(barbell|bar |ez[- ]?curl|deadlift|back squat|front squat|hack|leg press|smith|trap bar)\b/i.test(name||'');
+  var n=String(name||'');
+  // a cable attachment is called a bar too, and it holds no plates
+  if(/\bcable\b|\bdumbbell\b|\bkettlebell\b|\bband\b/i.test(n))return false;
+  return PL_RX.test(n);
 }
 function plMachine(id,name){return !!PL_MACH[id]||/\b(leg press|hack)\b/i.test(name||'');}
 function plBarPref(){var s=null;try{s=localStorage.getItem('arc_bar');}catch(e){}return s||'oly';}
