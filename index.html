@@ -3035,6 +3035,11 @@ body.wcon{overflow:hidden;}
     <div class="presets" style="grid-template-columns:1fr;margin-top:8px">
       <button class="preset sm" onclick="openPlates('',0)">Open the plate calculator</button>
     </div>
+    <!-- Whether a finished rest can actually reach you. Native only: on the open web there
+         is no per-app switch to send anyone to. -->
+    <div class="sfx-lbl" id="ntLbl" style="display:none;margin-top:14px"><span>Rest alerts</span></div>
+    <div class="presets" id="ntRow" style="display:none;grid-template-columns:1fr"></div>
+    <div class="footnote" id="ntNote" style="display:none;margin:6px 2px 0"></div>
     <!-- Walks flow in from Health Connect, the phone's own health vault - Samsung Health and
          watch apps write into it, Forge reads walks back out. Only shown where the native
          plugin exists (the Android app); the row hides itself on the open web. -->
@@ -3881,7 +3886,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.9';
+var APPV='v5.10';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5852,7 +5857,13 @@ function toggleSet(id,i,rest,unit){
     var secs=parseRest(rest);
     // exId, not id: after a swap the slot keeps its name and the lift standing in it is the one
     // you actually just did, which is the one worth reading in the shade.
-    if(secs>0)startTimer(secs,(EX[exId]||{}).name);
+    // Nothing left to rest FOR. When the set just logged was the last unlogged set in
+    // the day, the workout is over - a countdown starting there is the app asking you to
+    // wait around before pressing Finish. Judged on what is actually still unlogged rather
+    // than on position, so it holds when sets are done out of order, and it needs nothing
+    // of whoever built the workout: every day earns it, generated or hand-made.
+    var dayDone=loggedCount(CUR)>=totalSets(CUR);
+    if(secs>0&&!dayDone)startTimer(secs,(EX[exId]||{}).name);
     try{
       // The record cue is for beating something, and the first time you do a lift there is
       // nothing to have beaten - the grade is first, not pr. It still READS like a best,
@@ -8417,6 +8428,56 @@ function openPlates(id,lb){
   plDraw();
   document.getElementById('plateOvl').classList.add('on');
 }
+// ---- do the alerts actually reach you ----
+// Two switches stand between a finished rest and a buzz, and neither can be flipped from a
+// web page. Android's per-app notification toggle has a real deep link, so that one lands
+// exactly where it needs to. The watch's lives inside Samsung's Galaxy Wearable app, which
+// publishes no deep link at all - so that one opens the app and says, in its own words,
+// which three taps to make. Saying so beats pretending the app can do it.
+function ntDraw(){
+  var lbl=document.getElementById('ntLbl'),row=document.getElementById('ntRow'),note=document.getElementById('ntNote');
+  if(!lbl||!row||!note)return;
+  var ra=RA();
+  function hide(){lbl.style.display='none';row.style.display='none';note.style.display='none';}
+  if(!ra||!ra.notifState){hide();return;}
+  ra.notifState().then(function(s){
+    lbl.style.display='';row.style.display='';note.style.display='';
+    if(!s.phone){
+      row.innerHTML='<button class="preset sm" onclick="ntFix()">Switch rest alerts on</button>';
+      note.textContent='Android is holding Forge\u2019s notifications back, so a rest ending while the screen is off passes in silence. This opens the one screen where that is switched on.';
+      return;
+    }
+    if(s.watchApp){
+      row.innerHTML='<button class="preset sm on" onclick="ntWatch()">Also send them to my watch</button>';
+      note.textContent='Alerts reach this phone. Your watch has its own switch for Forge, kept inside Galaxy Wearable \u2014 this walks you to it.';
+      return;
+    }
+    row.innerHTML='<button class="preset sm on" onclick="ntFix()">Rest alerts are on</button>';
+    note.textContent='A rest ending will sound and buzz even with the screen off. This opens Android\u2019s own settings for Forge.';
+  }).catch(hide);
+}
+function ntFix(){
+  var ra=RA();
+  if(ra&&ra.openNotifSettings)try{ra.openNotifSettings().catch(function(){});}catch(e){}
+}
+function ntWatch(){
+  ask('On the watch it is a separate switch, and only you can reach it:\u000a\u000a1. Galaxy Wearable opens\u000a2. Watch settings \u2192 Notifications\u000a3. App notifications \u2192 switch Forge on\u000a\u000aThe alert buzzes your wrist from then on.',
+    function(){var ra=RA();if(ra&&ra.openWatchApp)try{ra.openWatchApp().catch(function(){});}catch(e){}},
+    'Alerts on your watch','OPEN GALAXY WEARABLE');
+}
+// Asked once, and only at the moment it matters: a rest is running that will not be heard.
+function ntNudge(){
+  if(SANDBOX||TUTON)return;
+  try{if(localStorage.getItem('arc_ntnudge'))return;}catch(e){}
+  var ra=RA();
+  if(!ra||!ra.notifState)return;
+  ra.notifState().then(function(s){
+    if(s.phone)return;
+    try{localStorage.setItem('arc_ntnudge','1');}catch(e){}
+    ask('Your rest is counting down, but Android is holding Forge\u2019s notifications back \u2014 so when it ends with the screen off, nothing will sound. Open that setting now?',
+      function(){ntFix();},'Let the rest alert reach you?','OPEN THE SETTING');
+  }).catch(function(){});
+}
 // The bar lives in Settings: chosen once, not asked again mid-workout.
 function drawBarRow(){
   var e=document.getElementById('barRow');if(!e)return;
@@ -10899,6 +10960,9 @@ function pageTurn(back,cb){
 // the quick timer off the home board has no exercise behind it.
 function startTimer(secs,exName){
   stopTimer();
+  // Once ever, and only while a rest is actually counting down: if Android is holding the
+  // notifications back, this rest will end in silence and now is when that matters.
+  try{setTimeout(ntNudge,900);}catch(e){}
   restExName=exName||'';
   var pill=document.getElementById('timerPill'),lbl=document.getElementById('tTime');
   timerEnd=Date.now()+secs*1000;
@@ -11022,7 +11086,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawBarRow();hcDraw();
+  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawBarRow();ntDraw();hcDraw();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   // The two tour buttons say which LENGTH they are, so the theme's word for "Tutorial" no longer
