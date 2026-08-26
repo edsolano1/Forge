@@ -1222,6 +1222,21 @@ body.tut .dayhead-add{display:none;}
 .prog-key{display:flex;gap:14px;justify-content:center;font-size:10.5px;color:var(--txt3);margin:10px 0 4px;}
 .prog-key b{font-size:10px;}
 .prog-wrap{max-height:calc(var(--usablevh) * .58);overflow-y:auto;text-align:left;margin-top:6px;}
+/* ---- the plate calculator: a drawn bar, loaded ---- */
+.pl-wrap{background:var(--card2,rgba(255,255,255,.03));border:1px solid var(--line);border-radius:12px;padding:14px 8px 10px;margin:4px 0 10px;overflow-x:auto;}
+.pl-wrap svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.pl-read{text-align:center;font-size:13px;color:var(--txt2);margin:0 2px 12px;line-height:1.5;}
+.pl-read b{color:var(--txt);font-weight:600;}
+.pl-read .pl-warn{color:var(--gold);}
+.pl-lbl{font-size:10px;letter-spacing:.1em;color:var(--txt3);margin:12px 0 6px;}
+.pl-wrow{display:flex;align-items:center;gap:8px;}
+.pl-in{flex:1;text-align:center;font-size:19px;font-weight:600;}
+.pl-step{width:46px;height:46px;flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--txt);border-radius:10px;font-size:22px;line-height:1;cursor:pointer;}
+.pl-step:active{background:rgba(255,255,255,.06);}
+.pl-bars{display:flex;flex-wrap:wrap;gap:6px;}
+.pl-bar{font-size:12px;padding:7px 11px;border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:8px;cursor:pointer;}
+.pl-bar.on{border-color:var(--go);color:var(--txt);}
+.pl-bar small{display:block;font-size:10px;color:var(--txt3);margin-top:1px;}
 .pg-sec{font-size:10px;letter-spacing:.1em;color:var(--txt3);margin:14px 0 6px;}
 .pg-row{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;margin-bottom:5px;background:var(--surface);cursor:pointer;transition:border-color .15s;}
 .pg-row:hover{border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
@@ -3115,6 +3130,25 @@ body.wcon{overflow:hidden;}
     </div>
   </div>
 </div>
+<!-- What goes on the bar. A picture, not a sum: the bar is drawn with the plates you
+     would actually slide on, one side of it, in the order they load. -->
+<div class="ovl" id="plateOvl" style="z-index:300">
+  <div class="sheet" style="max-width:440px">
+    <h3 id="plTitle">What goes on the bar</h3>
+    <div class="pl-wrap"><div id="plArt"></div></div>
+    <div class="pl-read" id="plRead"></div>
+    <div class="pl-lbl">TOTAL WEIGHT</div>
+    <div class="pl-wrow">
+      <button class="pl-step" onclick="plNudge(-1)">&minus;</button>
+      <input class="mk-in pl-in" id="plW" type="number" inputmode="decimal" oninput="plDraw()">
+      <button class="pl-step" onclick="plNudge(1)">+</button>
+    </div>
+    <div class="pl-lbl">THE BAR</div>
+    <div class="pl-bars" id="plBars"></div>
+    <div class="sheet-btns"><div class="btn" onclick="closeOvl('plateOvl')">CLOSE</div></div>
+  </div>
+</div>
+
 <!-- A weigh-in, entered from the Progress sheet. Stored to the day: a second entry for
      the same date replaces the first, and saving an empty weight removes that day's. -->
 <div class="ovl" id="bwOvl" style="z-index:300">
@@ -3804,7 +3838,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.2';
+var APPV='v5.3';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5551,10 +5585,19 @@ function renderSession(){
       // The button sits beside the instructions because that is where you already look for
       // "how do I do this one".
       var rl=refLink(rf.swapId||id,r.name);
+      // What goes on the bar, for the lifts that have one. Seeded with this exercise's
+      // own target so the answer is already drawn when it opens.
+      var plw=0;
+      if(plateEx(rf.exId,r.name)){
+        var m1=String(r.sets).match(/^([\d.]+)x/);
+        if(m1)plw=parseFloat(m1[1])||0;
+      }
       html+='<div class="ex-links">'+
             (rl?'<a href="'+rl+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> Instructions</a>':'')+
             '<a class="unote-btn'+(un?' has':'')+'" onclick="event.stopPropagation();openExNote(\''+rf.exId+'\')">'+
               '<svg viewBox="0 0 20 20"><path d="M4 3.5h9l3 3v10h-12z"/><path d="M7 8.5h6M7 12h4"/></svg> '+(un?'Note':'Add note')+'</a>'+
+            (plateEx(rf.exId,r.name)?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+JSON.stringify(r.name)+','+plw+')">'+
+              '<svg viewBox="0 0 20 20"><path d="M2 10h16"/><path d="M5 6.5v7M7.5 5v10M12.5 5v10M15 6.5v7"/></svg> Plates</a>':'')+
             '</div>';
       html+='</div><div class="sets">';
       tg.forEach(function(t,i){
@@ -8066,6 +8109,141 @@ function walkStrip(){
     '<div class="pg-row"><div class="pg-n">Streak at '+WALK_TGT+' min</div><div class="pg-v">'+st+(st===1?' day':' days')+'</div><div class="pg-d '+(st?'up':'fl')+'">'+(st?'ON':'\u2014')+'</div></div>'+
     '<div class="pg-row"><div class="pg-n">This week</div><div class="pg-v">'+wkm+' / '+(WALK_TGT*7)+' min</div><div class="pg-d '+(wkm>=WALK_TGT*7?'up':'fl')+'">'+Math.round(wkm/(WALK_TGT*7)*100)+'%</div></div>'+
     '<div class="pg-row"><div class="pg-n">Longest walk</div><div class="pg-v">'+best+' min</div><div class="pg-d fl">'+Math.round(tot/60)+'h all time</div></div>';
+}
+// ---------- what goes on the bar ----------
+// A picture beats arithmetic in a gym. This draws ONE SIDE of the bar with the plates
+// actually slid on, biggest at the collar, the way anyone loads. Everything here is
+// computed in the DISPLAY unit and stays there - real gyms hold real plates, and a
+// kg gym has no 45 lb plate to convert into. Storage stays canonical pounds as ever;
+// only the number arriving here is converted, once, on the way in.
+//
+// BARS, and the honest answer to "does anybody still use the skinny bar": yes - the
+// 1-inch standard bar lives on in home and apartment gyms and in older sets, where it
+// weighs anywhere from 15 to 25 lb and takes its own smaller plates. So it is offered,
+// with its own plate set, rather than pretending every bar is an Olympic 45.
+var PL_BARS=[
+  {k:'oly', n:'Olympic',   s:'The usual 2-inch bar', lb:45, kg:20},
+  {k:'wom', n:"Women's",   s:'2-inch, shorter',      lb:35, kg:15},
+  {k:'std', n:'Standard',  s:'1-inch skinny bar',    lb:15, kg:7,  std:1},
+  {k:'ez',  n:'EZ curl',   s:'The wavy one',         lb:20, kg:9,  std:1},
+  {k:'non', n:'No bar',    s:'Plate-loaded machine', lb:0,  kg:0}
+];
+// Olympic-hole plates, then the smaller 1-inch set that comes with a standard bar.
+var PL_SET={lb:[45,35,25,10,5,2.5], kg:[25,20,15,10,5,2.5,1.25]};
+var PL_SET_STD={lb:[25,10,5,2.5,1.25], kg:[10,5,2.5,1.25]};
+// Colour by denomination the way competition plates are coded, so the stack reads at a
+// glance. Iron plates are all black in life; the colour here is for finding your place.
+var PL_COL={
+  '45':'#2f6fd0','35':'#d8a41c','25':'#2e8b45','20':'#2f6fd0','15':'#d8a41c',
+  '10':'#b7bec9','5':'#c0392b','2.5':'#7a828d','1.25':'#8c8f96'
+};
+var PL={w:0,bar:'oly',name:''};
+function plBarDef(k){for(var i=0;i<PL_BARS.length;i++)if(PL_BARS[i].k===k)return PL_BARS[i];return PL_BARS[0];}
+function plBarW(k){var b=plBarDef(k);return UNIT_KG?b.kg:b.lb;}
+function plPlates(k){var b=plBarDef(k);var s=b.std?PL_SET_STD:PL_SET;return UNIT_KG?s.kg:s.lb;}
+// Greedy is correct here: every plate set is super-increasing, so taking the biggest
+// that fits can never strand a load a smarter search would have made.
+function plSolve(total,barK){
+  var bar=plBarW(barK),per=(total-bar)/2,out=[],rem=per,set=plPlates(barK),i;
+  if(per<0)return {bar:bar,per:[],left:0,short:true};
+  for(i=0;i<set.length;i++){
+    while(rem>=set[i]-0.0001){out.push(set[i]);rem=Math.round((rem-set[i])*1000)/1000;}
+  }
+  return {bar:bar,per:out,left:Math.round(rem*100)/100,short:false};
+}
+function plNum(v){return String(Math.round(v*100)/100).replace(/\.00$/,'');}
+function plArt(sol,barK){
+  // Three lanes, and they must not touch: the bar sits on mid, every plate label hangs
+  // in the lane under the tallest plate, and the caption gets the floor. A 45 drawn at
+  // full height used to push its own number off the bottom edge.
+  var per=sol.per,W=300,H=132,mid=56;
+  var barY=mid-4,barH=8,collarX=96;
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="the bar, loaded">';
+  // shaft running off the left edge (the far side is the mirror of this one), then the
+  // sleeve the plates ride on
+  svg+='<rect x="0" y="'+barY+'" width="'+(collarX+8)+'" height="'+barH+'" rx="3" fill="#8a9099"/>';
+  svg+='<rect x="'+(collarX-10)+'" y="'+(mid-11)+'" width="8" height="22" rx="2" fill="#6a7078"/>';
+  var x=collarX+8,maxH=80,drew=0,labY=mid+maxH/2+14;
+  if(!per.length){
+    svg+='<rect x="'+x+'" y="'+barY+'" width="'+(W-x-26)+'" height="'+barH+'" rx="3" fill="#8a9099"/>';
+    svg+='<text x="'+(x+30)+'" y="'+(mid-16)+'" fill="#7d848d" font-size="12" font-family="system-ui">bar only</text>';
+  }
+  per.forEach(function(p,i){
+    var set=plPlates(barK),big=set[0];
+    var ph=Math.max(30,maxH*Math.min(1,(p/big)*0.72+0.28));
+    var pw=p>=(UNIT_KG?10:25)?17:(p>=(UNIT_KG?2.5:5)?12:8);
+    if(x+pw>W-14){drew=1;return;}
+    var col=PL_COL[plNum(p)]||'#7a828d';
+    svg+='<rect x="'+x+'" y="'+(mid-ph/2)+'" width="'+pw+'" height="'+ph+'" rx="3" fill="'+col+'" stroke="rgba(0,0,0,.35)"/>';
+    svg+='<text x="'+(x+pw/2)+'" y="'+labY+'" text-anchor="middle" fill="#8e959e" font-size="10" font-family="system-ui">'+plNum(p)+'</text>';
+    x+=pw+3;
+  });
+  if(per.length){
+    svg+='<rect x="'+x+'" y="'+(mid-9)+'" width="7" height="18" rx="2" fill="#6a7078"/>';   // collar
+    svg+='<rect x="'+(x+7)+'" y="'+barY+'" width="'+Math.max(0,W-x-9)+'" height="'+barH+'" rx="3" fill="#8a9099"/>';
+  }
+  if(drew)svg+='<text x="'+(W-4)+'" y="14" text-anchor="end" fill="#8e959e" font-size="10" font-family="system-ui">+ more</text>';
+  svg+='<text x="4" y="'+(H-5)+'" fill="#6e747c" font-size="10" font-family="system-ui">one side &middot; load the same on the other</text>';
+  return svg+'</svg>';
+}
+function plDraw(){
+  var el=document.getElementById('plW');
+  var want=parseFloat(el.value);
+  if(isNaN(want)||want<0)want=0;
+  PL.w=want;
+  var sol=plSolve(want,PL.bar),u=wUnitName();
+  document.getElementById('plArt').innerHTML=plArt(sol,PL.bar);
+  var made=sol.bar+sol.per.reduce(function(a,b){return a+b;},0)*2;
+  var r='';
+  if(sol.short){
+    r='<b>The bar alone is '+plNum(sol.bar)+' '+u+'</b>, heavier than that.';
+  }else if(!sol.per.length){
+    r='<b>Just the bar</b> — '+plNum(sol.bar)+' '+u+'.';
+  }else{
+    var count={},order=[];
+    sol.per.forEach(function(p){var k=plNum(p);if(!count[k]){count[k]=0;order.push(k);}count[k]++;});
+    r='<b>Per side:</b> '+order.map(function(k){return count[k]+'×'+k;}).join(', ')+'<br>'+
+      (sol.bar?plNum(sol.bar)+' '+u+' bar + '+plNum((made-sol.bar)/2)+' a side':
+               plNum((made-sol.bar)/2)+' '+u+' a side')+
+      ' = <b>'+plNum(made)+' '+u+'</b>';
+  }
+  if(sol.left>0.001)r+='<br><span class="pl-warn">'+plNum(sol.left*2)+' '+u+
+    ' short of '+plNum(want)+' — no plate that small. Nearest is '+plNum(made)+'.</span>';
+  document.getElementById('plRead').innerHTML=r;
+  document.getElementById('plBars').innerHTML=PL_BARS.map(function(b){
+    var bw=UNIT_KG?b.kg:b.lb;
+    return '<button class="pl-bar'+(b.k===PL.bar?' on':'')+'" onclick="plPickBar(\''+b.k+'\')">'+
+      b.n+(bw?' '+bw+wUnitName():'')+'<small>'+b.s+'</small></button>';
+  }).join('');
+}
+function plPickBar(k){
+  PL.bar=k;
+  try{localStorage.setItem('arc_bar',k);}catch(e){}
+  plDraw();try{sfxTick&&sfxTick();}catch(e){}
+}
+// Step by whatever the bar can actually make: two of the smallest plate in the set.
+function plNudge(dir){
+  var set=plPlates(PL.bar),step=set[set.length-1]*2;
+  var v=(parseFloat(document.getElementById('plW').value)||0)+dir*step;
+  if(v<0)v=0;
+  document.getElementById('plW').value=Math.round(v*100)/100;
+  plDraw();try{sfxTick&&sfxTick();}catch(e){}
+}
+// Barbell and plate-loaded work only: a cable stack or a dumbbell has no bar to load.
+var PL_IDS={bench:1,bsquat:1,deadlift:1,bbcurl:1,bbthrust:1,smsquat:1,ohp:1,hack:1,lpress:1};
+function plateEx(id,name){
+  if(PL_IDS[id])return true;
+  return /\b(barbell|bar |ez[- ]?curl|deadlift|back squat|front squat|hack|leg press|smith|trap bar)\b/i.test(name||'');
+}
+function openPlates(id,name,lb){
+  var d=plateEx(id,name);
+  PL.name=name||'';
+  try{var s=localStorage.getItem('arc_bar');if(s)PL.bar=s;}catch(e){}
+  if(!d&&(id==='hack'||id==='lpress'))PL.bar='non';
+  document.getElementById('plTitle').textContent=name?('What goes on: '+name):'What goes on the bar';
+  document.getElementById('plW').value=lb?fmtW(lb):'';
+  plDraw();
+  document.getElementById('plateOvl').classList.add('on');
 }
 // ---------- bodyweight ----------
 // The scale's number, one per day, canonical pounds like every other weight in the app.
@@ -11947,7 +12125,7 @@ function tutAdvance(){
 // A tap where a hold was meant used to open a sheet the step knew nothing about, and the
 // fence then locked every button on it. Anything the step did not ask for is closed.
 var TUT_STRAY=['editOvl','exEditOvl','exNoteOvl','exAddOvl','exJoinOvl','swapOvl','settingsOvl','themeOvl','timerOvl',
-  'pumpOvl','lvlOvl','mkActOvl','mkSlotOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl','bwOvl'];
+  'pumpOvl','lvlOvl','mkActOvl','mkSlotOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl','bwOvl','plateOvl'];
 function tutStray(i){
   var keep=TUT_STEPS[i==null?TUTI:i].ovl||'';
   TUT_STRAY.forEach(function(id){
@@ -12522,7 +12700,7 @@ function sbEnd(){
   if(TUTON)tutEnd();                  // a tour inside the sandbox holds the sandbox DB; give it back first
   SANDBOX=false;
   document.body.classList.remove('sbx');
-  ['editOvl','exportOvl','askOvl','swapOvl','lvlOvl','exEditOvl','exNoteOvl','exAddOvl','settingsOvl','histOvl','progOvl','bwOvl'].forEach(function(id){
+  ['editOvl','exportOvl','askOvl','swapOvl','lvlOvl','exEditOvl','exNoteOvl','exAddOvl','settingsOvl','histOvl','progOvl','bwOvl','plateOvl'].forEach(function(id){
     if(document.getElementById(id))closeOvl(id);
   });
   document.getElementById('session').classList.remove('on');
