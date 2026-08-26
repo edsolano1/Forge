@@ -3866,7 +3866,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.6';
+var APPV='v5.7';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8209,11 +8209,15 @@ function plArt(){
     svg+='<rect x="'+(cx-span)+'" y="'+(mid-sleeveH/2)+'" width="'+(span-gap+4)+'" height="'+sleeveH+'" rx="2.5" fill="#8a9099"/>';
     svg+='<rect x="'+(cx+gap-4)+'" y="'+(mid-sleeveH/2)+'" width="'+(span-gap+4)+'" height="'+sleeveH+'" rx="2.5" fill="#8a9099"/>';
     if(PL.bar==='ez'){
-      // the wavy grip - three bends, which is what makes an EZ bar recognisable
-      var y0=mid,a=7,x0=cx-gap,x1=cx+gap,seg=(x1-x0)/6;
-      var d='M'+x0+' '+y0;
-      for(var i=0;i<6;i++)d+=' q '+(seg/2)+' '+((i%2?a:-a)*2)+' '+seg+' 0';
-      svg+='<path d="'+d+'" fill="none" stroke="#8a9099" stroke-width="'+(shaftH+1)+'" stroke-linecap="round"/>';
+      // A real EZ curl bar is a W, not a wave: it runs straight off each sleeve, drops
+      // into an angled grip on each side, and rises over a hump in the middle. Straight
+      // segments with bent corners - a smooth sine read as a squiggle, not a bar.
+      var a=8,g=gap;
+      var p=[[-g,0],[-g*0.72,0],[-g*0.40,a],[-g*0.13,-a*0.62],
+             [g*0.13,-a*0.62],[g*0.40,a],[g*0.72,0],[g,0]];
+      svg+='<polyline points="'+p.map(function(q){return (cx+q[0]).toFixed(1)+','+(mid+q[1]).toFixed(1);}).join(' ')+
+           '" fill="none" stroke="#8a9099" stroke-width="'+(shaftH+1)+
+           '" stroke-linejoin="round" stroke-linecap="round"/>';
     }else{
       svg+='<rect x="'+(cx-gap)+'" y="'+(mid-shaftH/2)+'" width="'+(gap*2)+'" height="'+shaftH+'" rx="2" fill="#8a9099"/>';
       // knurl marks, so a plain bar still reads as a bar
@@ -8292,14 +8296,14 @@ function plBarBtns(){
       b.n+(bw?' · '+bw+wUnitName():'')+'<small>'+b.s+'</small></button>';
   }).join('');
 }
-// Changing the bar keeps the WEIGHT you had built where the new bar can still make it -
-// the plates themselves may not exist on the other bar (no 45s on a 1-inch bar).
+// Changing the bar STRIPS it. Carrying the old total across looked like the new bar came
+// with plates already hanging on it - switch to the 35 and 5s had appeared by themselves.
+// Picking up a different bar means picking up a bare one; the plates go on after.
 function plPickBar(k){
-  var want=plTotal();
   PL.bar=k;
   // A bar chosen on a machine is not a barbell preference and must not be remembered.
   if(!PL.mach)try{localStorage.setItem('arc_bar',k);}catch(e){}
-  PL.on=plLoadFor(want);
+  PL.on=[];
   plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
 function plAdd(p){PL.on.push(p);plDraw();try{sfxTick&&sfxTick();}catch(e){}}
