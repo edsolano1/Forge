@@ -87,7 +87,14 @@ unavoidable, never write `'\\n'` inside a heredoc or `node -e` string — the sh
 each eat one level and it lands as a real newline inside a string literal, which is a syntax
 error. Use `String.fromCharCode(92)+'n'`. Same for `\'`.
 
-**4. `hidden` loses to any author `display` rule.** `[hidden]` is `display:none` in the UA sheet
+**4. Never put a NAME inside an `onclick=""` attribute.** Exercise and workout names carry
+double quotes (and apostrophes), which close the attribute early and leave a half-parsed
+handler behind. The tap then does nothing but bubble to the card, so it reads as "the
+button just selects it". Pass the ID only and look the name up in the function. Shipped
+broken once in v5.3 because the function was tested directly instead of by clicking the
+rendered button — **click the real element, not the handler.**
+
+**5. `hidden` loses to any author `display` rule.** `[hidden]` is `display:none` in the UA sheet
 only. An element with `display:flex` in the stylesheet ignores it completely.
 
 ---
