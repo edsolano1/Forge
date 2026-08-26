@@ -3025,18 +3025,9 @@ body.wcon{overflow:hidden;}
     <div class="presets" id="motionRow"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Units</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="unitRow"></div>
-    <!-- The bar you train on. Chosen once here; the plate calculator opens on it every
-         time rather than asking again mid-workout. -->
-    <div class="sfx-lbl" style="margin-top:14px"><span>Your bar</span></div>
-    <div class="presets" style="grid-template-columns:1fr 1fr" id="barRow"></div>
-    <div class="footnote" style="margin:6px 2px 0">The plate calculator starts from this. Plate-loaded machines ignore it and load bare.</div>
-    <!-- Always reachable. On a barbell lift the calculator also sits on the exercise
-         itself, already loaded to that lift's target; this is the way in from anywhere. -->
-    <div class="presets" style="grid-template-columns:1fr;margin-top:8px">
-      <button class="preset sm" onclick="openPlates('',0)">Open the plate calculator</button>
-    </div>
-    <!-- Whether a finished rest can actually reach you. Native only: on the open web there
-         is no per-app switch to send anyone to. -->
+    <!-- Whether a finished rest can actually reach you. Native only, and only when there is
+         something to DO about it: once the alerts are getting through, this row has nothing
+         left to say and takes itself off the sheet. -->
     <div class="sfx-lbl" id="ntLbl" style="display:none;margin-top:14px"><span>Rest alerts</span></div>
     <div class="presets" id="ntRow" style="display:none;grid-template-columns:1fr"></div>
     <div class="footnote" id="ntNote" style="display:none;margin:6px 2px 0"></div>
@@ -3886,7 +3877,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.10';
+var APPV='v5.11';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -7996,6 +7987,7 @@ function doRestore(input){
         if(!DB.days)DB.days={};if(!DB.custom)DB.custom={};if(!DB.cex)DB.cex={};
         if(!DB.slots)DB.slots={};if(!DB.exNotes)DB.exNotes={};
         if(!DB.dayEdit)DB.dayEdit={};if(!DB.vOvr)DB.vOvr={};if(!DB.bw)DB.bw=[];
+        if(!DB.exBar)DB.exBar={};
         if(DB.walkRun===undefined)DB.walkRun=null;
         var s=d.settings||{};
         Object.keys(s).forEach(function(k){
@@ -8367,8 +8359,10 @@ function plBarBtns(){
 // Picking up a different bar means picking up a bare one; the plates go on after.
 function plPickBar(k){
   PL.bar=k;PL.want=null;
-  // A bar chosen on a machine is not a barbell preference and must not be remembered.
-  if(!PL.mach)try{localStorage.setItem('arc_bar',k);}catch(e){}
+  // Remembered against the LIFT, so the EZ bar you pick for curls is still the EZ bar next
+  // week and never has to be chosen again. Machines included: if you tell it a hack squat
+  // takes a bar, it believes you and keeps that.
+  barRemember(PL.id,k);
   PL.on=[];
   plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
@@ -8407,15 +8401,16 @@ function plateEx(id,name){
   return PL_RX.test(n);
 }
 function plMachine(id,name){return !!PL_MACH[id]||/\b(leg press|hack)\b/i.test(name||'');}
-function plBarPref(){var s=null;try{s=localStorage.getItem('arc_bar');}catch(e){}return s||'oly';}
 function openPlates(id,lb){
   var ex=null;try{ex=R(id);}catch(e){}
   var name=(ex&&ex.name)||(EX[id]&&EX[id].name)||'';
   PL.name=name;
+  PL.id=id||'';
   PL.mach=plMachine(id,name);
-  // Set the bar OUTRIGHT rather than leaving whatever the last sheet held: a NO BAR
-  // chosen on the leg press was still standing when the next barbell lift opened.
-  PL.bar=PL.mach?'non':plBarPref();
+  // This lift’s own bar - the one it was last given, or a sensible guess from its name if
+  // it has never been asked. Set OUTRIGHT, never inherited from whichever sheet was open
+  // last, which is how a NO BAR chosen on the leg press used to follow you to the bench.
+  PL.bar=barFor(id,name);
   // Opened from a lift, it arrives already loaded to that lift's target - the answer is
   // on screen before anything is tapped. The typed box shows the same number, so it is
   // obvious where the plates came from and it can be edited straight away.
@@ -8447,13 +8442,10 @@ function ntDraw(){
       note.textContent='Android is holding Forge\u2019s notifications back, so a rest ending while the screen is off passes in silence. This opens the one screen where that is switched on.';
       return;
     }
-    if(s.watchApp){
-      row.innerHTML='<button class="preset sm on" onclick="ntWatch()">Also send them to my watch</button>';
-      note.textContent='Alerts reach this phone. Your watch has its own switch for Forge, kept inside Galaxy Wearable \u2014 this walks you to it.';
-      return;
-    }
-    row.innerHTML='<button class="preset sm on" onclick="ntFix()">Rest alerts are on</button>';
-    note.textContent='A rest ending will sound and buzz even with the screen off. This opens Android\u2019s own settings for Forge.';
+    // Getting through already. A row that only says so is clutter on a sheet that has
+    // plenty - the watch has its own switch, but that is a once-ever setup and it is
+    // offered by the nudge when a rest actually goes unheard, not parked here forever.
+    hide();
   }).catch(hide);
 }
 function ntFix(){
@@ -8478,19 +8470,30 @@ function ntNudge(){
       function(){ntFix();},'Let the rest alert reach you?','OPEN THE SETTING');
   }).catch(function(){});
 }
-// The bar lives in Settings: chosen once, not asked again mid-workout.
-function drawBarRow(){
-  var e=document.getElementById('barRow');if(!e)return;
-  var cur=plBarPref();
-  e.innerHTML=PL_BARS.map(function(b){
-    var bw=UNIT_KG?b.kg:b.lb;
-    return '<button class="preset sm'+(b.k===cur?' on':'')+'" onclick="barSet(\''+b.k+'\')">'+
-      b.n+(bw?' '+bw+wUnitName():'')+'</button>';
-  }).join('');
+// ---- which bar THIS lift uses ----
+// A bar is a property of the exercise, not of the person. An EZ curl is on the EZ bar every
+// week and a bench is on the Olympic every week, so asking once per lift and remembering is
+// the only version of this that does not become a chore. DB.exBar[exId] holds the answer,
+// written the moment a bar is picked inside that lift's calculator.
+// Before it has ever been answered, the name is a good guess: nobody curls an EZ bar on an
+// Olympic, and a leg press has no bar at all. A guess is never saved - only a real choice is,
+// so changing the guess later changes it for everyone who has not decided.
+function barGuess(id,name){
+  var n=String(name||'');
+  if(plMachine(id,n))return 'non';
+  if(/\bez\b|\bez[- ]?curl\b/i.test(n))return 'ez';
+  if(/\bsmith\b/i.test(n))return 'std';
+  return 'oly';
 }
-function barSet(k){
-  try{localStorage.setItem('arc_bar',k);}catch(e){}
-  drawBarRow();try{sfxLog();}catch(e){}
+function barFor(id,name){
+  var saved=(DB&&DB.exBar)?DB.exBar[id]:null;
+  return saved||barGuess(id,name);
+}
+function barRemember(id,k){
+  if(!id)return;                       // the standalone calculator belongs to no lift
+  DB.exBar=DB.exBar||{};
+  DB.exBar[id]=k;
+  saveDB();
 }
 // ---------- bodyweight ----------
 // The scale's number, one per day, canonical pounds like every other weight in the app.
@@ -8702,6 +8705,7 @@ function showHistory(){
   }).join('\n\n------------------------\n\n');
   document.getElementById('histTxt').value=out;
   HIST.sel=null;HIST.mon=null;
+  try{hcSyncProbe();}catch(e){}
   renderHist();
   document.getElementById('histOvl').classList.add('on');
 }
@@ -8844,6 +8848,7 @@ function renderHist(){
     // add button stretched the sheet past the screen and shoved its own buttons off the
     // bottom (user note, Aug 24).
     body.innerHTML='<div class="hscroll">'+walkStrip()+
+      hcSyncRow()+
       '<div class="hrow hwalk hadd" onclick="openWalkAdd()">+ ADD A WALK</div>'+
       out+'</div>';
     return;
@@ -9173,7 +9178,6 @@ function kgSet(on){
   UNIT_KG=!!on;
   try{localStorage.setItem('arc_kg',on?'1':'0');}catch(e){}
   drawUnitRow();
-  try{drawBarRow();}catch(e){}   // bar weights are written in the current unit
   renderHome();
   if(typeof sessionOpen==='function'&&sessionOpen())renderSession();
   try{sfxLog();}catch(e){}
@@ -10275,10 +10279,9 @@ function hcDraw(){
     }
     hs.granted().then(function(g){
       if(g.granted){
-        var got=(DB.walks||[]).filter(function(w){return w.hc;}).length;
-        b.textContent='Sync now';
-        n.textContent='Connected. '+(got?got+' walk'+(got===1?'':'s')+' brought in so far.':'Walks will flow in automatically.')+
-          ' If nothing arrives, open Samsung Health and allow it to sync with Health Connect.';
+        // Connected, so this row is done. SYNC WALKS NOW lives in Session history, beside
+        // the walks themselves, where pressing it shows the result rather than describing it.
+        l.style.display='none';r.style.display='none';n.style.display='none';
       }else{
         b.textContent='Connect to Health Connect';
         n.textContent='Walks recorded by Samsung Health or your watch flow in automatically. Forge only reads them, and nothing leaves the phone.';
@@ -10323,6 +10326,40 @@ function walkRm(i){
     if(w.hc){DB.walkGone=DB.walkGone||{};DB.walkGone[w.hc]=(w.ts?{t:w.ts,m:(w.min||0)}:1);}
     DB.walks.splice(i,1);saveDB();renderHist();
   },'Remove this walk?','REMOVE');
+}
+// SYNC WALKS NOW, where the walks are. In Settings it was a button that described a
+// result on another screen; here the list it fills in is directly underneath, so pressing
+// it shows its own work. Drawn only once Health Connect is actually connected - before
+// that the Settings row is still the place, because that is a permission, not a refresh.
+var HCSYNCOK=false;
+function hcSyncRow(){
+  if(!HCSYNCOK)return '';
+  return '<div class="hrow hwalk hadd" id="hcSyncBtn" onclick="hcSyncNow()">&#8635; SYNC WALKS NOW</div>';
+}
+// Cheap and cached: renderHist runs on every keystroke of history navigation, and asking
+// Android about permissions on each pass would be silly. The answer only changes when the
+// user grants it, which reopens the sheet anyway.
+function hcSyncProbe(){
+  var hs=HS();
+  if(!hs){HCSYNCOK=false;return;}
+  hs.granted().then(function(g){
+    var was=HCSYNCOK;
+    HCSYNCOK=!!(g&&g.granted);
+    if(HCSYNCOK!==was&&document.getElementById('histOvl')&&document.getElementById('histOvl').classList.contains('on'))renderHist();
+  }).catch(function(){HCSYNCOK=false;});
+}
+function hcSyncNow(){
+  var b=document.getElementById('hcSyncBtn');
+  if(b)b.textContent='\u21bb SYNCING\u2026';
+  var before=(DB.walks||[]).length;
+  hcSync(true);
+  // hcSync owns the dialog and the saving; this only puts the list back in front of you.
+  setTimeout(function(){
+    renderHist();
+    var after=(DB.walks||[]).length;
+    var nb=document.getElementById('hcSyncBtn');
+    if(nb&&after===before)nb.textContent='\u21bb SYNC WALKS NOW';
+  },2500);
 }
 function hcSync(manual){
   var hs=HS();if(!hs)return;
@@ -11086,7 +11123,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawBarRow();ntDraw();hcDraw();
+  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();ntDraw();hcDraw();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   // The two tour buttons say which LENGTH they are, so the theme's word for "Tutorial" no longer
