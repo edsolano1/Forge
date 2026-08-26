@@ -3866,7 +3866,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.7';
+var APPV='v5.8';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4167,10 +4167,17 @@ function setGrade(exId,set){
 // It is not recorded as a PR though - e.pr stays off, so first sessions do not inflate the count.
 // Once there is a baseline, the real grading takes over.
 function isTop(g){return g==='pr'||g==='first';}
+// A set is graded against your BEST EVER single set, which means that on any ordinary
+// day almost every set you do is "under" - and it was being washed grey to say so. A
+// good working set is not a demotion: 145x9 against a lifetime best of 145x10 read as
+// going backwards, on a lift that was going fine. So 'under' now looks like nothing at
+// all. The grade is still worked out and still STORED on the entry, so history, the
+// level-up engine and every chart are untouched and this stays reversible - the only
+// thing that changed is that the app stopped telling you that you failed.
 function gradeClass(e){
   if(!e)return '';
   var g=e.g||(e.pr?'pr':'');               // entries logged before grading existed
-  return isTop(g)?' ispr':g==='under'?' isunder':g==='match'?' ismatch':'';
+  return isTop(g)?' ispr':g==='match'?' ismatch':'';
 }
 function isReady(exId,tgts){
   var L=lastFor(exId);
@@ -5557,11 +5564,9 @@ function renderSession(){
   stopHold();resetHoldState();
   var wk=CUR,w=W[wk],A=DB.active[wk],html='';
   var canRaise={};levelPlan(wk).forEach(function(p){canRaise[p.id]=1;});
-  // What the colours on a logged set mean, once at the top rather than once in a tutorial.
-  html+='<div class="gradekey">'+
-        '<span><i style="background:var(--gold)"></i>Best ever</span>'+
-        '<span><i style="background:var(--match)"></i>Matched</span>'+
-        '<span><i style="background:var(--txt3)"></i>Under</span></div>';
+  // The colour key is gone (user call, mid-session, Aug 26). It existed to explain a
+  // three-way grade, and the grade itself was the problem: see gradeClass. A record still
+  // reads gold and needs no legend to say so.
 
   var lastT=null;
   var blks=edBlocks(wk),ssTot=0,ssI=0;
@@ -5798,7 +5803,9 @@ function toggleSet(id,i,rest,unit){
     // and it being logged - a throw in the flare/sound path used to eat the whole set.
     A.entries[id][i]=e;
     row.classList.add('done');
-    if(gr)row.classList.add(isTop(gr)?'ispr':gr==='match'?'ismatch':'isunder');
+    // The live path, hit the instant a set lands. It must agree with gradeClass, which
+    // no longer marks 'under' at all - the grade is stored on e.g either way.
+    if(gr&&gr!=='under')row.classList.add(isTop(gr)?'ispr':'ismatch');
     // rest starts the moment the set lands, before any effects
     var secs=parseRest(rest);
     // exId, not id: after a swap the slot keeps its name and the lift standing in it is the one
