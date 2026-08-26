@@ -3838,7 +3838,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.3';
+var APPV='v5.4';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5596,7 +5596,11 @@ function renderSession(){
             (rl?'<a href="'+rl+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> Instructions</a>':'')+
             '<a class="unote-btn'+(un?' has':'')+'" onclick="event.stopPropagation();openExNote(\''+rf.exId+'\')">'+
               '<svg viewBox="0 0 20 20"><path d="M4 3.5h9l3 3v10h-12z"/><path d="M7 8.5h6M7 12h4"/></svg> '+(un?'Note':'Add note')+'</a>'+
-            (plateEx(rf.exId,r.name)?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+JSON.stringify(r.name)+','+plw+')">'+
+            // Only the id and the weight cross into the attribute. The NAME used to ride
+            // along as JSON, and a name is full of double quotes - which closed the
+            // onclick attribute early, left a syntax error behind, and made the tap fall
+            // through to the card. openPlates looks the name up itself now.
+            (plateEx(rf.exId,r.name)?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+plw+')">'+
               '<svg viewBox="0 0 20 20"><path d="M2 10h16"/><path d="M5 6.5v7M7.5 5v10M12.5 5v10M15 6.5v7"/></svg> Plates</a>':'')+
             '</div>';
       html+='</div><div class="sets">';
@@ -8191,7 +8195,15 @@ function plDraw(){
   var want=parseFloat(el.value);
   if(isNaN(want)||want<0)want=0;
   PL.w=want;
-  var sol=plSolve(want,PL.bar),u=wUnitName();
+  var u=wUnitName();
+  // Nothing typed yet is its own state, not an error. A lift with no target weight set
+  // lands here, and "the bar alone is heavier than that" was a strange way to say it.
+  if(!want){
+    document.getElementById('plArt').innerHTML=plArt({bar:plBarW(PL.bar),per:[],left:0},PL.bar);
+    document.getElementById('plRead').innerHTML='Type the weight you want and the plates appear.';
+    plBarBtns();return;
+  }
+  var sol=plSolve(want,PL.bar);
   document.getElementById('plArt').innerHTML=plArt(sol,PL.bar);
   var made=sol.bar+sol.per.reduce(function(a,b){return a+b;},0)*2;
   var r='';
@@ -8210,6 +8222,9 @@ function plDraw(){
   if(sol.left>0.001)r+='<br><span class="pl-warn">'+plNum(sol.left*2)+' '+u+
     ' short of '+plNum(want)+' — no plate that small. Nearest is '+plNum(made)+'.</span>';
   document.getElementById('plRead').innerHTML=r;
+  plBarBtns();
+}
+function plBarBtns(){
   document.getElementById('plBars').innerHTML=PL_BARS.map(function(b){
     var bw=UNIT_KG?b.kg:b.lb;
     return '<button class="pl-bar'+(b.k===PL.bar?' on':'')+'" onclick="plPickBar(\''+b.k+'\')">'+
@@ -8218,7 +8233,9 @@ function plDraw(){
 }
 function plPickBar(k){
   PL.bar=k;
-  try{localStorage.setItem('arc_bar',k);}catch(e){}
+  // Only a barbell choice is worth remembering; picking one on a machine would otherwise
+  // teach the app that every bench press from now on has no bar.
+  if(!PL.mach)try{localStorage.setItem('arc_bar',k);}catch(e){}
   plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
 // Step by whatever the bar can actually make: two of the smallest plate in the set.
@@ -8231,15 +8248,23 @@ function plNudge(dir){
 }
 // Barbell and plate-loaded work only: a cable stack or a dumbbell has no bar to load.
 var PL_IDS={bench:1,bsquat:1,deadlift:1,bbcurl:1,bbthrust:1,smsquat:1,ohp:1,hack:1,lpress:1};
+// The plate-loaded machines among them. A leg press sled is not a 45 lb bar, so these
+// open on NO BAR - the remembered bar is a barbell preference and does not belong here.
+var PL_MACH={hack:1,lpress:1};
 function plateEx(id,name){
   if(PL_IDS[id])return true;
   return /\b(barbell|bar |ez[- ]?curl|deadlift|back squat|front squat|hack|leg press|smith|trap bar)\b/i.test(name||'');
 }
-function openPlates(id,name,lb){
-  var d=plateEx(id,name);
-  PL.name=name||'';
-  try{var s=localStorage.getItem('arc_bar');if(s)PL.bar=s;}catch(e){}
-  if(!d&&(id==='hack'||id==='lpress'))PL.bar='non';
+function plMachine(id,name){return !!PL_MACH[id]||/\b(leg press|hack)\b/i.test(name||'');}
+function openPlates(id,lb){
+  var ex=null;try{ex=R(id);}catch(e){}
+  var name=(ex&&ex.name)||(EX[id]&&EX[id].name)||'';
+  PL.name=name;
+  PL.mach=plMachine(id,name);
+  // Set the bar OUTRIGHT rather than leaving whatever the last sheet held: a NO BAR
+  // chosen on the leg press was still standing when the next barbell lift opened.
+  if(PL.mach)PL.bar='non';
+  else{var s=null;try{s=localStorage.getItem('arc_bar');}catch(e){}PL.bar=s||'oly';}
   document.getElementById('plTitle').textContent=name?('What goes on: '+name):'What goes on the bar';
   document.getElementById('plW').value=lb?fmtW(lb):'';
   plDraw();
