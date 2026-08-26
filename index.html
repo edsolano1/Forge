@@ -3877,7 +3877,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.11';
+var APPV='v5.12';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8249,12 +8249,37 @@ function plArt(){
   var span=PL.bar==='sho'?128:(PL.bar==='ez'?120:150);   // half-length of the whole bar
   var shaftH=thin?4:6,sleeveH=thin?5:10;
   var gap=PL.bar==='ez'?46:40;                            // clear space in the middle
-  var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="the bar, loaded both ends">';
+  var set=plPlates(PL.bar),big=set[0],maxH=76;
+  // biggest plate sits innermost, exactly as it loads
+  var order=PL.on.slice().sort(function(a,b){return b-a;});
+  function pwOf(p){return p>=(UNIT_KG?10:25)?15:(p>=(UNIT_KG?2.5:5)?11:8);}
+  // How far the stack actually reaches, worked out BEFORE anything is drawn, so a machine's
+  // horn can be cut to the length of what is hanging on it instead of guessing.
+  var start=gap+(none?6:2),reach=start,drew=0;
+  order.forEach(function(p){
+    var pw=pwOf(p);
+    if(reach+pw>span-6){drew++;return;}
+    reach+=pw+2.5;
+  });
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+(none?'the machine, loaded':'the bar, loaded both ends')+'">';
   function bar(){
     if(none){
-      // a plate-loaded machine: a carriage with a horn out of each side
-      svg+='<rect x="'+(cx-20)+'" y="'+(mid-20)+'" width="40" height="40" rx="6" fill="#3a4048" stroke="#565d66"/>';
-      svg+='<rect x="'+(cx-span*0.62)+'" y="'+(mid-4)+'" width="'+(span*1.24)+'" height="8" rx="3" fill="#6a7078"/>';
+      // A plate-loaded machine, drawn as the part you actually deal with: a WEIGHT HORN
+      // coming out of the frame, with the lip on the end that stops the plates walking off.
+      // The upright and the foot under it are what make it read as a machine standing on a
+      // gym floor rather than a box floating in the middle of the picture - the frame is the
+      // whole difference between "machine" and "shape".
+      var hl=Math.max(72,reach+12);
+      svg+='<rect x="'+(cx-32)+'" y="'+(mid+40)+'" width="64" height="7" rx="3" fill="#3f454d"/>';        // foot on the floor
+      svg+='<rect x="'+(cx-30)+'" y="'+(mid+47)+'" width="8" height="4" rx="2" fill="#343a41"/>';          // and its pads
+      svg+='<rect x="'+(cx+22)+'" y="'+(mid+47)+'" width="8" height="4" rx="2" fill="#343a41"/>';
+      svg+='<rect x="'+(cx-hl)+'" y="'+(mid-4.5)+'" width="'+(hl*2)+'" height="9" rx="4" fill="#8a9099"/>';// the horns
+      svg+='<rect x="'+(cx-hl-1)+'" y="'+(mid-9)+'" width="5" height="18" rx="2" fill="#6a7078"/>';        // end lips
+      svg+='<rect x="'+(cx+hl-4)+'" y="'+(mid-9)+'" width="5" height="18" rx="2" fill="#6a7078"/>';
+      // the upright last, so the horns read as coming OUT of it rather than through it
+      svg+='<rect x="'+(cx-8)+'" y="'+(mid-42)+'" width="16" height="84" rx="3" fill="#4a5058" stroke="#5f666f"/>';
+      svg+='<rect x="'+(cx-4)+'" y="'+(mid-34)+'" width="8" height="4" rx="2" fill="#3a4046"/>';           // frame holes
+      svg+='<rect x="'+(cx-4)+'" y="'+(mid+26)+'" width="8" height="4" rx="2" fill="#3a4046"/>';
       return;
     }
     // sleeves (where the plates ride), both ends
@@ -8277,15 +8302,12 @@ function plArt(){
     }
   }
   bar();
-  var set=plPlates(PL.bar),big=set[0],maxH=76,room=span-gap-10,drew=0;
-  // biggest plate sits innermost, exactly as it loads
-  var order=PL.on.slice().sort(function(a,b){return b-a;});
   [-1,1].forEach(function(side){
-    var x=cx+side*(gap+(none?6:2));
+    var x=cx+side*start;
     order.forEach(function(p,i){
       var ph=Math.max(26,maxH*Math.min(1,(p/big)*0.72+0.28));
-      var pw=p>=(UNIT_KG?10:25)?15:(p>=(UNIT_KG?2.5:5)?11:8);
-      if(Math.abs(x-cx)+pw>span-6){if(side===1)drew++;return;}
+      var pw=pwOf(p);
+      if(Math.abs(x-cx)+pw>span-6)return;
       var px=side>0?x:x-pw;
       svg+='<rect x="'+px.toFixed(1)+'" y="'+(mid-ph/2).toFixed(1)+'" width="'+pw+'" height="'+ph.toFixed(1)+
            '" rx="3" fill="'+(PL_COL[plNum(p)]||'#7a828d')+'" stroke="rgba(0,0,0,.4)"/>';
@@ -8298,8 +8320,9 @@ function plArt(){
     }
   });
   if(drew)svg+='<text x="'+(W-5)+'" y="15" text-anchor="end" fill="#8e959e" font-size="10" font-family="system-ui">+'+drew+' more each end</text>';
-  if(!PL.on.length)svg+='<text x="'+cx+'" y="'+(mid-30)+'" text-anchor="middle" fill="#6e747c" font-size="11" font-family="system-ui">'+(none?'nothing on yet':'bar only')+'</text>';
-  svg+='<text x="'+cx+'" y="'+(H-6)+'" text-anchor="middle" fill="#6e747c" font-size="10" font-family="system-ui">both ends shown &middot; this is the whole bar</text>';
+  if(!PL.on.length)svg+='<text x="'+cx+'" y="'+(mid-30)+'" text-anchor="middle" fill="#6e747c" font-size="11" font-family="system-ui">'+(none?'nothing on the horns yet':'bar only')+'</text>';
+  svg+='<text x="'+cx+'" y="'+(H-6)+'" text-anchor="middle" fill="#6e747c" font-size="10" font-family="system-ui">'+
+       (none?'both horns shown &middot; load the same on each':'both ends shown &middot; this is the whole bar')+'</text>';
   return svg+'</svg>';
 }
 function plDraw(){
