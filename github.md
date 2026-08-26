@@ -1,4 +1,4 @@
-repo: edsolano1/Arcanum
+repo: edsolano1/Forge (renamed from Arcanum, Aug 26 2026; a stub repo named Arcanum forwards the old Pages address)
 branch: main
 path: (repo root)
 

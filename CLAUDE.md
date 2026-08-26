@@ -3,11 +3,13 @@
 An offline workout logger. One HTML file, no build step, no account, no server.
 
 **The app is named Forge** (renamed from "Arcanum" in v4.145 — "Forge" was originally just the
-theme name). The old name deliberately survives in every technical identifier: the GitHub repo
-and Pages URL (`edsolano1/Arcanum`), the Android package (`com.edsolano.arcanum`), the desktop
-folder names, and the service-worker cache prefix (`arcanum-vNNN`). Those are load-bearing —
-changing any of them breaks the phone's URL or the install — so write "Forge" in prose and
-leave the identifiers alone.
+theme name). The repo and Pages URL are now `edsolano1/Forge` → `edsolano1.github.io/Forge/`
+(renamed Aug 26, 2026); a stub repo named `Arcanum` holds the OLD address with a redirect page
+plus a kill-switch service worker, so installed apps that still point there follow along with
+their data intact — do not delete that stub. The old name deliberately survives in: the Android
+package (`com.edsolano.arcanum` — changing it forks the app and orphans everyone's data), the
+desktop folder names, and the service-worker cache prefix (`arcanum-vNNN`). Write "Forge" in
+prose and leave those identifiers alone.
 
 Ships as two halves:
 - **Web** — GitHub Pages serves `main`. This is the half that gets tested.
