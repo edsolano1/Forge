@@ -32,7 +32,7 @@ as a tab and installed.
 A rest timer runs 45s–3min. When it ends the user must **hear** an alert, while they are in
 another app — in practice Spotify plus a muted mobile game, at the gym.
 
-1. The alert must sound with Arcanum in the background.
+1. The alert must sound with Forge (then "Arcanum") in the background.
 2. **The user's music must survive.** Dipping while the bell rings is fine. Stopping is not.
 
 One environmental fact: **the phone's ringer is on silent or vibrate, media volume ~25%.**
@@ -128,7 +128,7 @@ trim under it that lands the peak at 0.9 with nothing clipped.
 resumes. What to check on one rest, backgrounded:
 
 - The music dips at the bell and **comes back up**.
-- **No Arcanum media notification with a play button is left in the shade.** It should not appear at
+- **No Forge media notification with a play button is left in the shade.** It should not appear at
   all now. Its absence is the visible proof that the focus type changed.
 - `Settings → Rest log` shows `dur=3.6` (or `3` on Tundra) at the ZERO line.
 
