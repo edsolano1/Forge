@@ -3894,7 +3894,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.22';
+var APPV='v5.23';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4177,6 +4177,21 @@ function bestEver(exId,excludeIdx){
   }
   return best;
 }
+// The best single set of the LAST session you did this lift, as a score. This is what a
+// normal week is actually measured against - your own last time, not the best day you ever
+// had. bestEver still exists and still owns the PR line at the foot of the card; it just
+// stopped being the bar every ordinary set was held up to.
+function lastScore(exId){
+  var L=lastFor(exId);
+  if(!L||!L.sets||!L.sets.length)return null;
+  var best=null;
+  L.sets.forEach(function(s){
+    if(!s)return;
+    var sc=setScore(exId,s);
+    if(best===null||sc>best)best=sc;
+  });
+  return best;
+}
 function isPR(exId,set){return setGrade(exId,set)==='pr';}
 // How this set stands against your best ever for the lift:
 // 'pr' beat it, 'match' equalled it, 'under' came in below it,
@@ -4202,7 +4217,13 @@ function setGrade(exId,set){
   var b=bestEver(exId);
   if(!b)return 'first';                    // nothing to beat yet - set the baseline
   var s=setScore(exId,set),bs=setScore(exId,b);
-  if(s>bs+0.0001)return 'pr';
+  if(s>bs+0.0001)return 'pr';              // an all-time record, and rare by definition
+  // Beating your OWN LAST TIME is the thing training is actually made of, and it was going
+  // unmarked - gold only ever fired on a lifetime best, so a year of steady progress could
+  // pass without the app ever saying well done. 'up' reads gold too, but it is NOT recorded
+  // as a record: e.pr stays off, so the count on the finish sheet still means what it says.
+  var ls=lastScore(exId);
+  if(ls!==null&&s>ls+0.0001)return 'up';
   if(Math.abs(s-bs)<=0.0001)return 'match';
   return 'under';                          // stored, never shown - see gradeClass
 }
@@ -4210,7 +4231,7 @@ function setGrade(exId,set){
 // cue. It used to land grey, which is a grade, and there is nothing to grade it against yet.
 // It is not recorded as a PR though - e.pr stays off, so first sessions do not inflate the count.
 // Once there is a baseline, the real grading takes over.
-function isTop(g){return g==='pr'||g==='first';}
+function isTop(g){return g==='pr'||g==='first'||g==='up';}
 // A set is graded against your BEST EVER single set, which means that on any ordinary
 // day almost every set you do is "under" - and it was being washed grey to say so. A
 // good working set is not a demotion: 145x9 against a lifetime best of 145x10 read as
@@ -5908,6 +5929,7 @@ function updateProg(){
 }
 document.getElementById('sBack').onclick=function(){
   leaveSession();
+  try{wearPush();}catch(e){}   // walking away from the day clears the wrist too
 };
 
 // ---------- swap ----------
@@ -7559,6 +7581,7 @@ function finishNow(){
   renderSummary(sum);
   document.getElementById('session').classList.remove('on');
   stopTimer();renderHome();
+  try{wearPush();}catch(e){}   // the wrist finds out the day is done
   sessionSeal(function(){document.getElementById('exportOvl').classList.add('on');});
 }
 // Forge's finish. The piece comes out white-hot, then goes under: the colour walks
@@ -10433,12 +10456,18 @@ function wearDoLog(id,i){
   if(id&&nx.id!==id)return;
   if(typeof i==='number'&&nx.i!==i)return;
   var row=document.getElementById('sr-'+nx.id+'-'+nx.i);
-  if(row){
-    // press the real button: same grading, same rest, same writing down
-    var chk=row.querySelector('.chk');
-    if(chk){chk.click();return;}
+  if(!row){
+    // The session screen is not on show - backed out to the week, or the phone woke up on
+    // another screen. The day is still open either way, so its rows get rebuilt and the
+    // real button pressed regardless. Without this the wrist was a dead end exactly when
+    // it is most useful: phone in a bag, screen off, nothing to tap.
+    try{renderSession();}catch(e){}
+    row=document.getElementById('sr-'+nx.id+'-'+nx.i);
   }
-  wearPush();   // nothing to press (the session screen is not up) - just re-state
+  // press the real button: same grading, same rest, same writing down
+  var chk=row&&row.querySelector('.chk');
+  if(chk){chk.click();return;}
+  wearPush();   // genuinely nothing to press - just re-state the wrist
 }
 // ---------- walks in from Health Connect ----------
 // Samsung Health (and any watch app) writes walks into Health Connect, the phone's own
