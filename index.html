@@ -1227,6 +1227,7 @@ body.tut .dayhead-add{display:none;}
 .prog-key b{font-size:10px;}
 .prog-wrap{max-height:calc(var(--usablevh) * .58);overflow-y:auto;text-align:left;margin-top:6px;}
 /* ---- the plate calculator: a drawn bar, loaded ---- */
+.pl-stick{position:sticky;top:2px;z-index:3;background:var(--surface);margin:0 -22px;padding:0 22px 8px;}
 .pl-wrap{background:var(--card2,rgba(255,255,255,.03));border:1px solid var(--line);border-radius:12px;padding:14px 8px 10px;margin:4px 0 10px;overflow-x:auto;}
 .pl-wrap svg{display:block;margin:0 auto;max-width:100%;height:auto;}
 .pl-total{text-align:center;font-size:34px;font-weight:700;line-height:1.1;margin:2px 0 2px;color:var(--txt);font-variant-numeric:tabular-nums;}
@@ -1242,7 +1243,7 @@ body.tut .dayhead-add{display:none;}
    sitting right there, letting the body add too meant a near-miss on the minus silently
    put a plate ON. Explicit controls only. */
 .pl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.pl-chip{position:relative;border:1px solid var(--line);background:transparent;border-radius:12px;color:var(--txt);padding:9px 0 0;font-variant-numeric:tabular-nums;overflow:hidden;}
+.pl-chip{position:relative;text-align:center;border:1px solid var(--line);background:transparent;border-radius:12px;color:var(--txt);padding:9px 0 0;font-variant-numeric:tabular-nums;overflow:hidden;}
 .pl-chip .pl-n{font-size:20px;font-weight:700;line-height:1;}
 .pl-chip .pl-cnt{display:block;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--txt3);margin:3px 0 7px;min-height:12px;}
 .pl-chip.has{border-color:var(--go);}
@@ -3168,9 +3169,13 @@ body.wcon{overflow:hidden;}
   <div class="sheet" style="max-width:440px">
     <h3 id="plTitle">Plate calculator</h3>
     <!-- Both ends drawn, always. Halving a number, doubling it back and remembering to add
-         the bar is the actual hard part in a gym; seeing the whole bar removes all three. -->
-    <div class="pl-wrap"><div id="plArt"></div></div>
-    <div class="pl-total" id="plTotal"></div>
+         the bar is the actual hard part in a gym; seeing the whole bar removes all three.
+         Pinned to the top while the rest scrolls: the bar list lives at the foot of this
+         sheet now, and choosing from it REDRAWS this - so it has to stay in sight. -->
+    <div class="pl-stick">
+      <div class="pl-wrap"><div id="plArt"></div></div>
+      <div class="pl-total" id="plTotal"></div>
+    </div>
     <div class="pl-read" id="plRead"></div>
     <!-- Two ways in, because both are natural: name the weight you want and let it load
          the bar, or build it plate by plate. -->
@@ -3184,10 +3189,12 @@ body.wcon{overflow:hidden;}
     <div class="pl-grid" id="plGrid"></div>
     <div class="pl-acts">
       <button class="pl-act" onclick="plUndo()">UNDO</button>
-      <button class="pl-act" onclick="plClear()">STRIP THE BAR</button>
+      <button class="pl-act" onclick="plClear()">REMOVE ALL PLATES</button>
     </div>
-    <div class="pl-barnow" id="plBarNow"></div>
-    <div class="pl-bars" id="plBars" style="display:none"></div>
+    <!-- Always on the sheet, never behind a button. Which bar you are on is half the answer
+         to what goes on it, so hiding it behind CHANGE BAR hid half the calculator. -->
+    <div class="pl-lbl">BAR OR MACHINE</div>
+    <div class="pl-bars" id="plBars"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('plateOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -3881,7 +3888,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.17';
+var APPV='v5.18';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8403,15 +8410,7 @@ function plDraw(){
       '</div>'+
     '</div>';
   }).join('');
-  var bd=plBarDef(PL.bar);
-  document.getElementById('plBarNow').innerHTML=
-    '<span>Bar: <b>'+bd.n+(bw?' · '+plNum(bw)+' '+u:'')+'</b></span>'+
-    '<button onclick="plBarsToggle()">CHANGE BAR</button>';
-  plBarBtns();
-}
-function plBarsToggle(){
-  var e=document.getElementById('plBars');
-  e.style.display=e.style.display==='none'?'':'none';
+  plBarBtns();   // the list is on the sheet permanently, so it redraws with everything else
 }
 function plBarBtns(){
   document.getElementById('plBars').innerHTML=PL_BARS.map(function(b){
@@ -8492,7 +8491,6 @@ function openPlates(id,lb){
   PL.on=want?plLoadFor(want):[];
   document.getElementById('plType').value=want?plNum(want):'';
   document.getElementById('plTitle').textContent=name||'Plate calculator';
-  document.getElementById('plBars').style.display='none';
   plDraw();
   document.getElementById('plateOvl').classList.add('on');
 }
