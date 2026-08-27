@@ -2773,11 +2773,25 @@ body.wcon{overflow:hidden;}
            autoBkDraw shows it when the Filesystem bridge is really there. -->
       <div class="btn" id="bkAuto" onclick="autoBkToggle()" style="display:none">AUTOMATIC SAFETY COPY: OFF</div>
       <div class="footnote" id="bkAutoNote" style="display:none;margin:6px 2px 12px">A backup file that refreshes itself after every finished workout, in Documents under a Forge folder. It survives even deleting the app.</div>
+      <!-- A week is not a backup and the two must not be reachable by the same button:
+           one replaces everything the other person owns, the other adds to it. -->
+      <div class="btn" onclick="bkView('week')" style="margin-bottom:12px">SHARE A WEEK</div>
+      <div class="footnote" style="margin:-6px 2px 12px">Your workouts only — no logged sessions, nothing personal. Whoever opens it keeps everything they already have.</div>
       <div class="sheet-btns">
         <div class="btn btn-go" onclick="bkView(true)">BACKUP</div>
         <div class="btn" onclick="restoreAsk()">RESTORE</div>
         <div class="btn" onclick="closeOvl('backupOvl')">CLOSE</div>
       </div>
+    </div>
+    <div id="bkWeek" style="display:none">
+      <div class="btn btn-go" onclick="shareWeek('file')">SEND MY WEEK</div>
+      <div class="footnote" style="margin:6px 2px 12px">A small file holding the workouts on your week. Whoever opens it in Forge gains them; nothing of theirs is replaced.</div>
+      <div class="btn" onclick="shareWeek('text')">MY WEEK AS TEXT</div>
+      <div class="footnote" style="margin:6px 2px 12px">The same week written out, for reading or pasting into a message. Cannot be imported back.</div>
+      <div class="btn" onclick="pickWeek()">OPEN SOMEONE’S WEEK</div>
+      <div class="footnote" style="margin:6px 2px 12px">Adds their workouts to your saved workouts, ready to place on a day. Your week, your logs and your records are untouched.</div>
+      <input type="file" id="weekFile" accept="application/json,.json" style="display:none" onchange="doWeekImport(this)">
+      <div class="sheet-btns"><div class="btn" onclick="bkView(false)">CANCEL</div></div>
     </div>
     <div id="bkMenu" style="display:none">
       <div class="btn btn-go" onclick="exportDest('backup')">BACKUP FILE</div>
@@ -3894,7 +3908,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.23';
+var APPV='v5.24';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8046,6 +8060,149 @@ function doRestore(input){
   };
   rd.readAsText(f);
 }
+// ---------- sharing a week ----------
+// A ROUTINE is not a backup and must never be confused for one. A backup is everything you
+// own and RESTORING it replaces everything the other person owns - which is right for a new
+// phone and catastrophic for handing a friend your program. This carries the week and only
+// the week: no logs, no records, no walks, no settings, and importing it ADDS rather than
+// replaces.
+//
+// The trap that shapes the whole format: a migrated program lives under the SHIPPED ids -
+// d1, opt5, rest - and those ids mean something different in everyone's app. Exported raw,
+// importing your Tuesday would quietly overwrite theirs. So every id is anonymised on the
+// way out (w0, w1...) and minted fresh on the way in, and nothing ever lands on an id that
+// already means something to whoever opened it.
+function routineBlob(){
+  var days={},wk={},cex={},map={},n=0,cn=0;
+  function take(id){
+    if(map[id])return map[id];
+    var src=W[id]||DB.custom[id];
+    if(!src)return null;
+    var key='w'+(n++);
+    map[id]=key;
+    var copy=JSON.parse(JSON.stringify({
+      name:src.name,tag:src.tag,color:src.color,time:src.time,
+      kind:src.kind,sections:src.sections||[]
+    }));
+    // an exercise you invented travels with the workout, or it arrives as a broken row
+    (copy.sections||[]).forEach(function(s){
+      (s.rows||[]).forEach(function(r){
+        var ex=r[0];
+        if(DB.cex&&DB.cex[ex]){
+          if(!cex[ex]){cex[ex]=JSON.parse(JSON.stringify(DB.cex[ex]));cex[ex].__k='x'+(cn++);}
+          r[0]=cex[ex].__k;
+        }
+      });
+    });
+    wk[key]=copy;
+    return key;
+  }
+  DAYS.forEach(function(D){
+    var d=D.k;
+    days[d]=[];
+    (DB.days[d]||[]).forEach(function(id){
+      if(id==='rest')return;                 // the built-in rest day is everyone's already
+      var k=take(id);
+      if(k)days[d].push(k);
+    });
+  });
+  var outCex={};
+  for(var k in cex){var c=cex[k],kk=c.__k;delete c.__k;outCex[kk]=c;}
+  return JSON.stringify({forge:1,kind:'routine',app:APPV,at:new Date().toISOString(),
+                         days:days,workouts:wk,cex:outCex});
+}
+function routineName(){return 'forge-week-'+today()+'.json';}
+// The same week in words, for when a file is more ceremony than the thing deserves.
+function routineText(){
+  var out=APPNAME()+' \u00b7 a week\n\n';
+  DAYS.forEach(function(D){
+    var d=D.k,ids=DB.days[d]||[];
+    var names=[];
+    ids.forEach(function(id){
+      if(id==='rest'){names.push('Rest');return;}
+      var w=W[id]||DB.custom[id];
+      if(w)names.push(w.name.replace('Optional: ',''));
+    });
+    out+=D.n.toUpperCase()+' \u2014 '+(names.length?names.join(', '):'nothing')+'\n';
+    ids.forEach(function(id){
+      var w=W[id]||DB.custom[id];
+      if(!w||id==='rest')return;
+      (w.sections||[]).forEach(function(s){
+        (s.rows||[]).forEach(function(r){
+          var ex=R(r[0]),nm=(ex&&ex.name)||r[0];
+          var sets=(r[1]&&r[1].sets)||'';
+          out+='   '+nm+'  '+sets.split('\n').map(fmtLine).join(', ')+'\n';
+        });
+      });
+    });
+    out+='\n';
+  });
+  return out;
+}
+function shareWeek(kind){
+  if(!DAYS.some(function(D){return (DB.days[D.k]||[]).some(function(i){return i!=='rest';});})){
+    ask('There is nothing on your week yet. Build a day first and it can be shared.',null,'Nothing to share');
+    return;
+  }
+  var isText=kind==='text';
+  var txt=isText?routineText():routineBlob();
+  var name=isText?('forge-week-'+today()+'.txt'):routineName();
+  ask('Send your week, or keep a copy on this phone? It carries the workouts only \u2014 no logged sessions, no records, nothing personal.',
+    function(){saveToPhone(txt,name,isText);},
+    'Share your week','SAVE TO PHONE',null,
+    {label:'SEND',fn:function(){sendOut(txt,name,isText);}});
+}
+function pickWeek(){var i=document.getElementById('weekFile');if(i){i.value='';i.click();}}
+// Importing ADDS. Every workout is minted a fresh id and lands on the shelf; the week you
+// are already running, your logs and your records are not touched by any of it.
+function doWeekImport(input){
+  var f=input&&input.files&&input.files[0];
+  if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    var d=null;
+    try{d=JSON.parse(String(rd.result));}catch(e){}
+    if(!d||d.kind!=='routine'||!d.workouts){
+      ask('That file is not a Forge week. The one to open is the forge-week file ending in .json.',null,'Could not read it');
+      return;
+    }
+    var names=[],cnt=0;
+    for(var k in d.workouts){cnt++;if(names.length<4)names.push(d.workouts[k].name||'a workout');}
+    if(!cnt){ask('That week has no workouts in it.',null,'Nothing to add');return;}
+    ask(cnt+' workout'+(cnt===1?'':'s')+' \u2014 '+names.join(', ')+(cnt>names.length?' and more':'')+
+        '. They go to your saved workouts, ready to place on any day you like. Nothing you already have is changed or replaced.',
+      function(){weekAdd(d);},
+      'Add '+cnt+' workout'+(cnt===1?'':'s')+'?','ADD THEM');
+  };
+  rd.readAsText(f);
+}
+function weekAdd(d){
+  DB.cex=DB.cex||{};DB.custom=DB.custom||{};DB.extra=DB.extra||[];
+  var xmap={};
+  // their invented exercises first, so the rows have something real to point at
+  for(var xk in (d.cex||{})){
+    var nx='cx'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);
+    while(DB.cex[nx])nx+='b';
+    DB.cex[nx]=JSON.parse(JSON.stringify(d.cex[xk]));
+    xmap[xk]=nx;
+  }
+  var added=0;
+  for(var wk in d.workouts){
+    var src=JSON.parse(JSON.stringify(d.workouts[wk]));
+    (src.sections||[]).forEach(function(s){
+      (s.rows||[]).forEach(function(r){ if(xmap[r[0]])r[0]=xmap[r[0]]; });
+    });
+    var nid;
+    do{nid='cus'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);}
+    while(DB.custom[nid]||W[nid]);
+    src.custom=1;src.made=Date.now();
+    DB.custom[nid]=src;
+    DB.extra.push(nid);
+    added++;
+  }
+  mergeCustom();dayMap();saveDB();renderHome();
+  ask(added+' workout'+(added===1?' is':'s are')+' in your saved workouts, under the week. Hold one to put it on a day.',null,'Added');
+}
 function historyText(){
   return APPNAME()+' \u00b7 full history\n'+DB.logs.length+' sessions\n\n'+
     DB.logs.slice().reverse().map(function(L){
@@ -8138,10 +8295,11 @@ function bkNudge(){
 }
 // BACKUP turns the sheet's page to the three ways out, each with its explanation in
 // plain sight; CANCEL turns it back.
-function bkView(menu){
-  var m=document.getElementById('bkMain'),k=document.getElementById('bkMenu');
-  if(m)m.style.display=menu?'none':'';
-  if(k)k.style.display=menu?'':'none';
+function bkView(v){
+  var m=document.getElementById('bkMain'),k=document.getElementById('bkMenu'),w=document.getElementById('bkWeek');
+  if(m)m.style.display=v?'none':'';
+  if(k)k.style.display=(v===true)?'':'none';
+  if(w)w.style.display=(v==='week')?'':'none';
 }
 // RESTORE says what is about to happen before the system's own file browser opens, so
 // the picker never appears unexplained.
