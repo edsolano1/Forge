@@ -3877,7 +3877,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.12';
+var APPV='v5.13';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5649,8 +5649,9 @@ function renderSession(){
       var rl=refLink(rf.swapId||id,r.name);
       // What goes on the bar, for the lifts that have one. Seeded with this exercise's
       // own target so the answer is already drawn when it opens.
-      var plw=0;
-      if(plateEx(rf.exId,r.name)){
+      // Any lift with a weight offers it; see plateRow.
+      var showPl=plateRow(r,tg),plw=0;
+      if(showPl){
         var m1=String(r.sets).match(/^([\d.]+)x/);
         if(m1)plw=parseFloat(m1[1])||0;
       }
@@ -5662,7 +5663,7 @@ function renderSession(){
             // along as JSON, and a name is full of double quotes - which closed the
             // onclick attribute early, left a syntax error behind, and made the tap fall
             // through to the card. openPlates looks the name up itself now.
-            (plateEx(rf.exId,r.name)?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+plw+')">'+
+            (showPl?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+plw+')">'+
               '<svg viewBox="0 0 20 20"><path d="M2 10h16"/><path d="M5 6.5v7M7.5 5v10M12.5 5v10M15 6.5v7"/></svg> Plates</a>':'')+
             '</div>';
       html+='</div><div class="sets">';
@@ -8407,19 +8408,27 @@ function plSub(p){
 }
 function plUndo(){PL.want=null;PL.on.pop();plDraw();try{sfxTick&&sfxTick();}catch(e){}}
 function plClear(){PL.want=null;PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(e){}}
-// Barbell and plate-loaded work only: a cable stack or a dumbbell has no bar to load.
-var PL_IDS={bench:1,bsquat:1,deadlift:1,bbcurl:1,bbthrust:1,smsquat:1,ohp:1,hack:1,lpress:1};
-// The plate-loaded machines among them. A leg press sled is not a 45 lb bar, so these
-// open bare - the saved bar is a barbell preference and does not belong here.
+// Who gets the plate calculator: ANY lift measured in weight. Not a list of lifts I
+// picked, and not a switch the user has to find and set - both were versions of the app
+// deciding something only the gym knows. A hack squat is plate-loaded in one gym and a pin
+// stack in another, and no exercise NAME can settle that. So the offer is simply made
+// wherever there is a weight to load, and ignored where it is not wanted: one quiet link
+// beside Instructions, costing a glance, never a wrong answer.
+// A bodyweight lift, a timed hold and a cardio row have no weight at all, so they are the
+// only things left out - and that is structure, not opinion.
+function plateRow(row,tg){
+  if(!row||row.bw)return false;
+  return !!(tg&&tg[0]&&tg[0].type==='wr');
+}
+// The word list survives, demoted to a much smaller job: which bar to OPEN on. Getting it
+// wrong now costs one tap on CHANGE BAR, and the choice is remembered against that lift
+// forever after - where being wrong used to mean no calculator at all.
+var PL_IDS={bench:1,bsquat:1,deadlift:1,bbcurl:1,bbthrust:1,smsquat:1,ohp:1};
 var PL_MACH={hack:1,lpress:1};
-// The old test matched a bare "bar ", which put a plate calculator on the V-Bar Cable
-// Pushdown and the Parallel Bar Hip Raise - neither of which has a plate on it anywhere.
-// Only phrases that can ONLY mean a loadable bar or a plate-loaded machine count now.
-var PL_RX=/\bbarbell\b|\bez[- ]?(curl )?bar\b|\bdeadlift\b|\b(back|front|hack) squat\b|\bleg press\b|\bsmith machine\b|\btrap bar\b|\bt-?bar row\b|\bpendlay\b|\bpower (clean|snatch)\b/i;
+var PL_RX=/\bbarbell\b|\bez[- ]?(curl )?bar\b|\bdeadlift\b|\b(back|front) squat\b|\btrap bar\b|\bt-?bar row\b|\bpendlay\b|\bpower (clean|snatch)\b/i;
 function plateEx(id,name){
   if(PL_IDS[id])return true;
   var n=String(name||'');
-  // a cable attachment is called a bar too, and it holds no plates
   if(/\bcable\b|\bdumbbell\b|\bkettlebell\b|\bband\b/i.test(n))return false;
   return PL_RX.test(n);
 }
@@ -8506,7 +8515,11 @@ function barGuess(id,name){
   if(plMachine(id,n))return 'non';
   if(/\bez\b|\bez[- ]?curl\b/i.test(n))return 'ez';
   if(/\bsmith\b/i.test(n))return 'std';
-  return 'oly';
+  // Only lifts that plainly ARE barbell work open on a bar. Now that every weighted lift
+  // offers the calculator, defaulting everything to an Olympic would have a cable pushdown
+  // opening on a 45 lb bar it does not have - so anything not clearly a barbell starts bare,
+  // which is also the right answer for every plate-loaded machine in the building.
+  return plateEx(id,n)?'oly':'non';
 }
 function barFor(id,name){
   var saved=(DB&&DB.exBar)?DB.exBar[id]:null;
