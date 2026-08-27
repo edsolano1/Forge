@@ -707,7 +707,6 @@ body.tut #askOvl{z-index:402;}
 .btn-go{border-color:var(--go);color:var(--go);}
 .btn-prime{background:var(--go);border-color:var(--go);color:#0b0c0e;font-weight:700;letter-spacing:.07em;}
 .btn-prime:hover{color:#0b0c0e;border-color:var(--go);filter:brightness(1.08);}
-.sheet-btns.pl-foot .btn-prime{flex:1.8;}
 .btn-bad{--bad:#e0736b;color:var(--bad);border-color:color-mix(in srgb,var(--bad) 42%,var(--line));}
 .btn-bad:hover{color:var(--bad);background:color-mix(in srgb,var(--bad) 11%,var(--surface));
   border-color:color-mix(in srgb,var(--bad) 72%,var(--line));}
@@ -3199,7 +3198,7 @@ body.wcon{overflow:hidden;}
     <div class="pl-bars" id="plBars"></div>
     <!-- Nothing here is written until SAVE, which is what lets CANCEL be a plain undo
          of the whole visit rather than one step of it. -->
-    <div class="sheet-btns pl-foot">
+    <div class="sheet-btns">
       <div class="btn" onclick="plCancel()">CANCEL</div>
       <div class="btn btn-prime" onclick="plSave()">SAVE</div>
     </div>
@@ -3895,7 +3894,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.20';
+var APPV='v5.21';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
