@@ -1244,10 +1244,10 @@ body.tut .dayhead-add{display:none;}
 .pl-chip{position:relative;height:62px;border:1px solid var(--line);background:transparent;border-radius:12px;color:var(--txt);font-size:20px;font-weight:700;cursor:pointer;padding:0;font-variant-numeric:tabular-nums;}
 .pl-chip:active{background:rgba(255,255,255,.07);}
 .pl-chip .pl-cnt{display:block;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--txt3);margin-top:2px;}
-.pl-chip.has{border-color:var(--go);}
+.pl-chip.has{border-color:var(--go);padding-left:38px;}
 .pl-chip.has .pl-cnt{color:var(--go);}
-.pl-chip .pl-dot{position:absolute;left:5px;top:5px;width:11px;height:11px;border-radius:50%;}
-.pl-minus{position:absolute;right:3px;top:3px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--bg,#0d0f13);color:var(--txt2);font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pl-chip .pl-dot{position:absolute;right:6px;top:6px;width:11px;height:11px;border-radius:50%;}
+.pl-minus{position:absolute;left:0;top:0;bottom:0;width:38px;border:0;border-right:1px solid var(--line);border-radius:11px 0 0 11px;background:transparent;color:var(--txt2);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .pl-minus:active{background:rgba(255,255,255,.1);}
 .pl-acts{display:flex;gap:8px;margin-top:9px;}
 .pl-act{flex:1;height:40px;border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:10px;font-size:11px;letter-spacing:.08em;cursor:pointer;}
@@ -3877,7 +3877,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.14';
+var APPV='v5.15';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8329,6 +8329,14 @@ function plArt(){
       var px=(solo||side>0)?x:x-pw;
       svg+='<rect x="'+px.toFixed(1)+'" y="'+(mid-ph/2).toFixed(1)+'" width="'+pw+'" height="'+ph.toFixed(1)+
            '" rx="3" fill="'+(PL_COL[plNum(p)]||'#7a828d')+'" stroke="rgba(0,0,0,.4)"/>';
+      // Tap the plate itself to take it off. A drawn plate is 8 to 15 units wide, which is a
+      // cruel target for a thumb, so an invisible pad sits over it - wider than the plate and
+      // at least a fingertip tall. Small plates are drawn last and so land ON TOP of their
+      // neighbours' pads, which is the right bias: they are the hardest ones to hit.
+      var hw=Math.max(pw+3,18),hh=Math.max(ph,46);
+      svg+='<rect x="'+(px+pw/2-hw/2).toFixed(1)+'" y="'+(mid-hh/2).toFixed(1)+'" width="'+hw.toFixed(1)+
+           '" height="'+hh.toFixed(1)+'" fill="transparent" style="cursor:pointer" onclick="plSub('+p+')">'+
+           '<title>Take off a '+plNum(p)+'</title></rect>';
       if(solo||side>0)svg+='<text x="'+(px+pw/2).toFixed(1)+'" y="'+lab+'" text-anchor="middle" fill="#8e959e" font-size="10" font-family="system-ui">'+plNum(p)+'</text>';
       x+=solo?(pw+2.5):side*(pw+2.5);
     });
@@ -8338,8 +8346,6 @@ function plArt(){
     }
   });
   if(drew&&!solo)svg+='<text x="'+(W-5)+'" y="15" text-anchor="end" fill="#8e959e" font-size="10" font-family="system-ui">+'+drew+' more each end</text>';
-  if(!PL.on.length)svg+='<text x="'+cx+'" y="'+(mid-30)+'" text-anchor="middle" fill="#6e747c" font-size="11" font-family="system-ui">'+
-    (solo?'no plates yet':mach?'nothing on the horns yet':'bar only')+'</text>';
   svg+='<text x="'+cx+'" y="'+(H-6)+'" text-anchor="middle" fill="#6e747c" font-size="10" font-family="system-ui">'+
        (solo?'just the plates &middot; nothing is doubled':
         mach?'both horns shown &middot; load the same on each':
