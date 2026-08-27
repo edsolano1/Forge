@@ -3894,7 +3894,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.21';
+var APPV='v5.22';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5579,6 +5579,7 @@ function openWNow(wk,dk){
   document.getElementById('timerPill').style.setProperty('--tc',dayC(wk));
   document.getElementById('sTitle').textContent=w.name.replace('Optional: ','');
   renderSession();
+  try{wearPush();}catch(e){}
   // .on first: while the screen is display:none the scrollTop write is a no-op and
   // Chromium restores the previous session's offset the moment it becomes visible -
   // which is how a fresh day opened halfway down the page.
@@ -5873,6 +5874,7 @@ function toggleSet(id,i,rest,unit){
     // of whoever built the workout: every day earns it, generated or hand-made.
     var dayDone=loggedCount(CUR)>=totalSets(CUR);
     if(secs>0&&!dayDone)startTimer(secs,(EX[exId]||{}).name);
+    try{wearPush();}catch(e){}   // the wrist moves on with the phone
     try{
       // The record cue is for beating something, and the first time you do a lift there is
       // nothing to have beaten - the grade is first, not pr. It still READS like a best,
@@ -10351,6 +10353,93 @@ function nativeTimer(secs){
   try{ra.showTimer({seconds:secs,title:TXT('restingTtl'),body:sub});}catch(e){}
 }
 function nativeTimerHide(){var ra=RA();if(ra)try{ra.hideTimer();}catch(e){}}
+// ---------- the watch ----------
+// The wrist is a REMOTE CONTROL, never a second copy of the workout. It is told one thing -
+// the set you are on - and it sends back one thing - that you did it. Everything that
+// decides anything (grading, rest, level-ups, what gets written down) stays here, because a
+// watch holding its own opinion of the session is worse than no watch at all: two versions
+// of the truth and no way to tell which one you actually lifted.
+function WR(){
+  try{
+    var C=window.Capacitor;
+    if(C&&C.Plugins&&C.Plugins.Wear)return C.Plugins.Wear;
+  }catch(e){}
+  return null;
+}
+// The first set with nothing logged against it, in the order they are laid out. Judged on
+// what is unlogged rather than on position, so working out of order does not confuse it.
+function wearNext(){
+  if(!CUR||!DB.active[CUR])return null;
+  var wk=CUR,A=DB.active[wk],out=null;
+  edAllRows(wk).forEach(function(row){
+    if(out)return;
+    var rf=rowFor(A.swaps,row,wk),id=rf.id;
+    var tg=rf.swapId?rf.data.sets.split('\n').map(parseTarget):targetsOf(row,wk);
+    var ent=A.entries[id]||[];
+    for(var i=0;i<tg.length;i++){
+      if(!ent[i]){
+        out={id:id,exId:rf.exId,name:rf.data.name||'',i:i,n:tg.length,t:tg[i]};
+        return;
+      }
+    }
+  });
+  return out;
+}
+function wearTargetText(t){
+  if(!t)return '';
+  if(t.type==='wr')return fmtW(t.w)+'\u00d7'+t.r;
+  if(t.unit==='sec')return t.r+' sec';
+  return String(t.r)+' reps';
+}
+function wearPush(){
+  var wr=WR();
+  if(!wr||SANDBOX||TUTON)return;      // never drive a wrist from borrowed data
+  var st={open:false};
+  var nx=wearNext();
+  if(nx){
+    st={open:true,id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
+        target:wearTargetText(nx.t),restMs:wearRestLeft()};
+  }
+  try{wr.push({json:JSON.stringify(st)}).catch(function(){});}catch(e){}
+}
+function wearRestLeft(){
+  try{
+    if(typeof timerEnd!=='number'||!timerEnd)return 0;
+    var left=timerEnd-Date.now();
+    return left>0?left:0;
+  }catch(e){return 0;}
+}
+// What comes back. The watch does not log anything itself - it says a set was done and the
+// phone does exactly what a tap on the screen would have done, so there is one code path and
+// one set of rules whichever end you press.
+function wearBind(){
+  var wr=WR();
+  if(!wr||!wr.addListener)return;
+  try{
+    wr.addListener('wear',function(e){
+      if(!e||e.path!=='/forge/log')return;
+      var b={};try{b=JSON.parse(e.body||'{}');}catch(err){}
+      wearDoLog(b.id,b.setIdx);
+    });
+  }catch(e){}
+}
+function wearDoLog(id,i){
+  if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
+  var nx=wearNext();
+  if(!nx)return;
+  // Only ever the set the watch was actually showing. If the phone has moved on since -
+  // somebody logged it here first - the message is stale and dropped rather than applied
+  // to whatever happens to be next.
+  if(id&&nx.id!==id)return;
+  if(typeof i==='number'&&nx.i!==i)return;
+  var row=document.getElementById('sr-'+nx.id+'-'+nx.i);
+  if(row){
+    // press the real button: same grading, same rest, same writing down
+    var chk=row.querySelector('.chk');
+    if(chk){chk.click();return;}
+  }
+  wearPush();   // nothing to press (the session screen is not up) - just re-state
+}
 // ---------- walks in from Health Connect ----------
 // Samsung Health (and any watch app) writes walks into Health Connect, the phone's own
 // health vault; Forge reads them back out. READ ONLY, walks only, nothing leaves the
@@ -13145,6 +13234,7 @@ function sbEnd(){
   // Walks catch up quietly on every launch - a no-op until Health Connect is connected
   // from Settings, and throttled inside hcSync so it never becomes chatter.
   setTimeout(function(){try{hcSync(false);}catch(e){}},3000);
+  try{wearBind();}catch(e){}
   // The one-time backup nudge waits for the app to settle; it refuses to fire inside the
   // sandbox, a tour, or any life that already has a backup.
   setTimeout(function(){try{bkNudge();}catch(e){}},6000);
