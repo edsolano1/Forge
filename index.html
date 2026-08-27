@@ -3877,7 +3877,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.15';
+var APPV='v5.16';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8210,7 +8210,7 @@ var PL_BARS=[
   {k:'oly', n:'Olympic',       s:'The standard 2-inch bar', lb:45, kg:20},
   {k:'sho', n:'Short Olympic', s:'2-inch, lighter and shorter', lb:35, kg:15},
   {k:'std', n:'Standard',      s:'1-inch bar, smaller plates', lb:15, kg:7,  std:1},
-  {k:'ez',  n:'EZ curl',       s:'The wavy one',           lb:20, kg:9,  std:1},
+  {k:'ez',  n:'EZ curl',       s:'Olympic sleeves, wavy grip', lb:20, kg:9},
   {k:'mac', n:'Machine',       s:'Loads onto horns',       lb:0,  kg:0},
   // No bar and no machine: the plates themselves, in your hands. A plate held on an
   // incline sit-up, one in each hand for shrugs or raises. Nothing is doubled here -
