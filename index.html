@@ -3188,14 +3188,18 @@ body.wcon{overflow:hidden;}
     <div class="pl-lbl" id="plTapLbl">OR ADD AND TAKE OFF</div>
     <div class="pl-grid" id="plGrid"></div>
     <div class="pl-acts">
-      <button class="pl-act" onclick="plUndo()">UNDO</button>
       <button class="pl-act" onclick="plClear()">REMOVE ALL PLATES</button>
     </div>
     <!-- Always on the sheet, never behind a button. Which bar you are on is half the answer
          to what goes on it, so hiding it behind CHANGE BAR hid half the calculator. -->
     <div class="pl-lbl">BAR OR MACHINE</div>
     <div class="pl-bars" id="plBars"></div>
-    <div class="sheet-btns"><div class="btn" onclick="closeOvl('plateOvl')">CLOSE</div></div>
+    <!-- Nothing here is written until SAVE, which is what lets CANCEL be a plain undo
+         of the whole visit rather than one step of it. -->
+    <div class="sheet-btns">
+      <div class="btn" onclick="plCancel()">CANCEL</div>
+      <div class="btn btn-go" onclick="plSave()">SAVE</div>
+    </div>
   </div>
 </div>
 
@@ -3888,7 +3892,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.18';
+var APPV='v5.19';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8424,10 +8428,8 @@ function plBarBtns(){
 // Picking up a different bar means picking up a bare one; the plates go on after.
 function plPickBar(k){
   PL.bar=k;PL.want=null;
-  // Remembered against the LIFT, so the EZ bar you pick for curls is still the EZ bar next
-  // week and never has to be chosen again. Machines included: if you tell it a hack squat
-  // takes a bar, it believes you and keeps that.
-  barRemember(PL.id,k);
+  // Chosen, not yet committed: SAVE writes it against the lift, CANCEL walks away and the
+  // lift keeps whatever bar it had. Nothing on this sheet touches stored data before then.
   PL.on=[];
   plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
@@ -8447,7 +8449,21 @@ function plSub(p){
   for(var i=PL.on.length-1;i>=0;i--)if(Math.abs(PL.on[i]-p)<0.001){PL.on.splice(i,1);break;}
   plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
-function plUndo(){PL.want=null;PL.on.pop();plDraw();try{sfxTick&&sfxTick();}catch(e){}}
+// What is on the bar right now, per lift, for as long as the app is open. Deliberately NOT
+// stored on disk: a saved stack would go stale the moment a level-up moved the target, and
+// then the calculator would open lying about what is loaded. Within a session though, it is
+// the truth - you loaded the bar, it is still loaded, and reopening should show that rather
+// than resetting to a target you have already worked past.
+var PLKEEP={};
+function plSave(){
+  barRemember(PL.id,PL.bar);          // this lift uses this bar from now on
+  PLKEEP[PL.id]=PL.on.slice();
+  closeOvl('plateOvl');
+  try{sfxLog();}catch(e){}
+}
+// The universal undo. Nothing was committed on the way in, so walking away IS the undo -
+// the lift keeps the bar it had and whatever was on it before this sheet opened.
+function plCancel(){closeOvl('plateOvl');}
 function plClear(){PL.want=null;PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(e){}}
 // Who gets the plate calculator: ANY lift measured in weight. Not a list of lifts I
 // picked, and not a switch the user has to find and set - both were versions of the app
@@ -8486,10 +8502,17 @@ function openPlates(id,lb){
   // Opened from a lift, it arrives already loaded to that lift's target - the answer is
   // on screen before anything is tapped. The typed box shows the same number, so it is
   // obvious where the plates came from and it can be edited straight away.
+  var kept=PLKEEP[PL.id];
   var want=lb?dspW(lb):null;
-  PL.want=want;
-  PL.on=want?plLoadFor(want):[];
-  document.getElementById('plType').value=want?plNum(want):'';
+  if(kept&&kept.length){
+    // already loaded this lift's bar earlier in the session - show what is on it
+    PL.on=kept.slice();PL.want=null;
+    document.getElementById('plType').value='';
+  }else{
+    PL.want=want;
+    PL.on=want?plLoadFor(want):[];
+    document.getElementById('plType').value=want?plNum(want):'';
+  }
   document.getElementById('plTitle').textContent=name||'Plate calculator';
   plDraw();
   document.getElementById('plateOvl').classList.add('on');
