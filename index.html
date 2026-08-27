@@ -1235,20 +1235,24 @@ body.tut .dayhead-add{display:none;}
 .pl-read b{color:var(--txt);font-weight:600;}
 .pl-read .pl-warn{color:var(--gold);}
 .pl-lbl{font-size:10px;letter-spacing:.1em;color:var(--txt3);margin:12px 0 6px;}
-/* Plate chips: the whole chip adds, the corner circle takes one back off. Both are
-   comfortably past a thumb's worth of target at gym speed. */
 .pl-typerow{display:flex;align-items:center;gap:8px;}
 .pl-type{flex:1;text-align:center;font-size:19px;font-weight:600;}
 .pl-tu{font-size:13px;color:var(--txt3);width:24px;}
+/* A plate and its own pair of buttons. Nothing else on the chip is tappable: with a minus
+   sitting right there, letting the body add too meant a near-miss on the minus silently
+   put a plate ON. Explicit controls only. */
 .pl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.pl-chip{position:relative;height:62px;border:1px solid var(--line);background:transparent;border-radius:12px;color:var(--txt);font-size:20px;font-weight:700;cursor:pointer;padding:0;font-variant-numeric:tabular-nums;}
-.pl-chip:active{background:rgba(255,255,255,.07);}
-.pl-chip .pl-cnt{display:block;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--txt3);margin-top:2px;}
-.pl-chip.has{border-color:var(--go);padding-left:38px;}
+.pl-chip{position:relative;border:1px solid var(--line);background:transparent;border-radius:12px;color:var(--txt);padding:9px 0 0;font-variant-numeric:tabular-nums;overflow:hidden;}
+.pl-chip .pl-n{font-size:20px;font-weight:700;line-height:1;}
+.pl-chip .pl-cnt{display:block;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--txt3);margin:3px 0 7px;min-height:12px;}
+.pl-chip.has{border-color:var(--go);}
 .pl-chip.has .pl-cnt{color:var(--go);}
-.pl-chip .pl-dot{position:absolute;right:6px;top:6px;width:11px;height:11px;border-radius:50%;}
-.pl-minus{position:absolute;left:0;top:0;bottom:0;width:38px;border:0;border-right:1px solid var(--line);border-radius:11px 0 0 11px;background:transparent;color:var(--txt2);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.pl-minus:active{background:rgba(255,255,255,.1);}
+.pl-chip .pl-dot{position:absolute;right:7px;top:7px;width:10px;height:10px;border-radius:50%;}
+.pl-pm{display:flex;border-top:1px solid var(--line);}
+.pl-pm button{flex:1;height:36px;border:0;background:transparent;color:var(--txt2);font-size:20px;line-height:1;cursor:pointer;padding:0;}
+.pl-pm button:first-child{border-right:1px solid var(--line);}
+.pl-pm button:active{background:rgba(255,255,255,.09);}
+.pl-pm button:disabled{opacity:.25;cursor:default;}
 .pl-acts{display:flex;gap:8px;margin-top:9px;}
 .pl-act{flex:1;height:40px;border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:10px;font-size:11px;letter-spacing:.08em;cursor:pointer;}
 .pl-act:active{background:rgba(255,255,255,.06);}
@@ -3176,7 +3180,7 @@ body.wcon{overflow:hidden;}
              placeholder="e.g. 145" oninput="plTypeLoad(this.value)">
       <span class="pl-tu" id="plTypeUnit">lb</span>
     </div>
-    <div class="pl-lbl" id="plTapLbl">OR TAP TO ADD A PLATE</div>
+    <div class="pl-lbl" id="plTapLbl">OR ADD AND TAKE OFF</div>
     <div class="pl-grid" id="plGrid"></div>
     <div class="pl-acts">
       <button class="pl-act" onclick="plUndo()">UNDO</button>
@@ -3877,7 +3881,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.16';
+var APPV='v5.17';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8281,17 +8285,18 @@ function plArt(){
       return;
     }
     if(mach){
-      // A plate-loaded machine, drawn as the only part that matters: a HORN out of each
-      // side with the lip that stops plates walking off. The frame is left out entirely -
-      // an upright and a foot drew a whole machine to say one thing the horns already say,
-      // and every machine's frame looks different anyway. Two pegs read as loading points
-      // in any gym.
+      // A plate-loaded machine, drawn as the only part that matters: a HORN out of each side.
+      // The heavy end is the ROOT, at the inside, where it bolts to a frame; the tip is plain
+      // and rounded. That way round they read as sticking OUT. Putting the collar on the outer
+      // tip instead - which is where it started - made each one look like it was bolted at the
+      // far end and pointing back inwards, the whole thing inside out.
       var hl=Math.max(72,reach+12);
       [-1,1].forEach(function(sd){
-        var x0=cx+sd*(gap-10),x1=cx+sd*hl;
-        var lo=Math.min(x0,x1),wd=Math.abs(x1-x0);
-        svg+='<rect x="'+lo.toFixed(1)+'" y="'+(mid-4.5)+'" width="'+wd.toFixed(1)+'" height="9" rx="4" fill="#8a9099"/>';
-        svg+='<rect x="'+(sd>0?x1-4:x1-1).toFixed(1)+'" y="'+(mid-9)+'" width="5" height="18" rx="2" fill="#6a7078"/>';
+        var root=cx+sd*(gap-14),tip=cx+sd*hl;
+        var lo=Math.min(root,tip),wd=Math.abs(tip-root);
+        svg+='<rect x="'+lo.toFixed(1)+'" y="'+(mid-4.5)+'" width="'+wd.toFixed(1)+'" height="9" rx="4.5" fill="#8a9099"/>';
+        // the mounting boss at the root - thick where it is held, thin where it is loaded
+        svg+='<rect x="'+(sd>0?root:root-9).toFixed(1)+'" y="'+(mid-11)+'" width="9" height="22" rx="3" fill="#5f666f"/>';
       });
       return;
     }
@@ -8383,16 +8388,20 @@ function plDraw(){
   document.getElementById('plRead').innerHTML=r;
   document.getElementById('plTypeUnit').textContent=u;
   var tl=document.getElementById('plTapLbl');
-  if(tl)tl.textContent=solo?'OR TAP WHAT YOU ARE HOLDING':'OR TAP TO ADD A PLATE · ONE ON EACH END';
+  if(tl)tl.textContent=solo?'OR SET WHAT YOU ARE HOLDING':'OR ADD AND TAKE OFF · ONE ON EACH END';
   // the plate buttons, each showing how many of it are already on
   var cnt={};PL.on.forEach(function(p){var k=plNum(p);cnt[k]=(cnt[k]||0)+1;});
   document.getElementById('plGrid').innerHTML=plPlates(PL.bar).map(function(p){
     var k=plNum(p),n=cnt[k]||0;
-    return '<button class="pl-chip'+(n?' has':'')+'" onclick="plAdd('+p+')" aria-label="add a '+k+'">'+
-      '<span class="pl-dot" style="background:'+(PL_COL[k]||'#7a828d')+'"></span>'+k+
+    return '<div class="pl-chip'+(n?' has':'')+'">'+
+      '<span class="pl-dot" style="background:'+(PL_COL[k]||'#7a828d')+'"></span>'+
+      '<div class="pl-n">'+k+'</div>'+
       '<span class="pl-cnt">'+(n?n+' on':'&nbsp;')+'</span>'+
-      (n?'<span class="pl-minus" onclick="event.stopPropagation();plSub('+p+')" aria-label="take one off">&minus;</span>':'')+
-      '</button>';
+      '<div class="pl-pm">'+
+        '<button onclick="plSub('+p+')"'+(n?'':' disabled')+' aria-label="one less '+k+'">&minus;</button>'+
+        '<button onclick="plAdd('+p+')" aria-label="one more '+k+'">+</button>'+
+      '</div>'+
+    '</div>';
   }).join('');
   var bd=plBarDef(PL.bar);
   document.getElementById('plBarNow').innerHTML=
