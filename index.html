@@ -3910,7 +3910,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.26';
+var APPV='v5.27';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10625,7 +10625,7 @@ function wearPush(){
     // should not have to know that 40 lb is where the jump becomes 5.
     var wLb=t.type==='wr'?(t.w||0):0;
     st={open:true,id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
-        target:wearTargetText(t),restMs:wearRestLeft(),
+        target:wearTargetText(t),restEnd:wearRestEnd(),
         editable:(t.type==='wr'&&!nx.bw),
         w:dspW(wLb),r:(t.r||0),unit:wUnitName(),
         // The smallest honest jump IN THE DISPLAY UNIT. Differencing plateNext against the
@@ -10636,11 +10636,14 @@ function wearPush(){
   }
   try{wr.push({json:JSON.stringify(st)}).catch(function(){});}catch(e){}
 }
-function wearRestLeft(){
+// The MOMENT the rest ends, not how long is left of it. A duration is only true at the
+// instant it is written, and this state is a stored item the watch may not read for
+// minutes - or may re-read tomorrow on a cold start, at which point 'ninety seconds' is
+// a lie that starts a phantom countdown. An absolute time is simply in the past by then.
+function wearRestEnd(){
   try{
     if(typeof timerEnd!=='number'||!timerEnd)return 0;
-    var left=timerEnd-Date.now();
-    return left>0?left:0;
+    return timerEnd>Date.now()?timerEnd:0;
   }catch(e){return 0;}
 }
 // What comes back. The watch does not log anything itself - it says a set was done and the
