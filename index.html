@@ -3910,7 +3910,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.27';
+var APPV='v5.28';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10612,10 +10612,49 @@ function wearTargetText(t){
   if(t.unit==='sec')return t.r+' sec';
   return String(t.r)+' reps';
 }
+// The week as the WRIST needs it: names, and nothing else. No sections, no rows, no targets -
+// the watch is a small computer being handed something a phone renders, and the way to keep
+// it quick is to never send it work it cannot use. A dozen short strings, once, when nothing
+// is running. The set screen already carries everything needed once a day is open.
+function wearWeek(){
+  var out=[],done=loggedThisWeek();
+  DAYS.forEach(function(D){
+    (DB.days[D.k]||[]).forEach(function(id){
+      if(id==='rest')return;
+      var w=W[id]||DB.custom[id];
+      if(!w)return;
+      var n=0;
+      try{n=totalSets(id);}catch(e){}
+      out.push({id:id,d:D.n.slice(0,3),n:(w.name||'').replace('Optional: ',''),s:n,x:!!done[id]});
+    });
+  });
+  return out;
+}
+// Opening a day from the wrist. It deliberately will NOT switch away from a session already
+// running: the phone asks a real question before doing that (finish this one first?) and a
+// question nobody can see is not a question. If something is open, the watch simply gets told
+// about that one instead.
+function wearOpen(id){
+  if(SANDBOX||TUTON)return;
+  var openWk=null;
+  for(var k in (DB.active||{})){openWk=k;break;}
+  if(openWk){
+    if(!CUR||CUR!==openWk){
+      var dk0=(DB.active[openWk]||{}).wk||dayKeyOf(openWk);
+      try{openWNow(openWk,dk0);}catch(e){}
+    }
+    wearPush();return;
+  }
+  var w=W[id]||DB.custom[id];
+  if(!w)return;
+  var dk=dayKeyOf(id);
+  try{openWNow(id,dk);}catch(e){}
+  wearPush();
+}
 function wearPush(){
   var wr=WR();
   if(!wr||SANDBOX||TUTON)return;      // never drive a wrist from borrowed data
-  var st={open:false};
+  var st={open:false,week:wearWeek()};
   var nx=wearNext();
   if(nx){
     var t=nx.t||{};
@@ -10654,8 +10693,10 @@ function wearBind(){
   if(!wr||!wr.addListener)return;
   try{
     wr.addListener('wear',function(e){
-      if(!e||e.path!=='/forge/log')return;
+      if(!e)return;
       var b={};try{b=JSON.parse(e.body||'{}');}catch(err){}
+      if(e.path==='/forge/open'){wearOpen(b.id);return;}
+      if(e.path!=='/forge/log')return;
       wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
     });
   }catch(e){}
