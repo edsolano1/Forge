@@ -3908,7 +3908,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.24';
+var APPV='v5.25';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10559,7 +10559,7 @@ function wearNext(){
     var ent=A.entries[id]||[];
     for(var i=0;i<tg.length;i++){
       if(!ent[i]){
-        out={id:id,exId:rf.exId,name:rf.data.name||'',i:i,n:tg.length,t:tg[i]};
+        out={id:id,exId:rf.exId,name:rf.data.name||'',i:i,n:tg.length,t:tg[i],bw:!!rf.data.bw};
         return;
       }
     }
@@ -10578,8 +10578,21 @@ function wearPush(){
   var st={open:false};
   var nx=wearNext();
   if(nx){
+    var t=nx.t||{};
+    // Weight goes across in the DISPLAY unit and comes back the same way - the watch
+    // never sees pounds-under-kilograms, and the phone converts once on the way in,
+    // exactly as a typed number is treated. The step is worked out here too: the wrist
+    // should not have to know that 40 lb is where the jump becomes 5.
+    var wLb=t.type==='wr'?(t.w||0):0;
     st={open:true,id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
-        target:wearTargetText(nx.t),restMs:wearRestLeft()};
+        target:wearTargetText(t),restMs:wearRestLeft(),
+        editable:(t.type==='wr'&&!nx.bw),
+        w:dspW(wLb),r:(t.r||0),unit:wUnitName(),
+        // The smallest honest jump IN THE DISPLAY UNIT. Differencing plateNext against the
+        // current weight looked cleverer and produced 4 kg - a number no gym owns - because
+        // the pounds it started from do not sit on the kilogram lattice. Two of the smallest
+        // plate is what a bar actually moves by, and that is a constant per unit.
+        step:(UNIT_KG?2.5:(dspW(wLb)>=40?5:2.5))};
   }
   try{wr.push({json:JSON.stringify(st)}).catch(function(){});}catch(e){}
 }
@@ -10600,11 +10613,11 @@ function wearBind(){
     wr.addListener('wear',function(e){
       if(!e||e.path!=='/forge/log')return;
       var b={};try{b=JSON.parse(e.body||'{}');}catch(err){}
-      wearDoLog(b.id,b.setIdx);
+      wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
     });
   }catch(e){}
 }
-function wearDoLog(id,i){
+function wearDoLog(id,i,w,r){
   if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
   var nx=wearNext();
   if(!nx)return;
@@ -10621,6 +10634,19 @@ function wearDoLog(id,i){
     // it is most useful: phone in a bag, screen off, nothing to tap.
     try{renderSession();}catch(e){}
     row=document.getElementById('sr-'+nx.id+'-'+nx.i);
+  }
+  // What the wrist actually did, if it differs from the plan. Written into the very
+  // inputs the screen uses, so the set is logged by the same code reading the same
+  // boxes - there is no second way to record a set and no chance of the two disagreeing.
+  if(row&&(typeof w==='number'||typeof r==='number')){
+    if(typeof w==='number'&&isFinite(w)&&w>=0){
+      var wEl=document.getElementById('w-'+nx.id+'-'+nx.i);
+      if(wEl){var lb=Math.round(inW(w)*100)/100;wEl.value=fmtW(lb);wEl.dataset.lb=lb;}
+    }
+    if(typeof r==='number'&&isFinite(r)&&r>0){
+      var rEl=document.getElementById('r-'+nx.id+'-'+nx.i);
+      if(rEl)rEl.value=r;
+    }
   }
   // press the real button: same grading, same rest, same writing down
   var chk=row&&row.querySelector('.chk');
