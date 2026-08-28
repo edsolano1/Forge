@@ -3044,8 +3044,10 @@ body.wcon{overflow:hidden;}
     <div class="presets" style="grid-template-columns:1fr 1fr" id="sfxKeys"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Motion</span></div>
     <div class="presets" id="motionRow"></div>
-    <div class="sfx-lbl" style="margin-top:14px"><span>Units</span></div>
+    <div class="sfx-lbl" style="margin-top:14px"><span>Weight</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="unitRow"></div>
+    <div class="sfx-lbl" style="margin-top:14px"><span>Distance</span></div>
+    <div class="presets" style="grid-template-columns:1fr 1fr" id="distRow"></div>
     <!-- Whether a finished rest can actually reach you. Native only, and only when there is
          something to DO about it: once the alerts are getting through, this row has nothing
          left to say and takes itself off the sheet. -->
@@ -3908,7 +3910,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.25';
+var APPV='v5.26';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9107,7 +9109,7 @@ function renderHist(){
       if(it.walk){
         var wk=it.walk;
         var meta=(wk.min||0)+' min'+
-          (wk.steps?' &middot; '+Math.round(wk.steps).toLocaleString()+' steps':(wk.dist?' &middot; '+wk.dist+' mi':''))+
+          (wk.dist?' &middot; '+fmtDist(wk.dist):'')+(wk.steps?' &middot; '+Math.round(wk.steps).toLocaleString()+' steps':'')+
           (wk.kcal?' &middot; '+Math.round(wk.kcal)+' cal':'')+
           (wk.bpm?' &middot; '+Math.round(wk.bpm)+' bpm':'');
         return '<div class="hrow hwalk" onclick="walkRm('+it.wi+')">'+
@@ -9457,10 +9459,48 @@ function plateNext(w,down){
 function fmtLine(s){
   return String(s).replace(/^([\d.]+)x/,function(_,w){return fmtW(parseFloat(w))+'x';});
 }
+// ---------- distance ----------
+// Its own choice, not a passenger of the weight unit. Plenty of people lift in pounds and
+// walk in kilometres, or the reverse - roads and barbells are not measured by the same
+// habit, and tying them together would be the app deciding something it has no business
+// deciding. Storage stays canonical MILES forever, exactly as weight stays canonical
+// pounds: converted at the eyes and nowhere else.
+// Until it is answered it follows the weight unit, which makes a metric first run read
+// metric throughout and leaves every existing pound user reading exactly what they read
+// yesterday. The moment the switch is touched the answer is explicit and stops following.
+var DIST_KM=(function(){
+  try{var v=localStorage.getItem('arc_km');if(v!==null)return v==='1';}catch(e){}
+  return UNIT_KG;
+})();
+var MI_PER_KM=0.621371;
+function dUnitName(){return DIST_KM?'km':'mi';}
+function dspD(mi){return DIST_KM?Math.round(mi/MI_PER_KM*100)/100:mi;}
+function fmtDist(mi){
+  if(mi==null||isNaN(mi))return '';
+  var v=dspD(mi);
+  return (Math.round(v*100)/100)+' '+dUnitName();
+}
+function distSet(on){
+  DIST_KM=!!on;
+  try{localStorage.setItem('arc_km',DIST_KM?'1':'0');}catch(e){}
+  drawDistRow();
+  try{if(document.getElementById('histOvl').classList.contains('on'))renderHist();}catch(e){}
+  try{sfxLog();}catch(e){}
+}
+function drawDistRow(){
+  var e=document.getElementById('distRow');if(!e)return;
+  e.innerHTML=[['0','Miles'],['1','Kilometres']].map(function(u){
+    var on=(DIST_KM?'1':'0')===u[0];
+    return '<button class="preset sm'+(on?' on':'')+'" onclick="distSet('+u[0]+')">'+u[1]+'</button>';
+  }).join('');
+}
 function kgSet(on){
   UNIT_KG=!!on;
   try{localStorage.setItem('arc_kg',on?'1':'0');}catch(e){}
   drawUnitRow();
+  // An unanswered distance follows the weight unit, so it moves with it - once the
+  // distance switch has been touched it is explicit and stops following.
+  try{if(localStorage.getItem('arc_km')===null){DIST_KM=UNIT_KG;drawDistRow();}}catch(e){}
   renderHome();
   if(typeof sessionOpen==='function'&&sessionOpen())renderSession();
   try{sfxLog();}catch(e){}
@@ -11525,7 +11565,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();ntDraw();hcDraw();
+  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();ntDraw();hcDraw();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   // The two tour buttons say which LENGTH they are, so the theme's word for "Tutorial" no longer
