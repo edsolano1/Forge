@@ -3910,7 +3910,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.34';
+var APPV='v5.35';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10730,7 +10730,7 @@ function wearPush(detailId){
     // wk is the WORKOUT that is running; id is the row inside it. The watch needs both:
     // one to know whether the overview it is looking at is the live one, the other to log.
     st={open:true,wk:CUR,week:wearWeek(),saved:wearSaved(),id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
-        target:wearTargetText(t),restEnd:wearRestEnd(),
+        target:wearTargetText(t),restEnd:wearRestEnd(),restLen:wearRestLen(),
         editable:(t.type==='wr'&&!nx.bw),
         w:dspW(wLb),r:(t.r||0),unit:wUnitName(),
         // The smallest honest jump IN THE DISPLAY UNIT. Differencing plateNext against the
@@ -10746,6 +10746,28 @@ function wearPush(detailId){
 // instant it is written, and this state is a stored item the watch may not read for
 // minutes - or may re-read tomorrow on a cold start, at which point 'ninety seconds' is
 // a lie that starts a phantom countdown. An absolute time is simply in the past by then.
+// How long the rest is IN TOTAL, so the wrist can draw a proportion. Sent as well as the end
+// because a watch that wakes up halfway through has no way to know what it missed - and a bar
+// that assumes it caught the start would read full when the rest is nearly over. Measured
+// against restStartedAt rather than remembered, so a +15 lands in it too.
+function wearRestLen(){
+  try{
+    if(typeof timerEnd!=='number'||!timerEnd||!restStartedAt)return 0;
+    var n=timerEnd-restStartedAt;
+    return n>0?n:0;
+  }catch(e){return 0;}
+}
+// Cutting a rest short from the wrist. Deliberately the SAME two lines the notification skip
+// runs - move the end to now and let the running tick land it - so there is one way a rest
+// finishes early no matter which surface asked, alarms handed back to Android included.
+function wearSkipRest(){
+  try{
+    if(typeof timerInt==='undefined'||!timerInt)return;
+    skipQuiet=true;timerEnd=Date.now();
+    try{clearRestNotif();}catch(e){}
+    wearPush();
+  }catch(e){}
+}
 function wearRestEnd(){
   try{
     if(typeof timerEnd!=='number'||!timerEnd)return 0;
@@ -10765,6 +10787,7 @@ function wearBind(){
       if(e.path==='/forge/detail'){wearPush(b.id);return;}
       if(e.path==='/forge/open'){wearOpen(b.id);return;}
       if(e.path==='/forge/pick'){wearPick(b.i);return;}
+      if(e.path==='/forge/skiprest'){wearSkipRest();return;}
       if(e.path!=='/forge/log')return;
       wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
     });
