@@ -3910,7 +3910,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.29';
+var APPV='v5.30';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10651,10 +10651,28 @@ function wearOpen(id){
   try{openWNow(id,dk);}catch(e){}
   wearPush();
 }
-function wearPush(){
+// One workout, in the least the wrist can be shown and still understand it: exercise names,
+// how many sets each, and the first target line. Fetched only when a day is actually tapped,
+// never sent with the week - a dozen workouts of detail pushed up front is exactly the sort
+// of work a watch should not be doing on the chance you might look.
+function wearDetail(id){
+  var w=W[id]||DB.custom[id];
+  if(!w)return null;
+  var rows=[];
+  (w.sections||[]).forEach(function(sec){
+    (sec.rows||[]).forEach(function(r){
+      var ex=null;try{ex=R(r[0]);}catch(e){}
+      var lines=String((r[1]&&r[1].sets)||'').split('\n');
+      rows.push({n:((ex&&ex.name)||r[0]),s:lines.length,t:fmtLine(lines[0]||'')});
+    });
+  });
+  return {id:id,name:(w.name||'').replace('Optional: ',''),rows:rows};
+}
+function wearPush(detailId){
   var wr=WR();
   if(!wr||SANDBOX||TUTON)return;      // never drive a wrist from borrowed data
   var st={open:false,week:wearWeek()};
+  if(detailId){var d=wearDetail(detailId);if(d)st.detail=d;}
   var nx=wearNext();
   if(nx){
     var t=nx.t||{};
@@ -10663,7 +10681,7 @@ function wearPush(){
     // exactly as a typed number is treated. The step is worked out here too: the wrist
     // should not have to know that 40 lb is where the jump becomes 5.
     var wLb=t.type==='wr'?(t.w||0):0;
-    st={open:true,id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
+    st={open:true,week:wearWeek(),id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
         target:wearTargetText(t),restEnd:wearRestEnd(),
         editable:(t.type==='wr'&&!nx.bw),
         w:dspW(wLb),r:(t.r||0),unit:wUnitName(),
@@ -10672,6 +10690,7 @@ function wearPush(){
         // the pounds it started from do not sit on the kilogram lattice. Two of the smallest
         // plate is what a bar actually moves by, and that is a constant per unit.
         step:(UNIT_KG?2.5:(dspW(wLb)>=40?5:2.5))};
+    if(detailId){var d2=wearDetail(detailId);if(d2)st.detail=d2;}
   }
   try{wr.push({json:JSON.stringify(st)}).catch(function(){});}catch(e){}
 }
@@ -10695,6 +10714,7 @@ function wearBind(){
     wr.addListener('wear',function(e){
       if(!e)return;
       var b={};try{b=JSON.parse(e.body||'{}');}catch(err){}
+      if(e.path==='/forge/detail'){wearPush(b.id);return;}
       if(e.path==='/forge/open'){wearOpen(b.id);return;}
       if(e.path!=='/forge/log')return;
       wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
