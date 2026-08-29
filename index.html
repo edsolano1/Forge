@@ -3910,7 +3910,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.30';
+var APPV='v5.31';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10634,6 +10634,23 @@ function wearWeek(){
 // running: the phone asks a real question before doing that (finish this one first?) and a
 // question nobody can see is not a question. If something is open, the watch simply gets told
 // about that one instead.
+// The shelf: workouts you keep but have not placed on a day. Exactly the thing someone reaches
+// for when they want a quick session that is not this week's plan, so leaving it off the wrist
+// made the watch able to show only the plan and never the improvisation.
+// Same shape and same restraint as the week - names and set counts, nothing more.
+function wearSaved(){
+  var onDay={},out=[];
+  DAYS.forEach(function(D){(DB.days[D.k]||[]).forEach(function(id){onDay[id]=1;});});
+  (DB.extra||[]).forEach(function(id){
+    if(onDay[id])return;                  // it is on the week; it belongs up there instead
+    var w=W[id]||DB.custom[id];
+    if(!w)return;
+    var n=0;
+    try{n=totalSets(id);}catch(e){}
+    out.push({id:id,n:(w.name||'').replace('Optional: ',''),s:n});
+  });
+  return out;
+}
 function wearOpen(id){
   if(SANDBOX||TUTON)return;
   var openWk=null;
@@ -10671,7 +10688,7 @@ function wearDetail(id){
 function wearPush(detailId){
   var wr=WR();
   if(!wr||SANDBOX||TUTON)return;      // never drive a wrist from borrowed data
-  var st={open:false,week:wearWeek()};
+  var st={open:false,week:wearWeek(),saved:wearSaved()};
   if(detailId){var d=wearDetail(detailId);if(d)st.detail=d;}
   var nx=wearNext();
   if(nx){
@@ -10681,7 +10698,7 @@ function wearPush(detailId){
     // exactly as a typed number is treated. The step is worked out here too: the wrist
     // should not have to know that 40 lb is where the jump becomes 5.
     var wLb=t.type==='wr'?(t.w||0):0;
-    st={open:true,week:wearWeek(),id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
+    st={open:true,week:wearWeek(),saved:wearSaved(),id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
         target:wearTargetText(t),restEnd:wearRestEnd(),
         editable:(t.type==='wr'&&!nx.bw),
         w:dspW(wLb),r:(t.r||0),unit:wUnitName(),
