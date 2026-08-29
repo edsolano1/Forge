@@ -1,0 +1,5 @@
+index.html:6375:  h+='<div class="mk-lbl">Name</div>'+
+index.html:6391:    h+='<div class="mk-lbl">This workout</div><div class="dayacts">';
+index.html:6426:    h+='<div class="mk-lbl">Where it lives</div>'+
+index.html:6432:  h+='<div class="mk-lbl">Where it lives</div><div class="mk-slots" style="--mkc:'+MK.color+'">';
+index.html:6461:  h+='<div class="mk-lbl">The work</div><div class="mk-work" style="--mkc:'+MK.color+'">';

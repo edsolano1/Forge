@@ -3910,7 +3910,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.33';
+var APPV='v5.34';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10589,22 +10589,36 @@ function WR(){
 }
 // The first set with nothing logged against it, in the order they are laid out. Judged on
 // what is unlogged rather than on position, so working out of order does not confuse it.
+// The lift the wrist is pointed AT, when it is not simply the next one. A machine being
+// occupied is the ordinary reason to jump the order and come back, and an app that insists
+// on its own sequence just sends you back to carrying the phone.
+var WEARFOCUS=null;
+function wearPick(rowId){
+  if(!CUR||!DB.active[CUR])return;
+  WEARFOCUS=rowId||null;
+  wearPush();
+}
 function wearNext(){
   if(!CUR||!DB.active[CUR])return null;
-  var wk=CUR,A=DB.active[wk],out=null;
+  var wk=CUR,A=DB.active[wk],out=null,aimed=null;
   edAllRows(wk).forEach(function(row){
-    if(out)return;
+    if(out&&!WEARFOCUS)return;
+    if(out&&aimed)return;
     var rf=rowFor(A.swaps,row,wk),id=rf.id;
     var tg=rf.swapId?rf.data.sets.split('\n').map(parseTarget):targetsOf(row,wk);
     var ent=A.entries[id]||[];
     for(var i=0;i<tg.length;i++){
       if(!ent[i]){
-        out={id:id,exId:rf.exId,name:rf.data.name||'',i:i,n:tg.length,t:tg[i],bw:!!rf.data.bw};
+        var cand={id:id,exId:rf.exId,name:rf.data.name||'',i:i,n:tg.length,t:tg[i],bw:!!rf.data.bw};
+        if(!out)out=cand;
+        if(WEARFOCUS&&id===WEARFOCUS&&!aimed)aimed=cand;
         return;
       }
     }
   });
-  return out;
+  // the lift you jumped to is finished: stop aiming and rejoin the running order
+  if(WEARFOCUS&&!aimed)WEARFOCUS=null;
+  return aimed||out;
 }
 function wearTargetText(t){
   if(!t)return '';
@@ -10664,6 +10678,7 @@ function wearOpen(id){
   }
   var w=W[id]||DB.custom[id];
   if(!w)return;
+  WEARFOCUS=null;          // a fresh session never inherits the last one aim
   var dk=dayKeyOf(id);
   try{openWNow(id,dk);}catch(e){}
   wearPush();
@@ -10681,11 +10696,21 @@ function wearDetail(id){
   // overlay rather than in the workout: a Test day carrying two lifts arrived on the wrist
   // showing one, while the list beside it counted the sets of both and said six. Counting
   // from one source is the only way those two numbers can never disagree again.
+  // How far through each lift you are, when this workout is the one running. Without it the
+  // overview is a plan; with it, it is where you actually are - and the row ids are what let
+  // the wrist point at one when the machine it wanted is taken.
+  var A=(CUR===id)?DB.active[id]:null;
+  var nx=A?wearNext():null;
   edAllRows(id).forEach(function(row){
     var d=null;try{d=R(row,id);}catch(e){}
     if(!d)return;
+    var rf=A?rowFor(A.swaps,row,id):null;
+    var rid=rf?rf.id:(typeof row==='string'?row:row[0]);
     var lines=String(d.sets||'').split('\n');
-    rows.push({n:(d.name||(typeof row==='string'?row:row[0])),s:lines.length,t:fmtLine(lines[0]||'')});
+    var done=0;
+    if(A)(A.entries[rid]||[]).forEach(function(e){if(e)done++;});
+    rows.push({i:rid,n:(d.name||rid),s:lines.length,t:fmtLine(lines[0]||''),
+               d:done,c:!!(nx&&nx.id===rid)});
   });
   return {id:id,name:(w.name||'').replace('Optional: ',''),rows:rows};
 }
@@ -10702,7 +10727,9 @@ function wearPush(detailId){
     // exactly as a typed number is treated. The step is worked out here too: the wrist
     // should not have to know that 40 lb is where the jump becomes 5.
     var wLb=t.type==='wr'?(t.w||0):0;
-    st={open:true,week:wearWeek(),saved:wearSaved(),id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
+    // wk is the WORKOUT that is running; id is the row inside it. The watch needs both:
+    // one to know whether the overview it is looking at is the live one, the other to log.
+    st={open:true,wk:CUR,week:wearWeek(),saved:wearSaved(),id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
         target:wearTargetText(t),restEnd:wearRestEnd(),
         editable:(t.type==='wr'&&!nx.bw),
         w:dspW(wLb),r:(t.r||0),unit:wUnitName(),
@@ -10737,6 +10764,7 @@ function wearBind(){
       var b={};try{b=JSON.parse(e.body||'{}');}catch(err){}
       if(e.path==='/forge/detail'){wearPush(b.id);return;}
       if(e.path==='/forge/open'){wearOpen(b.id);return;}
+      if(e.path==='/forge/pick'){wearPick(b.i);return;}
       if(e.path!=='/forge/log')return;
       wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
     });
