@@ -3910,7 +3910,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.32';
+var APPV='v5.33';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10676,12 +10676,16 @@ function wearDetail(id){
   var w=W[id]||DB.custom[id];
   if(!w)return null;
   var rows=[];
-  (w.sections||[]).forEach(function(sec){
-    (sec.rows||[]).forEach(function(r){
-      var ex=null;try{ex=R(r[0]);}catch(e){}
-      var lines=String((r[1]&&r[1].sets)||'').split('\n');
-      rows.push({n:((ex&&ex.name)||r[0]),s:lines.length,t:fmtLine(lines[0]||'')});
-    });
+  // Read through edAllRows and R - the SAME pair the session screen reads. Walking the raw
+  // sections misses anything added through the editor, which lives in the day's own edit
+  // overlay rather than in the workout: a Test day carrying two lifts arrived on the wrist
+  // showing one, while the list beside it counted the sets of both and said six. Counting
+  // from one source is the only way those two numbers can never disagree again.
+  edAllRows(id).forEach(function(row){
+    var d=null;try{d=R(row,id);}catch(e){}
+    if(!d)return;
+    var lines=String(d.sets||'').split('\n');
+    rows.push({n:(d.name||(typeof row==='string'?row:row[0])),s:lines.length,t:fmtLine(lines[0]||'')});
   });
   return {id:id,name:(w.name||'').replace('Optional: ',''),rows:rows};
 }
