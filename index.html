@@ -3931,7 +3931,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.42';
+var APPV='v5.43';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4175,11 +4175,15 @@ function refLink(id,name){
   if(v)return"https://exrx.net/"+(v.slice(0,10)==='Stretches/'?v:'WeightExercises/'+v);
   return"https://exrx.net/Lists/Directory";
 }
-function fmtSets(sets){
+// The Last line stopped carrying PR tags (user note, mid-workout): the record already has
+// its own place at the foot of the card, and a tag repeated inside the list of sets just
+// made the numbers harder to read. The text export keeps them - prose history has no
+// footer to point at.
+function fmtSets(sets,withPR){
   return sets.map(function(s){
     if(!s)return '-';
-    var base=s.w?(fmtW(s.w)+'\u00d7'+s.r):(s.r+(s.unit?' '+s.unit:''));
-    return base+(s.pr?' PR':'')+(s.br&&s.br>10?'*':'');
+    var base=s.w?(fmtW(s.w)+'×'+s.r):(s.r+(s.unit?' '+s.unit:''));
+    return base+(withPR&&s.pr?' PR':'')+(s.br&&s.br>10?'*':'');
   }).join(', ');
 }
 // Cleared clean = every target set matched or beaten last time
@@ -7526,7 +7530,7 @@ function buildExport(wk,A){
     sec.rows.forEach(function(row){
       var rf=rowFor(A.swaps,row),id=rf.id,ent=(A.entries[id]||[]).filter(function(x){return x;});
       if(!ent.length)return;
-      out+=rf.data.name+(rf.swapId?' (swap)':'')+': '+fmtSets(ent)+'\n';
+      out+=rf.data.name+(rf.swapId?' (swap)':'')+': '+fmtSets(ent,true)+'\n';
     });
   });
   if(out.indexOf('*')>-1)out+='\n* hold broken by a pause over 10s';
