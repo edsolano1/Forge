@@ -3924,7 +3924,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.37';
+var APPV='v5.38';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8689,7 +8689,6 @@ function plClear(){PL.want=null;PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(
 // The whole value is that the rungs land on REAL plates. "137.5" is useless under a bar; the
 // weights below are solved against the very bar this lift is already known to use, in the
 // display unit, so a kilogram user gets a kilogram ladder rather than a translation.
-var WARM_FR=[0.45,0.65,0.80,0.90], WARM_REPS=[10,8,5,3,2];
 var WARMOPEN={}, WARMPLANS={};
 
 // The nearest weight this bar can ACTUALLY be loaded to, worked in display units because
@@ -8715,16 +8714,31 @@ function warmSideTxt(w,k){
   for(i=0;i<set.length;i++)while(rem>=set[i]-0.0001){out.push(plNum(set[i]));rem=Math.round((rem-set[i])*1000)/1000;}
   return out.length?out.join(' + ')+' a side':'';
 }
-// The ladder. Offered only where there is genuinely a ladder to climb - fewer than two rungs
-// means the working weight is light enough that ramping to it is theatre, and no button
-// appears at all. That is a better rule than a list of "big lifts", because heavy is what
-// needs warming up and no exercise NAME can tell you what is heavy for this person.
-// Whether this lift is LOADED at all - a bar, or a machine plates hang on. The first pass
-// offered a ramp wherever one could be arithmetically generated, which put '10 + 2.5 a side'
-// under a cable lateral raise and a four-rung ladder under an ab crunch machine. A pin stack
-// has no sides, so that was not merely unnecessary, it was wrong. This asks the same question
-// the plate calculator asks when it guesses a bar - and honours a bar the user has since set
-// by hand, which is the only thing that actually knows how the gym is built.
+
+// How MANY rungs the climb is worth. The first pass used one fixed table of fractions no
+// matter how far you had to travel, which put five rungs under a 145 lb bench - five plate
+// changes to reach a weight most people get to in three. Each rung on a bar costs a plate
+// change and a minute of your life, so the count scales with the climb.
+//
+// A pin stack or a rack of dumbbells costs seconds, not minutes, which is why breadth and
+// length are decided separately: the ladder is offered widely, and kept short where it is
+// expensive.
+function warmRungs(wd,barD){
+  if(barD>0){
+    var ratio=wd/barD;
+    return ratio<2?1:(ratio<3.5?2:(ratio<5.5?3:4));
+  }
+  return wd>=(UNIT_KG?100:220)?3:2;
+}
+function warmSteps(n){
+  if(n<=1)return [{f:0.75,r:5}];
+  if(n===2)return [{f:0.60,r:8},{f:0.85,r:3}];
+  if(n===3)return [{f:0.50,r:8},{f:0.70,r:5},{f:0.88,r:3}];
+  return [{f:0.45,r:10},{f:0.65,r:8},{f:0.80,r:5},{f:0.90,r:3}];
+}
+// Whether this lift is PLATE-loaded. It no longer decides whether a ramp is offered - only
+// whether the rungs can say what hangs on one end. A pin stack has no sides, and printing
+// "10 + 2.5 a side" under a cable was not merely unnecessary, it was false.
 function warmLoaded(exId,name){
   if(DB&&DB.exBar&&DB.exBar[exId])return true;
   return plateEx(exId,name)||plMachine(exId,name);
@@ -8732,20 +8746,24 @@ function warmLoaded(exId,name){
 function warmPlan(exId,name,lbWorking){
   var wd=dspW(lbWorking||0);
   if(!wd||wd<=0)return [];
-  if(!warmLoaded(exId,name))return [];
-  var k=barFor(exId,name),barD=plBarW(k),out=[],prev=0;
-  // Working within half again of the bar is not a climb. You take the bar, you do the set -
-  // three rungs between 45 and 65 is the app inventing work to look thorough.
+  var loaded=warmLoaded(exId,name);
+  var k=loaded?barFor(exId,name):'mac';
+  var barD=loaded?plBarW(k):0;
+  // Working within half again of the bar is not a climb - you take the bar and do the set.
   if(barD>0&&wd<barD*1.5)return [];
-  if(barD>0&&barD<=wd*0.6){out.push({w:barD,r:WARM_REPS[0],bar:true});prev=barD;}
-  WARM_FR.forEach(function(f,i){
-    var w=warmSnapD(wd*f,k);
+  // And below a plate a side there is nothing to ramp THROUGH: a 20 lb lateral raise does
+  // not need a ladder, it needs one lighter set you were going to do anyway.
+  if(barD<=0&&wd<(UNIT_KG?20:45))return [];
+  var out=[],prev=0;
+  if(barD>0&&barD<=wd*0.6){out.push({w:barD,r:10,bar:true});prev=barD;}
+  warmSteps(warmRungs(wd,barD)).forEach(function(s){
+    var w=loaded?warmSnapD(wd*s.f,k):natW(wd*s.f);
     if(w<=prev+0.001)return;          // no rung repeating the one below it
     if(w>=wd-0.001)return;            // and none that has arrived at the working weight
-    out.push({w:w,r:WARM_REPS[i+1]});
+    out.push({w:w,r:s.r});
     prev=w;
   });
-  return out.length>=2?out:[];
+  return out;
 }
 function warmToggle(id){WARMOPEN[id]=!WARMOPEN[id];warmDraw(id);try{sfxTick&&sfxTick();}catch(e){}}
 function warmTick(id,i){
@@ -8768,11 +8786,12 @@ function warmHtml(id){
   if(!m||!WARMOPEN[id])return '';
   var plan=warmPlan(m.ex,m.name,m.lb);
   if(!plan.length)return '';
-  var k=barFor(m.ex,m.name);
+  var loaded=warmLoaded(m.ex,m.name);
+  var k=loaded?barFor(m.ex,m.name):null;
   var A=CUR&&DB.active[CUR],done=(A&&A.warm&&A.warm[id])||[];
   var h='<div class="warm-hd">Warm-up<span>doesn\'t count toward your numbers</span></div>';
   plan.forEach(function(g,i){
-    var side=warmSideTxt(g.w,k);
+    var side=loaded?warmSideTxt(g.w,k):'';
     h+='<div class="warm-row'+(done[i]?' on':'')+'" onclick="event.stopPropagation();warmTick(\''+id+'\','+i+')">'+
        '<span class="warm-ck"></span>'+
        '<b class="num">'+plNum(g.w)+'</b><span class="warm-u">'+wUnitName()+'</span>'+
