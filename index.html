@@ -3924,7 +3924,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.38';
+var APPV='v5.39';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10929,10 +10929,31 @@ function wearBind(){
       if(e.path==='/forge/open'){wearOpen(b.id);return;}
       if(e.path==='/forge/pick'){wearPick(b.i);return;}
       if(e.path==='/forge/skiprest'){wearSkipRest();return;}
+      if(e.path==='/forge/startat'){wearStartAt(b.id,b.i);return;}
       if(e.path!=='/forge/log')return;
       wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
     });
   }catch(e){}
+}
+// Beginning a day AT a particular lift. The watch offers this because looking at a lift on a
+// workout that is not running should not commit you to the whole day - so nothing is sent
+// until you press LOG SET, and the question is asked on the wrist, where it can be seen.
+//
+// By then the intent is unambiguous, so this does the whole thing in one: open the day, aim
+// at that lift, and log its first set through the very same path a tap on the phone takes.
+// The refusal to switch away from a session already running is kept exactly as it is - that
+// is a real question and the phone still asks it.
+function wearStartAt(id,rowId){
+  if(SANDBOX||TUTON)return;
+  var openWk=null;
+  for(var k in (DB.active||{})){openWk=k;break;}
+  if(openWk&&openWk!==id){wearOpen(id);return;}   // something else is running: wearOpen says so
+  if(!openWk)wearOpen(id);
+  if(!CUR||CUR!==id)return;
+  WEARFOCUS=rowId||null;
+  var nx=wearNext();
+  if(nx)wearDoLog(nx.id,nx.i);
+  else wearPush();
 }
 function wearDoLog(id,i,w,r){
   if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
