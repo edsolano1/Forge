@@ -354,6 +354,8 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
   cursor:pointer;transition:background .15s;}
 .bank-add:hover{background:color-mix(in srgb,var(--go) 8%,transparent);}
 .bank-add svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;}
+.bank-forge{gap:7px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;}
+.bank-forge svg{width:17px;height:17px;stroke-width:1.6;}
 .blk.dragging{z-index:60;opacity:.94;transition:none;}
 .blk.dragging .exc{box-shadow:0 20px 44px -14px rgba(0,0,0,.65);}
 /* While a block is being dragged the whole list collapses to name rows: a three-deep
@@ -3084,8 +3086,13 @@ body.wcon{overflow:hidden;}
       <button class="preset sm" id="tutBtnShort" onclick="tutStart(1)">Short</button>
       <button class="preset sm" id="tutBtn" onclick="tutStart()">Full</button>
     </div>
-    <!-- The sandbox came off this sheet at release (Aug 23): it is a development tool for
-         replaying the first run. sbStart and everything under it stay whole and dormant. -->
+    <!-- The sandbox came off this sheet at release (Aug 23) as a dev tool, and came back
+         (v5.41) as a user feature: it replays the whole first run - welcome, ritual,
+         generated week - in a copy where nothing is saved, and leaving throws it all away. -->
+    <div class="sfx-lbl"><span>The first run</span></div>
+    <div class="presets" style="grid-template-columns:1fr">
+      <button class="preset sm" onclick="sbStart()">TRY IT FRESH &middot; nothing is saved</button>
+    </div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('settingsOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -3924,7 +3931,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.40';
+var APPV='v5.41';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5500,7 +5507,10 @@ function renderHome(){
   // whether or not it holds anything - and when it is empty the box itself says what it is for.
   document.getElementById('extraCards').innerHTML=(xs.length?xs.map(xcard).join('')
     :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here. Drag one down, or hold it and choose MOVE TO SAVED WORKOUTS.</div>')+
-    '<div class="bank-add" onclick="openNewSaved()" title="New saved workout">'+PLUS+'</div>';
+    '<div class="bank-add" onclick="openNewSaved()" title="New saved workout">'+PLUS+'</div>'+
+    '<div class="bank-add bank-forge" onclick="ezOpen(\x27saved\x27)" title="Forge me a week">'+
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 13h9c1.5 0 3 .4 4 1-1 .8-2.6 1.5-4.5 1.5H10c-.7 1.5-1 2.2-1 3H6c0-.8-.3-1.5-1-3H3z"/><path d="M5 11l1.5-2M8 10.5l.5-2.2M11 11l1.2-1.8" stroke-linecap="round"/></svg>'+
+    '<span>Forge me a week</span></div>';
   document.getElementById('extraLabel').textContent=MKTXT().xl;
   document.getElementById('extraLabel').style.display='';
   document.getElementById('extraHint').style.display=xs.length?'':'none';
@@ -13495,8 +13505,12 @@ var EZ_STEPS=[
     ['lean','Lose weight','Supersets for density, a cardio burn to end every day, a daily walk',EZ_ART.flame],
     ['move','Just get moving','Lighter all round, shorter days - plus the daily walk',EZ_ART.wind]];}}
 ];
-function ezOpen(){
-  EZ={step:0,level:null,days:null,goal:null};
+// into: 'days' places the week on the calendar (a first run has an empty one waiting);
+// 'saved' parks it in Saved workouts instead, because an existing user already HAS a week
+// and a generator that overwrites a Tuesday nobody asked it to touch is a bug with steps.
+function ezOpen(into){
+  if(into==='saved'&&(DB.extra||[]).length>5){mkNote('Saved workouts is nearly full. A forged week can be up to five workouts - clear some room first.','Not enough room');return;}
+  EZ={step:0,level:null,days:null,goal:null,into:into||'days'};
   document.getElementById('ez').classList.add('on');
   ezRender();
 }
@@ -13676,11 +13690,16 @@ function ezForge(){
       color:MK_COLS[order.length%MK_COLS.length],sections:sections};
     madeBy[d.n]=id;order.push(id);
   });
-  slots.forEach(function(day,i){
-    var id=order[i];
-    DB.days[day]=DB.days[day]||[];
-    if(DB.days[day].indexOf(id)<0)DB.days[day].push(id);
-  });
+  if(EZ.into==='saved'){
+    DB.extra=DB.extra||[];
+    order.forEach(function(id){if(DB.extra.indexOf(id)<0)DB.extra.push(id);});
+  }else{
+    slots.forEach(function(day,i){
+      var id=order[i];
+      DB.days[day]=DB.days[day]||[];
+      if(DB.days[day].indexOf(id)<0)DB.days[day].push(id);
+    });
+  }
   // Both cardio-leaning goals carry the walk: the cheapest habit with the longest reach.
   if(goal==='lean'||goal==='move'){
     var wid='cus'+Date.now().toString(36)+'w';
@@ -13697,7 +13716,9 @@ function ezForge(){
     muscle:'Every set here is chosen for how it changes your shape. You will get stronger as a side effect - and the long rests on the big lifts are where the growth is earned.',
     lean:'The lifting stays heavy on purpose: it is what protects your muscle while the fat comes off. Training guards the muscle - the kitchen does the losing.',
     move:'This week will not maximise any one thing. It makes almost everything better at once, and it is the easiest plan to keep for years - which is the whole trick.'};
-  try{if(EZ_WHY[goal])setTimeout(function(){mkNote(EZ_WHY[goal],'Your week is forged');},900);}catch(e){}
+  var saved=(EZ.into==='saved');
+  var lead=saved?'It is waiting in Saved workouts - hold a piece to put it on a day. ':'';
+  try{if(EZ_WHY[goal])setTimeout(function(){mkNote(lead+EZ_WHY[goal],'Your week is forged');},900);}catch(e){}
   setTimeout(tutOffer,2400);
 }
 
