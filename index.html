@@ -3931,7 +3931,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.44';
+var APPV='v5.45';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9987,10 +9987,10 @@ function sfxPR(){
   if(!sfxAllowed('pr'))return;
   // Beating a record is the one moment worth a different instrument entirely - not the
   // hammer again, but blades meeting.
-  // 0.95 dwarfed the hammer it was supposed to crown - reported from the gym with music up:
-  // the strike vanished under the record's ring. A record should read as the LOUDEST hit of
-  // the day, not a different weight class entirely.
-  if(FG()&&swdBuf&&SFX_ON){initAudio();if(actx){playClip(swdBuf,actx.currentTime+0.02,{vol:0.58});return;}}
+  // Turned down twice now, both times from the gym rather than the desk: 0.95 dwarfed the
+  // hammer outright, and 0.58 still startled with music up. Half again - 0.29 - keeps the
+  // blades as the brightest moment of the day without making anyone flinch mid-set.
+  if(FG()&&swdBuf&&SFX_ON){initAudio();if(actx){playClip(swdBuf,actx.currentTime+0.02,{vol:0.29});return;}}
   // Records live an octave and a half above everything else in Moonwell - same glass,
   // far higher, and a second voice a fifth over it once the first has bloomed.
   if(MW())return sfx(function(t){
