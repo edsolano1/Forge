@@ -640,8 +640,8 @@ body.tut #askOvl{z-index:402;}
 .st-tgt b{color:var(--txt2);}
 .st-last b{color:var(--txt2);}
 .st-best b{color:var(--gold);}
-.ex-links{margin-top:10px;display:flex;gap:7px;}
-.ex-links a{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--txt3);text-decoration:none;padding:5px 10px;border:1px solid var(--line);border-radius:8px;transition:.15s;}
+.ex-links{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;}
+.ex-links a{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:12px;color:var(--txt3);text-decoration:none;padding:5px 10px;border:1px solid var(--line);border-radius:8px;transition:.15s;}
 .ex-links a:hover{color:var(--txt);border-color:#33373d;}
 .ex-links a.unote-btn{cursor:pointer;}
 .ex-links a.unote-btn.has{color:var(--go);border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
@@ -3924,7 +3924,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.36';
+var APPV='v5.37';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
