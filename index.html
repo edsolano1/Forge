@@ -3924,7 +3924,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.39';
+var APPV='v5.40';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13541,7 +13541,7 @@ function ezRender(){
 // Starting weights are per lift at intermediate, scaled by level, rounded to real plates,
 // and deliberately modest: the first session sets the baseline and the level-up engine
 // climbs from there - overshooting a stranger's first day is how apps get deleted.
-var EZ_W={bench:65,ohp:45,bsquat:75,deadlift:95,incdb:25,mbench:60,lpress:120,latpd:55,
+var EZ_W={bench:65,ohp:45,bsquat:75,deadlift:95,incdb:25,mbench:60,lpress:120,latpd:55,bbthrust:95,
           row:60,machrow:70,hthrust:90,preacher:25,sdbcurl:20,hammer:17.5,rope:25,ohext:20,
           skull:20,dblat:12.5,revfly:45,mfly:60,dbfly:20,slegcurl:60,lext:60,
           dcalfr:30,scalfr:70};
@@ -13564,6 +13564,7 @@ var EZ_POOL={
   bicep2: {beg:'hammer', int:'hammer', adv:'hammer'},
   tricep: {beg:'rope',   int:'rope',   adv:'rope'},
   tricep2:{beg:'ohext',  int:'skull',  adv:'skull'},
+  gluteI: {beg:'hthrust',int:'hthrust',adv:'bbthrust'},
   core:   {beg:'plank',  int:'plank',  adv:'plank'},
   core2:  {beg:'bike',   int:'hollow', adv:'hollow'}
 };
@@ -13578,21 +13579,46 @@ var EZ_DAYS={
   lower2:{n:'Lower Body B',r:[['hinge','main'],['squat','sec'],['hamI','acc'],[['calf','iso'],['core2','core']]]},
   push:{n:'Push Day',r:[['hpress','main'],['vpress','sec'],['incline','acc'],[['chestI','iso'],['tricep','iso']],['sideD','iso']]},
   pull:{n:'Pull Day',r:[['hinge','main'],['vpull','sec'],['hpull','sec'],[['rearD','iso'],['bicep','iso']],['bicep2','iso']]},
-  legs:{n:'Leg Day',r:[['squat','main'],['hamI','sec'],['quadI','acc'],[['calf','iso'],['core','core']]]}
+  legs:{n:'Leg Day',r:[['squat','main'],['hamI','sec'],['quadI','acc'],[['calf','iso'],['core','core']]]},
+  // The third full-body day: three days rotating the emphasis - squat leads A, hinge
+  // leads B, PRESSING leads this one - so no pattern goes a week without being first
+  // while fresh. Also what lets three days train everything three times.
+  fullC:{n:'Full Body C',r:[['hpress','main'],['squat','sec'],['vpull','sec'],[['gluteI','iso'],['sideD','iso']],['core','core']]},
+  // The strength goal at four or five days reorganises around the LIFTS, not body parts:
+  // each day is one main lift at strength dosing and accessories at hypertrophy dosing,
+  // because when the barbell is the scoreboard the week should be shaped like the score.
+  sqday:{n:'Squat Day',   r:[['squat','main'],['hinge','sec'],['quadI','acc'],[['calf','iso'],['core','core']]]},
+  bhday:{n:'Bench Day',   r:[['hpress','main'],['hpull','sec'],['chestI','acc'],[['tricep','iso'],['tricep2','iso']]]},
+  dlday:{n:'Deadlift Day',r:[['hinge','mainD'],['vpull','sec'],['hamI','acc'],[['gluteI','iso'],['core2','core']]]},
+  ohday:{n:'Press Day',   r:[['vpress','main'],['incline','sec'],['sideD','acc'],[['rearD','iso'],['bicep','iso']]]}
 };
 // the split: which days make the week, by day count and level
-function ezSplit(level,days){
+function ezSplit(level,days,goal){
   var D=EZ_DAYS;
-  if(days<=2)return level==='beg'?[D.fullA,D.fullB]:[D.upper1,D.lower1];
-  if(days===3)return level==='beg'?[D.fullA,D.fullB,D.fullA]:[D.push,D.pull,D.legs];
+  // Strength at 4-5 days: main-lift days. Everyone else gets the frequency the evidence
+  // supports - training a muscle twice a week beats once, so two days is ALWAYS full
+  // body (upper/lower at two hit everything once a week), and three days is full body
+  // A/B/C for every level (PPL at three had the same once-a-week problem dressed up).
+  if(goal==='strong'&&days>=4){
+    return days===4?[D.sqday,D.bhday,D.dlday,D.ohday]
+                   :[D.sqday,D.bhday,D.dlday,D.ohday,D.upper2];
+  }
+  if(days<=2)return [D.fullA,D.fullB];
+  if(days===3)return [D.fullA,D.fullB,D.fullC];
   if(days===4)return [D.upper1,D.lower1,D.upper2,D.lower2];
-  return level==='beg'?[D.fullA,D.lower1,D.fullB,D.upper1,D.fullA]:[D.push,D.pull,D.legs,D.upper2,D.lower2];
+  return level==='beg'?[D.fullA,D.lower1,D.fullB,D.upper1,D.fullC]:[D.push,D.pull,D.legs,D.upper2,D.lower2];
 }
 // the prescription: sets x reps x rest per role class, per goal
 var EZ_RX={
-  strong:{main:{s:5,r:5, rest:'3 min'}, sec:{s:4,r:6, rest:'2 min'}, acc:{s:3,r:8, rest:'90 sec'}, iso:{s:2,r:12,rest:'60 sec'}, core:{s:3,t:30,rest:'45 sec'}},
+  // Strength: heavy main work with LONG rests - 3-5 min is what the research supports for
+  // force output - and accessories at 2 min, not 90 sec. mainD is the deadlift-day main:
+  // one set fewer, because deadlifts cost more to recover from than anything else.
+  strong:{main:{s:5,r:5, rest:'3 min'}, mainD:{s:4,r:5,rest:'3 min'}, sec:{s:4,r:6, rest:'2 min'}, acc:{s:3,r:8, rest:'2 min'}, iso:{s:2,r:12,rest:'60 sec'}, core:{s:3,t:30,rest:'90 sec'}},
   muscle:{main:{s:4,r:8, rest:'2 min'}, sec:{s:3,r:10,rest:'90 sec'}, acc:{s:3,r:12,rest:'75 sec'}, iso:{s:3,r:15,rest:'60 sec'}, core:{s:3,t:35,rest:'45 sec'}},
-  lean:  {main:{s:3,r:12,rest:'75 sec'},sec:{s:3,r:12,rest:'60 sec'}, acc:{s:3,r:15,rest:'45 sec'}, iso:{s:3,r:15,rest:'45 sec'}, core:{s:3,t:40,rest:'30 sec'}},
+  // Fat loss: the lifting stays HEAVY - it is what protects muscle in a deficit, and a
+  // 75-second squat rest was a burn circuit pretending otherwise. Compounds rest like
+  // compounds; only the small stuff hurries.
+  lean:  {main:{s:3,r:10,rest:'2 min'},sec:{s:3,r:12,rest:'90 sec'}, acc:{s:3,r:12,rest:'60 sec'}, iso:{s:3,r:15,rest:'45 sec'}, core:{s:3,t:40,rest:'45 sec'}},
   move:  {main:{s:3,r:10,rest:'90 sec'},sec:{s:2,r:12,rest:'75 sec'}, acc:{s:2,r:12,rest:'60 sec'}, iso:{s:2,r:15,rest:'60 sec'}, core:{s:2,t:30,rest:'45 sec'}}
 };
 var EZ_SLOTS={2:['mon','thu'],3:['mon','wed','fri'],4:['mon','tue','thu','fri'],5:['mon','tue','wed','thu','fri']};
@@ -13617,7 +13643,7 @@ function ezRow(role,cls,level,mult,goal){
 function ezForge(){
   var mult=EZ.level==='beg'?0.6:EZ.level==='adv'?1.4:1;
   var goal=EZ.goal,level=EZ.level;
-  var plan=ezSplit(level,EZ.days),slots=EZ_SLOTS[EZ.days]||EZ_SLOTS[3];
+  var plan=ezSplit(level,EZ.days,goal),slots=EZ_SLOTS[EZ.days]||EZ_SLOTS[3];
   dayMap();
   // One workout per unique day-shape, REUSED where the split repeats it - Full Body A on
   // Monday and Friday is one piece standing on two days, so a raise on one is already
@@ -13666,7 +13692,13 @@ function ezForge(){
   ezClose();
   renderHome();window.scrollTo(0,0);
   try{sfxIgnite();}catch(e){}
-  setTimeout(tutOffer,650);
+  var EZ_WHY={
+    strong:'Progress is weight on the bar. Some weeks you will not feel destroyed - that is by design. Strength is a skill you practice, not just a muscle you exhaust.',
+    muscle:'Every set here is chosen for how it changes your shape. You will get stronger as a side effect - and the long rests on the big lifts are where the growth is earned.',
+    lean:'The lifting stays heavy on purpose: it is what protects your muscle while the fat comes off. Training guards the muscle - the kitchen does the losing.',
+    move:'This week will not maximise any one thing. It makes almost everything better at once, and it is the easiest plan to keep for years - which is the whole trick.'};
+  try{if(EZ_WHY[goal])setTimeout(function(){mkNote(EZ_WHY[goal],'Your week is forged');},900);}catch(e){}
+  setTimeout(tutOffer,2400);
 }
 
 // ---------- sandbox ----------
