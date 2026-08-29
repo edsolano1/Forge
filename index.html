@@ -645,6 +645,20 @@ body.tut #askOvl{z-index:402;}
 .ex-links a:hover{color:var(--txt);border-color:#33373d;}
 .ex-links a.unote-btn{cursor:pointer;}
 .ex-links a.unote-btn.has{color:var(--go);border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
+/* The ramp, ticked off and thrown away. Deliberately quieter than a real set row: these are
+   not your training and must never read as if they were. */
+.warm-hd{display:flex;align-items:baseline;gap:8px;margin-top:11px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);}
+.warm-hd span{text-transform:none;letter-spacing:0;opacity:.65;}
+.warm-row{display:flex;align-items:center;gap:9px;padding:8px 11px;margin-top:6px;border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:.15s;}
+.warm-row:hover{border-color:#33373d;}
+.warm-row.on{opacity:.45;}
+.warm-ck{width:15px;height:15px;flex:none;border:1px solid var(--line);border-radius:5px;position:relative;}
+.warm-row.on .warm-ck{background:var(--go);border-color:var(--go);}
+.warm-row.on .warm-ck:after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(43deg);}
+.warm-row b{font-size:15px;}
+.warm-u{font-size:11px;color:var(--txt3);margin-left:-5px;}
+.warm-r{font-size:12px;color:var(--txt3);}
+.warm-s{margin-left:auto;font-size:11px;color:var(--txt3);text-align:right;}
 /* Your own note reads as a margin annotation, not as more of the app's voice: indented behind a
    rule, in the accent colour, so it is clearly the thing you wrote. */
 .ex-unote{font-size:12.5px;line-height:1.5;margin-top:6px;padding:5px 0 5px 9px;white-space:pre-wrap;
@@ -3910,7 +3924,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.35';
+var APPV='v5.36';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -5710,6 +5724,9 @@ function renderSession(){
         var m1=String(r.sets).match(/^([\d.]+)x/);
         if(m1)plw=parseFloat(m1[1])||0;
       }
+      // The ramp UP to that weight, offered only where there is one worth climbing.
+      var wplan=showPl?warmPlan(rf.exId,r.name,plw):[];
+      if(wplan.length)WARMPLANS[id]={ex:rf.exId,name:r.name,lb:plw};
       html+='<div class="ex-links">'+
             (rl?'<a href="'+rl+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> Instructions</a>':'')+
             '<a class="unote-btn'+(un?' has':'')+'" onclick="event.stopPropagation();openExNote(\''+rf.exId+'\')">'+
@@ -5718,9 +5735,12 @@ function renderSession(){
             // along as JSON, and a name is full of double quotes - which closed the
             // onclick attribute early, left a syntax error behind, and made the tap fall
             // through to the card. openPlates looks the name up itself now.
+            (wplan.length?'<a class="warm-btn" onclick="event.stopPropagation();warmToggle(\x27'+id+'\x27)">'+
+              '<svg viewBox="0 0 20 20"><path d="M4 15.5h12"/><path d="M6 12l2.5-3.5L11 11l2.5-3.5"/></svg> Warm-up</a>':'')+
             (showPl?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+plw+')">'+
               '<svg viewBox="0 0 20 20"><path d="M2 10h16"/><path d="M5 6.5v7M7.5 5v10M12.5 5v10M15 6.5v7"/></svg> Plates</a>':'')+
             '</div>';
+      if(wplan.length)html+='<div class="warm" id="warm-'+id+'"></div>';
       html+='</div><div class="sets">';
       tg.forEach(function(t,i){
         var e=ent[i];
@@ -8660,6 +8680,108 @@ function plClear(){PL.want=null;PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(
 // beside Instructions, costing a glance, never a wrong answer.
 // A bodyweight lift, a timed hold and a cardio row have no weight at all, so they are the
 // only things left out - and that is structure, not opinion.
+// ---------- warm-ups ----------
+// A ramp, not a logging chore. Nobody's first heavy set is their working weight, but nobody
+// wants those sets in their numbers either: a warm-up is not volume, is not a PR, and is not
+// something anyone reviews later. So these are ticked off and thrown away - they live in the
+// open session and die with it, and never reach DB.logs at all.
+//
+// The whole value is that the rungs land on REAL plates. "137.5" is useless under a bar; the
+// weights below are solved against the very bar this lift is already known to use, in the
+// display unit, so a kilogram user gets a kilogram ladder rather than a translation.
+var WARM_FR=[0.45,0.65,0.80,0.90], WARM_REPS=[10,8,5,3,2];
+var WARMOPEN={}, WARMPLANS={};
+
+// The nearest weight this bar can ACTUALLY be loaded to, worked in display units because
+// that is the unit the plates in the room are stamped with.
+function warmSnapD(x,k){
+  var b=plBarDef(k),barD=plBarW(k),set=plPlates(k),sm=set[set.length-1];
+  if(b.solo){                      // plates in your hands: nothing is doubled
+    var n=Math.round(x/sm)*sm;
+    return Math.round(Math.max(sm,n)*100)/100;
+  }
+  var per=(x-barD)/2;
+  if(per<=0)return barD;
+  per=Math.max(0,Math.round(per/sm)*sm);
+  return Math.round((barD+per*2)*100)/100;
+}
+// What hangs on one end, so the rung can be loaded without doing the arithmetic under it.
+function warmSideTxt(w,k){
+  var b=plBarDef(k),barD=plBarW(k),set=plPlates(k);
+  if(b.solo)return '';
+  var per=(w-barD)/2;
+  if(per<=0.0001)return barD>0?'bar only':'';
+  var out=[],rem=per,i;
+  for(i=0;i<set.length;i++)while(rem>=set[i]-0.0001){out.push(plNum(set[i]));rem=Math.round((rem-set[i])*1000)/1000;}
+  return out.length?out.join(' + ')+' a side':'';
+}
+// The ladder. Offered only where there is genuinely a ladder to climb - fewer than two rungs
+// means the working weight is light enough that ramping to it is theatre, and no button
+// appears at all. That is a better rule than a list of "big lifts", because heavy is what
+// needs warming up and no exercise NAME can tell you what is heavy for this person.
+// Whether this lift is LOADED at all - a bar, or a machine plates hang on. The first pass
+// offered a ramp wherever one could be arithmetically generated, which put '10 + 2.5 a side'
+// under a cable lateral raise and a four-rung ladder under an ab crunch machine. A pin stack
+// has no sides, so that was not merely unnecessary, it was wrong. This asks the same question
+// the plate calculator asks when it guesses a bar - and honours a bar the user has since set
+// by hand, which is the only thing that actually knows how the gym is built.
+function warmLoaded(exId,name){
+  if(DB&&DB.exBar&&DB.exBar[exId])return true;
+  return plateEx(exId,name)||plMachine(exId,name);
+}
+function warmPlan(exId,name,lbWorking){
+  var wd=dspW(lbWorking||0);
+  if(!wd||wd<=0)return [];
+  if(!warmLoaded(exId,name))return [];
+  var k=barFor(exId,name),barD=plBarW(k),out=[],prev=0;
+  // Working within half again of the bar is not a climb. You take the bar, you do the set -
+  // three rungs between 45 and 65 is the app inventing work to look thorough.
+  if(barD>0&&wd<barD*1.5)return [];
+  if(barD>0&&barD<=wd*0.6){out.push({w:barD,r:WARM_REPS[0],bar:true});prev=barD;}
+  WARM_FR.forEach(function(f,i){
+    var w=warmSnapD(wd*f,k);
+    if(w<=prev+0.001)return;          // no rung repeating the one below it
+    if(w>=wd-0.001)return;            // and none that has arrived at the working weight
+    out.push({w:w,r:WARM_REPS[i+1]});
+    prev=w;
+  });
+  return out.length>=2?out:[];
+}
+function warmToggle(id){WARMOPEN[id]=!WARMOPEN[id];warmDraw(id);try{sfxTick&&sfxTick();}catch(e){}}
+function warmTick(id,i){
+  if(!CUR||!DB.active[CUR])return;
+  var A=DB.active[CUR];
+  A.warm=A.warm||{};
+  var a=A.warm[id]||[];
+  a[i]=!a[i];
+  A.warm[id]=a;
+  saveDB();
+  warmDraw(id);
+  try{sfxTick&&sfxTick();}catch(e){}
+}
+function warmDraw(id){
+  var el=document.getElementById('warm-'+id);
+  if(el)el.innerHTML=warmHtml(id);
+}
+function warmHtml(id){
+  var m=WARMPLANS[id];
+  if(!m||!WARMOPEN[id])return '';
+  var plan=warmPlan(m.ex,m.name,m.lb);
+  if(!plan.length)return '';
+  var k=barFor(m.ex,m.name);
+  var A=CUR&&DB.active[CUR],done=(A&&A.warm&&A.warm[id])||[];
+  var h='<div class="warm-hd">Warm-up<span>doesn\'t count toward your numbers</span></div>';
+  plan.forEach(function(g,i){
+    var side=warmSideTxt(g.w,k);
+    h+='<div class="warm-row'+(done[i]?' on':'')+'" onclick="event.stopPropagation();warmTick(\''+id+'\','+i+')">'+
+       '<span class="warm-ck"></span>'+
+       '<b class="num">'+plNum(g.w)+'</b><span class="warm-u">'+wUnitName()+'</span>'+
+       '<span class="warm-r">&times; '+g.r+'</span>'+
+       (side?'<span class="warm-s">'+side+'</span>':'')+
+       '</div>';
+  });
+  return h;
+}
 function plateRow(row,tg){
   if(!row||row.bw)return false;
   return !!(tg&&tg[0]&&tg[0].type==='wr');
