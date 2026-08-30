@@ -3931,7 +3931,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.48';
+var APPV='v5.49';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10750,6 +10750,34 @@ function WR(){
 var WEARFOCUS=null;
 // The SET the wrist is pointed at, when it is not simply the next one of the aimed lift.
 // One-shot: it clears the moment it is acted on, so the running order resumes by itself.
+// Swapping a lift from the wrist - the machine-is-taken case, done properly. The watch asks
+// for the COMPARABLE alternatives (same muscle group, the same list the phone's swap sheet
+// leads with), the person picks one, and the phone runs the very same doSwap the sheet runs -
+// including regrading anything already logged in the slot. Structure editing stays on the
+// phone; a swap is the one structural change that happens mid-session with the phone in a bag.
+var WEARSWAP=null;
+function wearSwapList(rowId){
+  if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
+  var isPump=rowId.indexOf('p_')===0,g=grpOf(rowId),opts=[];
+  Object.keys(EX).forEach(function(k){
+    if(k===rowId)return;
+    if((k.indexOf('p_')===0)!==isPump)return;   // pump day stays in pump day
+    if(grpOf(k)!==g)return;
+    opts.push(k);
+  });
+  opts.sort(function(a,b){return EX[a].name.toLowerCase()<EX[b].name.toLowerCase()?-1:1;});
+  var cur=(DB.active[CUR].swaps||{})[rowId]||rowId;
+  WEARSWAP={i:rowId,name:(EX[cur]||EX[rowId]||{}).name||'',swapped:cur!==rowId,
+            opts:opts.slice(0,10).map(function(k){return {k:k,n:EX[k].name};})};
+  wearPush();
+}
+function wearSwap(rowId,k){
+  if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
+  swapTarget=rowId;
+  doSwap(k||null);
+  WEARSWAP=null;
+  wearPush(CUR);   // the overview is what the wrist returns to, so it rides along fresh
+}
 var WEARSET=null;
 function wearPick(rowId,setIdx){
   if(!CUR||!DB.active[CUR])return;
@@ -10940,6 +10968,7 @@ function wearPush(detailId){
     }catch(e){}
     if(detailId){var d2=wearDetail(detailId);if(d2)st.detail=d2;}
   }
+  if(WEARSWAP){st.swap=WEARSWAP;WEARSWAP=null;}
   try{wr.push({json:JSON.stringify(st)}).catch(function(){});}catch(e){}
 }
 // The MOMENT the rest ends, not how long is left of it. A duration is only true at the
@@ -10988,6 +11017,8 @@ function wearBind(){
       if(e.path==='/forge/open'){wearOpen(b.id);return;}
       if(e.path==='/forge/pick'){wearPick(b.i,(typeof b.s==='number'?b.s:null));return;}
       if(e.path==='/forge/skiprest'){wearSkipRest();return;}
+      if(e.path==='/forge/swaplist'){wearSwapList(b.i);return;}
+      if(e.path==='/forge/swap'){wearSwap(b.i,b.k);return;}
       if(e.path==='/forge/startat'){wearStartAt(b.id,b.i);return;}
       if(e.path!=='/forge/log')return;
       wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
