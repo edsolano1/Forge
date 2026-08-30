@@ -3931,7 +3931,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.47';
+var APPV='v5.48';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10748,20 +10748,34 @@ function WR(){
 // occupied is the ordinary reason to jump the order and come back, and an app that insists
 // on its own sequence just sends you back to carrying the phone.
 var WEARFOCUS=null;
-function wearPick(rowId){
+// The SET the wrist is pointed at, when it is not simply the next one of the aimed lift.
+// One-shot: it clears the moment it is acted on, so the running order resumes by itself.
+var WEARSET=null;
+function wearPick(rowId,setIdx){
   if(!CUR||!DB.active[CUR])return;
   WEARFOCUS=rowId||null;
+  WEARSET=(typeof setIdx==='number'&&setIdx>=0)?setIdx:null;
   wearPush();
 }
 function wearNext(){
   if(!CUR||!DB.active[CUR])return null;
   var wk=CUR,A=DB.active[wk],out=null,aimed=null;
   edAllRows(wk).forEach(function(row){
-    if(out&&!WEARFOCUS)return;
     if(out&&aimed)return;
+    if(out&&!WEARFOCUS)return;
     var rf=rowFor(A.swaps,row,wk),id=rf.id;
-    var tg=rf.swapId?rf.data.sets.split('\n').map(parseTarget):targetsOf(row,wk);
+    var tg=rf.swapId?rf.data.sets.split(String.fromCharCode(10)).map(parseTarget):targetsOf(row,wk);
     var ent=A.entries[id]||[];
+    // A specific set was tapped. Unlogged, it simply becomes the current one - sets may be
+    // done out of order, the phone always allowed that. LOGGED, it opens as a redo: the
+    // numbers shown are what was written down, and saving overwrites that entry the same
+    // way the phone's own edit pad does.
+    if(WEARFOCUS&&id===WEARFOCUS&&WEARSET!=null&&tg[WEARSET]&&!aimed){
+      var e=ent[WEARSET],t0=tg[WEARSET];
+      aimed={id:id,exId:rf.exId,name:rf.data.name||'',i:WEARSET,n:tg.length,
+             t:(e?{type:t0.type,w:(e.w!=null?e.w:t0.w),r:(e.r!=null?e.r:t0.r),unit:t0.unit}:t0),
+             bw:!!rf.data.bw,redo:!!e};
+    }
     for(var i=0;i<tg.length;i++){
       if(!ent[i]){
         var cand={id:id,exId:rf.exId,name:rf.data.name||'',i:i,n:tg.length,t:tg[i],bw:!!rf.data.bw};
@@ -10772,7 +10786,7 @@ function wearNext(){
     }
   });
   // the lift you jumped to is finished: stop aiming and rejoin the running order
-  if(WEARFOCUS&&!aimed)WEARFOCUS=null;
+  if(WEARFOCUS&&!aimed){WEARFOCUS=null;WEARSET=null;}
   return aimed||out;
 }
 function wearTargetText(t){
@@ -10841,7 +10855,7 @@ function wearOpen(id){
   }
   var w=W[id]||DB.custom[id];
   if(!w)return;
-  WEARFOCUS=null;          // a fresh session never inherits the last one aim
+  WEARFOCUS=null;WEARSET=null;   // a fresh session never inherits the last one's aim
   var dk=dayKeyOf(id);
   try{openWNow(id,dk);}catch(e){}
   wearPush();
@@ -10898,7 +10912,7 @@ function wearPush(detailId){
     // one to know whether the overview it is looking at is the live one, the other to log.
     st={open:true,wk:CUR,week:wearWeek(),saved:wearSaved(),id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
         target:wearTargetText(t),restEnd:wearRestEnd(),restLen:wearRestLen(),
-        editable:(t.type==='wr'&&!nx.bw),
+        editable:(t.type==='wr'&&!nx.bw),redo:!!nx.redo,
         w:dspW(wLb),r:(t.r||0),unit:wUnitName(),
         // The smallest honest jump IN THE DISPLAY UNIT. Differencing plateNext against the
         // current weight looked cleverer and produced 4 kg - a number no gym owns - because
@@ -10972,7 +10986,7 @@ function wearBind(){
       var b={};try{b=JSON.parse(e.body||'{}');}catch(err){}
       if(e.path==='/forge/detail'){wearPush(b.id);return;}
       if(e.path==='/forge/open'){wearOpen(b.id);return;}
-      if(e.path==='/forge/pick'){wearPick(b.i);return;}
+      if(e.path==='/forge/pick'){wearPick(b.i,(typeof b.s==='number'?b.s:null));return;}
       if(e.path==='/forge/skiprest'){wearSkipRest();return;}
       if(e.path==='/forge/startat'){wearStartAt(b.id,b.i);return;}
       if(e.path!=='/forge/log')return;
@@ -11009,6 +11023,20 @@ function wearDoLog(id,i,w,r){
   // to whatever happens to be next.
   if(id&&nx.id!==id)return;
   if(typeof i==='number'&&nx.i!==i)return;
+  if(nx.redo){
+    var E=(DB.active[CUR].entries[nx.id]||[])[nx.i];
+    if(E){
+      if(typeof w==='number'&&isFinite(w)&&w>=0)E.w=Math.round(inW(w)*100)/100;
+      if(typeof r==='number'&&isFinite(r)&&r>0)E.r=r;
+      saveDB();
+      try{renderSession();}catch(e){}
+    }
+    WEARSET=null;
+    wearPush();
+    return;
+  }
+  // an aimed-at future set, once logged, releases the set aim so the order resumes
+  if(WEARSET!=null&&nx.id===WEARFOCUS&&nx.i===WEARSET)WEARSET=null;
   var row=document.getElementById('sr-'+nx.id+'-'+nx.i);
   if(!row){
     // The session screen is not on show - backed out to the week, or the phone woke up on
