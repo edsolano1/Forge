@@ -3931,7 +3931,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.49';
+var APPV='v5.50';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10969,6 +10969,10 @@ function wearPush(detailId){
     if(detailId){var d2=wearDetail(detailId);if(d2)st.detail=d2;}
   }
   if(WEARSWAP){st.swap=WEARSWAP;WEARSWAP=null;}
+  // The Data Layer drops an item identical to the one already standing - so a re-request
+  // whose answer happened to match byte-for-byte was silently swallowed, and the watch sat
+  // on Loading forever. A timestamp makes every deliberate push distinct.
+  st.ts=Date.now();
   try{wr.push({json:JSON.stringify(st)}).catch(function(){});}catch(e){}
 }
 // The MOMENT the rest ends, not how long is left of it. A duration is only true at the
