@@ -3942,7 +3942,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.53';
+var APPV='v5.54';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13606,7 +13606,7 @@ function wcAsk(){
     '<button class="wc-pick" onclick="wcPick(0)"><b>I know what I\'m building</b>'+
     '<small>Start with an empty week</small></button>'+
     '<button class="wc-pick" onclick="wcPick(1)"><b>Build one for me</b>'+
-    '<small>Answer three questions, get a week</small></button>');
+    '<small>Answer a few questions, get a week</small></button>');
 }
 // 0 = their own week, 1 = one laid out for them. Both land on the same screen afterwards, and
 // both hand over to the tour offer - whichever they picked, this is still a first launch.
@@ -13637,6 +13637,13 @@ var EZ_ART={
   wind:'<svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 20h22c5 0 5-7 0-7"/><path d="M8 28h32c5 0 5 7 0 7"/><path class="au" d="M8 36h16"/></svg>',
   flame:'<svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M26 8c2 6 9 9 9 18a9 9 0 0 1-18 0c0-5 3-8 5-11 1 3 2 4 4 5-1-4-1-8 0-12z"/><path class="au" d="M26 42a5 5 0 0 0 5-5c0-3-3-4-5-7-2 3-5 4-5 7a5 5 0 0 0 5 5z"/></svg>'
 };
+function ezScale(n,max){
+  var h='<svg viewBox="0 0 52 52" fill="none">';
+  for(var i=0;i<max;i++){var x=26-(max-1)*4+i*8;
+    h+='<rect x="'+(x-2.6)+'" y="'+(30-(i+1)*3)+'" width="5.2" height="'+((i+1)*3+8)+'" rx="1.6" '+
+       (i<n?'fill="currentColor" class="au" stroke="none"':'stroke="currentColor" stroke-width="1.2"')+'/>';}
+  return h+'</svg>';
+}
 function ezDays(){
   var dots=function(n){var h='<svg viewBox="0 0 52 52" fill="none">';
     for(var i=0;i<7;i++){var x=8+i*6;h+='<circle cx="'+x+'" cy="26" r="2.4" '+(i<n?'fill="currentColor" class="au" stroke="none"':'stroke="currentColor" stroke-width="1.2"')+'/>';}
@@ -13651,11 +13658,22 @@ function ezDays(){
           [5,'Five days','A day for every part, weekend off',dots(5)]];
 }
 var EZ_STEPS=[
-  {t:'How far along is the metal?',s:'Be honest - the week is built to match, and it levels up with you either way.',
-   k:'level',opts:function(){return [
-    ['beg','Beginner','New to this, or coming back from a long time away',EZ_ART.ore],
-    ['int','Intermediate','Training on and off for a year or more',EZ_ART.ingot],
-    ['adv','Advanced','Consistent for years and ready to be pushed',EZ_ART.blade]];}},
+  {t:'Have you followed a real program?',s:'Not just going to the gym - a structured plan, for a continuous stretch.',
+   k:'xp1',opts:function(){return [
+    [0,'Never','This would be my first',ezScale(0,4)],
+    [1,'Up to 6 months','Started one, life happened',ezScale(1,4)],
+    [2,'6 months to 2 years','A real stretch of real training',ezScale(2,4)],
+    [3,'Over 2 years','Programs are how I train',ezScale(4,4)]];}},
+  {t:'Do you know your working weights?',s:'Roughly what you use on your main lifts, without checking anywhere.',
+   k:'xp2',opts:function(){return [
+    [0,'No, I don’t track','The weights and I are strangers',ezScale(0,3)],
+    [1,'For a couple of lifts','The big ones, roughly',ezScale(1,3)],
+    [2,'Yes, for most','I could recite them',ezScale(3,3)]];}},
+  {t:'The last three months - honestly?',s:'The week is built from what you actually do, not what you meant to.',
+   k:'xp3',opts:function(){return [
+    [0,'Not training right now','Starting fresh, or coming back',ezScale(0,3)],
+    [1,'On and off','Some weeks yes, some weeks no',ezScale(1,3)],
+    [2,'Twice a week or more','Nearly every week, showing up',ezScale(3,3)]];}},
   {t:'How many days a week?',s:'Only count days you will actually show up. Fewer days done beats more days planned.',
    k:'days',opts:function(){return ezDays().map(function(d){return [d[0],d[1],d[2],d[3]];});}},
   {t:'What is it for?',s:'This sets how heavy, how many reps, how long you rest — and whether the week carries cardio.',
@@ -13816,6 +13834,10 @@ function ezRow(role,cls,level,mult,goal){
   return [id,{sets:out.join('\n'),rest:rx.rest}];
 }
 function ezForge(){
+  if(EZ.xp1!=null){
+    var sc=(EZ.xp1||0)+(EZ.xp2||0)+(EZ.xp3||0);
+    EZ.level=(EZ.xp3===0)?'beg':(sc<=2?'beg':(sc<=5?'int':'adv'));
+  }
   var mult=EZ.level==='beg'?0.6:EZ.level==='adv'?1.4:1;
   var goal=EZ.goal,level=EZ.level;
   var plan=ezSplit(level,EZ.days,goal),slots=EZ_SLOTS[EZ.days]||EZ_SLOTS[3];
