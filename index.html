@@ -3931,7 +3931,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.45';
+var APPV='v5.46';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10901,6 +10901,25 @@ function wearPush(detailId){
         // the pounds it started from do not sit on the kilogram lattice. Two of the smallest
         // plate is what a bar actually moves by, and that is a constant per unit.
         step:(UNIT_KG?2.5:(dspW(wLb)>=40?5:2.5))};
+    // Every set of the CURRENT lift, not just the one you are on. "Set 1 of 3" answered
+    // where you are but never what the whole climb looks like - a pyramid reads as a
+    // mystery one rung at a time. Done sets carry what was actually logged, the rest
+    // their targets, all in the display unit like everything else that crosses.
+    try{
+      var A2=DB.active[CUR],lad=null;
+      edAllRows(CUR).forEach(function(row){
+        if(lad)return;
+        var rf2=rowFor(A2.swaps,row,CUR);
+        if(rf2.id!==nx.id)return;
+        var tg2=rf2.swapId?rf2.data.sets.split(String.fromCharCode(10)).map(parseTarget):targetsOf(row,CUR);
+        var ent2=A2.entries[nx.id]||[];
+        lad=tg2.map(function(t2,j){
+          var e2=ent2[j];
+          return {t:e2?(e2.w?fmtW(e2.w)+'×'+e2.r:String(e2.r)):wearTargetText(t2),d:!!e2,c:(j===nx.i)};
+        });
+      });
+      if(lad)st.sets=lad;
+    }catch(e){}
     if(detailId){var d2=wearDetail(detailId);if(d2)st.detail=d2;}
   }
   try{wr.push({json:JSON.stringify(st)}).catch(function(){});}catch(e){}
