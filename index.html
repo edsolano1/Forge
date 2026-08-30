@@ -3942,7 +3942,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.52';
+var APPV='v5.53';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13641,7 +13641,11 @@ function ezDays(){
   var dots=function(n){var h='<svg viewBox="0 0 52 52" fill="none">';
     for(var i=0;i<7;i++){var x=8+i*6;h+='<circle cx="'+x+'" cy="26" r="2.4" '+(i<n?'fill="currentColor" class="au" stroke="none"':'stroke="currentColor" stroke-width="1.2"')+'/>';}
     return h+'</svg>';};
-  return [[2,'Two days','The bare minimum that still moves the needle',dots(2)],
+  // One day is for the person dipping a toe in - the wizard serves people who need guidance,
+  // and refusing their reality loses them entirely. One full session, honestly framed, with
+  // the daily walk carrying the other six days.
+  return [[1,'One day','Dipping a toe in - one full session, and walks the rest of the week',dots(1)],
+          [2,'Two days','The bare minimum that still moves the needle',dots(2)],
           [3,'Three days','The classic - a day of rest between every fire',dots(3)],
           [4,'Four days','Each half of the body gets its own two days',dots(4)],
           [5,'Five days','A day for every part, weekend off',dots(5)]];
@@ -13773,6 +13777,7 @@ function ezSplit(level,days,goal){
     return days===4?[D.sqday,D.bhday,D.dlday,D.ohday]
                    :[D.sqday,D.bhday,D.dlday,D.ohday,D.upper2];
   }
+  if(days===1)return [D.fullA];
   if(days<=2)return [D.fullA,D.fullB];
   if(days===3)return [D.fullA,D.fullB,D.fullC];
   if(days===4)return [D.upper1,D.lower1,D.upper2,D.lower2];
@@ -13791,7 +13796,7 @@ var EZ_RX={
   lean:  {main:{s:3,r:10,rest:'2 min'},sec:{s:3,r:12,rest:'90 sec'}, acc:{s:3,r:12,rest:'60 sec'}, iso:{s:3,r:15,rest:'45 sec'}, core:{s:3,t:40,rest:'45 sec'}},
   move:  {main:{s:3,r:10,rest:'90 sec'},sec:{s:2,r:12,rest:'75 sec'}, acc:{s:2,r:12,rest:'60 sec'}, iso:{s:2,r:15,rest:'60 sec'}, core:{s:2,t:30,rest:'45 sec'}}
 };
-var EZ_SLOTS={2:['mon','thu'],3:['mon','wed','fri'],4:['mon','tue','thu','fri'],5:['mon','tue','wed','thu','fri']};
+var EZ_SLOTS={1:['mon'],2:['mon','thu'],3:['mon','wed','fri'],4:['mon','tue','thu','fri'],5:['mon','tue','wed','thu','fri']};
 var EZ_FIN=['stairs','rower','cbike'];   // weight-loss finishers, rotated across the week
 function ezRow(role,cls,level,mult,goal){
   var id=(EZ_POOL[role]||{})[level];if(!id||!EX[id])return null;
