@@ -2553,6 +2553,17 @@ body.wcon{overflow:hidden;}
 .wc-pick small{display:block;margin-top:4px;font-size:12px;color:var(--txt3);letter-spacing:.01em;}
 .wc-pick:hover{border-color:color-mix(in srgb,var(--gold) 52%,var(--line));}
 .wc-pick:active{transform:scale(.988);}
+/* The safety pair: a question and its No/Yes, styled like everything else on the welcome so
+   it reads as part of the conversation rather than a form that wandered in. */
+.wc-q{width:100%;text-align:left;font-size:14px;line-height:1.5;color:var(--txt);
+  padding:14px 16px;border:1px solid var(--line);border-radius:13px;background:var(--surface);}
+.wc-yn{display:flex;gap:9px;margin-top:11px;}
+.wc-yn-b{flex:1;padding:10px 0;border-radius:10px;border:1px solid var(--line);cursor:pointer;
+  background:none;color:var(--txt2);font-size:14px;font-weight:600;letter-spacing:.02em;
+  transition:border-color .14s,color .14s,background .14s;}
+.wc-yn-b:hover{border-color:color-mix(in srgb,var(--gold) 45%,var(--line));}
+.wc-yn-b.on{background:var(--gold);border-color:var(--gold);color:#1b1409;}
+.wc-note{width:100%;text-align:center;font-size:11.5px;color:var(--txt3);margin-top:2px;}
 @media(max-width:360px){.wc-t{font-size:28px;}.wc-in{max-width:300px;}}
 /* Motion Off means the screen still arrives, it just arrives already there. */
 :root.mo-off #welcome.on .wc-in > *{animation:none;}
@@ -3931,7 +3942,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.51';
+var APPV='v5.52';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13549,6 +13560,47 @@ function offerStart(){
   if(!w){installStarter();renderHome();setTimeout(tutOffer,600);return;}   // never strand a first run
   var m=document.getElementById('wcMark');
   if(m)m.innerHTML=logoSvg('wc-logo',68);
+  wcSafety();
+}
+// ---------- the safety screen ----------
+// Two questions, before anything else, exactly two - more reads as a clinic. A yes to either
+// does NOT gate the app: it shows one supportive interstitial saying to clear the plan with a
+// professional first, stores the answer, and moves on. No in-app triage of what the condition
+// is; that crosses into medical territory and stays out. Under-tiering is always safer than
+// over-tiering, and this is the under-tier of onboarding.
+var WC_SAFE={q1:null,q2:null};
+function wcSafety(){
+  WC_SAFE={q1:null,q2:null};
+  wcSafetyDraw();
+}
+function wcSafetyDraw(){
+  function pair(k){
+    var v=WC_SAFE[k];
+    return '<div class="wc-yn">'+
+      '<button class="wc-yn-b'+(v===false?' on':'')+'" onclick="wcSafeSet(\''+k+'\',false)">No</button>'+
+      '<button class="wc-yn-b'+(v===true?' on':'')+'" onclick="wcSafeSet(\''+k+'\',true)">Yes</button>'+
+      '</div>';
+  }
+  wcStage('Two quick questions first',
+    '<div class="wc-q">Any injury, pain, or medical condition that currently limits how you move or exercise?'+pair('q1')+'</div>'+
+    '<div class="wc-q">Has a doctor ever told you to avoid or limit exercise?'+pair('q2')+'</div>'+
+    '<div class="wc-note">Forge gives general fitness guidance, not medical advice.</div>');
+}
+function wcSafeSet(k,v){
+  WC_SAFE[k]=v;
+  if(WC_SAFE.q1===null||WC_SAFE.q2===null){wcSafetyDraw();return;}
+  DB.safety={q1:WC_SAFE.q1,q2:WC_SAFE.q2,at:new Date().toISOString().slice(0,10)};
+  saveDB();
+  if(WC_SAFE.q1||WC_SAFE.q2){
+    wcStage('One thing before you start',
+      '<div class="wc-q" style="text-align:left">Forge is yours to use either way - but with what you answered, the right first move is showing your plan to a doctor or a qualified trainer before going hard. Build the week here, bring it to them, and start once they have seen it.</div>'+
+      '<button class="wc-pick" onclick="wcAsk()"><b>Understood</b><small>Take me to the start</small></button>');
+    return;
+  }
+  wcAsk();
+}
+// the original welcome question, now the SECOND thing a first run sees
+function wcAsk(){
   // The wizard's own pair, kept whole for v5: an empty week, or the forging ritual.
   wcStage('Where do you want to start?',
     '<button class="wc-pick" onclick="wcPick(0)"><b>I know what I\'m building</b>'+
