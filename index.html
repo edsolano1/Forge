@@ -3942,7 +3942,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.55';
+var APPV='v5.56';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4086,6 +4086,16 @@ function lastFor(exId){
   return null;
 }
 var EXRX={
+  // Verified against the live site (30 Aug 2026): every path below answered 200 with a
+  // matching title. The three big lifts were MISSING entirely - their Instructions button
+  // dumped people on the site directory - and the lower-chest raise pointed at a
+  // high-to-low fly when the app coaches low-to-high: a wrong demo, not a loose one.
+  ohp:"DeltoidAnterior/BBMilitaryPress",
+  bsquat:"Quadriceps/BBSquat",
+  deadlift:"ErectorSpinae/BBDeadlift",
+  p_lext:"Quadriceps/LVLegExtension",
+  p_lcurl:"Hamstrings/LVSeatedLegCurl",
+  p_pdown:"LatissimusDorsi/CBBentoverPullover",
   bench:"PectoralSternal/BBBenchPress",
   dbbench:"PectoralSternal/DBBenchPress",
   incdb:"PectoralClavicular/DBInclineBenchPress",
@@ -4142,7 +4152,7 @@ var EXRX={
   legraise:"HipFlexors/BWLyingLegRaise",
   scalfr:"Soleus/LVSeatedCalfRaise",
   stcalf:"Gastrocnemius/LVStandingCalfRaise",
-  lowchest:"PectoralSternal/CBStandingFly",
+  lowchest:"PectoralClavicular/CBInclineFly",
   machpd:"LatissimusDorsi/LVFrontPulldown",
   ohext:"Triceps/CBStandingTricepsExtensionRope",
   bdip:"Triceps/WtBenchDip",
