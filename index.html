@@ -3942,7 +3942,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.54';
+var APPV='v5.55';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13637,6 +13637,15 @@ var EZ_ART={
   wind:'<svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 20h22c5 0 5-7 0-7"/><path d="M8 28h32c5 0 5 7 0 7"/><path class="au" d="M8 36h16"/></svg>',
   flame:'<svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M26 8c2 6 9 9 9 18a9 9 0 0 1-18 0c0-5 3-8 5-11 1 3 2 4 4 5-1-4-1-8 0-12z"/><path class="au" d="M26 42a5 5 0 0 0 5-5c0-3-3-4-5-7-2 3-5 4-5 7a5 5 0 0 0 5 5z"/></svg>'
 };
+function ezClock(min){
+  var a=(min/60)*Math.PI*2-Math.PI/2;
+  var x=26+13*Math.cos(a),y=26+13*Math.sin(a);
+  return '<svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">'+
+    '<circle cx="26" cy="26" r="16"/>'+
+    '<path class="au" d="M26 26L26 15" stroke-width="1.9"/>'+
+    '<path class="au" d="M26 26L'+x.toFixed(1)+' '+y.toFixed(1)+'" stroke-width="1.9"/>'+
+    '</svg>';
+}
 function ezScale(n,max){
   var h='<svg viewBox="0 0 52 52" fill="none">';
   for(var i=0;i<max;i++){var x=26-(max-1)*4+i*8;
@@ -13676,6 +13685,11 @@ var EZ_STEPS=[
     [2,'Twice a week or more','Nearly every week, showing up',ezScale(3,3)]];}},
   {t:'How many days a week?',s:'Only count days you will actually show up. Fewer days done beats more days planned.',
    k:'days',opts:function(){return ezDays().map(function(d){return [d[0],d[1],d[2],d[3]];});}},
+  {t:'How long is a session?',s:'Count the time you actually have, door to door. The week is trimmed to fit, not crammed.',
+   k:'len',opts:function(){return [
+    [30,'30 minutes','Compounds only - the work that matters most, nothing decorative',ezClock(30)],
+    [45,'45 minutes','The full lifts plus a little isolation',ezClock(45)],
+    [60,'60 minutes','The complete session - isolation, core, finisher and all',ezClock(60)]];}},
   {t:'What is it for?',s:'This sets how heavy, how many reps, how long you rest — and whether the week carries cardio.',
    k:'goal',opts:function(){return [
     ['strong','Get strong','Heavy fives on the big lifts, long rests, accessories kept honest',EZ_ART.anvil],
@@ -13833,6 +13847,37 @@ function ezRow(role,cls,level,mult,goal){
   var out=[];for(var i=0;i<sets;i++)out.push(line);
   return [id,{sets:out.join('\n'),rest:rx.rest}];
 }
+function ezTrim(rows,len,goal){
+  if(!len||len>=60)return rows;
+  var flat=[];
+  rows.forEach(function(slot){
+    (Array.isArray(slot[0])?slot:[slot]).forEach(function(it){flat.push(it);});
+  });
+  if(len<=30&&goal==='strong'){
+    var main=flat.filter(function(r){return r[1]==='main'||r[1]==='mainD';});
+    var sup=flat.filter(function(r){return r[1]==='sec'||r[1]==='acc';});
+    return main.slice(0,1).concat(sup.slice(0,1));
+  }
+  if(len<=30){
+    var keep=flat.filter(function(r){return r[1]!=='iso';}).slice(0,4);
+    return keep;
+  }
+  // 45: the full lifts plus a LITTLE isolation - at most two of it. Walked slot by slot
+  // rather than flattened, so a superset pair the weight-loss goal builds stays a pair
+  // when both halves survive and degrades to a single row when only one does.
+  var iso=0;
+  var out=[];
+  rows.forEach(function(slot){
+    if(!Array.isArray(slot[0])){
+      if(slot[1]!=='iso'||(++iso)<=2)out.push(slot);
+      return;
+    }
+    var kept=slot.filter(function(it){return it[1]!=='iso'||(++iso)<=2;});
+    if(kept.length===2)out.push(kept);
+    else if(kept.length===1)out.push(kept[0]);
+  });
+  return out;
+}
 function ezForge(){
   if(EZ.xp1!=null){
     var sc=(EZ.xp1||0)+(EZ.xp2||0)+(EZ.xp3||0);
@@ -13849,7 +13894,7 @@ function ezForge(){
   plan.forEach(function(d,i){
     if(madeBy[d.n]){order.push(madeBy[d.n]);return;}
     var sections=[],straight=[];
-    d.r.forEach(function(slot){
+    ezTrim(d.r,EZ.len,goal).forEach(function(slot){
       if(Array.isArray(slot[0])){    // a superset candidate pair
         var a=ezRow(slot[0][0],slot[0][1],level,mult,goal);
         var b=ezRow(slot[1][0],slot[1][1],level,mult,goal);
