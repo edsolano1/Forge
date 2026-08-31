@@ -3942,7 +3942,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.56';
+var APPV='v5.57';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13956,8 +13956,14 @@ function ezForge(){
     move:'This week will not maximise any one thing. It makes almost everything better at once, and it is the easiest plan to keep for years - which is the whole trick.'};
   var saved=(EZ.into==='saved');
   var lead=saved?'It is waiting in Saved workouts - hold a piece to put it on a day. ':'';
-  try{if(EZ_WHY[goal])setTimeout(function(){mkNote(lead+EZ_WHY[goal],'Your week is forged');},900);}catch(e){}
-  setTimeout(tutOffer,2400);
+  // The tour offer waits for the philosophy line to be READ, not for a timer - seen on
+  // device: fired at 2.4s it landed on top of a note shown at 0.9s, giving the one line
+  // that says what the plan believes about a second and a half of life.
+  if(EZ_WHY[goal]){
+    setTimeout(function(){
+      ask(lead+EZ_WHY[goal],function(){setTimeout(tutOffer,350);},'Your week is forged','LET’S GO');
+    },900);
+  }else setTimeout(tutOffer,650);
 }
 
 // ---------- sandbox ----------
