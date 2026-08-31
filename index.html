@@ -3942,7 +3942,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.57';
+var APPV='v5.58';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11050,7 +11050,7 @@ function wearBind(){
       if(e.path==='/forge/skiprest'){wearSkipRest();return;}
       if(e.path==='/forge/swaplist'){wearSwapList(b.i);return;}
       if(e.path==='/forge/swap'){wearSwap(b.i,b.k);return;}
-      if(e.path==='/forge/startat'){wearStartAt(b.id,b.i);return;}
+      if(e.path==='/forge/startat'){wearStartAt(b.id,b.i,(typeof b.s==='number'?b.s:null));return;}
       if(e.path!=='/forge/log')return;
       wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
     });
@@ -11064,7 +11064,7 @@ function wearBind(){
 // at that lift, and log its first set through the very same path a tap on the phone takes.
 // The refusal to switch away from a session already running is kept exactly as it is - that
 // is a real question and the phone still asks it.
-function wearStartAt(id,rowId){
+function wearStartAt(id,rowId,setIdx){
   if(SANDBOX||TUTON)return;
   var openWk=null;
   for(var k in (DB.active||{})){openWk=k;break;}
@@ -11072,6 +11072,7 @@ function wearStartAt(id,rowId){
   if(!openWk)wearOpen(id);
   if(!CUR||CUR!==id)return;
   WEARFOCUS=rowId||null;
+  WEARSET=(typeof setIdx==='number'&&setIdx>=0)?setIdx:null;
   var nx=wearNext();
   if(nx)wearDoLog(nx.id,nx.i);
   else wearPush();
