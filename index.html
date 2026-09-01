@@ -3189,7 +3189,6 @@ body.wcon{overflow:hidden;}
     <div class="ins-s" id="insSetup"></div>
     <ul class="ins-c" id="insCues"></ul>
     <div class="ins-m"><span>Watch for:</span> <em id="insMistake"></em></div>
-    <a class="ins-ref" id="insRef" target="_blank" rel="noopener">Video reference &#8599;</a>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('instrOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -3964,7 +3963,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.64';
+var APPV='v5.65';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4107,100 +4106,12 @@ function lastFor(exId){
   }
   return null;
 }
-var EXRX={
-  // Verified against the live site (30 Aug 2026): every path below answered 200 with a
-  // matching title. The three big lifts were MISSING entirely - their Instructions button
-  // dumped people on the site directory - and the lower-chest raise pointed at a
-  // high-to-low fly when the app coaches low-to-high: a wrong demo, not a loose one.
-  ohp:"DeltoidAnterior/BBMilitaryPress",
-  bsquat:"Quadriceps/BBSquat",
-  deadlift:"ErectorSpinae/BBDeadlift",
-  p_lext:"Quadriceps/LVLegExtension",
-  p_lcurl:"Hamstrings/LVSeatedLegCurl",
-  
-  bench:"PectoralSternal/BBBenchPress",
-  dbbench:"PectoralSternal/DBBenchPress",
-  incdb:"PectoralClavicular/DBInclineBenchPress",
-  p_inc:"PectoralClavicular/DBInclineBenchPress",
-  
-  
-  mfly:"PectoralSternal/LVPecDeckFly",
-  p_fly:"PectoralSternal/LVPecDeckFly",
-  
-  
-  hammer:"Brachioradialis/DBHammerCurl",
-  p_hammer:"Brachioradialis/DBHammerCurl",
-  machlat:"DeltoidLateral/LVLateralRaise",
-  revfly:"DeltoidPosterior/LVRearLateralRaise",
-  lext:"Quadriceps/LVLegExtension",
-  plegcurl:"Hamstrings/LVLyingLegCurl",
-  bbthrust:"GluteusMaximus/BBHipThrust",
-  
-  // Verified against exrx's own pages. Two traps here: their slugs are irregular enough
-  // that guessing produces 404s (AsPullupKneeling, AsChinupSelf and ASPullupBand are all
-  // real and all different), AND about half their library is now behind a subscription -
-  // so where an exercise has several variants, the one picked is a variant confirmed to
-  // be outside the paywall. AsPullupOpen is free; AsPullupKneeling is not.
-  pullup:"LatissimusDorsi/AsPullupOpen",
-  vbar:"Triceps/CBPushdownVBar",
-  
-  
-  skull:"Triceps/DBLyingTriExt",
-  preacher:"Brachialis/LVPreacherCurlH",
-  wcurl:"WristFlexors/BBWristCurl",
-  rwcurl:"WristExtensors/BBReverseWristCurl",
-  hack:"GluteusMaximus/SLHackSquat",
-  lpress:"Quadriceps/SL45LegPress",
-  
-  abmach:"RectusAbdominis/LVSeatedCrunch",
-  dblat:"DeltoidLateral/DBLateralRaise",
-  p_lat:"DeltoidLateral/DBLateralRaise",
-  clat:"DeltoidLateral/CBLateralRaise",
-  mbench:"PectoralSternal/LVBenchPress",
-  lvchest:"PectoralSternal/LVChestPress",
-  smbench:"PectoralSternal/SMBenchPress",
-  pullover:"PectoralSternal/DBPullover",
-  row:"BackGeneral/CBSeatedRow",
-  machrow:"BackGeneral/LVSeatedRow",
-  
-  sdbcurl:"Biceps/DBCurl",
-  inccurl:"Biceps/DBInclineCurl",
-  cbcurl:"Biceps/CBCurl",
-  p_curl:"Biceps/CBCurl",
-  slegcurl:"Hamstrings/LVSeatedLegCurl",
-  plank:"RectusAbdominis/BWFrontPlank",
-  
-  
-  legraise:"HipFlexors/BWLyingLegRaise",
-  scalfr:"Soleus/LVSeatedCalfRaise",
-  stcalf:"Gastrocnemius/LVStandingCalfRaise",
-  
-  machpd:"LatissimusDorsi/LVFrontPulldown",
-  ohext:"Triceps/CBStandingTricepsExtensionRope",
-  bdip:"Triceps/WtBenchDip",
-  p_dip:"Triceps/WtBenchDip",
-  smsquat:"Quadriceps/SMSquat",
-  
-  
-  // stretches sit outside the weight library, so these carry their own section
-  hipflex:"Stretches/HipFlexors/KneelingHipFlexor",
-  hamstr:"Stretches/Hamstrings/LyingSingleLeg",
-  pushup:"PectoralSternal/WtPushup",
-  dbfly:"PectoralSternal/DBFly",
-  bbcurl:"Biceps/BBCurl",
-  dip:"Triceps/AsTriDip",
-  
-  
-  
-  dcalfr:"Gastrocnemius/LV45CalfRaise"
-};
+
 // exrx has no page for these - a link would only dump you on a category index
-var NOPAGE={xover:1,p_xover:1,lowchest:1,facepull:1,sapd:1,p_pdown:1,latpd:1,rope:1,p_rope:1,dbrow:1,goblet:1,bike:1,p_bike:1,kneeraise:1,sumo:1,hthrust:1,lunge:1,hipraise:1,hang:1,hollow:1,p_hollow:1,stepup:1,chestdr:1,pigeon:1};
 // Everything without a looked-up page goes to the matching exrx category list instead
 // of a web search - a real page on the real site, one tap from the exercise.
 // Shrinking list - every entry here is an exercise still awaiting a looked-up page.
 
-var NOREF={walk:1,stairs:1,treadrun:1,treadwalk:1,cbike:1,ellip:1,rower:1,jumprope:1,outrun:1,swim:1,assault:1};   // not exrx exercises; no link beats a wrong one
 // The library exactly as it SHIPS, before a single thing of yours has been merged into it.
 // mergeCustom writes DB.custom and DB.cex straight into W and EX and only ever adds - which is
 // right for the real week and wrong for the sandbox, whose entire job is to show what somebody
@@ -4275,17 +4186,18 @@ function openInstr(exId){
   ul.innerHTML='';
   d.c.forEach(function(c){var li=document.createElement('li');li.textContent=c;ul.appendChild(li);});
   document.getElementById('insMistake').textContent=d.m;
-  var ref=document.getElementById('insRef'),rl=refLink(exId,name);
-  if(rl){ref.href=rl;ref.style.display='';}else ref.style.display='none';
   document.getElementById('instrOvl').classList.add('on');
 }
+// External references are gone (owner call, 31 Aug): if videos ship one day they ship for
+// EVERY lift as licensed or self-shot embedded content, not links to someone else's site
+// for some. A custom exercise keeps its own link - the user typed that one, it is theirs.
+// NOREF outlived the reference table it was named for: mergeCustom still marks the user's
+// own exercises in it and the sandbox uses that to swap libraries cleanly.
+var NOREF={};
 function refLink(id,name){
   var cx=EX[id];
-  if(cx&&cx.custom)return cx.link||'';   // your own exercise, your own reference
-  if(NOREF[id]||NOPAGE[id])return"";
-  var v=EXRX[id];
-  if(v)return"https://exrx.net/"+(v.slice(0,10)==='Stretches/'?v:'WeightExercises/'+v);
-  return"https://exrx.net/Lists/Directory";
+  if(cx&&cx.custom)return cx.link||'';
+  return'';
 }
 // The Last line stopped carrying PR tags (user note, mid-workout): the record already has
 // its own place at the foot of the card, and a tag repeated inside the list of sets just
