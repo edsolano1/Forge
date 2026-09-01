@@ -3942,7 +3942,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.60';
+var APPV='v5.61';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4113,7 +4113,7 @@ var EXRX={
   lext:"Quadriceps/LVLegExtension",
   plegcurl:"Hamstrings/LVLyingLegCurl",
   bbthrust:"GluteusMaximus/BBHipThrust",
-  hthrust:"GluteusMaximus/BBHipThrust",
+  
   // Verified against exrx's own pages. Two traps here: their slugs are irregular enough
   // that guessing produces 404s (AsPullupKneeling, AsChinupSelf and ASPullupBand are all
   // real and all different), AND about half their library is now behind a subscription -
@@ -4123,7 +4123,7 @@ var EXRX={
   vbar:"Triceps/CBPushdownVBar",
   rope:"Triceps/CBPushdown",
   p_rope:"Triceps/CBPushdown",
-  skull:"Triceps/BBLyingTriExtSC",
+  skull:"Triceps/DBLyingTriExt",
   preacher:"Brachialis/LVPreacherCurlH",
   wcurl:"WristFlexors/BBWristCurl",
   rwcurl:"WristExtensors/BBReverseWristCurl",
@@ -4147,8 +4147,8 @@ var EXRX={
   p_curl:"Biceps/CBCurl",
   slegcurl:"Hamstrings/LVSeatedLegCurl",
   plank:"RectusAbdominis/BWFrontPlank",
-  kneeraise:"HipFlexors/BWHangingLegRaise",
-  hipraise:"RectusAbdominis/BWVerticalLegHipRaisePB",
+  
+  
   legraise:"HipFlexors/BWLyingLegRaise",
   scalfr:"Soleus/LVSeatedCalfRaise",
   stcalf:"Gastrocnemius/LVStandingCalfRaise",
@@ -4158,22 +4158,22 @@ var EXRX={
   bdip:"Triceps/WtBenchDip",
   p_dip:"Triceps/WtBenchDip",
   smsquat:"Quadriceps/SMSquat",
-  lunge:"Quadriceps/BWLunge",
-  sumo:"Quadriceps/DBSquat",
+  
+  
   // stretches sit outside the weight library, so these carry their own section
   hipflex:"Stretches/HipFlexors/KneelingHipFlexor",
   hamstr:"Stretches/Hamstrings/LyingSingleLeg",
   pushup:"PectoralSternal/WtPushup",
   dbfly:"PectoralSternal/DBFly",
   bbcurl:"Biceps/BBCurl",
-  dip:"PectoralSternal/LVChestDip",
+  dip:"Triceps/AsTriDip",
   facepull:"DeltoidPosterior/CBStandingRearDeltRowRope",
-  bike:"Obliques/BWTwistingCrunch",
-  p_bike:"Obliques/BWTwistingCrunch",
+  
+  
   dcalfr:"Gastrocnemius/LV45CalfRaise"
 };
 // exrx has no page for these - a link would only dump you on a category index
-var NOPAGE={hipraise:1,hang:1,hollow:1,p_hollow:1,stepup:1,chestdr:1,pigeon:1};
+var NOPAGE={bike:1,p_bike:1,kneeraise:1,sumo:1,hthrust:1,lunge:1,hipraise:1,hang:1,hollow:1,p_hollow:1,stepup:1,chestdr:1,pigeon:1};
 // Everything without a looked-up page goes to the matching exrx category list instead
 // of a web search - a real page on the real site, one tap from the exercise.
 // Shrinking list - every entry here is an exercise still awaiting a looked-up page.
