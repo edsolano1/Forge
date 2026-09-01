@@ -3189,7 +3189,7 @@ body.wcon{overflow:hidden;}
     <div class="ins-s" id="insSetup"></div>
     <ul class="ins-c" id="insCues"></ul>
     <div class="ins-m"><span>Watch for:</span> <em id="insMistake"></em></div>
-    <a class="ins-ref" id="insRef" target="_blank" rel="noopener">Video reference ↗</a>
+    <a class="ins-ref" id="insRef" target="_blank" rel="noopener">Video reference &#8599;</a>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('instrOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -3964,7 +3964,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.63';
+var APPV='v5.64';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
