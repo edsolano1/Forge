@@ -661,6 +661,17 @@ body.tut #askOvl{z-index:402;}
 .warm-u{font-size:11px;color:var(--txt3);margin-left:-5px;}
 .warm-r{font-size:12px;color:var(--txt3);}
 .warm-s{margin-left:auto;font-size:11px;color:var(--txt3);text-align:right;}
+/* the written instructions sheet: setup line, cues as a list, the one mistake, and the
+   external page demoted to a reference footnote where an exact one exists */
+.ins-s{font-size:14px;line-height:1.55;color:var(--txt2);margin:4px 0 12px;}
+.ins-c{margin:0 0 14px;padding-left:20px;}
+.ins-c li{font-size:14px;line-height:1.5;margin:7px 0;color:var(--txt);}
+.ins-c li::marker{color:var(--go);}
+.ins-m{font-size:13px;line-height:1.5;padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:12px;}
+.ins-m span{color:var(--go);font-weight:600;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;}
+.ins-m em{font-style:normal;color:var(--txt2);}
+.ins-ref{display:inline-block;font-size:12px;color:var(--txt3);text-decoration:none;margin-bottom:4px;}
+.ins-ref:hover{color:var(--txt);}
 /* Your own note reads as a margin annotation, not as more of the app's voice: indented behind a
    rule, in the accent colour, so it is clearly the thing you wrote. */
 .ex-unote{font-size:12.5px;line-height:1.5;margin-top:6px;padding:5px 0 5px 9px;white-space:pre-wrap;
@@ -3172,6 +3183,17 @@ body.wcon{overflow:hidden;}
   </div>
 </div>
 
+<div class="ovl" id="instrOvl">
+  <div class="sheet" style="max-width:430px">
+    <h3 id="insName">Exercise</h3>
+    <div class="ins-s" id="insSetup"></div>
+    <ul class="ins-c" id="insCues"></ul>
+    <div class="ins-m"><span>Watch for:</span> <em id="insMistake"></em></div>
+    <a class="ins-ref" id="insRef" target="_blank" rel="noopener">Video reference ↗</a>
+    <div class="sheet-btns"><div class="btn" onclick="closeOvl('instrOvl')">CLOSE</div></div>
+  </div>
+</div>
+
 <div class="ovl" id="swapOvl">
   <div class="sheet">
     <h3>Swap exercise</h3>
@@ -3942,7 +3964,7 @@ function drawThemePick(){
 // the one that matters: it is what makes a device drop the build it is holding, so it only
 // ever moves forward and is never renumbered to match this. They are not the same count and
 // are not meant to be - v3.0 ships on arcanum-v131.
-var APPV='v5.62';
+var APPV='v5.63';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -4188,6 +4210,75 @@ var NOREF={walk:1,stairs:1,treadrun:1,treadwalk:1,cbike:1,ellip:1,rower:1,jumpro
 // libraries are defined above this line and boot cannot have merged anything yet.
 var W0=Object.assign({},W),EX0=Object.assign({},EX),
     NOREF0=Object.assign({},NOREF),GRP0=Object.assign({},GRP);
+// ---------- written instructions ----------
+// The app's own words, not a link to somebody else's website. Each lift: how to set up,
+// three or four cues worth saying, and the one mistake that actually happens. The external
+// page, where an exact one exists, is demoted to a reference line at the foot.
+var EXINSTR={
+bench:{s:"Flat bench, eyes under the bar, feet planted, grip just outside shoulder width.",c:["Pull the bar out over your chest, not your face","Lower under control to the sternum, elbows about 45 degrees from your sides","Touch, then drive the bar up and slightly back toward the rack","Squeeze the bar hard - a tight grip keeps the shoulders honest"],m:"Bouncing off the chest. The touch is quiet or the weight is too heavy."},
+bsquat:{s:"Bar on the upper back, hands as close as shoulders allow, feet shoulder width, toes slightly out.",c:["Big breath, brace like taking a punch","Sit down between your heels, knees tracking over toes","Depth is where your hips stop moving down without the back rounding","Drive the floor apart on the way up"],m:"Knees caving in on the way up. Push them out or drop the weight."},
+deadlift:{s:"Bar over mid-foot, shins an inch away. Hinge down, grip just outside the legs.",c:["Pull the slack out of the bar before it leaves the floor","Chest up, back flat, hips and shoulders rise together","Push the floor away rather than lifting the bar","Lock out by squeezing the glutes, not leaning back"],m:"Jerking the bar off the floor with a round back. Set, brace, then pull."},
+ohp:{s:"Bar at the collarbones, grip just outside the shoulders, elbows slightly ahead of the bar.",c:["Brace the whole trunk before the first inch","Press up and slightly back, moving the head out of the way then through","Finish with the bar over the ears, elbows locked","Squeeze the glutes so the lower back cannot arch"],m:"Turning it into an incline press by leaning back. The trunk stays a pillar."},
+incdb:{s:"Bench at 30 to 45 degrees, dumbbells resting on the thighs, kick them up one at a time.",c:["Start at the shoulders, palms forward or slightly turned in","Press up and slightly together without clanking at the top","Lower until the hands reach chest level - a real stretch, not a shoulder strain"],m:"Setting the bench too steep. Past 45 degrees it becomes a shoulder press."},
+mbench:{s:"Seat set so the handles sit level with mid-chest.",c:["Shoulder blades pulled back into the pad and kept there","Press to full lockout without the shoulders rolling forward","Lower slowly to a full stretch - the machine makes slow safe, use that"],m:"Half reps at the top. The lockout is part of the lift."},
+lpress:{s:"Back and hips flat against the pads, feet shoulder width and mid-platform.",c:["Lower until the knees are near 90 degrees - deeper only if the hips stay down","Push through the whole foot, not the toes","Stop just short of locking the knees hard"],m:"Letting the hips curl off the pad at the bottom. That is the lower back lifting, and it should not be."},
+latpd:{s:"Knees under the pads, grip a little wider than the shoulders.",c:["Chest tall, lean back only slightly","Pull the bar to the top of the chest, elbows driving down and back","Let the arms fully lengthen at the top - the stretch is half the exercise"],m:"Rowing the weight down with a big lean-back. Long arms, tall chest."},
+machrow:{s:"Chest against the pad, feet planted, arms fully long to start.",c:["Drive the elbows straight back, not out","Squeeze the shoulder blades together for a beat","Return slow enough to feel the stretch across the back"],m:"Shrugging as you pull. Shoulders stay down away from the ears."},
+row:{s:"Hinge to about 45 degrees, back flat, bar hanging under the shoulders.",c:["Pull the bar to the lower ribs","Elbows stay close, shoulder blades finish the movement","Hold the hinge - the torso does not pump up and down"],m:"Standing up with every rep. The hinge is the exercise; the arms are just hooks."},
+mfly:{s:"Seat set so the handles sit level with mid-chest, slight bend fixed at the elbows.",c:["Bring the arms together in a wide arc, like hugging a barrel","Pause a beat where the hands meet","Open only as far as a comfortable stretch"],m:"Turning it into a press by bending the elbows more as it gets hard."},
+dbfly:{s:"Flat bench, dumbbells above the chest, slight bend fixed at the elbows.",c:["Lower in a wide arc until you feel the stretch across the chest","Keep the same elbow bend the whole way","Arc back up as if wrapping arms around something big"],m:"Going too deep. The stretch should be felt in the chest, never the shoulder joint."},
+slegcurl:{s:"Back flat against the pad, ankle pad just below the calves, thighs held by the top pad.",c:["Curl the heels under as far as they will go","Pause a beat fully curled","Resist on the way back - do not let the stack yank the legs"],m:"Half reps. Full curl, or lower the weight."},
+lext:{s:"Back against the pad, knee lined up with the machine pivot, pad on the shins.",c:["Extend to a full lockout and hold a beat","Lower with control to a right angle","Toes pointed slightly up the whole way"],m:"Kicking the weight up and letting it drop. Smooth both directions."},
+scalfr:{s:"Balls of the feet on the platform, heels free, pads on the thighs.",c:["Full stretch at the bottom - heels as low as they go","Drive to full tiptoe and squeeze at the top","One second up, one second down, no bouncing"],m:"Bouncing out of the bottom. The stretch is the point; do not rush past it."},
+dcalfr:{s:"Shoulders under the pads, balls of the feet on the edge, legs straight but not locked.",c:["Sink the heels for a full stretch","Rise as high as the ankles allow","Pause a beat at the top"],m:"Bending the knees to move more weight. That turns calves into quads."},
+preacher:{s:"Armpits snug over the pad, upper arms flat against it, full grip on the handles.",c:["Curl to full contraction without the elbows lifting off","Lower until the arms are almost straight","The pad does the strictness - let it"],m:"Stopping high on the way down. The bottom half is where the work lives."},
+sdbcurl:{s:"Seated upright, dumbbells hanging at the sides, palms forward.",c:["Curl without the elbows drifting forward","Squeeze at the top, then lower slow","The back stays against the pad - no rocking"],m:"Swinging the weights up with the shoulders. Seated exists to prevent exactly that."},
+hammer:{s:"Standing or seated, dumbbells at the sides, palms facing each other.",c:["Curl with the thumbs up the whole way","Elbows pinned to the sides","Control the lowering - it is half the rep"],m:"Letting the elbows drift behind the body to sneak the weight up."},
+rope:{s:"Rope on the high pulley, elbows pinned to the sides, slight forward lean.",c:["Push down and split the rope ends apart at the bottom","Elbows stay glued to the ribs","Let the forearms come all the way up - full stretch"],m:"Leaning on the weight with bodyweight. The triceps push; the body stands still."},
+ohext:{s:"Rope on the low pulley, back to the stack, hands behind the head, elbows up.",c:["Extend until the arms are straight overhead","Elbows stay narrow and pointed forward","Deep stretch behind the head on every return"],m:"Elbows flaring wide - it takes the triceps out of it."},
+skull:{s:"Flat bench, dumbbells pressed up over the chest, palms facing each other.",c:["Bend only at the elbows, lowering to the sides of the head","Upper arms stay vertical and still","Extend back up without pressing - no chest involvement"],m:"Moving the upper arms. If the elbows travel, it has become a pullover."},
+dblat:{s:"Standing tall, dumbbells at the sides, slight bend in the elbows.",c:["Raise out to the sides to shoulder height, no higher","Lead with the elbows, pinkies slightly up","Lower slower than you raised"],m:"Swinging with the hips. If the torso moves, the weight is too heavy."},
+revfly:{s:"Chest against the incline pad or hinged over, dumbbells hanging below.",c:["Raise out wide, elbows slightly bent and fixed","Squeeze the rear shoulders at the top","No momentum - this is a small muscle, treat it like one"],m:"Turning it into a row. The arms stay long; the elbows do not pull back."},
+hthrust:{s:"Upper back on the pad or bench, feet flat, weight over the hips.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin tucked, ribs down - do not arch the finish"],m:"Overextending at the top. The finish is a squeeze, not a back bend."},
+bbthrust:{s:"Upper back on a bench, bar padded across the hips, feet flat at shoulder width.",c:["Drive through the heels to a flat line from knees to shoulders","Full glute squeeze at the top, one beat","Lower the hips under control - do not drop"],m:"Pushing through the toes. Heels down or the glutes clock out."},
+plank:{s:"Forearms down, elbows under shoulders, body one straight line.",c:["Squeeze glutes and brace the belly the entire time","Push the floor away through the forearms","The line stays flat - no sag, no peak"],m:"Hips sagging as the clock runs. When the line breaks, the set is over."},
+hollow:{s:"On your back, arms overhead, legs long, lower back pressed into the floor.",c:["Lift shoulders and legs a few inches off the floor","The lower back never leaves the ground","Breathe - do not trade the brace for a held breath"],m:"Legs too low too soon. Raise them until the back can stay pressed down."},
+abmach:{s:"Seat set so the pivot lines up with your hips, pads at the chest.",c:["Crunch by rounding the spine, not folding at the hips","Exhale hard into every crunch","Return with control - do not let the stack pull you open"],m:"Pulling with the arms on the handles. They only rest there."},
+vbar:{s:"V-bar on the high pulley, elbows pinned to the sides.",c:["Push to full lockout and squeeze","Elbows never leave the ribs","Slow return to a full forearm stretch"],m:"Shoulders creeping up as fatigue sets in. Pin them down."},
+dbrow:{s:"One knee and hand braced on a bench, other foot planted, dumbbell hanging long.",c:["Pull the dumbbell to the hip, not the shoulder","Elbow close to the body, back flat throughout","Full stretch at the bottom of every rep"],m:"Twisting the torso to hoist the weight. The chest stays square to the floor."},
+goblet:{s:"Dumbbell held vertical against the chest, elbows tucked, feet shoulder width.",c:["Sit down between the heels, chest tall","Elbows travel inside the knees at the bottom","Drive up through the whole foot"],m:"Letting the weight pull the chest forward. It rests on the chest - the legs do the lifting."},
+lunge:{s:"Standing tall, dumbbells at the sides or hands free.",c:["Step far enough that the front shin stays vertical","Lower the back knee toward the floor, torso upright","Push through the front heel into the next step"],m:"Short steps. If the front knee sails past the toes, lengthen the stride."},
+sumo:{s:"Feet wide, toes out at 45 degrees, dumbbell hanging at the center.",c:["Knees track over the toes - out, not forward","Sit straight down, torso tall","Squeeze the inner thighs and glutes on the way up"],m:"Narrowing into a regular squat as you tire. The wide stance is the exercise."},
+kneeraise:{s:"Hanging from the bar or on elbow pads, shoulders down away from the ears.",c:["Draw the knees up past the hips","Curl the pelvis at the top - that is the ab part","Lower slow, no swinging"],m:"Swinging into rhythm. Dead stop between reps if you have to."},
+legraise:{s:"On your back, hands under the hips or flat at the sides.",c:["Raise the legs together to vertical","Lower slow, stopping before the lower back peels up","The slower the lowering, the better the set"],m:"Letting the back arch off the floor at the bottom. Shorten the range instead."},
+pullup:{s:"Assist pad set so the last rep is hard but clean. Full grip, arms long.",c:["Pull the elbows down to the ribs","Chin over the bar without reaching with the neck","All the way down every rep - long arms"],m:"Cutting the bottom. A half pull-up assists nobody."},
+dip:{s:"Assist pad set for a hard clean set. Body upright for triceps.",c:["Lower until the upper arms reach parallel","Elbows track back, not out wide","Press to a full lockout"],m:"Leaning far forward - that shifts it to the chest. Stay tall for triceps."},
+xover:{s:"Pulleys set high, one handle in each hand, staggered stance, slight forward lean.",c:["Bring the hands down and together in a wide arc","Cross slightly at the bottom and squeeze","Fixed elbow bend the whole way"],m:"Pressing instead of sweeping. The arms arc; they do not push."},
+lowchest:{s:"Pulleys set low, handles at the sides, staggered stance.",c:["Sweep low-to-high, hands finishing at shoulder height","Arms mostly straight - 10 to 15 degrees of bend only","Squeeze the upper chest where the hands meet"],m:"Curling the weight up with the biceps. The arc comes from the shoulder."},
+facepull:{s:"Rope at upper-chest height, palms facing in, step back until the stack floats.",c:["Pull toward the bridge of the nose, elbows high and wide","Finish with knuckles beside the ears","Squeeze between the shoulder blades"],m:"Pulling to the chest with elbows low. That is a row - the elbows lead high."},
+sapd:{s:"Bar or rope on the high pulley, hinge slightly, arms long.",c:["Sweep the bar down to the thighs with straight arms","Feel the lats, not the triceps","Let the arms rise fully for the stretch"],m:"Bending the elbows as it travels - it quietly becomes a pushdown."},
+wcurl:{s:"Forearms on the thighs or a bench, wrists hanging past the edge, palms up.",c:["Curl the wrists up as far as they go","Lower until the fingers almost open","Small movement, full range, no hurry"],m:"Lifting the forearms off the support to cheat the range."},
+bdip:{s:"Hands on the bench edge behind you, legs out, hips just clear of the bench.",c:["Lower until the upper arms reach parallel","Elbows point straight back","Press up to a full lockout without shrugging"],m:"Flaring the elbows wide. Straight back, always."},
+rwcurl:{s:"Forearms supported, wrists past the edge, palms down.",c:["Raise the knuckles as high as they go","Lower slow and full","Lighter than you think - this muscle is small"],m:"Gripping too heavy a bar and moving it two inches."}
+};
+// Pump-day rows are the same lifts under p_ ids; strip the prefix to share their words
+function exInstrFor(id){
+  return EXINSTR[id]||EXINSTR[String(id).replace(/^p_/,"")]||null;
+}
+function openInstr(exId){
+  var d=exInstrFor(exId);
+  if(!d)return;
+  var name=(EX[exId]&&EX[exId].name)||exId;
+  document.getElementById('insName').textContent=name;
+  document.getElementById('insSetup').textContent=d.s;
+  var ul=document.getElementById('insCues');
+  ul.innerHTML='';
+  d.c.forEach(function(c){var li=document.createElement('li');li.textContent=c;ul.appendChild(li);});
+  document.getElementById('insMistake').textContent=d.m;
+  var ref=document.getElementById('insRef'),rl=refLink(exId,name);
+  if(rl){ref.href=rl;ref.style.display='';}else ref.style.display='none';
+  document.getElementById('instrOvl').classList.add('on');
+}
 function refLink(id,name){
   var cx=EX[id];
   if(cx&&cx.custom)return cx.link||'';   // your own exercise, your own reference
@@ -5751,6 +5842,8 @@ function renderSession(){
       // The button sits beside the instructions because that is where you already look for
       // "how do I do this one".
       var rl=refLink(rf.swapId||id,r.name);
+      var hasIns=!!exInstrFor(rf.swapId||rf.exId);
+      var insEx=rf.swapId||rf.exId;
       // What goes on the bar, for the lifts that have one. Seeded with this exercise's
       // own target so the answer is already drawn when it opens.
       // Any lift with a weight offers it; see plateRow.
@@ -5763,7 +5856,8 @@ function renderSession(){
       var wplan=showPl?warmPlan(rf.exId,r.name,plw):[];
       if(wplan.length)WARMPLANS[id]={ex:rf.exId,name:r.name,lb:plw};
       html+='<div class="ex-links">'+
-            (rl?'<a href="'+rl+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> Instructions</a>':'')+
+            (hasIns?'<a onclick="event.stopPropagation();openInstr(\x27'+insEx+'\x27)"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> Instructions</a>'
+             :(rl?'<a href="'+rl+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> Instructions</a>':''))+
             '<a class="unote-btn'+(un?' has':'')+'" onclick="event.stopPropagation();openExNote(\''+rf.exId+'\')">'+
               '<svg viewBox="0 0 20 20"><path d="M4 3.5h9l3 3v10h-12z"/><path d="M7 8.5h6M7 12h4"/></svg> '+(un?'Note':'Add note')+'</a>'+
             // Only the id and the weight cross into the attribute. The NAME used to ride
