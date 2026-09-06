@@ -8334,7 +8334,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.66';
+var APPV='v5.67';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8549,14 +8549,19 @@ function exInstrFor(id){
 }
 function openInstr(exId){
   var d=exInstrFor(exId);
-  if(!d)return;
+  if(!d&&!ANIM.of(exId))return;              // nothing to show at all
   var name=(EX[exId]&&EX[exId].name)||exId;
   document.getElementById('insName').textContent=name;
-  document.getElementById('insSetup').textContent=d.s;
-  var ul=document.getElementById('insCues');
-  ul.innerHTML='';
-  d.c.forEach(function(c){var li=document.createElement('li');li.textContent=c;ul.appendChild(li);});
-  document.getElementById('insMistake').textContent=d.m;
+  var su=document.getElementById('insSetup'),ul=document.getElementById('insCues'),mi=document.getElementById('insMistake');
+  if(d){                                     // the written half, when the lift has words
+    su.style.display='';ul.style.display='';mi.parentNode.style.display='';
+    su.textContent=d.s;
+    ul.innerHTML='';
+    d.c.forEach(function(c){var li=document.createElement('li');li.textContent=c;ul.appendChild(li);});
+    mi.textContent=d.m;
+  }else{                                     // animation-only: the figure IS the instruction
+    su.style.display='none';ul.style.display='none';mi.parentNode.style.display='none';
+  }
   insAnimShow(exId);
   document.getElementById('instrOvl').classList.add('on');
 }
@@ -10126,7 +10131,7 @@ function renderSession(){
       // The button sits beside the instructions because that is where you already look for
       // "how do I do this one".
       var rl=refLink(rf.swapId||id,r.name);
-      var hasIns=!!exInstrFor(rf.swapId||rf.exId);
+      var hasIns=!!exInstrFor(rf.swapId||rf.exId)||!!ANIM.of(rf.swapId||rf.exId);   // words OR a moving figure both earn the button
       var insEx=rf.swapId||rf.exId;
       // What goes on the bar, for the lifts that have one. Seeded with this exercise's
       // own target so the answer is already drawn when it opens.
