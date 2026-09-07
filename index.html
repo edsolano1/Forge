@@ -8334,7 +8334,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.70';
+var APPV='v5.71';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15927,10 +15927,11 @@ function drawSfxTog(){
   var e=document.getElementById('sfxTog');
   if(e)e.textContent=SFX_ON?'SOUND ON':'MUTED';
 }
-var holdInt=null,holdStart=0,holdKey=null,holdAcc={},holdBreak={},pauseAt={};
-function curHold(k){return (holdAcc[k]||0)+Math.round((Date.now()-holdStart)/1000);}
+var holdInt=null,holdStart=0,holdKey=null,holdAcc={},holdBreak={},pauseAt={},holdLead=false;
+function curHold(k){return (holdAcc[k]||0)+(holdLead?0:Math.round((Date.now()-holdStart)/1000));}
 function resetHoldState(){holdAcc={};holdBreak={};pauseAt={};}
 function stopHold(){
+  holdLead=false;
   if(holdInt){clearInterval(holdInt);holdInt=null;holdKey=null;}
   var bs=document.querySelectorAll('.hold.running');
   for(var i=0;i<bs.length;i++){bs[i].innerHTML='<svg viewBox="0 0 20 20"><path d="M6 3.5l10 6.5-10 6.5z"/></svg>';bs[i].classList.remove('running');}
@@ -15941,6 +15942,12 @@ function toggleHold(id,i,target,rest){
   var btn=document.getElementById('hb-'+key),inp=document.getElementById('r-'+key),row=document.getElementById('sr-'+key);
   var A=DB.active[CUR];
   if(holdInt&&holdKey===key){
+    if(holdLead){                                  // cancel the lead-in - the clock never started
+      stopHold();
+      inp.value=holdAcc[key]||0;
+      if(holdAcc[key]>0){btn.classList.add('resume');btn.title='Resume - keeps your '+holdAcc[key]+'s';}
+      return;
+    }
     holdAcc[key]=curHold(key);
     inp.value=holdAcc[key];
     stopHold();
@@ -15965,16 +15972,32 @@ function toggleHold(id,i,target,rest){
     saveDB();updateProg();
   }
   holdAcc[key]=base;
-  holdStart=Date.now();holdKey=key;
+  // A 3-second lead-in before the clock runs (owner call, 6 Sep, from a real plank):
+  // pressing start and BEING in position are not the same moment. The field counts
+  // 3-2-1 with a tick each second; pressing again during it cancels clean.
+  holdLead=true;holdStart=Date.now();holdKey=key;
   btn.innerHTML='<svg viewBox="0 0 20 20"><rect x="5" y="5" width="10" height="10" rx="1.5"/></svg>';btn.classList.remove('resume');btn.classList.add('running');
-  btn.title='Pause - keeps your time';
-  var hit=!!(target&&base>=target);
-  if(hit)inp.classList.add('beat');
+  btn.title='Cancel';
+  var lead=3;
+  inp.value=lead;
+  try{sfxTick(false);}catch(e){}
   holdInt=setInterval(function(){
-    var e=base+Math.round((Date.now()-holdStart)/1000);
-    inp.value=e;
-    if(target&&e>=target&&!hit){hit=true;inp.classList.add('beat');sfxHold();vib([60,50,60]);}
-  },200);
+    lead--;
+    if(lead>0){inp.value=lead;try{sfxTick(false);}catch(e){}return;}
+    clearInterval(holdInt);
+    holdLead=false;
+    holdStart=Date.now();
+    inp.value=base;
+    btn.title='Pause - keeps your time';
+    vib([80]);
+    var hit=!!(target&&base>=target);
+    if(hit)inp.classList.add('beat');
+    holdInt=setInterval(function(){
+      var e=base+Math.round((Date.now()-holdStart)/1000);
+      inp.value=e;
+      if(target&&e>=target&&!hit){hit=true;inp.classList.add('beat');sfxHold();vib([60,50,60]);}
+    },200);
+  },1000);
 }
 var timerInt=null;
 // One rest per set when the row carries a list, otherwise the single value for all of them.
