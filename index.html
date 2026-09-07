@@ -1137,8 +1137,13 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-rt{display:flex;align-items:center;gap:9px;margin:0;}
 .mk-rn{flex:1;min-width:0;font-size:15.5px;font-weight:600;color:var(--txt);line-height:1.3;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-/* the two things you can do TO an item, kept together and away from the name */
-.mk-acts{display:inline-flex;gap:4px;flex-shrink:0;margin-left:2px;}
+/* the two things you can do TO an item, kept together and away from the name.
+   This was called .mk-acts and lost every one of its properties to the OTHER .mk-acts 700 lines
+   below - a vertical stack of full-width buttons that has nothing to do with a row of icons.
+   Same name, two components, later one wins: the trash icon has been shrinkable and gapless
+   ever since, and the note below about the chain "stacking above the trash" is that collision
+   being worked around rather than fixed. Renamed, so both components keep their own rules. */
+.mk-rowacts{display:inline-flex;gap:4px;flex-shrink:0;margin-left:2px;}
 .mk-ic{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
   padding:0;border-radius:8px;border:1px solid transparent;background:transparent;
   color:var(--txt3);cursor:pointer;transition:.14s;}
@@ -3375,7 +3380,10 @@ var EX = {
   treadwalk:{cardio:1,name:"Incline Treadmill Walk",note:"Speed low, incline high - no holding the rails",sets:"30 min",rest:""},
   cbike:    {cardio:1,name:"Stationary Bike",note:"Resistance high enough that the legs, not the momentum, are doing it",sets:"200 cal",rest:""},
   ellip:    {cardio:1,name:"Elliptical",note:"Push and pull the handles - it is a whole body machine or it is nothing",sets:"20 min",rest:""},
-  rower:    {cardio:1,name:"Rowing Machine",note:"Legs, then back, then arms - and the reverse coming forward",sets:"2000 cal",rest:""},
+  // 2000 is the rower's famous number, but it is METRES and this field is calories - so the
+  // default read as several hours against a 200 cal bike sitting next to it. Until distance is
+  // a measure the builder can offer, the default is the honest one and the 2k lives in the note.
+  rower:    {cardio:1,name:"Rowing Machine",note:"Legs, then back, then arms - and the reverse coming forward. The classic piece is 2000 m",sets:"200 cal",rest:""},
   jumprope: {cardio:1,name:"Jump Rope",note:"Small hops, wrists doing the turning",sets:"10 min",rest:""},
   outrun:   {cardio:1,name:"Outdoor Run",note:"Route and pace are yours - log the time",sets:"30 min",rest:""},
   swim:     {cardio:1,name:"Swim",note:"Any stroke - count the time in the water, not the lengths",sets:"30 min",rest:""},
@@ -7504,7 +7512,6 @@ var ANIM=(function(){
     var sy=lerp(206,232,k);                        // the shoulders fold down toward the viewer
     seg(x,[cx-58,166],[cx-46,sy+6],5,LINE);seg(x,[cx+58,166],[cx+46,sy+6],5,LINE);   // the levers to the pad BEHIND
     seg(x,[cx-46,sy+6],[cx+46,sy+6],8,GO);         // the upper-back cushion - drawn FIRST, the body covers it
-    dot(x,[cx,sy-30],19);
     seg(x,[cx,sy-10],[cx,sy+2],8);
     seg(x,[cx-40,sy+4],[cx+40,sy+4],10);
     seg(x,[cx,sy+4],[cx,300],11);
@@ -8292,7 +8299,9 @@ var ANIM=(function(){
     cd:[drawDoorwayF,drawDoorwayS],pg:[drawPigeonF,drawPigeonS],hs:[drawHamStrF,drawHamStrS]
   };
   // cards whose first panel is a TOP view rather than a front view
-  var TOPF={hb:1,lg:1,pl:1,rt:1,sd:1,bc:1,ro:1,sr:1,lp:1,mv:1};
+  // rt (russian twist) and sd (side plank) were listed here too - both are drawn, neither is
+  // reachable from any exercise, so the flags named nothing. They come back with the lifts.
+  var TOPF={hb:1,lg:1,pl:1,bc:1,ro:1,sr:1,lp:1,mv:1};
   // Forge exercise id -> motion code (p_ pump ids resolve through their base id)
   var MAP={
     bench:'bp',incdb:'id',mbench:'mb',xover:'cc',vbar:'ps',rope:'rp',ohext:'oe',
@@ -8334,7 +8343,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.71';
+var APPV='v5.72';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8506,13 +8515,19 @@ mbench:{s:"Seat set so the handles sit level with mid-chest.",c:["Shoulder blade
 lpress:{s:"Back and hips flat against the pads, feet shoulder width and mid-platform.",c:["Lower until the knees are near 90 degrees - deeper only if the hips stay down","Push through the whole foot, not the toes","Stop just short of locking the knees hard"],m:"Letting the hips curl off the pad at the bottom. That is the lower back lifting, and it should not be."},
 latpd:{s:"Knees under the pads, grip a little wider than the shoulders.",c:["Chest tall, lean back only slightly","Pull the bar to the top of the chest, elbows driving down and back","Let the arms fully lengthen at the top - the stretch is half the exercise"],m:"Rowing the weight down with a big lean-back. Long arms, tall chest."},
 machrow:{s:"Chest against the pad, feet planted, arms fully long to start.",c:["Drive the elbows straight back, not out","Squeeze the shoulder blades together for a beat","Return slow enough to feel the stretch across the back"],m:"Shrugging as you pull. Shoulders stay down away from the ears."},
-row:{s:"Hinge to about 45 degrees, back flat, bar hanging under the shoulders.",c:["Pull the bar to the lower ribs","Elbows stay close, shoulder blades finish the movement","Hold the hinge - the torso does not pump up and down"],m:"Standing up with every rep. The hinge is the exercise; the arms are just hooks."},
+// This entry used to describe a bent-over BARBELL row - hinge at 45 degrees, hold the hinge,
+// do not stand up with every rep - on a card whose name, note and animation are all a SEATED
+// cable row. You cannot stand up on a seated row. Rewritten to the lift that is actually drawn.
+row:{s:"Feet flat on the plate, knees slightly bent, sitting tall with the V-bar in both hands and the arms fully long.",c:["Pull the handle to the LOWER ribs, not up to the chest","Drive the elbows straight back and close to the body","Squeeze the shoulder blades together for a beat","Let the arms lengthen all the way out again - that stretch is half the exercise"],m:"Rowing with the whole torso. The chest stays tall and still; rocking back and forth hands the lift to the lower back."},
 mfly:{s:"Seat set so the handles sit level with mid-chest, slight bend fixed at the elbows.",c:["Bring the arms together in a wide arc, like hugging a barrel","Pause a beat where the hands meet","Open only as far as a comfortable stretch"],m:"Turning it into a press by bending the elbows more as it gets hard."},
 dbfly:{s:"Flat bench, dumbbells above the chest, slight bend fixed at the elbows.",c:["Lower in a wide arc until you feel the stretch across the chest","Keep the same elbow bend the whole way","Arc back up as if wrapping arms around something big"],m:"Going too deep. The stretch should be felt in the chest, never the shoulder joint."},
 slegcurl:{s:"Back flat against the pad, ankle pad just below the calves, thighs held by the top pad.",c:["Curl the heels under as far as they will go","Pause a beat fully curled","Resist on the way back - do not let the stack yank the legs"],m:"Half reps. Full curl, or lower the weight."},
 lext:{s:"Back against the pad, knee lined up with the machine pivot, pad on the shins.",c:["Extend to a full lockout and hold a beat","Lower with control to a right angle","Toes pointed slightly up the whole way"],m:"Kicking the weight up and letting it drop. Smooth both directions."},
 scalfr:{s:"Balls of the feet on the platform, heels free, pads on the thighs.",c:["Full stretch at the bottom - heels as low as they go","Drive to full tiptoe and squeeze at the top","One second up, one second down, no bouncing"],m:"Bouncing out of the bottom. The stretch is the point; do not rush past it."},
-dcalfr:{s:"Shoulders under the pads, balls of the feet on the edge, legs straight but not locked.",c:["Sink the heels for a full stretch","Rise as high as the ankles allow","Pause a beat at the top"],m:"Bending the knees to move more weight. That turns calves into quads."},
+// The setup line here was word for word the STANDING machine's - shoulders under the pads - on
+// the card for the 45-degree sled, which has a seat, a backrest and handles at the hips. Nothing
+// goes on the shoulders. Two different machines were sharing one set of instructions.
+dcalfr:{s:"Sit back into the angled seat with your back on the rest and your legs down the slope. Balls of both feet on the small plate, heels hanging free, hands on the seat handles.",c:["The legs stay STRAIGHT but never locked - the ankle does all of it","Let the heels sink below the plate for a full stretch","Drive up to full tiptoe and hold a beat at the top","One second up, one second down - no bouncing"],m:"Bending the knees to move more weight. The moment the knee helps, it has stopped being a calf raise."},
 preacher:{s:"Armpits snug over the pad, upper arms flat against it, full grip on the handles.",c:["Curl to full contraction without the elbows lifting off","Lower until the arms are almost straight","The pad does the strictness - let it"],m:"Stopping high on the way down. The bottom half is where the work lives."},
 sdbcurl:{s:"Seated upright, dumbbells hanging at the sides, palms forward.",c:["Curl without the elbows drifting forward","Squeeze at the top, then lower slow","The back stays against the pad - no rocking"],m:"Swinging the weights up with the shoulders. Seated exists to prevent exactly that."},
 hammer:{s:"Standing or seated, dumbbells at the sides, palms facing each other.",c:["Curl with the thumbs up the whole way","Elbows pinned to the sides","Control the lowering - it is half the rep"],m:"Letting the elbows drift behind the body to sneak the weight up."},
@@ -8520,12 +8535,18 @@ rope:{s:"Rope on the high pulley, elbows pinned to the sides, slight forward lea
 ohext:{s:"Rope on the low pulley, back to the stack, hands behind the head, elbows up.",c:["Extend until the arms are straight overhead","Elbows stay narrow and pointed forward","Deep stretch behind the head on every return"],m:"Elbows flaring wide - it takes the triceps out of it."},
 skull:{s:"Flat bench, dumbbells pressed up over the chest, palms facing each other.",c:["Bend only at the elbows, lowering to the sides of the head","Upper arms stay vertical and still","Extend back up without pressing - no chest involvement"],m:"Moving the upper arms. If the elbows travel, it has become a pullover."},
 dblat:{s:"Standing tall, dumbbells at the sides, slight bend in the elbows.",c:["Raise out to the sides to shoulder height, no higher","Lead with the elbows, pinkies slightly up","Lower slower than you raised"],m:"Swinging with the hips. If the torso moves, the weight is too heavy."},
-revfly:{s:"Chest against the incline pad or hinged over, dumbbells hanging below.",c:["Raise out wide, elbows slightly bent and fixed","Squeeze the rear shoulders at the top","No momentum - this is a small muscle, treat it like one"],m:"Turning it into a row. The arms stay long; the elbows do not pull back."},
+// Was written for a pair of dumbbells on an incline bench. The card is the MACHINE reverse fly
+// and the figure is a machine - chest pad, tower, handles - with no dumbbell anywhere in it.
+revfly:{s:"Facing the machine, chest against the pad, seat set so the handles sit at shoulder height. One handle in each hand, arms out in front of you.",c:["Sweep the arms out and back in a wide arc, elbows slightly bent and FIXED there","Squeeze the rear shoulders at the end of the arc","The chest stays on the pad - that is what stops the body helping","Return slow; never let the stack snatch the arms forward"],m:"Bending the elbows more as it gets heavy. That quietly turns a rear-delt fly into a row."},
 hthrust:{s:"Upper back on the pad or bench, feet flat, weight over the hips.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin tucked, ribs down - do not arch the finish"],m:"Overextending at the top. The finish is a squeeze, not a back bend."},
 bbthrust:{s:"Upper back on a bench, bar padded across the hips, feet flat at shoulder width.",c:["Drive through the heels to a flat line from knees to shoulders","Full glute squeeze at the top, one beat","Lower the hips under control - do not drop"],m:"Pushing through the toes. Heels down or the glutes clock out."},
 plank:{s:"Forearms down, elbows under shoulders, body one straight line.",c:["Squeeze glutes and brace the belly the entire time","Push the floor away through the forearms","The line stays flat - no sag, no peak"],m:"Hips sagging as the clock runs. When the line breaks, the set is over."},
 hollow:{s:"On your back, arms overhead, legs long, lower back pressed into the floor.",c:["Lift shoulders and legs a few inches off the floor","The lower back never leaves the ground","Breathe - do not trade the brace for a held breath"],m:"Legs too low too soon. Raise them until the back can stay pressed down."},
-abmach:{s:"Seat set so the pivot lines up with your hips, pads at the chest.",c:["Crunch by rounding the spine, not folding at the hips","Exhale hard into every crunch","Return with control - do not let the stack pull you open"],m:"Pulling with the arms on the handles. They only rest there."},
+// Brought into line with the machine that was actually drawn and approved in the motion review:
+// a raised seat with the feet HANGING, a cushion under the thighs and one on the upper back,
+// hands on handles behind the head. The old words said "pads at the chest", which is a different
+// machine from the one in the picture beside them.
+abmach:{s:"Sit up on the raised seat with the cushion across your thighs and your feet hanging free. Upper back against the pad, hands on the handles behind your head, elbows forward in a V.",c:["Crunch by ROUNDING the spine - the ribs travel toward the hips","Exhale hard into every rep","The feet hang the whole set; they never reach for the floor","Return slow - do not let the stack pull you back open"],m:"Hauling on the handles with the arms. The hands only rest there; the stomach moves the weight."},
 vbar:{s:"V-bar on the high pulley, elbows pinned to the sides.",c:["Push to full lockout and squeeze","Elbows never leave the ribs","Slow return to a full forearm stretch"],m:"Shoulders creeping up as fatigue sets in. Pin them down."},
 dbrow:{s:"One knee and hand braced on a bench, other foot planted, dumbbell hanging long.",c:["Pull the dumbbell to the hip, not the shoulder","Elbow close to the body, back flat throughout","Full stretch at the bottom of every rep"],m:"Twisting the torso to hoist the weight. The chest stays square to the floor."},
 goblet:{s:"Dumbbell held vertical against the chest, elbows tucked, feet shoulder width.",c:["Sit down between the heels, chest tall","Elbows travel inside the knees at the bottom","Drive up through the whole foot"],m:"Letting the weight pull the chest forward. It rests on the chest - the legs do the lifting."},
@@ -8583,6 +8604,11 @@ stcalf:{s:"Shoulders under the pads, balls of the feet on the block, heels hangi
 // Pump-day ids strip their p_ and land on these five, whose base ids do not match the strip:
 EXINSTR.inc=EXINSTR.incdb;EXINSTR.fly=EXINSTR.mfly;EXINSTR.lat=EXINSTR.dblat;
 EXINSTR.curl=EXINSTR.cbcurl;EXINSTR.pdown=EXINSTR.sapd;EXINSTR.lcurl=EXINSTR.slegcurl;
+// p_dip is the odd one out: stripping its prefix lands on 'dip', which is a real entry for a
+// DIFFERENT lift - the assisted machine. Pump day's is a Bench Dip, and its animation has always
+// been the bench one, so the card was showing a figure on a bench beside words about an assist
+// pad. This one has to be named outright rather than left to the strip.
+EXINSTR.p_dip=EXINSTR.bdip;
 // Pump-day rows are the same lifts under p_ ids; strip the prefix to share their words
 function exInstrFor(id){
   return EXINSTR[id]||EXINSTR[String(id).replace(/^p_/,"")]||null;
@@ -10103,6 +10129,11 @@ var CHAIN='<svg class="sslink" viewBox="0 0 20 20"><path d="M8.4 11.6a3.4 3.4 0 
 function renderSession(){
   stopHold();resetHoldState();
   var wk=CUR,w=W[wk],A=DB.active[wk],html='';
+  // Leaving a day you never logged into deletes its session on the way out, but pageTurn holds
+  // the .on class for another 230ms - so for that window sessionOpen() is still true while the
+  // session it names is already gone, and every rowFor(A.swaps,...) below threw on undefined.
+  // CUR outlives leaveSession too, which is why "if(CUR)renderSession()" was never the guard.
+  if(!w||!A)return;
   var canRaise={};levelPlan(wk).forEach(function(p){canRaise[p.id]=1;});
   // The colour key is gone (user call, mid-session, Aug 26). It existed to explain a
   // three-way grade, and the grade itself was the problem: see gradeClass. A record still
@@ -10282,7 +10313,8 @@ function openEdit(id,i,which){
   edCtx={id:id,i:i,which:which,val:cur,isSec:isSec};
   document.getElementById('edEx').textContent=r.name;
   document.getElementById('edSet').textContent='Set '+(i+1)+' \u00b7 '+(which==='w'?'Weight':(isSec?'Seconds':'Reps'));
-  document.getElementById('edUnit').textContent=which==='w'?(wUnitName()+'s'):(isSec?'seconds':'reps');
+  // The other two branches are whole words, so this one is too - and "kgs" was never a unit.
+  document.getElementById('edUnit').textContent=which==='w'?(UNIT_KG?'kilograms':'pounds'):(isSec?'seconds':'reps');
   edPad();
   var tgt=fmtLine((r.sets.split('\n')[i]||'').trim());
   document.getElementById('edHint').textContent='Target for this set: '+tgt;
@@ -10290,7 +10322,19 @@ function openEdit(id,i,which){
   document.getElementById('editOvl').classList.add('on');
 }
 function edShow(){document.getElementById('edBig').value=(Math.round(edCtx.val*100)/100);}
-function edRead(){var v=parseFloat(document.getElementById('edBig').value);return isNaN(v)?edCtx.val:Math.max(0,v);}
+// Two things the pad used to wave through. A decimal COMMA is how half the world writes half
+// a kilo, and "12,5" was landing in the log as a flat 12 - the half silently gone, on the very
+// users most likely to type it. And there was no ceiling at all: a slipped keypress put 999999
+// on a set, where it became the best-ever for that lift and owned every chart's scale forever
+// after. Nothing a person lifts needs four digits, and nothing they hold needs five.
+function edRead(){
+  var raw=String(document.getElementById('edBig').value||'').trim();
+  if(raw.indexOf(',')>-1&&raw.indexOf('.')<0)raw=raw.replace(',','.');
+  var v=parseFloat(raw);
+  if(isNaN(v))return edCtx.val;
+  var cap=(edCtx&&edCtx.which==='w')?2000:9999;   // the cap is in the DISPLAY unit, like the pad
+  return Math.min(cap,Math.max(0,v));
+}
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter')return;
   if(!document.getElementById('editOvl').classList.contains('on'))return;
@@ -11247,7 +11291,7 @@ function mkRender(){
          // exercises, so it follows the other list of exercises.
          (g?'':mkGripSvg())+
          '<span class="mk-rn">'+mkEsc(nm)+'</span>'+
-         '<span class="mk-acts">'+
+         '<span class="mk-rowacts">'+
            // The chain lived up here and stacked above the trash, doubling the header's height
            // for a control used once per exercise at most. It sits at the foot of the card now,
            // beside the set stepper, in the space that row never used - see mkSetsUI.
@@ -12016,7 +12060,7 @@ function renderSummary(s){
     return '<div class="sum-c'+(cls?' '+cls:'')+'"><div class="sum-n">'+n+(unit?'<small>'+unit+'</small>':'')+'</div><div class="sum-l">'+label+'</div></div>';
   }
   var cells=[cell(s.sets,'',s.sets===1?'Set logged':'Sets logged')];
-  if(s.vol>0)cells.push(cell(Math.round(dspW(s.vol)).toLocaleString(),' '+wUnitName()+'s','Weight moved'));
+  if(s.vol>0)cells.push(cell(Math.round(dspW(s.vol)).toLocaleString(),' '+wUnitName(),'Weight moved'));
   if(s.reps>0)cells.push(cell(s.reps,'','Total reps'));
   if(s.held>0){var hd=fmtHeld(s.held);cells.push(cell(hd.n,hd.u,'Time held'));}
   cells.push(s.mins?cell(s.mins,' min','Time in session'):cell('\u2014','','Time in session'));
@@ -12841,10 +12885,14 @@ function exHistory(id){
   });
   return out;
 }
+// The weight-moved row prints its value with thousands separators and its delta without, so a
+// good week read "15,360 lb  +15360" - the same number, written two ways, side by side. The
+// separator belongs on both; toLocaleString on a small count changes nothing.
 function arrow(diff){
   if(diff===null)return '<span class="fl">new</span>';
-  if(diff>0)return '<span class="up">&#9650; +'+Math.round(diff)+'</span>';
-  if(diff<0)return '<span class="dn">&#9660; '+Math.round(diff)+'</span>';
+  var n=Math.abs(Math.round(diff)).toLocaleString();
+  if(diff>0)return '<span class="up">&#9650; +'+n+'</span>';
+  if(diff<0)return '<span class="dn">&#9660; -'+n+'</span>';
   return '<span class="fl">&#9679; same</span>';
 }
 function topSet(sets){
@@ -18162,7 +18210,7 @@ var EZ_STEPS=[
     [30,'30 minutes','Compounds only - the work that matters most, nothing decorative',ezClock(30)],
     [45,'45 minutes','The full lifts plus a little isolation',ezClock(45)],
     [60,'60 minutes','The complete session - isolation, core, finisher and all',ezClock(60)]];}},
-  {t:'What is it for?',s:'This sets how heavy, how many reps, how long you rest — and whether the week carries cardio.',
+  {t:'What is it for?',s:'This sets how heavy, how many reps, how long you rest - and whether the week carries cardio.',
    k:'goal',opts:function(){return [
     ['strong','Get strong','Heavy fives on the big lifts, long rests, accessories kept honest',EZ_ART.anvil],
     ['muscle','Build muscle','Moderate weight, eights to fifteens, steady pace',EZ_ART.stack],
@@ -18174,7 +18222,8 @@ var EZ_STEPS=[
 // and a generator that overwrites a Tuesday nobody asked it to touch is a bug with steps.
 function ezOpen(into){
   if(into==='saved'&&(DB.extra||[]).length>5){mkNote('Saved workouts is nearly full. A forged week can be up to five workouts - clear some room first.','Not enough room');return;}
-  EZ={step:0,level:null,days:null,goal:null,into:into||'days'};
+  // done:false is the reset of the one-forge-per-run latch - see ezPick.
+  EZ={step:0,level:null,days:null,goal:null,into:into||'days',done:false};
   document.getElementById('ez').classList.add('on');
   ezRender();
 }
@@ -18186,10 +18235,21 @@ function ezBack(){
   var w=document.getElementById('welcome');
   if(w){w.classList.add('on');w.setAttribute('aria-hidden','false');document.body.classList.add('wcon');}
 }
+// The last answer is the one that BUILDS, and it used to be tappable twice. ezForge writes the
+// whole week and only closes the sheet when it is finished, so a second tap - 120ms apart is
+// nothing on a phone - ran the entire generator again and APPENDED a second set of workouts to
+// the same days: Full Body A twice on Monday, twice on Wednesday, and so on. Tapping a different
+// goal the second time was worse, stacking two different weeks until DAY_MAX quietly capped the
+// day at three. It is the first screen a new user ever sees, so it gets a latch.
+// The latch has to OUTLIVE the forge, not just wrap it: ezForge is synchronous, so a flag
+// released in a finally is already down again by the time a second tap 120ms later lands. It
+// stays down until ezOpen starts a new run, which is the only moment another week is wanted.
 function ezPick(k,v){
+  if(EZ.done)return;
   EZ[k]=v;
-  if(EZ.step<EZ_STEPS.length-1){EZ.step++;ezRender();}
-  else ezForge();
+  if(EZ.step<EZ_STEPS.length-1){EZ.step++;ezRender();return;}
+  EZ.done=true;
+  ezForge();
 }
 function ezRender(){
   var st=EZ_STEPS[EZ.step];
@@ -18351,6 +18411,10 @@ function ezTrim(rows,len,goal){
   return out;
 }
 function ezForge(){
+  // Belt and braces with the EZBUSY latch above: the sheet goes BEFORE any of the writing, so
+  // there is no live button to tap twice even if something in here ever becomes asynchronous.
+  // The ezClose() further down stays and is simply a no-op by then.
+  ezClose();
   if(EZ.xp1!=null){
     var sc=(EZ.xp1||0)+(EZ.xp2||0)+(EZ.xp3||0);
     EZ.level=(EZ.xp3===0)?'beg':(sc<=2?'beg':(sc<=5?'int':'adv'));
