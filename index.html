@@ -8334,7 +8334,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.67';
+var APPV='v5.68';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10013,21 +10013,10 @@ function reconcileActive(){
 }
 function openW(wk,dk){
   initAudio();
-  var open=openElsewhere(wk);
-  if(open.length){
-    var names=open.map(function(k){return W[k].name.replace('Optional: ','');});
-    var n1=loggedCount(open[0]);
-    var msg=(open.length===1?names[0]+' is still open with '+n1+(n1===1?' set':' sets')+' on it.':open.length+' other sessions are still open: '+names.join(', ')+'.')+
-      TXT('sealLine')+(open.length===1?'':'s')+'. Every set you logged is saved to your history \u2014 nothing is lost \u2014 but the day will not show as LOCKED IN: only finishing a session from inside it does that.'+
-      (open.length===1?TXT('sealMore'):'');
-    ask(msg,function(){
-      open.forEach(sealAway);
-      saveDB();renderHome();
-      pageTurn(false,function(){openWNow(wk,dk);});
-    },open.length===1?TXT('sealTtl1'):TXT('sealTtlN'),TXT('sealYes'),null,
-    {label:TXT('sealAlt'),fn:function(){pageTurn(false,function(){openWNow(open[0]);});}});
-    return;
-  }
+  // Browsing is free (owner call, 6 Sep): another day opens without a word while a session
+  // runs elsewhere - looking is not a commitment. The close-out question lives in toggleSet
+  // now, firing on the FIRST set logged into a different workout, which is the moment it
+  // actually matters. An untouched browsed day is deleted again on the way out (leaveSession).
   pageTurn(false,function(){openWNow(wk,dk);});
 }
 function openWNow(wk,dk){
@@ -10306,6 +10295,20 @@ function saveEdit(){
 }
 function toggleSet(id,i,rest,unit){
   initAudio();stopRestAlert();
+  // The moment browsing becomes training: first set into this workout while another session
+  // holds logged sets. Ask now - close that one out, or go back to it - never earlier.
+  var others=openElsewhere(CUR);
+  if(others.length&&loggedCount(CUR)===0){
+    var nm=W[others[0]].name.replace('Optional: ',''),n1=loggedCount(others[0]);
+    var msg=(others.length===1?nm+' is still open with '+n1+(n1===1?' set':' sets')+' on it.':others.length+' other sessions are still open.')+
+      ' Logging here closes '+(others.length===1?'it':'them')+' out. Every set you logged is saved to your history, but a closed-out day does not show as LOCKED IN - only finishing from inside does that.';
+    ask(msg,function(){
+      others.forEach(sealAway);saveDB();
+      toggleSet(id,i,rest,unit);
+    },TXT('sealTtl1'),'CLOSE OUT & LOG HERE',null,
+    {label:TXT('sealAlt'),fn:function(){pageTurn(false,function(){openWNow(others[0]);});}});
+    return;
+  }
   var key=id+'-'+i;
   if(holdInt&&holdKey===key){
     holdAcc[key]=curHold(key);
@@ -13780,7 +13783,15 @@ function sessionOpen(){
 function syncPumpBtn(){renderSides();}
 function leaveSession(){
   pageTurn(true,function(){document.getElementById('session').classList.remove('on');syncPumpBtn();});
-  stopTimer();stopHold();resetHoldState();renderHome();
+  // the rest timer is NOT stopped (owner catch, 6 Sep): the pill is fixed-position and keeps
+  // counting on the home board, so peeking at the week never eats a rest alert
+  stopHold();resetHoldState();
+  // a browsed day that was never touched leaves nothing behind - no ghost half-open session
+  var A=CUR&&DB.active&&DB.active[CUR];
+  if(!TUTON&&A&&loggedCount(CUR)===0&&!A.note&&!A.start&&!A.edit&&Object.keys(A.swaps||{}).length===0){
+    delete DB.active[CUR];saveDB();
+  }
+  renderHome();
 }
 function onBackButton(){
   if(!splashGone){dismissSplash();backGuard();return;}
