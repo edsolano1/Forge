@@ -8346,7 +8346,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.73';
+var APPV='v5.74';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8479,13 +8479,29 @@ function parseTarget(s){
 }
 function targetsOf(row,wk){return R(row,wk).sets.split('\n').map(parseTarget);}
 
-function exOfKey(L,k){return ((L&&L.swaps)||{})[k]||k;}
+// ---------- slots: one lift can stand in a workout more than once ----------
+// A workout may legitimately hold the same lift twice - heavy fives early and a lighter backoff
+// block later, or a movement that appears alone AND inside a superset. But a plan row is only an
+// exercise id, so both blocks resolved to the same key: one entries array, one set of DOM ids.
+// Logging set one of the second block wrote over set one of the first, and ticking it deleted
+// that entry outright - record and all - with the counter walking backwards. A repeated row now
+// carries its own slot, "bench~2", while the BASE id stays what history, grading and the
+// level-up engine key on. Slots are what the session files sets under; bases are what they mean.
+function slotBase(k){var s=String(k==null?'':k),i=s.indexOf('~');return i<0?s:s.slice(0,i);}
+function exOfKey(L,k){
+  var m=(L&&L.swaps)||{};
+  return m[k]||m[slotBase(k)]||slotBase(k);
+}
+// Every set of this lift from the most recent session that holds any - across BOTH slots when
+// the day ran it twice. "Last" means what you did last time, not what one block of it did.
 function lastFor(exId){
   for(var i=DB.logs.length-1;i>=0;i--){
     var L=DB.logs[i];if(!L.entries)continue;
+    var sets=[];
     for(var k in L.entries){
-      if(exOfKey(L,k)===exId&&L.entries[k].length)return {sets:L.entries[k],date:L.date};
+      if(exOfKey(L,k)===exId&&L.entries[k].length)sets=sets.concat(L.entries[k]);
     }
+    if(sets.length)return {sets:sets,date:L.date};
   }
   return null;
 }
@@ -8665,9 +8681,17 @@ function fmtSets(sets,withPR){
 // was held against. Weighted sets score by estimated 1RM, which is the standard way to
 // compare across rep ranges. Assisted machines still run backwards (less help is better),
 // and timed or bodyweight work scores on the count, since there is no weight to speak of.
+// Two weights that read as the SAME number on screen have to score the same. Storage is pounds
+// and dspW rounds kg to the half, so a 137.5 lb record shows as 62.5 - and typing 62.5 straight
+// back stored 137.78875, a fifth of a pound heavier, which beat the record and lit the set up
+// gold. The user saw 62.5 against 62.5 and was handed a personal best for it. data-lb keeps the
+// target you never touch honest; this is the half that was missing, for the moment you do touch
+// it. Grading scores the weight AS SHOWN. Storage stays canonical pounds - volume, charts and
+// the export all read s.w directly and are untouched by this.
+function gradeW(lb){return UNIT_KG?Math.round((lb||0)/LB_PER_KG*2)/2:(lb||0);}
 function setScore(exId,s){
   if(!s)return -1;
-  var w=s.w||0,r=s.r||0;
+  var w=gradeW(s.w),r=s.r||0;
   if(s.unit==='sec'||!w)return r;
   if(invEx(exId))return r/(w||1);          // less assistance, more reps: both push it up
   return r>1?w*(1+r/30):w;                 // Epley
@@ -8676,10 +8700,12 @@ function bestEver(exId,excludeIdx){
   var best=null,bs=-1;
   for(var i=0;i<DB.logs.length;i++){
     if(excludeIdx!==undefined&&i===excludeIdx)continue;
-    var L=DB.logs[i],sets=null;
+    var L=DB.logs[i],sets=[];
     if(!L.entries)continue;
-    for(var kk in L.entries){if(exOfKey(L,kk)===exId){sets=L.entries[kk];break;}}
-    if(!sets)continue;
+    // every slot this lift stood in that day, not just the first one found: a backoff block is
+    // still this lift, and a record set inside it is still a record.
+    for(var kk in L.entries){if(exOfKey(L,kk)===exId)sets=sets.concat(L.entries[kk]||[]);}
+    if(!sets.length)continue;
     for(var j=0;j<sets.length;j++){
       var x=sets[j];if(!x)continue;
       var sc=setScore(exId,x);
@@ -10112,17 +10138,59 @@ function openWNow(wk,dk){
 }
 function rowFor(swaps,row,wk){
   var base=typeof row==='string'?row:row[0];
-  var sw=(swaps||{})[base];
-  // id  = the plan slot the sets are filed under (stable, never collides)
+  // The slot the row carries, written by slotWorkout when a lift repeats in the day. Absent -
+  // which is every row in a workout that names each lift once - the slot IS the base id, so
+  // nothing about existing sessions, logs or swaps changes shape.
+  var slot=(typeof row==='string'?null:((row[1]||{}).slot))||base;
+  // swaps made before slots existed are filed under the base, so both are consulted
+  var sw=(swaps||{})[slot]||(swaps||{})[base];
+  // id   = the plan slot the sets are filed under - unique within the day
+  // baseId = the row's own library id, which day-edits and the swap sheet key on
   // exId = the lift actually performed, which is what history and grading key on
   if(sw){
     // an override is filed against the slot, not the lift standing in it, or swapping
     // out and back would quietly drop the change
     var d=R(sw,null);
     if(wk){var s=edGet(wk,base,'sets');if(s)d.sets=s;var r=edGet(wk,base,'rest');if(r!=null)d.rest=r;}
-    return {id:base,baseId:base,exId:sw,swapId:sw,data:d};
+    return {id:slot,baseId:base,exId:sw,swapId:sw,data:d};
   }
-  return {id:base,baseId:base,exId:base,swapId:null,data:R(row,wk)};
+  return {id:slot,baseId:base,exId:base,swapId:null,data:R(row,wk)};
+}
+// Give every row that repeats a lift its own slot, written into the row's override so it travels
+// with the workout and survives a reorder. Idempotent, and a no-op on the overwhelming majority
+// of workouts, which name each lift once. Returns whether anything actually moved.
+function slotWorkout(w){
+  if(!w||!w.sections)return false;
+  var seen={},changed=false;
+  w.sections.forEach(function(sec){
+    (sec.rows||[]).forEach(function(row,i){
+      var id=typeof row==='string'?row:row[0];
+      if(!id)return;
+      seen[id]=(seen[id]||0)+1;
+      var want=seen[id]>1?id+'~'+seen[id]:null;
+      var have=(typeof row==='string')?null:(((row[1]||{}).slot)||null);
+      if(want===have)return;
+      if(typeof row==='string'){
+        if(!want)return;
+        sec.rows[i]=[id,{slot:want}];       // R() starts from the library, so an override of
+      }else{                                 // nothing but a slot changes no numbers
+        row[1]=row[1]||{};
+        if(want)row[1].slot=want;else delete row[1].slot;
+      }
+      changed=true;
+    });
+  });
+  return changed;
+}
+// Run over everything the app can open. The user's own workouts are written back, because their
+// slots have to be the same tomorrow as they were when the sets were filed under them; the
+// shipped days are recomputed each boot from the same rules, which lands on the same answer.
+function slotAll(){
+  var wrote=false;
+  if(DB&&DB.custom)for(var k in DB.custom){if(slotWorkout(DB.custom[k]))wrote=true;}
+  for(var j in W){if(!(DB&&DB.custom&&DB.custom[j]))slotWorkout(W[j]);}
+  if(wrote){try{saveDB();}catch(e){}}
+  return wrote;
 }
 var DRAGSVG='<div class="exdrag" title="Drag to reorder"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/></svg></div>';
 var CARDGRIP='<span class="carddrag" title="Drag to reorder"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/></svg></span>';
@@ -10172,7 +10240,7 @@ function renderSession(){
       // as "rename this"; the hold changes the exercise, not what it is called. It stops short of
       // the links row below on purpose: Instructions and Add note are not part of what a hold does.
       html+='<div class="ex-h"><div class="ex-body"><div class="ex-nrow">'+DRAGSVG+'<div class="ex-n">'+r.name+(rf.swapId?' <span style="color:var(--gold);font-size:11px;font-weight:500">SWAPPED</span>':'')+'</div>'+
-            '<div class="ex-tools">'+(ready&&canRaise[rf.exId]?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(CUR)">'+ARROW+'</span>':'')+'<div class="ex-swap" onclick="openSwap(\''+rf.baseId+'\')" title="Swap exercise"><svg viewBox="0 0 20 20"><path d="M3 7h11l-2.6-2.6M17 13H6l2.6 2.6"/></svg></div></div></div>';
+            '<div class="ex-tools">'+(ready&&canRaise[rf.exId]?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(CUR)">'+ARROW+'</span>':'')+'<div class="ex-swap" onclick="openSwap(\''+rf.id+'\')" title="Swap exercise"><svg viewBox="0 0 20 20"><path d="M3 7h11l-2.6-2.6M17 13H6l2.6 2.6"/></svg></div></div></div>';
       // Your own note on the exercise. Keyed on exId, so it follows the lift through a swap and
       // survives every session - machine seat height, a grip, a cue that only matters to you.
       // Separate from r.note, which is the app's own coaching line and is not yours to edit.
@@ -10403,7 +10471,10 @@ function toggleSet(id,i,rest,unit){
     stopHold();
   }
   var A=DB.active[CUR];
-  var exId=(A.swaps||{})[id]||id;   // grade against the swapped lift, not the slot
+  // Grade against the swapped lift, not the slot - and a slot is no longer always an exercise
+  // id, so a repeated row ("bench~2") has to fall back to its base or setGrade would be handed
+  // a name no library holds and every set in that block would read as a first.
+  var exId=(A.swaps||{})[id]||(A.swaps||{})[slotBase(id)]||slotBase(id);
   if(!A.entries[id])A.entries[id]=[];
   var row=document.getElementById('sr-'+key);
   if(A.entries[id][i]){
@@ -10492,7 +10563,10 @@ function openSwap(id){
 // all - and a specific machine could only be found by scrolling the whole list. Both halves
 // are alphabetical now, and the search bar filters them live.
 function swapList(){
-  var id=swapTarget;if(!id)return;
+  // swapTarget names the BLOCK being swapped; the library is keyed on the lift, so a repeated
+  // row arrives here as "bench~2" and everything below wants "bench".
+  if(!swapTarget)return;
+  var id=slotBase(swapTarget);
   var q=((document.getElementById('swapSearch')||{}).value||'').trim().toLowerCase();
   var g=grpOf(id),same=[],other=[],isPump=id.indexOf('p_')===0;
   Object.keys(EX).forEach(function(k){
@@ -10516,7 +10590,9 @@ function swapList(){
   document.getElementById('swapList').innerHTML=html;
 }
 function doSwap(k){
-  var A=DB.active[CUR],prev=A.swaps[swapTarget]||swapTarget,next=k||swapTarget;
+  // swapTarget is a SLOT, so a day running the same lift twice can swap one block and leave the
+  // other alone. On every other workout the slot is the base id and this is what it always was.
+  var A=DB.active[CUR],prev=A.swaps[swapTarget]||slotBase(swapTarget),next=k||slotBase(swapTarget);
   if(k)A.swaps[swapTarget]=k;
   else delete A.swaps[swapTarget];
   // sets already logged in this slot stay put and are regraded against the new lift
@@ -10603,6 +10679,10 @@ function mergeCustom(){
   if(!DB.exNotes)DB.exNotes={};   // your own notes, keyed by exercise, kept across sessions
   for(var k in DB.cex){EX[k]=DB.cex[k];NOREF[k]=1;if(!GRP[k])GRP[k]='other';}
   for(var d in DB.custom)W[d]=DB.custom[d];
+  // Once the library is whole, hand every workout its slots. Here because it is the one place
+  // that runs on load AND after every builder save, so a day that just gained a second bench
+  // press is filed correctly before anything can be logged into it.
+  slotAll();
 }
 // ============================================================
 // YOUR PROGRAM, AS DATA
@@ -12881,10 +12961,14 @@ function exHistory(id){
   var out=[];
   DB.logs.forEach(function(l){
     if(!l.entries)return;
+    var sets=[];
     for(var k in l.entries){
-      if(exOfKey(l,k)===id&&l.entries[k].length)
-        out.push({date:l.date,vol:sessVol(l.entries[k]),sets:l.entries[k]});
+      if(exOfKey(l,k)===id&&l.entries[k].length)sets=sets.concat(l.entries[k]);
     }
+    // one point per SESSION, not per slot. A day that ran the lift twice is still one day on
+    // the chart, with both blocks' volume counted into it - two dots on the same date would
+    // read as two sessions and halve the volume of each.
+    if(sets.length)out.push({date:l.date,vol:sessVol(sets),sets:sets});
   });
   return out;
 }
@@ -13819,7 +13903,25 @@ function renderHist(){
 // alt is an optional third choice {label,fn} - it gets its own full-width row above the
 // pair and takes the accent, because when there is a way out that loses nothing it should
 // read as the obvious one. Passing it demotes the confirm button to plain.
+// There is ONE ask sheet, and it used to be rewritten in place: a second ask() while the first
+// was still up replaced its title, its message and BOTH its callbacks. The first question was
+// then never seen and never answered, whatever it guarded silently never ran, and answering what
+// looked like one question actually answered the other. They queue now, in the order they were
+// asked, and the next opens as the current one closes - so nothing the app wanted to ask is lost.
+var ASKQ=[];
 function ask(msg,onYes,title,yesLabel,onNo,alt){
+  var ov=document.getElementById('askOvl');
+  if(ov&&ov.classList.contains('on')){ASKQ.push([msg,onYes,title,yesLabel,onNo,alt]);return;}
+  askNow(msg,onYes,title,yesLabel,onNo,alt);
+}
+// Every exit from the sheet comes through closeOvl, which calls this. The short delay lets the
+// sheet finish closing so the next question reads as a new question rather than a flicker.
+function askDrain(){
+  if(!ASKQ.length)return;
+  var a=ASKQ.shift();
+  setTimeout(function(){askNow(a[0],a[1],a[2],a[3],a[4],a[5]);},120);
+}
+function askNow(msg,onYes,title,yesLabel,onNo,alt){
   document.getElementById('askTitle').textContent=title||'Are you sure?';
   document.getElementById('askMsg').textContent=msg;
   var y=document.getElementById('askYes'),n=document.getElementById('askNo');
@@ -13847,6 +13949,7 @@ function closeOvl(id){
   if(id==='lvlOvl')lvlAbort();
   if(id==='instrOvl')insAnimStop();
   document.getElementById(id).classList.remove('on');
+  if(id==='askOvl')askDrain();   // whatever was asked while this one was up gets its turn
 }
 
 // ---------- hardware back button ----------
@@ -13900,8 +14003,10 @@ function onBackButton(){
   var ov=topOvl();
   if(ov){                                  // an open sheet closes first
     if(ov.id==='histOvl'&&HIST.sel!==null){histBack();backGuard();return;}
-    if(ov.id==='lvlOvl')lvlAbort();   // back out of the sheet mid-transfer and nothing is written
-    ov.classList.remove('on');backGuard();return;
+    // Through closeOvl rather than stripping the class here: it is what aborts a level-up
+    // mid-transfer so nothing is written, stops an instruction animation, and hands the ask
+    // sheet on to whatever queued behind it. Backing out used to strand all three.
+    closeOvl(ov.id);backGuard();return;
   }
   if(sessionOpen()){leaveSession();backGuard();return;}
   // The day editor is a full screen like a session, but it is not .ovl and not #session, so back
@@ -15268,16 +15373,19 @@ var WEARFOCUS=null;
 var WEARSWAP=null;
 function wearSwapList(rowId){
   if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
-  var isPump=rowId.indexOf('p_')===0,g=grpOf(rowId),opts=[];
+  // rowId is the slot. The watch swaps a block the same way the phone does, but every lookup
+  // below is a library one, so they all read the base.
+  var bId=slotBase(rowId);
+  var isPump=bId.indexOf('p_')===0,g=grpOf(bId),opts=[];
   Object.keys(EX).forEach(function(k){
-    if(k===rowId)return;
+    if(k===bId)return;
     if((k.indexOf('p_')===0)!==isPump)return;   // pump day stays in pump day
     if(grpOf(k)!==g)return;
     opts.push(k);
   });
   opts.sort(function(a,b){return EX[a].name.toLowerCase()<EX[b].name.toLowerCase()?-1:1;});
-  var cur=(DB.active[CUR].swaps||{})[rowId]||rowId;
-  WEARSWAP={i:rowId,name:(EX[cur]||EX[rowId]||{}).name||'',swapped:cur!==rowId,
+  var cur=(DB.active[CUR].swaps||{})[rowId]||(DB.active[CUR].swaps||{})[bId]||bId;
+  WEARSWAP={i:rowId,name:(EX[cur]||EX[bId]||{}).name||'',swapped:cur!==bId,
             opts:opts.slice(0,10).map(function(k){return {k:k,n:EX[k].name};})};
   wearPush();
 }
