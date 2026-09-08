@@ -1332,7 +1332,11 @@ body.tut .dayhead-add{display:none;}
    have equal specificity, so order is what decides the padding. */
 .mfilt{display:flex;gap:6px;overflow-x:auto;padding:11px 0 3px;scrollbar-width:none;}
 .mfilt::-webkit-scrollbar{display:none;}
-.mfilt .preset{flex:0 0 auto;padding:8px 13px;border-radius:9px;font-size:12.5px;}
+/* min-height rather than padding, because padding plus a font metric is a guess and this is a
+   number with a floor under it: 44px is the smallest thing a thumb reliably hits, and measuring
+   the real WebView on the phone said the first cut of this row came out at 32. */
+.mfilt .preset{flex:0 0 auto;padding:0 15px;min-height:44px;display:inline-flex;align-items:center;
+  border-radius:10px;font-size:13px;}
 .preset.mk-del{border-color:color-mix(in srgb,#c2554a 55%,var(--line));color:#c2554a;}
 .preset.mk-del:hover{border-color:#c2554a;color:#c2554a;}
 .sfx-lbl{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);margin:20px 0 9px;}
@@ -8413,7 +8417,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.82';
+var APPV='v5.83';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
