@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.80** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.86** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -23,12 +23,13 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 | Level-ups | Per-day targets, per-lift history; machine lattice learning; kg-native plate steps |
 | Progress | 8-week volume bars, this-week-vs-last rows, per-exercise est-1RM charts |
 | Units | lb/kg toggle (Settings); storage stays pounds forever; zero-drift round-tripping |
-| Library | 106 exercises. Neutral starting weights (nobody's personal log), full names, searchable swap sheet |
+| Library | 114 exercises, each tagged with the muscle it trains and the equipment it needs. Neutral starting weights (nobody's personal log), full names, searchable swap sheet, and a muscle filter in the builder |
 | Instructions | Every exercise has written setup, cues and the one mistake that actually happens — plus a moving figure, drawn front and side. No links out; the app owns the teaching |
+| Without a gym | The wizard asks what you own: a gym, a barbell at home, dumbbells and a bench, just dumbbells, or nothing but a floor. Every slot in the generated week is filled with something you can actually perform, and a slot with no honest answer is left out rather than faked |
 | Warm-ups | Plate-accurate ramps on loaded lifts, never counted in your stats |
 | Plate calculator | A drawing of the loaded bar, both ends, plates tapped on as chips; per-lift bar memory; kg-native |
 | The watch | Log sets from the wrist: week → workout → lift → set, a rest screen with 3-2-1 haptics, redo any logged set, swap a lift mid-session |
-| First run | A safety screen, three behavioural questions, session length and goal — then a week built to the answers |
+| First run | A safety screen, three behavioural questions, session length, what equipment you have, and a goal — then a week built to the answers |
 | Sounds | One master volume dial for everything, including the native screen-off alert |
 | Backup | Plain-text export via share sheet; JSON backup/restore; an opt-in safety copy that refreshes itself after every finished session; week sharing that adds rather than replaces |
 | Bodyweight | One weigh-in a day inside Progress, canonical pounds, neutral deltas |
@@ -43,7 +44,7 @@ In order of when we plan to touch it:
 2. ~~Remove the sandbox from Settings~~ — done, v4.195. The machinery stays whole and dormant.
 3. ~~**First-run wizard, deeper pass**~~ — **done.** Unpinned in v5.0 and deepened since: a safety screen, three behavioural questions instead of self-rating, session length, and a goal that sets reps, rests and whether the week carries cardio. Every axis now answers to the answers — including core work, which used to hand a beginner and a two-year lifter the same 35-second plank (v5.77).
 4. **v5: the other themes return** — Obsidian, Frost, and Moonwell are frozen but intact. Forge-only until you say otherwise; this is the one item waiting purely on your word.
-5. ~~**Per-exercise instruction, after v5**~~ — **done, and it went further than the plan.** All 106 exercises carry the three-part card the template describes: setup, the cues worth saying, and the one mistake that actually happens. The links out are gone entirely (owner call, 31 Aug) — no exercise carries one. Every exercise also has a moving figure, drawn front and side, and all 93 motion drawings in the file are reachable. This was "the first big project of the post-v5 era"; it is finished.
+5. ~~**Per-exercise instruction, after v5**~~ — **done, and it went further than the plan.** All 114 exercises carry the three-part card the template describes: setup, the cues worth saying, and the one mistake that actually happens. The links out are gone entirely (owner call, 31 Aug) — no exercise carries one. Every exercise also has a moving figure, drawn front and side, and all 93 motion drawings in the file are reachable. This was "the first big project of the post-v5 era"; it is finished.
 6. **Device sync, after v5** — write finished sessions out to, and pull cardio in from, the platform health stores: **Health Connect** on Android, and **Apple Health (HealthKit)** if an iOS wrapper ever ships. This is the moment watches and rings start feeding the log — and the point where real-time cardio tracking becomes worth having at all, which is why the live walk clock could retire now (Aug 23) instead of limping along half-connected.
 
 Smaller known trade-offs, accepted for now:
