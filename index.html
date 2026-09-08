@@ -3504,6 +3504,20 @@ var ALT={
   // take a bar across the hips later, so it keeps its weight box rather than losing it forever.
   glutebr:  {name:"Glute Bridge",note:"Shoulders on the floor - lay a bar across the hips when it gets easy",sets:"0x15\n0x15\n0x15",rest:"60 sec"},
   sideplank:{name:"Side Plank",note:"Each side. One straight line, hips stacked",sets:"30 sec\n30 sec\n30 sec",rest:"45 sec"},
+  // ---------- what a room without machines was still missing ----------
+  // v5.85 made the generator honest about equipment and the holes showed up immediately: below a
+  // gym there was no vertical pull, no hamstring curl and no calf raise, and below a bench no
+  // horizontal pull at all - so a dumbbells-only week trained no back whatever. These eight close
+  // it. None of them is a compromise: a pull-up is not a lesser lat pulldown, and a Nordic curl is
+  // harder than the machine it replaces.
+  pullupbw: {bw:1,name:"Pull-Up",note:"Dead hang to chin over the bar, every rep",sets:"0x6\n0x6\n0x6",rest:"2 min"},
+  invrow:   {bw:1,name:"Inverted Row",note:"Bar at hip height, body straight, chest to the bar",sets:"0x10\n0x10\n0x10",rest:"90 sec"},
+  dbrow2:   {name:"Dumbbell Bent-Over Row",note:"Both arms, hinged over - no bench needed",sets:"30x10\n30x10\n30x10",rest:"90 sec"},
+  doorrow:  {bw:1,name:"Doorway Row",note:"Grip a sturdy door frame, feet close, lean back and pull in",sets:"0x12\n0x12\n0x12",rest:"60 sec"},
+  sldl:     {name:"Single-Leg Romanian Deadlift",note:"One dumbbell, one leg - hips back, the free leg rises behind",sets:"20x10\n20x10\n20x10",rest:"90 sec"},
+  nordic:   {bw:1,name:"Nordic Hamstring Curl",note:"Feet anchored, lower slowly - the hardest hamstring move there is",sets:"0x5\n0x5\n0x5",rest:"90 sec"},
+  dbcalf:   {name:"Dumbbell Calf Raise",note:"A dumbbell in each hand, balls of the feet on a step",sets:"30x15\n30x15\n30x15\n30x15",rest:"45 sec"},
+  bwcalf:   {bw:1,name:"Standing Calf Raise",note:"Bodyweight, off a step if you have one",sets:"0x20\n0x20\n0x20\n0x20",rest:"45 sec"},
   bike:null
 };
 delete ALT.bike;
@@ -3540,7 +3554,10 @@ var ALTGRP={lvchest:'chest-press',dbbench:'chest-press',smbench:'chest-press',pu
   // trained them directly, so the shrug had nowhere to sit and no comparable swap to offer.
   bbcalf:'calf',incbb:'chest-press',rdl:'hamstring',shrug:'traps',mohp:'delt-press',
   bwsquat:'quad',frontsq:'quad',dbohp:'delt-press',rtwist:'core',
-  bbrow:'back-horizontal',dbrfly:'delt-rear',crunch:'core',glutebr:'glute',sideplank:'core'};
+  bbrow:'back-horizontal',dbrfly:'delt-rear',crunch:'core',glutebr:'glute',sideplank:'core',
+  // the eight home answers (v5.86)
+  pullupbw:'back-vertical',invrow:'back-horizontal',dbrow2:'back-horizontal',doorrow:'back-horizontal',
+  sldl:'hamstring',nordic:'hamstring',dbcalf:'calf',bwcalf:'calf'};
 for(var __g in ALTGRP){GRP[__g]=ALTGRP[__g];}
 for(var __pg in PUMPGRP){GRP[__pg]=PUMPGRP[__pg];}
 function grpOf(id){return GRP[id]||'other';}
@@ -3583,7 +3600,10 @@ var KIT={
   abmach:['machine'], hipraise:['machine'], kneeraise:['hang'], rtwist:['db'],
   // cardio
   stairs:['machine'], treadrun:['machine'], treadwalk:['machine'], cbike:['machine'],
-  ellip:['machine'], rower:['machine'], assault:['machine'], jumprope:['rope'], swim:['pool']
+  ellip:['machine'], rower:['machine'], assault:['machine'], jumprope:['rope'], swim:['pool'],
+  // the v5.86 home additions. The doorway row, the Nordic curl and the bodyweight calf raise are
+  // deliberately absent from this table: they need nothing, which is the whole point of them.
+  pullupbw:['hang'], invrow:['bar','rack'], dbrow2:['db'], sldl:['db'], dbcalf:['db']
   // everything absent needs nothing: push-up, bodyweight squat, plank, side plank, crunch,
   // glute bridge, hollow hold, leg raise, bicycle crunch, the four stretches, walk, outdoor run
 };
@@ -8410,6 +8430,297 @@ var ANIM=(function(){
   }
 
 
+  // ================= v5.86: the lifts a room without machines can still do =================
+  // Same laws as everything above: shared pose numbers across the pair, one tempo, real
+  // implements, feet drawn heel-ball-TOES pointing away from the body.
+
+  // ---------- INVERTED ROW: heels down, body one rigid line, chest to the bar ----------
+  function drawInvRowS(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var ang=lerp(-25,-34,k);                       // the whole body pivots at the heels
+    var ankle=[86,424];
+    var knee=P(ankle,ang,88), hip=P(knee,ang,92), sho=P(hip,ang,98), head=P(sho,ang,48);
+    seg(x,[414,424],[414,140],7,LINE);             // the upright, clear of the arm
+    seg(x,[396,424],[432,424],7,LINE);
+    seg(x,[414,204],[344,204],6,LINE);             // the J-hook the bar sits in
+    var bar=[332,204];
+    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
+    seg(x,ankle,[72,400],9);                       // heel planted, toes pointing up and away
+    seg(x,sho,P(sho,ang,26),8);
+    dot(x,head,19);
+    var e1=elb(sho,bar,50,55,-1), e2=elb(sho,bar,50,55,1);
+    var e=e1[0]<e2[0]?e1:e2;                       // the elbow tucks back toward the feet
+    seg(x,sho,e,9);seg(x,e,bar,9);
+    x.fillStyle="#15171b";x.strokeStyle=GO;x.lineWidth=7;
+    x.beginPath();x.arc(bar[0],bar[1],10,0,7);x.fill();x.stroke();
+  }
+  // Seen from the head end: the bar nearest, the body receding away under it. y is depth here,
+  // which is why the figure is short - the width tells you it is the same person.
+  function drawInvRowF(x,t){
+    x.clearRect(0,0,480,480);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var cx=240;
+    seg(x,[cx-130,424],[cx-130,144],6,LINE);seg(x,[cx+130,424],[cx+130,144],6,LINE);
+    seg(x,[cx-118,176],[cx+118,176],8,GO);
+    var headY=lerp(238,206,k), shoY=headY+38, hipY=shoY+lerp(56,50,k), kneeY=lerp(366,348,k);
+    var ex=lerp(64,88,k), ey=lerp(198,226,k);      // the elbows finish wide and low
+    seg(x,[cx-44,shoY],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-56,176],9);
+    seg(x,[cx+44,shoY],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+56,176],9);
+    seg(x,[cx-44,shoY],[cx+44,shoY],10);
+    dot(x,[cx,headY],19);
+    seg(x,[cx,shoY],[cx,hipY],11);                 // torso foreshortened - it runs away from you
+    x.globalAlpha=.55;
+    seg(x,[cx,hipY],[cx-18,kneeY],10);seg(x,[cx,hipY],[cx+18,kneeY],10);
+    seg(x,[cx-18,kneeY],[cx-22,400],10);seg(x,[cx+18,kneeY],[cx+22,400],10);
+    x.globalAlpha=1;
+    seg(x,[cx-22,400],[cx-28,414],8);seg(x,[cx+22,400],[cx+28,414],8);   // the heels never move
+  }
+
+  // ---------- DUMBBELL BENT-OVER ROW: the barbell row's hinge, one bell per hand ----------
+  function drawDbRow2S(x,t){
+    x.clearRect(0,0,480,480);ground(x,90,390,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var shin=-80, thigh=-120, torso=-30;           // the hinge is HELD - only the arms move
+    var ankle=[228,424];
+    var knee=P(ankle,shin,88), hip=P(knee,thigh,92), sho=P(hip,torso,98);
+    x.globalAlpha=.35;
+    var a2=[212,424],k2=P(a2,shin,88),h2=P(k2,thigh,92);
+    seg(x,a2,k2,9);seg(x,k2,h2,9);
+    seg(x,[a2[0]-8,424],[a2[0]+26,424],9);
+    x.globalAlpha=1;
+    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
+    seg(x,[ankle[0]-8,424],[ankle[0]+26,424],9);
+    seg(x,sho,P(sho,torso,26),8);
+    dot(x,P(sho,torso,48),19);
+    var hand=[lerp(sho[0]+14,sho[0]-14,k), lerp(sho[1]+120,sho[1]+50,k)];
+    var e1=elb(sho,hand,50,55,-1), e2=elb(sho,hand,50,55,1);
+    var e=e1[0]<e2[0]?e1:e2;                       // elbow past the ribs, not out to the side
+    seg(x,sho,e,9);seg(x,e,hand,9);
+    plate(x,hand,13);                              // the bell end-on, both hands in line
+  }
+  function drawDbRow2F(x,t){
+    x.clearRect(0,0,480,480);ground(x,110,370,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var cx=240;
+    // heights lifted straight off the side view: hips 257, shoulders 208, head 184
+    seg(x,[cx-24,424],[cx,261],10);seg(x,[cx+24,424],[cx,261],10);
+    seg(x,[cx-36,424],[cx-12,424],9);seg(x,[cx+12,424],[cx+36,424],9);
+    seg(x,[cx,261],[cx,214],11);
+    seg(x,[cx-52,210],[cx+52,210],11);
+    seg(x,[cx,210],[cx,198],8);
+    dot(x,[cx,184],19);
+    var by=lerp(336,272,k), ex=lerp(58,92,k), ey=lerp(266,196,k);
+    seg(x,[cx-52,214],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-58,by],9);
+    seg(x,[cx+52,214],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+58,by],9);
+    seg(x,[cx-76,by],[cx-40,by],8,GO);seg(x,[cx+40,by],[cx+76,by],8,GO);
+    x.fillStyle=GO;
+    x.fillRect(cx-84,by-14,10,28);x.fillRect(cx-46,by-14,10,28);
+    x.fillRect(cx+36,by-14,10,28);x.fillRect(cx+74,by-14,10,28);
+  }
+
+  // ---------- DOORWAY ROW: no equipment at all - the frame is the bar ----------
+  function drawDoorRowS(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    // The straight-arm lean is capped by arm length: feet at the frame, hands at chest height,
+    // and about 19 degrees back is as far as a person can physically get. That IS the exercise.
+    var ang=-(90+lerp(21,3,k));
+    var ankle=[366,424];
+    var knee=P(ankle,ang,88), hip=P(knee,ang,92), sho=P(hip,ang,98), head=P(sho,ang,48);
+    seg(x,[384,424],[384,44],7,LINE);              // the jamb, floor to ceiling
+    seg(x,[384,46],[456,46],7,LINE);
+    seg(x,[404,424],[404,46],5,LINE);              // the far edge of the frame
+    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
+    seg(x,[352,424],[390,424],9);                  // feet flat at the base, toes to the door
+    seg(x,sho,P(sho,ang,26),8);
+    dot(x,head,19);
+    var hand=[372,196];
+    var e1=elb(sho,hand,50,55,-1), e2=elb(sho,hand,50,55,1);
+    var e=e1[1]>e2[1]?e1:e2;                       // elbows drive DOWN past the ribs
+    seg(x,sho,e,9);seg(x,e,hand,9);
+    dot(x,hand,7);                                 // both hands, one each side of the frame
+  }
+  function drawDoorRowF(x,t){
+    x.clearRect(0,0,480,480);ground(x,90,390,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var cx=240, shoY=lerp(164,146,k);              // the side view's shoulder heights, exactly
+    seg(x,[cx-100,424],[cx-100,46],6,LINE);seg(x,[cx+100,424],[cx+100,46],6,LINE);
+    seg(x,[cx-100,48],[cx+100,48],6,LINE);
+    var hipY=shoY+lerp(92,98,k), kneeY=hipY+(424-hipY)*0.5, ankY=418;
+    seg(x,[cx-26,ankY],[cx-24,kneeY],10);seg(x,[cx-24,kneeY],[cx,hipY],10);
+    seg(x,[cx+26,ankY],[cx+24,kneeY],10);seg(x,[cx+24,kneeY],[cx,hipY],10);
+    seg(x,[cx-38,424],[cx-14,424],9);seg(x,[cx+14,424],[cx+38,424],9);
+    seg(x,[cx,hipY],[cx,shoY],11);
+    seg(x,[cx-42,shoY+4],[cx+42,shoY+4],10);
+    seg(x,[cx,shoY],[cx,shoY-26],8);
+    dot(x,[cx,shoY-48],19);
+    var ex=lerp(76,104,k), ey=lerp(180,208,k);     // the elbows finish wide and low
+    seg(x,[cx-42,shoY+8],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-96,190],9);
+    seg(x,[cx+42,shoY+8],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+96,190],9);
+    dot(x,[cx-96,190],5);dot(x,[cx+96,190],5);
+  }
+
+  // ---------- SINGLE-LEG RDL: the hinge, on one leg, the free leg the counterweight ----------
+  function drawSlRdlS(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var ankle=[250,424];
+    var knee=P(ankle,-88,88), hip=P(knee,-95,92);  // the soft knee bend never changes
+    var torso=lerp(-86,-25,k);
+    var sho=P(hip,torso,98), head=P(sho,torso,48);
+    var legAng=lerp(101,166,k);                    // already off the floor at the top, then rises
+    var kneeF=P(hip,legAng,92), ankF=P(kneeF,legAng,88);
+    x.globalAlpha=.55;
+    seg(x,hip,kneeF,10);seg(x,kneeF,ankF,10);
+    seg(x,ankF,P(ankF,legAng-30,20),8);            // the trailing foot, toes pointing away
+    x.globalAlpha=1;
+    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
+    seg(x,[242,424],[276,424],9);
+    seg(x,sho,P(sho,torso,26),8);
+    dot(x,head,19);
+    var hand=[sho[0]+2,Math.min(sho[1]+105,406)];  // the bell hangs plumb from the shoulder
+    seg(x,sho,hand,9);
+    plate(x,hand,13);
+  }
+  function drawSlRdlF(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var cx=240, fold=lerp(0,44,k);                 // the chest folds TOWARD you - y is depth
+    var shoY=146+fold*0.9, hipY=lerp(244,252,k);
+    seg(x,[cx-8,424],[cx-4,336],10);seg(x,[cx-4,336],[cx,hipY],10);
+    seg(x,[cx-20,424],[cx+12,424],9);
+    x.globalAlpha=.45;
+    seg(x,[cx,hipY],[cx+46,lerp(298,246,k)],10);   // the free leg swings out behind, straightening
+    seg(x,[cx+46,lerp(298,246,k)],[cx+88,lerp(374,218,k)],10);
+    x.globalAlpha=1;
+    seg(x,[cx,hipY],[cx,shoY],11);
+    seg(x,[cx-42,shoY+4],[cx+42,shoY+4],10);
+    seg(x,[cx,shoY],[cx,shoY-26],8);
+    dot(x,[cx,98+fold],19);
+    seg(x,[cx-42,shoY+8],[cx-48,shoY+96],9);
+    plate(x,[cx-48,shoY+104],13);
+    seg(x,[cx+42,shoY+8],[cx+76,shoY+52],9);       // the other arm out for balance
+    dot(x,[cx+76,shoY+52],5);
+  }
+
+  // ---------- NORDIC HAMSTRING CURL: knees down, feet pinned, the body falls as one ----------
+  function drawNordicS(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var knee=[300,416];
+    var ang=lerp(-92,-152,k);                      // the whole trunk rotates about the knee
+    var hip=P(knee,ang,50), sho=P(hip,ang,98), head=P(sho,ang,48);
+    seg(x,[368,398],[420,398],7,LINE);             // whatever is holding the heels down
+    seg(x,[372,398],[372,424],7,LINE);seg(x,[416,398],[416,424],7,LINE);
+    seg(x,knee,[388,420],10);                      // the shin laid flat back under the anchor
+    seg(x,[388,420],[410,414],8);                  // the foot, toes pointing away
+    dot(x,knee,7);
+    seg(x,knee,hip,10);seg(x,hip,sho,11);
+    seg(x,sho,P(sho,ang,26),8);
+    dot(x,head,19);
+    var hand=[lerp(262,116,k),lerp(304,404,k)];    // the hands come out ready to catch
+    var e1=elb(sho,hand,50,55,-1), e2=elb(sho,hand,50,55,1);
+    var e=e1[1]<e2[1]?e1:e2;
+    seg(x,sho,e,9);seg(x,e,hand,9);
+    dot(x,hand,5);
+  }
+  function drawNordicF(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var cx=240, fold=lerp(0,50,k);
+    x.fillStyle=LINE;x.fillRect(cx-64,394,128,24); // whatever is pinning the heels
+    x.globalAlpha=.4;
+    seg(x,[cx-26,416],[cx-34,398],10);seg(x,[cx+26,416],[cx+34,398],10);   // shins running away
+    x.globalAlpha=1;
+    dot(x,[cx-26,416],10);dot(x,[cx+26,416],10);   // both knees ON the floor - this is a kneel
+    seg(x,[cx-26,412],[cx,366],10);seg(x,[cx+26,412],[cx,366],10);
+    var shoY=268+fold*0.9;
+    seg(x,[cx,366],[cx,shoY],11);
+    seg(x,[cx-42,shoY+4],[cx+42,shoY+4],10);
+    seg(x,[cx,shoY],[cx,shoY-26],8);
+    dot(x,[cx,220+fold],19);
+    var hx=lerp(44,72,k), hy=shoY+lerp(86,66,k);   // arms reaching toward you, foreshortened
+    seg(x,[cx-42,shoY+8],[cx-hx,hy],9);seg(x,[cx+42,shoY+8],[cx+hx,hy],9);
+    dot(x,[cx-hx,hy],5);dot(x,[cx+hx,hy],5);
+  }
+
+  // ---------- DUMBBELL CALF RAISE: balls on a step, heels below the edge ----------
+  function drawDbCalfS(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    x.fillStyle=LINE;x.fillRect(298,406,108,26);   // the step
+    // The foot is rigid and turns about the ball: heel 26 below the edge at the stretch, 26 above
+    // it at the squeeze, and the ankle rides the arc - which is what lifts the whole body 24.
+    var hy=lerp(432,376,k), ankle=[lerp(277,295,k),lerp(406,380,k)];
+    var knee=P(ankle,-92,88), hip=P(knee,-89,92), sho=P(hip,-91,98), head=P(sho,-91,48);
+    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
+    seg(x,[261,hy],[304,406],10);                  // heel hanging off the edge, driving up
+    dot(x,[261,hy],6);
+    seg(x,[304,406],[328,406],8);                  // the ball and toes ON the step
+    seg(x,sho,P(sho,-91,26),8);
+    dot(x,head,19);
+    var hand=[sho[0]+10,sho[1]+105];
+    seg(x,sho,hand,9);
+    plate(x,hand,13);
+  }
+  function drawDbCalfF(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var cx=240, r=lerp(0,-24,k);
+    x.fillStyle=LINE;x.fillRect(cx-76,406,152,26);
+    // every height is the side view's: ankles 406, knees 318, hips 226, shoulders 128, head 80
+    seg(x,[cx-26,406+r],[cx-24,318+r],10);seg(x,[cx-24,318+r],[cx,226+r],10);
+    seg(x,[cx+26,406+r],[cx+24,318+r],10);seg(x,[cx+24,318+r],[cx,226+r],10);
+    seg(x,[cx-26,406+r],[cx-38,lerp(430,384,k)],9);seg(x,[cx+26,406+r],[cx+38,lerp(430,384,k)],9);
+    dot(x,[cx-38,lerp(430,384,k)],5);dot(x,[cx+38,lerp(430,384,k)],5);   // the heels, well clear
+    seg(x,[cx-44,406],[cx-16,406],9);seg(x,[cx+16,406],[cx+44,406],9);   // balls of the feet, planted
+    seg(x,[cx,226+r],[cx,132+r],11);
+    seg(x,[cx-42,128+r],[cx+42,128+r],10);
+    seg(x,[cx,128+r],[cx,104+r],8);
+    dot(x,[cx,80+r],19);
+    seg(x,[cx-42,132+r],[cx-58,224+r],9);seg(x,[cx+42,132+r],[cx+58,224+r],9);
+    plate(x,[cx-58,232+r],13);plate(x,[cx+58,232+r],13);
+  }
+
+  // ---------- STANDING CALF RAISE: nothing but a floor and a wall to steady on ----------
+  function drawBwCalfS(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    seg(x,[412,424],[412,120],7,LINE);             // the wall, for balance only
+    // no step, so the heel starts on the floor: all of the range is upward
+    var hy=lerp(424,370,k), ankle=[lerp(248,266,k),lerp(420,394,k)];
+    var knee=P(ankle,-92,88), hip=P(knee,-89,92), sho=P(hip,-91,98), head=P(sho,-91,48);
+    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
+    seg(x,[232,hy],[272,424],10);                  // the heel lifts, the ball stays down
+    dot(x,[232,hy],6);
+    seg(x,[272,424],[296,424],8);                  // toes planted, pointing away
+    seg(x,sho,P(sho,-91,26),8);
+    dot(x,head,19);
+    seg(x,sho,[310,sho[1]+40],9);seg(x,[310,sho[1]+40],[394,sho[1]+30],9);
+    dot(x,[394,sho[1]+30],5);                      // fingertips on the wall
+    seg(x,[sho[0]-10,sho[1]+6],[sho[0]-18,sho[1]+100],9);dot(x,[sho[0]-18,sho[1]+106],5);
+  }
+  function drawBwCalfF(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var cx=240, r=lerp(0,-24,k);
+    seg(x,[424,424],[424,120],7,LINE);
+    // the side view's heights: ankles 420, knees 332, hips 240, shoulders 142, head 94
+    seg(x,[cx-26,420+r],[cx-24,332+r],10);seg(x,[cx-24,332+r],[cx,240+r],10);
+    seg(x,[cx+26,420+r],[cx+24,332+r],10);seg(x,[cx+24,332+r],[cx,240+r],10);
+    seg(x,[cx-26,420+r],[cx-40,lerp(424,386,k)],9);seg(x,[cx+26,420+r],[cx+40,lerp(424,386,k)],9);
+    dot(x,[cx-40,lerp(424,386,k)],5);dot(x,[cx+40,lerp(424,386,k)],5);
+    seg(x,[cx-44,424],[cx-16,424],9);seg(x,[cx+16,424],[cx+44,424],9);   // balls of the feet, planted
+    seg(x,[cx,240+r],[cx,146+r],11);
+    seg(x,[cx-42,142+r],[cx+42,142+r],10);
+    seg(x,[cx,142+r],[cx,120+r],8);
+    dot(x,[cx,94+r],19);
+    seg(x,[cx+42,146+r],[cx+92,168+r],9);seg(x,[cx+92,168+r],[cx+176,180+r],9);
+    dot(x,[cx+176,180+r],5);
+    seg(x,[cx-42,146+r],[cx-52,240+r],9);dot(x,[cx-52,246+r],5);   // the other arm just hangs
+  }
+
   var R={
     sq:[drawSquatF,drawSquatS],cu:[drawCurlF,drawCurlS],dl:[drawDeadF,drawDeadS],
     bp:[drawBenchF,drawBenchS],op:[drawOhpF,drawOhpS],rw:[drawRowF,drawRowS],
@@ -8441,7 +8752,10 @@ var ANIM=(function(){
     sa:[drawStairF,drawStairS],bi:[drawSpinF,drawSpinS],el:[drawEllipF,drawEllipS],
     ro:[drawRowerF,drawRowerS],jr:[drawJumpRopeF,drawJumpRopeS],or:[drawOutRunF,drawOutRunS],
     sw:[drawSwimF,drawSwimS],ai:[drawAirBikeF,drawAirBikeS],hf:[drawHipFlexF,drawHipFlexS],
-    cd:[drawDoorwayF,drawDoorwayS],pg:[drawPigeonF,drawPigeonS],hs:[drawHamStrF,drawHamStrS]
+    cd:[drawDoorwayF,drawDoorwayS],pg:[drawPigeonF,drawPigeonS],hs:[drawHamStrF,drawHamStrS],
+    iv:[drawInvRowF,drawInvRowS],d2:[drawDbRow2F,drawDbRow2S],dw:[drawDoorRowF,drawDoorRowS],
+    sl:[drawSlRdlF,drawSlRdlS],nc:[drawNordicF,drawNordicS],dk:[drawDbCalfF,drawDbCalfS],
+    bv:[drawBwCalfF,drawBwCalfS]
   };
   // cards whose first panel is a TOP view rather than a front view
   // rt and sd are back with the Russian Twist and the Side Plank, which is what they were always
@@ -8467,6 +8781,11 @@ var ANIM=(function(){
     bbcalf:'cf',incbb:'ip',rdl:'rd',shrug:'sh',mohp:'mp',
     bwsquat:'bw',frontsq:'fs',dbohp:'ds',rtwist:'rt',
     bbrow:'rw',dbrfly:'rf',crunch:'cr',glutebr:'gr',sideplank:'sd',
+    // v5.86. pullupbw shares 'pu' on purpose: that drawing is already an UNASSISTED pull-up on a
+    // plain bar - the assist pad was never in it - so the true bodyweight lift is the honest owner
+    // of the picture, and the assisted machine keeps borrowing it exactly as it always did.
+    pullupbw:'pu',invrow:'iv',dbrow2:'d2',doorrow:'dw',
+    sldl:'sl',nordic:'nc',dbcalf:'dk',bwcalf:'bv',
     p_inc:'id',p_xover:'cc',p_fly:'mf',p_lat:'lr',p_curl:'cb',p_hammer:'hc',
     p_rope:'rp',p_dip:'bd',p_bike:'bc',p_hollow:'hb',p_pdown:'sp',p_lext:'le',p_lcurl:'lc'
   };
@@ -8494,7 +8813,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.85';
+var APPV='v5.86';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8782,7 +9101,15 @@ bbrow:{s:"Bar over mid-foot, hinge to about 45 degrees with a flat back, grip ju
 dbrfly:{s:"Hinged at the hips to about 45 degrees, back flat, light dumbbells hanging straight below the shoulders.",c:["Raise out WIDE, elbows slightly bent and fixed there","Squeeze the rear shoulders at the top","Lighter than you think - this is a small muscle","No momentum; the torso does not rock"],m:"Turning it into a row. The arms stay long and travel out to the sides, not back to the hips."},
 crunch:{s:"On your back, knees bent, feet flat, fingertips resting at your ears.",c:["Curl the upper back off the floor - the lower back never leaves it","Exhale hard at the top and hold a beat","Lower slow; the head is the last thing down","Fingertips only touch the ears - they never pull"],m:"Yanking the neck with the hands. If the chin is being dragged to the chest, the arms are doing the set."},
 glutebr:{s:"On your back, knees bent, feet flat and close to the hips, arms flat at your sides.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin tucked, ribs down - do not arch the finish","Lower under control; the hips do not drop"],m:"Pushing through the toes. Heels down, or the hamstrings take the set off the glutes."},
-sideplank:{s:"On your side, forearm under the shoulder, legs stacked or the top foot just in front, free hand on the hip.",c:["Lift the hips until the body is one straight line from head to heels","Hips stay STACKED - do not let the top one roll forward","Push the floor away through the forearm","Time each side; the clock is the set"],m:"Hips sagging as the clock runs. When the line breaks the set is over - stop there and keep the honest time."}
+sideplank:{s:"On your side, forearm under the shoulder, legs stacked or the top foot just in front, free hand on the hip.",c:["Lift the hips until the body is one straight line from head to heels","Hips stay STACKED - do not let the top one roll forward","Push the floor away through the forearm","Time each side; the clock is the set"],m:"Hips sagging as the clock runs. When the line breaks the set is over - stop there and keep the honest time."},
+pullupbw:{s:"Hang at full length from a bar, hands a little wider than the shoulders, knees bent behind you.",c:["Pull the elbows DOWN to the ribs - think of driving them into your back pockets","Chin over the bar without craning the neck","Lower all the way to straight arms every rep","Six honest reps beat twelve half ones. If you cannot do one yet, jump to the top and lower slowly"],m:"Cutting the bottom. The dead hang is where the back actually works."},
+invrow:{s:"A bar in a rack at about hip height. Lie under it, grip a little wider than the shoulders, heels on the floor, body straight from head to heels.",c:["Squeeze the whole body into one line and hold it there","Pull the chest to the bar, elbows back past the ribs","Lower until the arms are straight without letting the hips sag","Walk the feet further out to make it harder, tuck them in to make it easier"],m:"Letting the hips drop first. If the line breaks, the set is over."},
+dbrow2:{s:"A dumbbell in each hand, feet hip width, hinge at the hips to about 45 degrees with a flat back. The bells hang under the shoulders.",c:["Pull both bells to the lower ribs, elbows close to the body","Hold the hinge - the torso does not pump up and down","Squeeze the shoulder blades together at the top","Lower to fully straight arms every rep"],m:"Standing up with each pull. The hinge is the exercise; the arms are just hooks."},
+doorrow:{s:"Stand facing a sturdy door frame, feet close to the base, grip both sides at chest height. Lean back with straight arms and a straight body.",c:["Keep the body one line from head to heels - no bending at the hips","Pull yourself in until the chest is near the frame, elbows down past the ribs","Push back out slowly to straight arms","Walk the feet closer to the frame to make it easier"],m:"Bending at the waist to get there. The body travels as one piece or the back does nothing."},
+sldl:{s:"One dumbbell, held in the hand opposite the standing leg. Stand on one foot with a soft knee that does not change.",c:["Push the hips STRAIGHT back and let the free leg rise behind you as a counterweight","Hips stay level - do not let the free hip roll open","Go as low as the hamstring allows with a flat back, usually shin height","Stand up by driving the hips forward, not by pulling with the back"],m:"Turning it into a one-legged squat. The knee angle is set at the top and held all the way down."},
+nordic:{s:"Kneel on something soft with the heels pinned - under a couch, a loaded bar, or a partner holding them.",c:["Body dead straight from knees to head, hips never bending","Lower forward as SLOWLY as you can hold it","Catch yourself with the hands and push back up to the start","Three to five reps is a real set. This one is genuinely hard"],m:"Breaking at the hips to slow the fall. That takes the hamstrings out of it entirely."},
+dbcalf:{s:"A dumbbell in each hand, balls of the feet on a step or a thick book, heels hanging free.",c:["Drop the heels below the step for a full stretch at the bottom","Drive up to full tiptoe and squeeze for a beat","Knees straight but never locked - the calves do all of it","Hold something with one hand if balance is the limit"],m:"Bouncing. One second up, one second down, every rep."},
+bwcalf:{s:"Standing tall, feet hip width. A step under the balls of the feet if you have one, the flat floor if you do not.",c:["Rise onto the toes as high as you can go and hold a beat","Lower slowly - the way down is half the work","Fingertips on a wall for balance, not for help","Once twenty reps is easy, do one leg at a time"],m:"Fast little pulses. Full height, full stretch, or it is not a rep."}
 };
 // Pump-day ids strip their p_ and land on these five, whose base ids do not match the strip:
 EXINSTR.inc=EXINSTR.incdb;EXINSTR.fly=EXINSTR.mfly;EXINSTR.lat=EXINSTR.dblat;
@@ -18784,7 +19111,7 @@ function ezRender(){
 // climbs from there - overshooting a stranger's first day is how apps get deleted.
 var EZ_W={bench:65,ohp:45,bsquat:75,deadlift:95,incdb:25,mbench:60,lpress:120,latpd:55,bbthrust:95,
           goblet:35,dbohp:25,dbrfly:10,bbcurl:45,rdl:75,frontsq:55,bbrow:65,dbbench:30,dbrow:30,
-          machpd:55,stcalf:50,bbcalf:65,
+          machpd:55,stcalf:50,bbcalf:65,dbrow2:30,sldl:20,dbcalf:30,
           row:60,machrow:70,hthrust:90,preacher:25,sdbcurl:20,hammer:17.5,rope:25,ohext:20,
           skull:20,dblat:12.5,revfly:45,mfly:60,dbfly:20,slegcurl:60,lext:60,
           dcalfr:30,scalfr:70};
@@ -18805,14 +19132,16 @@ var EZ_POOL={
   hpress: {beg:['mbench','dbbench','pushup'], int:['bench','dbbench','pushup'], adv:['bench','dbbench','pushup']},
   vpress: {beg:['dblat','dbohp'],          int:['ohp','dbohp'],   adv:['ohp','dbohp']},
   incline:{beg:['incdb','pushup'],         int:['incdb','pushup'],adv:['incdb','pushup']},
-  vpull:  {beg:['latpd','machpd'],         int:['latpd','machpd'],adv:['latpd','machpd']},
-  hpull:  {beg:['machrow','dbrow'],        int:['row','dbrow'],   adv:['row','dbrow','bbrow']},
+  // A vertical pull needs something to hang from and there is no honest way around that: with a
+  // rack it is a pull-up, and below that the slot drops rather than pretend a row is a pulldown.
+  vpull:  {beg:['latpd','machpd','pullupbw'], int:['latpd','machpd','pullupbw'], adv:['latpd','machpd','pullupbw']},
+  hpull:  {beg:['machrow','dbrow','invrow','dbrow2','doorrow'], int:['row','dbrow','invrow','dbrow2','doorrow'], adv:['row','dbrow','bbrow','invrow','dbrow2','doorrow']},
   chestI: {beg:['mfly','dbfly'],           int:['dbfly'],         adv:['dbfly']},
   sideD:  {beg:['dblat'],                  int:['dblat'],         adv:['dblat']},
   rearD:  {beg:['revfly','dbrfly'],        int:['revfly','dbrfly'],adv:['revfly','dbrfly']},
   quadI:  {beg:['lext'],                   int:['lext'],          adv:['lext']},
-  hamI:   {beg:['slegcurl'],               int:['slegcurl'],      adv:['slegcurl']},
-  calf:   {beg:['scalfr','stcalf'],        int:['scalfr','stcalf'],adv:['dcalfr','stcalf','bbcalf']},
+  hamI:   {beg:['slegcurl','sldl','nordic'], int:['slegcurl','sldl','nordic'], adv:['slegcurl','sldl','nordic']},
+  calf:   {beg:['scalfr','stcalf','dbcalf','bwcalf'], int:['scalfr','stcalf','dbcalf','bwcalf'], adv:['dcalfr','stcalf','bbcalf','dbcalf','bwcalf']},
   bicep:  {beg:['preacher','sdbcurl','bbcurl','hammer'], int:['sdbcurl','bbcurl','hammer'], adv:['sdbcurl','bbcurl','hammer']},
   bicep2: {beg:['hammer'],                 int:['hammer'],        adv:['hammer']},
   tricep: {beg:['rope','bdip'],            int:['rope','bdip'],   adv:['rope','bdip']},
@@ -18824,7 +19153,9 @@ var EZ_POOL={
 // What the user says they train with. A gym owns the lot; the rest are the honest home tiers.
 var EZ_KIT={
   gym:  ['db','bar','rack','bench','machine','hang','band','rope','pool'],
-  home: ['db','bar','rack','bench'],
+  // 'hang' rides along with a rack: every home rack has a pull-up bar across the top, and without
+  // it a barbell-at-home week has no vertical pull at all - the biggest single hole v5.85 measured.
+  home: ['db','bar','rack','bench','hang'],
   dbb:  ['db','bench'],
   dbo:  ['db'],
   none: []
@@ -18835,11 +19166,19 @@ function ezCan(id,own){
   for(var i=0;i<k.length;i++)if(own.indexOf(k[i])<0)return false;
   return true;
 }
-function ezPickLift(role,level,own){
+// 'used' is the day's running list. Two roles CAN land on the same answer once the equipment
+// runs thin - push and incline both become the push-up on a bare floor - and a day that names the
+// same lift twice reads as broken. The second role walks on down its list, or drops.
+function ezPickLift(role,level,own,used){
   var list=(EZ_POOL[role]||{})[level];
   if(!list)return null;
   if(typeof list==='string')list=[list];
-  for(var i=0;i<list.length;i++)if(EX[list[i]]&&ezCan(list[i],own))return list[i];
+  for(var i=0;i<list.length;i++){
+    var id=list[i];
+    if(!EX[id]||!ezCan(id,own))continue;
+    if(used&&used.indexOf(id)>=0)continue;
+    return id;
+  }
   return null;                                          // nothing fits: the slot drops
 }
 // Each day is roles with a ROLE CLASS: main / sec / acc / iso / core. Pairs in [] are
@@ -18898,8 +19237,9 @@ var EZ_RX={
 };
 var EZ_SLOTS={1:['mon'],2:['mon','thu'],3:['mon','wed','fri'],4:['mon','tue','thu','fri'],5:['mon','tue','wed','thu','fri']};
 var EZ_FIN=['stairs','rower','cbike'];   // weight-loss finishers, rotated across the week
-function ezRow(role,cls,level,mult,goal){
-  var id=ezPickLift(role,level,ezOwns());if(!id||!EX[id])return null;
+function ezRow(role,cls,level,mult,goal,used){
+  var id=ezPickLift(role,level,ezOwns(),used);if(!id||!EX[id])return null;
+  if(used)used.push(id);
   var rx=EZ_RX[goal][cls]||EZ_RX[goal].acc;
   var sets=Math.max(2,rx.s-(level==='beg'?1:0));
   var line;
@@ -18971,18 +19311,18 @@ function ezForge(){
   var madeBy={},order=[];
   plan.forEach(function(d,i){
     if(madeBy[d.n]){order.push(madeBy[d.n]);return;}
-    var sections=[],straight=[];
+    var sections=[],straight=[],used=[];
     ezTrim(d.r,EZ.len,goal).forEach(function(slot){
       if(Array.isArray(slot[0])){    // a superset candidate pair
-        var a=ezRow(slot[0][0],slot[0][1],level,mult,goal);
-        var b=ezRow(slot[1][0],slot[1][1],level,mult,goal);
+        var a=ezRow(slot[0][0],slot[0][1],level,mult,goal,used);
+        var b=ezRow(slot[1][0],slot[1][1],level,mult,goal,used);
         if(goal==='lean'&&a&&b){
           if(straight.length){sections.push({title:'Straight sets',ss:false,rows:straight});straight=[];}
           sections.push({title:'Superset',ss:true,rows:[a,b]});
         }else{if(a)straight.push(a);if(b)straight.push(b);}
         return;
       }
-      var row=ezRow(slot[0],slot[1],level,mult,goal);
+      var row=ezRow(slot[0],slot[1],level,mult,goal,used);
       if(row)straight.push(row);
     });
     // the fat-loss week ends every day on a burn, rotating the machine so no two days match
