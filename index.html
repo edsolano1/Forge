@@ -8494,7 +8494,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.84';
+var APPV='v5.85';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -18638,7 +18638,7 @@ function wcPick(n){
 // Three questions, each a single screen of drawn choices, then a generated week. The
 // answers never leave this object; what leaves is ordinary DB.custom workouts placed on
 // ordinary days, indistinguishable from hand-built ones to everything downstream.
-var EZ={step:0,level:null,days:null,goal:null};
+var EZ={step:0,level:null,days:null,goal:null,kit:null};
 // The art: raw ore, a worked ingot, a finished blade - how far along the metal is, which
 // is what "beginner / intermediate / advanced" actually means in this world.
 var EZ_ART={
@@ -18703,6 +18703,16 @@ var EZ_STEPS=[
     [30,'30 minutes','Compounds only - the work that matters most, nothing decorative',ezClock(30)],
     [45,'45 minutes','The full lifts plus a little isolation',ezClock(45)],
     [60,'60 minutes','The complete session - isolation, core, finisher and all',ezClock(60)]];}},
+  // A CONSTRAINT, not a preference - see the rule in CLAUDE.md. What you own changes which lift
+  // fills a slot; it never changes which muscles the week trains. Asking "what do you want to
+  // work" would; asking "what have you got" does not.
+  {t:'What do you train with?',s:'The week is built from what you actually have. Nothing here is a compromise - it just picks the right lift for the room you are standing in.',
+   k:'kit',opts:function(){return [
+    ['gym','A gym','Machines, bars, cables - the full room',EZ_ART.anvil],
+    ['home','A barbell at home','Bar, plates, a rack and a bench',EZ_ART.ingot],
+    ['dbb','Dumbbells and a bench','Or a sturdy chair to lie back on',EZ_ART.ore],
+    ['dbo','Just dumbbells','No bench, no bar',EZ_ART.ore],
+    ['none','Nothing but a floor','Bodyweight only, anywhere',EZ_ART.wind]];}},
   {t:'What is it for?',s:'This sets how heavy, how many reps, how long you rest - and whether the week carries cardio.',
    k:'goal',opts:function(){return [
     ['strong','Get strong','Heavy fives on the big lifts, long rests, accessories kept honest',EZ_ART.anvil],
@@ -18716,7 +18726,7 @@ var EZ_STEPS=[
 function ezOpen(into){
   if(into==='saved'&&(DB.extra||[]).length>5){mkNote('Saved workouts is nearly full. A forged week can be up to five workouts - clear some room first.','Not enough room');return;}
   // done:false is the reset of the one-forge-per-run latch - see ezPick.
-  EZ={step:0,level:null,days:null,goal:null,into:into||'days',done:false};
+  EZ={step:0,level:null,days:null,goal:null,kit:null,into:into||'days',done:false};
   document.getElementById('ez').classList.add('on');
   ezRender();
 }
@@ -18773,32 +18783,65 @@ function ezRender(){
 // and deliberately modest: the first session sets the baseline and the level-up engine
 // climbs from there - overshooting a stranger's first day is how apps get deleted.
 var EZ_W={bench:65,ohp:45,bsquat:75,deadlift:95,incdb:25,mbench:60,lpress:120,latpd:55,bbthrust:95,
+          goblet:35,dbohp:25,dbrfly:10,bbcurl:45,rdl:75,frontsq:55,bbrow:65,dbbench:30,dbrow:30,
+          machpd:55,stcalf:50,bbcalf:65,
           row:60,machrow:70,hthrust:90,preacher:25,sdbcurl:20,hammer:17.5,rope:25,ohext:20,
           skull:20,dblat:12.5,revfly:45,mfly:60,dbfly:20,slegcurl:60,lext:60,
           dcalfr:30,scalfr:70};
 // role -> the lift that fills it, per level
+// Each role is now an ORDERED list rather than one lift: the gym answer first, then the barbell
+// one, then dumbbells, then whatever needs nothing at all. The generator walks it and takes the
+// first entry the user can actually perform with the equipment they said they have. Somebody in
+// a gym owns everything, so the head of every list is exactly what the table said before this
+// change - a full-gym week is generated identically to how it always was.
+//
+// Where a list runs out, the slot is DROPPED rather than filled with something impossible. That
+// is honest and it is also a map of the library's real holes: a vertical pull needs something to
+// hang from, and direct quad, hamstring and calf work all need a machine. A floor-only week comes
+// out shorter because a floor-only week IS shorter, not because the generator gave up.
 var EZ_POOL={
-  squat:  {beg:'lpress', int:'bsquat', adv:'bsquat'},
-  hinge:  {beg:'hthrust',int:'deadlift',adv:'deadlift'},
-  hpress: {beg:'mbench', int:'bench',  adv:'bench'},
-  vpress: {beg:'dblat',  int:'ohp',    adv:'ohp'},
-  incline:{beg:'incdb',  int:'incdb',  adv:'incdb'},
-  vpull:  {beg:'latpd',  int:'latpd',  adv:'latpd'},
-  hpull:  {beg:'machrow',int:'row',    adv:'row'},
-  chestI: {beg:'mfly',   int:'dbfly',  adv:'dbfly'},
-  sideD:  {beg:'dblat',  int:'dblat',  adv:'dblat'},
-  rearD:  {beg:'revfly', int:'revfly', adv:'revfly'},
-  quadI:  {beg:'lext',   int:'lext',   adv:'lext'},
-  hamI:   {beg:'slegcurl',int:'slegcurl',adv:'slegcurl'},
-  calf:   {beg:'scalfr', int:'scalfr', adv:'dcalfr'},
-  bicep:  {beg:'preacher',int:'sdbcurl',adv:'sdbcurl'},
-  bicep2: {beg:'hammer', int:'hammer', adv:'hammer'},
-  tricep: {beg:'rope',   int:'rope',   adv:'rope'},
-  tricep2:{beg:'ohext',  int:'skull',  adv:'skull'},
-  gluteI: {beg:'hthrust',int:'hthrust',adv:'bbthrust'},
-  core:   {beg:'plank',  int:'plank',  adv:'plank'},
-  core2:  {beg:'bike',   int:'hollow', adv:'hollow'}
+  squat:  {beg:['lpress','goblet','bwsquat'], int:['bsquat','goblet','bwsquat'], adv:['bsquat','frontsq','goblet','bwsquat']},
+  hinge:  {beg:['hthrust','glutebr'],      int:['deadlift','rdl','glutebr'], adv:['deadlift','rdl','glutebr']},
+  hpress: {beg:['mbench','dbbench','pushup'], int:['bench','dbbench','pushup'], adv:['bench','dbbench','pushup']},
+  vpress: {beg:['dblat','dbohp'],          int:['ohp','dbohp'],   adv:['ohp','dbohp']},
+  incline:{beg:['incdb','pushup'],         int:['incdb','pushup'],adv:['incdb','pushup']},
+  vpull:  {beg:['latpd','machpd'],         int:['latpd','machpd'],adv:['latpd','machpd']},
+  hpull:  {beg:['machrow','dbrow'],        int:['row','dbrow'],   adv:['row','dbrow','bbrow']},
+  chestI: {beg:['mfly','dbfly'],           int:['dbfly'],         adv:['dbfly']},
+  sideD:  {beg:['dblat'],                  int:['dblat'],         adv:['dblat']},
+  rearD:  {beg:['revfly','dbrfly'],        int:['revfly','dbrfly'],adv:['revfly','dbrfly']},
+  quadI:  {beg:['lext'],                   int:['lext'],          adv:['lext']},
+  hamI:   {beg:['slegcurl'],               int:['slegcurl'],      adv:['slegcurl']},
+  calf:   {beg:['scalfr','stcalf'],        int:['scalfr','stcalf'],adv:['dcalfr','stcalf','bbcalf']},
+  bicep:  {beg:['preacher','sdbcurl','bbcurl','hammer'], int:['sdbcurl','bbcurl','hammer'], adv:['sdbcurl','bbcurl','hammer']},
+  bicep2: {beg:['hammer'],                 int:['hammer'],        adv:['hammer']},
+  tricep: {beg:['rope','bdip'],            int:['rope','bdip'],   adv:['rope','bdip']},
+  tricep2:{beg:['ohext','skull','bdip'],   int:['skull','bdip'],  adv:['skull','bdip']},
+  gluteI: {beg:['hthrust','glutebr'],      int:['hthrust','glutebr'],adv:['bbthrust','hthrust','glutebr']},
+  core:   {beg:['plank'],                  int:['plank'],         adv:['plank']},
+  core2:  {beg:['bike'],                   int:['hollow'],        adv:['hollow']}
 };
+// What the user says they train with. A gym owns the lot; the rest are the honest home tiers.
+var EZ_KIT={
+  gym:  ['db','bar','rack','bench','machine','hang','band','rope','pool'],
+  home: ['db','bar','rack','bench'],
+  dbb:  ['db','bench'],
+  dbo:  ['db'],
+  none: []
+};
+function ezOwns(){return EZ_KIT[EZ.kit]||EZ_KIT.gym;}   // unanswered means a gym, as it always did
+function ezCan(id,own){
+  var k=kitOf(id);
+  for(var i=0;i<k.length;i++)if(own.indexOf(k[i])<0)return false;
+  return true;
+}
+function ezPickLift(role,level,own){
+  var list=(EZ_POOL[role]||{})[level];
+  if(!list)return null;
+  if(typeof list==='string')list=[list];
+  for(var i=0;i<list.length;i++)if(EX[list[i]]&&ezCan(list[i],own))return list[i];
+  return null;                                          // nothing fits: the slot drops
+}
 // Each day is roles with a ROLE CLASS: main / sec / acc / iso / core. Pairs in [] are
 // superset candidates - realised only for the weight-loss goal, ordinary rows otherwise.
 var EZ_DAYS={
@@ -18856,7 +18899,7 @@ var EZ_RX={
 var EZ_SLOTS={1:['mon'],2:['mon','thu'],3:['mon','wed','fri'],4:['mon','tue','thu','fri'],5:['mon','tue','wed','thu','fri']};
 var EZ_FIN=['stairs','rower','cbike'];   // weight-loss finishers, rotated across the week
 function ezRow(role,cls,level,mult,goal){
-  var id=(EZ_POOL[role]||{})[level];if(!id||!EX[id])return null;
+  var id=ezPickLift(role,level,ezOwns());if(!id||!EX[id])return null;
   var rx=EZ_RX[goal][cls]||EZ_RX[goal].acc;
   var sets=Math.max(2,rx.s-(level==='beg'?1:0));
   var line;
