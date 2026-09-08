@@ -27,7 +27,16 @@ main constraint on how to work in it. See **Traps** below before editing.
   serves `main`, so a branch never reaches the phone.
 - **Bump both versions every time.** `APPV` in `index.html` and `CACHE` in `sw.js`. The service
   worker will serve the old build otherwise. `v4.9` is followed by `v4.10`, not `v4.91`.
-- **End every reply with a TLDR and the build number** to look for.
+- **End every reply with a TLDR and the build number** to look for, then a **WHAT'S NEXT** line.
+  - If something is genuinely pending, name it and say why it matters.
+  - If nothing is pending, recommend one next step only when it earns its place. The test is
+    whether a user would be worse off without it. "The app can't do X and someone will hit that"
+    is a reason; "it would be neat" is not.
+  - **If there is nothing worth doing, say exactly that.** An empty queue is a legitimate answer
+    and the right one more often than it looks. Do not invent work to fill the line.
+  - Owner's words (8 Sep 2026): *there are times where we are just adding bells and whistles for
+    no reason, let's not do that. Let's make sure that we always get value... If there is nothing
+    to improve, simply state it so we don't over engineer.*
 - **The user is not a coder.** Short answers by default; they will ask for detail.
 - **Only the Forge theme is in scope** until the themes get their own v5.x pass. Obsidian,
   Frost and Moonwell stay frozen (`THEMES_ON=0`) — check whether a selector is theme-scoped
