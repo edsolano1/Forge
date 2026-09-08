@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.1** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.80** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -23,9 +23,15 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 | Level-ups | Per-day targets, per-lift history; machine lattice learning; kg-native plate steps |
 | Progress | 8-week volume bars, this-week-vs-last rows, per-exercise est-1RM charts |
 | Units | lb/kg toggle (Settings); storage stays pounds forever; zero-drift round-tripping |
-| Library | Neutral starting weights (nobody's personal log), full names, searchable swap sheet |
+| Library | 106 exercises. Neutral starting weights (nobody's personal log), full names, searchable swap sheet |
+| Instructions | Every exercise has written setup, cues and the one mistake that actually happens — plus a moving figure, drawn front and side. No links out; the app owns the teaching |
+| Warm-ups | Plate-accurate ramps on loaded lifts, never counted in your stats |
+| Plate calculator | A drawing of the loaded bar, both ends, plates tapped on as chips; per-lift bar memory; kg-native |
+| The watch | Log sets from the wrist: week → workout → lift → set, a rest screen with 3-2-1 haptics, redo any logged set, swap a lift mid-session |
+| First run | A safety screen, three behavioural questions, session length and goal — then a week built to the answers |
 | Sounds | One master volume dial for everything, including the native screen-off alert |
-| Backup | Plain-text export via share sheet; JSON backup/restore |
+| Backup | Plain-text export via share sheet; JSON backup/restore; an opt-in safety copy that refreshes itself after every finished session; week sharing that adds rather than replaces |
+| Bodyweight | One weigh-in a day inside Progress, canonical pounds, neutral deltas |
 
 ---
 
@@ -35,9 +41,9 @@ In order of when we plan to touch it:
 
 1. **Tutorial rewrite** — *parked until the very end, on purpose.* The tour's script must teach the app as it now is: per-day completion, superset rest pacing, the Units setting, the one-editor flow. Writing it earlier would have meant rewriting it after every change above. *(Started v4.159: the sample week itself was rebuilt light — three workouts instead of a filled board, one of them cardio, and the demo lift is now a dumbbell bench at 20 lb raised to 25, so the example excludes nobody. The script pass is still to come.)*
 2. ~~Remove the sandbox from Settings~~ — done, v4.195. The machinery stays whole and dormant.
-3. **First-run wizard, deeper pass** — *pinned until v5.* The "build one for me?" question and the three-question forging ritual are fully built and working, but deliberately switched off (`EZ_ON` flag). We want to invest real design time there rather than ship it as-is. Until then, a first run lands on an empty week with the tour offer.
-4. **v5: the other themes return** — Obsidian, Frost, and Moonwell are frozen but intact. Forge-only until then.
-5. **Per-exercise instruction, after v5** — every exercise gets a real in-app explanation of how to perform it safely, built from one template applied across the whole library: setup, the movement itself, what to avoid. Today an exercise carries a one-line cue and an Instructions link out to the web; the template replaces the outsourcing with teaching the app owns. Ambitious and deliberately parked — this is the first big project of the post-v5 era, and the template gets designed once, then applied everywhere.
+3. ~~**First-run wizard, deeper pass**~~ — **done.** Unpinned in v5.0 and deepened since: a safety screen, three behavioural questions instead of self-rating, session length, and a goal that sets reps, rests and whether the week carries cardio. Every axis now answers to the answers — including core work, which used to hand a beginner and a two-year lifter the same 35-second plank (v5.77).
+4. **v5: the other themes return** — Obsidian, Frost, and Moonwell are frozen but intact. Forge-only until you say otherwise; this is the one item waiting purely on your word.
+5. ~~**Per-exercise instruction, after v5**~~ — **done, and it went further than the plan.** All 106 exercises carry the three-part card the template describes: setup, the cues worth saying, and the one mistake that actually happens. The links out are gone entirely (owner call, 31 Aug) — no exercise carries one. Every exercise also has a moving figure, drawn front and side, and all 93 motion drawings in the file are reachable. This was "the first big project of the post-v5 era"; it is finished.
 6. **Device sync, after v5** — write finished sessions out to, and pull cardio in from, the platform health stores: **Health Connect** on Android, and **Apple Health (HealthKit)** if an iOS wrapper ever ships. This is the moment watches and rings start feeding the log — and the point where real-time cardio tracking becomes worth having at all, which is why the live walk clock could retire now (Aug 23) instead of limping along half-connected.
 
 Smaller known trade-offs, accepted for now:
