@@ -3442,6 +3442,22 @@ var ALT={
   stcalf:   {name:"Standing Calf Raise Machine",note:"Knees straight - hits the gastrocnemius like the diagonal machine",sets:"50x12\n50x12\n50x12\n50x12",rest:"45 sec"},
   kneeraise:{bw:1,name:"Hanging Knee Raise",note:"From the pull-up bar - knees to chest, no swinging",sets:"0x12\n0x12\n0x12",rest:"45 sec"},
   abmach:   {name:"Ab Crunch Machine",note:"Seated machine crunch - loadable core work",sets:"30x15\n30x15\n30x15",rest:"45 sec"},
+  // ---------- nine lifts that were already drawn ----------
+  // Their animations have been finished, reviewed and sitting in the file the whole time, with
+  // no exercise pointing at them - so the app had no way to put any of them on screen. These are
+  // the nine that read correctly in both views; the bent-over row, the rear delt fly and the side
+  // plank are drawn too but their front views show the wrong movement, and they come back once
+  // that is fixed. Starting weights are deliberately modest: the first session sets the baseline
+  // and the level-up engine climbs from there.
+  bbcalf:   {name:"Barbell Calf Raise",note:"Bar on the traps, heels off a block or the floor",sets:"65x15\n65x15\n65x15\n65x15",rest:"45 sec"},
+  incbb:    {name:"Incline Barbell Press",wraps:1,note:"30 to 45 degrees - press perpendicular to the bench",sets:"55x8\n55x8\n55x8",rest:"2 min"},
+  rdl:      {name:"Romanian Deadlift",note:"Hips back, legs near straight - the stretch is the exercise",sets:"65x8\n65x8\n65x8",rest:"2 min"},
+  shrug:    {name:"Barbell Shrug",note:"Straight up and down - no rolling",sets:"95x12\n95x12\n95x12",rest:"60 sec"},
+  mohp:     {name:"Machine Shoulder Press",note:"Seat set so the handles start at shoulder height",sets:"50x10\n50x10\n50x10",rest:"90 sec"},
+  bwsquat:  {bw:1,name:"Bodyweight Squat",note:"No equipment - arms out front as a counterbalance",sets:"0x20\n0x20\n0x20",rest:"60 sec"},
+  frontsq:  {name:"Front Squat",note:"Bar on the front rack, elbows high",sets:"45x8\n45x8\n45x8",rest:"3 min"},
+  dbohp:    {name:"Dumbbell Shoulder Press",note:"Seated, dumbbells from the ears to overhead",sets:"25x10\n25x10\n25x10",rest:"2 min"},
+  rtwist:   {name:"Russian Twist",note:"Both sides = one rep. Turn from the ribs",sets:"10x20\n10x20\n10x20",rest:"45 sec"},
   bike:null
 };
 delete ALT.bike;
@@ -3473,7 +3489,11 @@ var ALTGRP={lvchest:'chest-press',dbbench:'chest-press',smbench:'chest-press',pu
   dbfly:'chest-fly',machrow:'back-horizontal',dbrow:'back-horizontal',machpd:'back-vertical',
   bbcurl:'biceps',inccurl:'biceps',dip:'triceps',bdip:'triceps',
   machlat:'delt-side',facepull:'delt-rear',goblet:'quad',smsquat:'quad',
-  bbthrust:'glute',stepup:'glute',stcalf:'calf',kneeraise:'core',abmach:'core'};
+  bbthrust:'glute',stepup:'glute',stcalf:'calf',kneeraise:'core',abmach:'core',
+  // the nine that were drawn but unreachable. 'traps' is a new group: nothing in the library
+  // trained them directly, so the shrug had nowhere to sit and no comparable swap to offer.
+  bbcalf:'calf',incbb:'chest-press',rdl:'hamstring',shrug:'traps',mohp:'delt-press',
+  bwsquat:'quad',frontsq:'quad',dbohp:'delt-press',rtwist:'core'};
 for(var __g in ALTGRP){GRP[__g]=ALTGRP[__g];}
 for(var __pg in PUMPGRP){GRP[__pg]=PUMPGRP[__pg];}
 function grpOf(id){return GRP[id]||'other';}
@@ -8302,9 +8322,10 @@ var ANIM=(function(){
     cd:[drawDoorwayF,drawDoorwayS],pg:[drawPigeonF,drawPigeonS],hs:[drawHamStrF,drawHamStrS]
   };
   // cards whose first panel is a TOP view rather than a front view
-  // rt (russian twist) and sd (side plank) were listed here too - both are drawn, neither is
-  // reachable from any exercise, so the flags named nothing. They come back with the lifts.
-  var TOPF={hb:1,lg:1,pl:1,bc:1,ro:1,sr:1,lp:1,mv:1};
+  // rt comes back with the Russian Twist, which is what it was always for: a rotation is the one
+  // thing a side view cannot show, so the first panel looks down at the mat. sd stays out until
+  // the side plank's own drawing is fixed and it has an exercise again.
+  var TOPF={hb:1,lg:1,pl:1,rt:1,bc:1,ro:1,sr:1,lp:1,mv:1};
   // Forge exercise id -> motion code (p_ pump ids resolve through their base id)
   var MAP={
     bench:'bp',incdb:'id',mbench:'mb',xover:'cc',vbar:'ps',rope:'rp',ohext:'oe',
@@ -8319,6 +8340,9 @@ var ANIM=(function(){
     dbfly:'fy',machrow:'mr',dbrow:'oa',machpd:'ml',bbcurl:'cu',inccurl:'ic',dip:'dp',
     bdip:'bd',machlat:'ma',facepull:'fp',goblet:'gb',smsquat:'ss',bbthrust:'ht',
     stepup:'st',stcalf:'sm',kneeraise:'kr',abmach:'ab',
+    // the nine finished drawings that nothing pointed at until now
+    bbcalf:'cf',incbb:'ip',rdl:'rd',shrug:'sh',mohp:'mp',
+    bwsquat:'bw',frontsq:'fs',dbohp:'ds',rtwist:'rt',
     p_inc:'id',p_xover:'cc',p_fly:'mf',p_lat:'lr',p_curl:'cb',p_hammer:'hc',
     p_rope:'rp',p_dip:'bd',p_bike:'bc',p_hollow:'hb',p_pdown:'sp',p_lext:'le',p_lcurl:'lc'
   };
@@ -8346,7 +8370,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.74';
+var APPV='v5.75';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8619,6 +8643,17 @@ machlat:{s:"Seat set so the pads rest just above the elbows, hands light on the 
 smsquat:{s:"Bar on the traps, feet planted a half step FORWARD of the bar line, shoulder width.",c:["Sit straight down - the rails allow what the forward feet create","Knees track over the toes","Drive through the whole foot to lockout"],m:"Feet directly under the bar. On a Smith machine that folds you forward - step them out."},
 stepup:{s:"Knee-height box, a dumbbell in each hand, one whole foot planted on top.",c:["Drive through the TOP foot - the bottom leg does not jump","Stand fully tall on the box","Lower slow - the way down is half the rep","All reps one leg, then switch"],m:"Bouncing off the bottom leg. If it pushes, the box is too high or the bells too heavy."},
 stcalf:{s:"Shoulders under the pads, balls of the feet on the block, heels hanging free.",c:["Drop the heels for a full stretch at the bottom","Drive to full tiptoe and squeeze","Knees straight but never locked - the calves do all of it"],m:"Bouncing. One second up, one second down, every rep."}
+,
+// ---------- the nine that had a finished animation and no exercise to reach it ----------
+bbcalf:{s:"Bar racked on the traps as for a squat, feet hip width, balls of the feet on a block or a plate if you have one.",c:["Sink the heels for a full stretch at the bottom","Drive to full tiptoe and squeeze","Knees straight but never locked","One second up, one second down"],m:"Bending the knees to move more weight. The moment the knee helps, the calves have clocked out."},
+incbb:{s:"Bench set at 30 to 45 degrees, eyes under the bar, feet planted, grip just outside shoulder width.",c:["Lower to the upper chest, just below the collarbones","Elbows about 45 degrees from the sides","Press straight up out of the bench, not back toward your face","Shoulder blades stay pinned back into the pad"],m:"Setting the bench too steep. Past 45 degrees it quietly becomes a shoulder press."},
+rdl:{s:"Standing tall with the bar at the hips, feet hip width, a soft bend in the knees that does not change.",c:["Push the hips BACK - the bar slides down the thighs","Go as low as the hamstrings allow with a flat back, usually mid-shin","Feel it in the back of the legs, never the lower back","Stand up by driving the hips forward"],m:"Turning it into a squat by bending the knees. The knee angle is set at the top and held all the way down."},
+shrug:{s:"Bar held at arms length in front of the thighs, grip just outside the hips, standing tall.",c:["Lift the shoulders STRAIGHT up toward the ears","Hold the top for a full beat - that beat is the exercise","Lower all the way down for the stretch","The arms never bend; they are only hooks"],m:"Rolling the shoulders in circles. It adds nothing and grinds the joint - straight up, straight down."},
+mohp:{s:"Seat set so the handles sit level with the shoulders, back flat against the pad, feet planted.",c:["Press to a full lockout without the shoulders shrugging up","Lower under control until the handles reach shoulder height","The back stays on the pad the whole rep","The machine makes slow safe - use that"],m:"Half reps at the bottom. Coming down only halfway skips where the shoulder work was."},
+bwsquat:{s:"Feet shoulder width, toes slightly out, arms straight out in front as a counterbalance.",c:["Sit down between the heels, chest tall","Knees track over the toes - out, not in","As deep as you can go without the back rounding","Drive up through the whole foot"],m:"Letting the heels lift. If they float, sit back further rather than straight down."},
+frontsq:{s:"Bar resting across the front of the shoulders, elbows driven high and forward, fingertips under the bar.",c:["Elbows STAY high - the shelf holds the bar, not the hands","Sit straight down with an upright torso","Depth is where the elbows start to drop","Drive up without letting the chest fall forward"],m:"Elbows dropping on the way up. The moment they fall the bar rolls forward and the rep is over."},
+dbohp:{s:"Seated with back support, dumbbells at ear height, palms facing forward, elbows under the wrists.",c:["Press up and slightly together without clanking at the top","Lower until the hands are level with the ears","Ribs down - the back stays against the pad","Each side works alone, so neither can carry the other"],m:"Arching the lower back to finish the press. If the ribs flare, the weight is too heavy."},
+rtwist:{s:"Sitting on the floor, knees bent, leaning back to about 45 degrees with a weight held at the chest.",c:["Turn from the RIBS, not the arms - the weight follows the torso","Touch down beside one hip, then sweep to the other","Both sides together are one rep","Feet may rest down; lifting them is the harder version"],m:"Swinging the arms while the chest stays square. If the ribs are not turning, nothing is being trained."}
 };
 // Pump-day ids strip their p_ and land on these five, whose base ids do not match the strip:
 EXINSTR.inc=EXINSTR.incdb;EXINSTR.fly=EXINSTR.mfly;EXINSTR.lat=EXINSTR.dblat;
@@ -10549,7 +10584,9 @@ document.getElementById('sBack').onclick=function(){
 
 // ---------- swap ----------
 var swapTarget=null;
-var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly / isolation','back-vertical':'Vertical pull','back-horizontal':'Horizontal row','biceps':'Biceps','triceps':'Triceps','quad':'Quad / squat pattern','glute':'Glutes / hip extension','hamstring':'Hamstring / leg curl','posterior':'Posterior chain','calf':'Calves','delt-side':'Side delt','delt-rear':'Rear delt','core':'Core','forearm':'Forearm','cardio':'Cardio','mobility':'Mobility','other':'Other'};
+// 'delt-press' has been a group since the overhead press was added and has never had a label, so
+// its swap sheet printed the raw key as a heading. 'traps' is new, for the shrug.
+var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly / isolation','back-vertical':'Vertical pull','back-horizontal':'Horizontal row','biceps':'Biceps','triceps':'Triceps','quad':'Quad / squat pattern','glute':'Glutes / hip extension','hamstring':'Hamstring / leg curl','posterior':'Posterior chain','calf':'Calves','delt-side':'Side delt','delt-rear':'Rear delt','delt-press':'Overhead press','traps':'Traps','core':'Core','forearm':'Forearm','cardio':'Cardio','mobility':'Mobility','other':'Other'};
 function swapItem(k){
   return '<div class="swapitem" onclick="doSwap(\''+k+'\')">'+EX[k].name+'<small>'+EX[k].sets.split('\n').map(fmtLine).join(', ')+'</small></div>';
 }
