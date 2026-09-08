@@ -4019,6 +4019,23 @@ function drawThemePick(){
    The Motion Study rig, every card owner-approved (board v88): one computed stick-figure
    skeleton, two views per exercise, drawn live on canvas. Zero assets, works offline.
    A fix to any single exercise is a fix to its one draw function below - nothing else. */
+// ---------- the two kinds of front view, and why heights only compare across one of them ----------
+// The cross-view law - same landmark heights in both panels, every frame - governs an UPRIGHT
+// figure seen in two orthogonal planes. A squat, a curl, a shrug: y is height in both, and a head
+// drawn at 98 in one and 140 in the other is a fault.
+//
+// It does not govern the other kind. When the lift puts the body flat or deeply hinged - bench,
+// plank, push-up, skull crusher, pullover, glute bridge, swim - the front panel is drawn END-ON,
+// looking down the length of the body, because a lying figure seen from the true front is a line.
+// In those, y carries DEPTH: further away sits higher in frame and smaller, which is why several
+// of them use an r13 head and an alpha gradient on the far limbs. Comparing a head height across
+// those two panels measures nothing, and "fixing" it to match would flatten a correct perspective
+// drawing into a wrong one.
+//
+// The tell is width. An end-on figure is about a body wide; the same body side-on is about a body
+// LONG, so the front panel measures roughly half its side panel. Every card whose two panels
+// disagree on head height by more than about twenty pixels turns out to sit under 0.65 on that
+// ratio - which is the projection talking, not drift. Measure the ratio before calling one wrong.
 var ANIM=(function(){
 "use strict";
   var INK="#e8ded2", GO="#d97b2e", LINE="#2b2e34";
@@ -8389,7 +8406,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.79';
+var APPV='v5.80';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
