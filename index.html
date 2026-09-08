@@ -1330,6 +1330,11 @@ body.tut .dayhead-add{display:none;}
 /* The muscle row in the exercise picker. One line that scrolls sideways rather than wrapping
    into a wall of buttons above the list you came to read. Must sit AFTER .preset.sm: the two
    have equal specificity, so order is what decides the padding. */
+/* the ADVANCED fold on the custom-exercise sheet - a quiet row, not a button */
+.mk-adv{margin-top:14px;padding:9px 2px;font-size:11.5px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--txt3);cursor:pointer;user-select:none;border-top:1px solid var(--line);}
+.mk-adv:hover{color:var(--go);}
+.mk-adv small{font-weight:400;letter-spacing:0;text-transform:none;color:var(--txt3);margin-left:7px;}
 .mfilt{display:flex;gap:6px;overflow-x:auto;padding:11px 0 3px;scrollbar-width:none;}
 .mfilt::-webkit-scrollbar{display:none;}
 /* min-height rather than padding, because padding plus a font metric is a guess and this is a
@@ -3192,6 +3197,20 @@ body.wcon{overflow:hidden;}
         Lower number is better</button>
     </div>
     <div class="footnote" style="margin:8px 2px 0">For assisted machines, where less weight means you did more of the work yourself.</div>
+    <!-- Tagging is real but it is not the job. Naming a lift and adding it should stay three
+         fields long, so the muscle and the equipment live behind a fold that most people will
+         never open. Untagged is a legitimate answer: the filter lets those through rather than
+         hiding them. -->
+    <div class="mk-adv" id="mkCexAdvRow" onclick="mkCexAdvToggle()">
+      <span id="mkCexAdvCaret">▸</span> ADVANCED <small>muscle and equipment, both optional</small>
+    </div>
+    <div id="mkCexAdv" style="display:none">
+      <div class="mk-lbl" style="margin-top:10px">Muscle</div>
+      <div class="mfilt" id="mkCexGrpRow"></div>
+      <div class="mk-lbl" style="margin-top:10px">What it needs</div>
+      <div class="mfilt" id="mkCexKitRow"></div>
+      <div class="footnote" style="margin:8px 2px 0">Tag it and it shows up under that muscle in the picker, and the app knows whether you can do it with what you own. Leave it blank and it simply shows everywhere.</div>
+    </div>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('mkCexOvl')">CANCEL</div>
       <div class="btn btn-go" onclick="mkSaveCex()">ADD</div>
@@ -3525,6 +3544,64 @@ var ALTGRP={lvchest:'chest-press',dbbench:'chest-press',smbench:'chest-press',pu
 for(var __g in ALTGRP){GRP[__g]=ALTGRP[__g];}
 for(var __pg in PUMPGRP){GRP[__pg]=PUMPGRP[__pg];}
 function grpOf(id){return GRP[id]||'other';}
+
+// ---------- what each lift actually needs ----------
+// The library grew out of one person's gym, so every row silently assumed a machine room. This is
+// the tag that lets the app answer "what can I do with what I own" - a spare room with two
+// dumbbells, a garage with a bar, or nothing but a floor. Listed only where something IS needed:
+// an absent id needs NOTHING, which is the right default for an app that should work at home.
+// Several lifts need two things and say so - a barbell bench press is a bar AND a bench, and
+// owning one without the other does not get you the lift.
+var KITLABEL={db:'Dumbbells',bar:'Barbell + plates',rack:'A rack',bench:'A bench',
+              machine:'Gym machine or cable',hang:'A bar to hang from',band:'Resistance band',
+              rope:'Jump rope',pool:'A pool'};
+var KIT={
+  // chest
+  bench:['bar','bench','rack'], incbb:['bar','bench','rack'], incdb:['db','bench'],
+  dbbench:['db','bench'], dbfly:['db','bench'], pullover:['db','bench'],
+  smbench:['machine','bench'], mbench:['machine'], xover:['machine'], mfly:['machine'],
+  lowchest:['machine'], lvchest:['machine'],
+  // back
+  pullup:['machine'], latpd:['machine'], row:['machine'], sapd:['machine'],
+  machrow:['machine'], machpd:['machine'], dbrow:['db','bench'], bbrow:['bar'],
+  // arms
+  vbar:['machine'], rope:['machine'], ohext:['machine'], dip:['machine'], bdip:['bench'],
+  skull:['db','bench'], preacher:['machine'], cbcurl:['machine'], bbcurl:['bar'],
+  sdbcurl:['db','bench'], inccurl:['db','bench'], hammer:['db'],
+  wcurl:['db'], rwcurl:['db'], hang:['hang'],
+  // shoulders
+  ohp:['bar','rack'], mohp:['machine'], dbohp:['db','bench'], dblat:['db'], dbrfly:['db'],
+  clat:['machine'], machlat:['machine'], revfly:['machine'], facepull:['machine'], shrug:['bar'],
+  // legs
+  bsquat:['bar','rack'], frontsq:['bar','rack'], bbcalf:['bar','rack'],
+  deadlift:['bar'], rdl:['bar'], bbthrust:['bar','bench'],
+  goblet:['db'], sumo:['db'], lunge:['db'], stepup:['db','bench'],
+  hack:['machine'], lpress:['machine'], lext:['machine'], hthrust:['machine'],
+  slegcurl:['machine'], plegcurl:['machine'], dcalfr:['machine'], scalfr:['machine'],
+  stcalf:['machine'], smsquat:['machine'],
+  // core
+  abmach:['machine'], hipraise:['machine'], kneeraise:['hang'], rtwist:['db'],
+  // cardio
+  stairs:['machine'], treadrun:['machine'], treadwalk:['machine'], cbike:['machine'],
+  ellip:['machine'], rower:['machine'], assault:['machine'], jumprope:['rope'], swim:['pool']
+  // everything absent needs nothing: push-up, bodyweight squat, plank, side plank, crunch,
+  // glute bridge, hollow hold, leg raise, bicycle crunch, the four stretches, walk, outdoor run
+};
+// Pump-day ids are the same lifts under a p_ prefix, but stripping the prefix does not always
+// land on the base: p_inc is the incline DUMBBELL press, p_dip is the BENCH dip. The instructions
+// learned this the hard way and papered over it with alias assignments; naming the pairs once is
+// the honest version, and anything else that needs the base can read it here too.
+var PUMPBASE={p_inc:'incdb',p_xover:'xover',p_fly:'mfly',p_lat:'dblat',p_curl:'cbcurl',
+  p_hammer:'hammer',p_rope:'rope',p_dip:'bdip',p_bike:'bike',p_hollow:'hollow',
+  p_pdown:'sapd',p_lext:'lext',p_lcurl:'slegcurl'};
+// A user's own exercise carries its own tags on the record; the shipped ones live in the table.
+function kitOf(id){
+  var c=DB&&DB.cex&&DB.cex[id];
+  if(c&&c.kit)return c.kit;
+  var s=slotBase(String(id));
+  var base=PUMPBASE[s]||s.replace(/^p_/,'');
+  return KIT[s]||KIT[base]||[];
+}
 
 // Resolve a row reference: "id" or ["id",{override}]
 // ---- changes made to a day from inside the session ----
@@ -8417,7 +8494,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.83';
+var APPV='v5.84';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10802,7 +10879,10 @@ function mergeCustom(){
   if(!DB.slots)DB.slots={};
   if(!DB.cex)DB.cex={};
   if(!DB.exNotes)DB.exNotes={};   // your own notes, keyed by exercise, kept across sessions
-  for(var k in DB.cex){EX[k]=DB.cex[k];NOREF[k]=1;if(!GRP[k])GRP[k]='other';}
+  // A user's own exercise can now carry its own muscle group, set under ADVANCED when they made
+  // it. Untagged ones still land on 'other' - and 'other' is deliberately exempt from the muscle
+  // filter rather than hidden by it, see mkFiltHit.
+  for(var k in DB.cex){EX[k]=DB.cex[k];NOREF[k]=1;if(DB.cex[k].grp)GRP[k]=DB.cex[k].grp;else if(!GRP[k])GRP[k]='other';}
   for(var d in DB.custom)W[d]=DB.custom[d];
   // Once the library is whole, hand every workout its slots. Here because it is the one place
   // that runs on load AND after every builder save, so a day that just gained a second bench
@@ -12039,8 +12119,14 @@ var MKFILT=null;
 function mkFiltOf(k){var m=null;MUSCLE.forEach(function(x){if(x.k===k)m=x;});return m;}
 function mkFiltHit(id){
   if(!MKFILT)return true;
+  var g=grpOf(id);
+  // An exercise you invented and never tagged sits in 'other', which belongs to no chip - so the
+  // filter shipped in v5.82 made your OWN exercises vanish the moment you tapped one, which is
+  // the worst thing a filter can do. Untagged passes every chip instead: better to show your
+  // three lifts under a heading they do not quite belong to than to lose them.
+  if(g==='other')return true;
   var m=mkFiltOf(MKFILT);
-  return !!m&&m.g.indexOf(grpOf(id))>=0;
+  return !!m&&m.g.indexOf(g)>=0;
 }
 function mkFiltSet(k){
   MKFILT=(MKFILT===k)?null:k;      // tapping the lit one clears it, so All is never a dead end
@@ -12118,6 +12204,7 @@ function mkNewEx(){
   document.getElementById('mkCexNote').value='';
   document.getElementById('mkCexLink').value='';
   mkCexInvSet(false);
+  mkCexAdvReset(null);
   document.getElementById('mkCexOvl').classList.add('on');
 }
 function mkEditCex(id){
@@ -12132,7 +12219,58 @@ function mkEditCex(id){
   document.getElementById('mkCexNote').value=x.note||'';
   document.getElementById('mkCexLink').value=x.link||'';
   mkCexInvSet(!!x.inv);
+  mkCexAdvReset(x);
   document.getElementById('mkCexOvl').classList.add('on');
+}
+// ---------- ADVANCED: the muscle and the equipment, both optional ----------
+// Folded away because naming a lift and adding it must stay a three-field job. Nothing here is
+// required and nothing here is asked for; leaving both blank is a legitimate answer and the
+// picker lets an untagged exercise through every filter rather than hiding it.
+var MKCEXGRP=null, MKCEXKIT=[];
+function mkCexAdvToggle(){
+  var p=document.getElementById('mkCexAdv'),c=document.getElementById('mkCexAdvCaret');
+  var open=p.style.display==='none';
+  p.style.display=open?'':'none';
+  c.textContent=open?'▾':'▸';
+  if(open)mkCexAdvDraw();
+  try{sfxTick&&sfxTick();}catch(e){}
+}
+function mkCexGrpSet(g){MKCEXGRP=(MKCEXGRP===g)?null:g;mkCexAdvDraw();try{sfxTick&&sfxTick();}catch(e){}}
+function mkCexKitSet(k){
+  var i=MKCEXKIT.indexOf(k);
+  if(i>=0)MKCEXKIT.splice(i,1);else MKCEXKIT.push(k);   // equipment is a LIST - a bench press is a bar and a bench
+  mkCexAdvDraw();try{sfxTick&&sfxTick();}catch(e){}
+}
+function mkCexAdvDraw(){
+  var g=document.getElementById('mkCexGrpRow'),k=document.getElementById('mkCexKitRow');
+  if(!g||!k)return;
+  // the muscle list is the picker's own chips, so the two vocabularies never drift apart
+  g.innerHTML=MUSCLE.map(function(m){
+    return '<button class="preset sm'+(MKCEXGRP===m.k?' on':'')+'" onclick="mkCexGrpSet(\''+m.k+'\')">'+m.n+'</button>';
+  }).join('');
+  k.innerHTML=Object.keys(KITLABEL).map(function(id){
+    return '<button class="preset sm'+(MKCEXKIT.indexOf(id)>=0?' on':'')+'" onclick="mkCexKitSet(\''+id+'\')">'+KITLABEL[id]+'</button>';
+  }).join('');
+}
+// A muscle chip names a bucket of movement groups; an exercise needs ONE of them. The first in
+// the bucket is the honest default - "chest" means chest-press before it means chest-fly.
+function mkCexGrpValue(){
+  if(!MKCEXGRP)return null;
+  var m=mkFiltOf(MKCEXGRP);
+  return m?m.g[0]:null;
+}
+function mkCexAdvReset(x){
+  MKCEXGRP=null;MKCEXKIT=[];
+  if(x){
+    MKCEXKIT=(x.kit||[]).slice();
+    if(x.grp)MUSCLE.forEach(function(m){if(m.g.indexOf(x.grp)>=0)MKCEXGRP=m.k;});
+  }
+  var p=document.getElementById('mkCexAdv'),c=document.getElementById('mkCexAdvCaret');
+  // it opens already unfolded when there is something in it to see
+  var any=!!(MKCEXGRP||MKCEXKIT.length);
+  if(p)p.style.display=any?'':'none';
+  if(c)c.textContent=any?'▾':'▸';
+  mkCexAdvDraw();
 }
 // Which world the new exercise belongs to. Drawn as the same preset buttons the settings use.
 var MKCEXKIND='lift';
@@ -12172,6 +12310,9 @@ function mkSaveCex(){
     // Editable after the fact: it is easy to add an assisted machine and only notice the scale
     // runs backwards the first time a good set grades as a bad one.
     if(inv)DB.cex[mkCexId].inv=1;else delete DB.cex[mkCexId].inv;
+    var eg=mkCexGrpValue();
+    if(eg)DB.cex[mkCexId].grp=eg;else delete DB.cex[mkCexId].grp;
+    if(MKCEXKIT.length)DB.cex[mkCexId].kit=MKCEXKIT.slice();else delete DB.cex[mkCexId].kit;
     mergeCustom();saveDB();closeOvl('mkCexOvl');mkCexId=null;
     mkPickList();mkRender();return;
   }
@@ -12183,6 +12324,9 @@ function mkSaveCex(){
     ? {cardio:1,name:n,note:note,link:link,sets:'20 min',rest:'',custom:1}
     : {name:n,note:note,link:link,sets:'0x10\n0x10\n0x10',rest:'60 sec',custom:1};
   if(inv)DB.cex[id].inv=1;
+  var ng=mkCexGrpValue();
+  if(ng)DB.cex[id].grp=ng;
+  if(MKCEXKIT.length)DB.cex[id].kit=MKCEXKIT.slice();
   mergeCustom();saveDB();
   closeOvl('mkCexOvl');
   mkAddEx(id);
