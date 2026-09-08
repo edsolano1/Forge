@@ -8389,7 +8389,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.76';
+var APPV='v5.77';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8980,6 +8980,9 @@ function levelPlan(wk){
         // math steps in the display unit's own plates (2.5/5 lb, or 2.5/5 kg in kg mode).
         var st=stepFor(id,base),plate=(base>=40?5:2.5);
         if(st!==plate)nw=down?Math.max(0,base-st):base+st;
+        // A dumbbell has its own lattice and it is not the plate one - see dbNext. A LEARNED
+        // lattice still outranks it above: if the logs say this rack has 22.5s, the rack wins.
+        else if(isDb(id,rf.data.name))nw=dbNext(base,down);
         else nw=plateNext(base,down);
         // Only a lift with NO usable history is an estimate. A barbell whose logged
         // weights already sit on plate steps has confirmed plate math - marking it ~
@@ -14298,6 +14301,27 @@ function plateNext(w,down){
   if(kn<0)kn=0;
   return Math.round(kn*LB_PER_KG*100)/100;
 }
+// Dumbbells are not loaded with plates and do not step like them. Plate math offered a clean
+// session on a 30 lb curl a 32.5 lb dumbbell, which most gyms simply do not own - the rack runs
+// in fives once past the light end. Below that they genuinely do come in 2.5s, which is why the
+// shipped lateral raise starts at 12.5, so the split sits at 20. In kilograms the 2.5 kg step
+// plateNext already uses IS the dumbbell lattice, so that path is left alone.
+// The word "dumbbell" carries most of these; the rest are lifts everyone knows are dumbbells
+// without the name saying so, and the list is theirs rather than a guess from the text.
+var DB_IDS={hammer:1,lunge:1,goblet:1,sumo:1,skull:1,pullover:1,inccurl:1,stepup:1,sdbcurl:1,
+            dblat:1,p_lat:1,p_hammer:1,p_inc:1};
+function isDb(id,name){
+  if(DB_IDS[slotBase(id)])return true;
+  return /\bdumbbell\b|\bdb\b/i.test(String(name||''));
+}
+// The two directions have to describe the SAME ladder or a raise and a drop disagree about what
+// the rack holds: 20 steps up to 25, so 25 must step back down to 20, not to a 22.5 the way up
+// never offered. Both hinge on the same 20.
+function dbNext(w,down){
+  if(UNIT_KG)return plateNext(w,down);
+  if(down)return Math.max(0, w>20?w-5:w-2.5);
+  return w>=20?w+5:w+2.5;
+}
 // a target line like "145x8" with its weight spoken in the current unit
 function fmtLine(s){
   return String(s).replace(/^([\d.]+)x/,function(_,w){return fmtW(parseFloat(w))+'x';});
@@ -18551,8 +18575,14 @@ function ezRow(role,cls,level,mult,goal){
   var rx=EZ_RX[goal][cls]||EZ_RX[goal].acc;
   var sets=Math.max(2,rx.s-(level==='beg'?1:0));
   var line;
-  if(cls==='core'&&/sec/.test(EX[id].sets))line=rx.t+' sec';
-  else if(cls==='core')line='0x'+(rx.r||15);
+  // Everything else in a generated week answers to LEVEL - the weights through mult, the set
+  // count through the beginner's one-fewer rule. Core did not. rx.t went in flat, so somebody
+  // who answered "over two years, programs are how I train" and somebody who has never trained
+  // both walked away with the same 35-second plank, in the one week the app builds from six
+  // questions about them. Core scales like the rest of it now, rounded to fives so the number
+  // reads like something a person would say, with a floor so a beginner's plank is still a plank.
+  if(cls==='core'&&/sec/.test(EX[id].sets))line=Math.max(15,Math.round(rx.t*mult/5)*5)+' sec';
+  else if(cls==='core')line='0x'+Math.max(10,Math.round((rx.r||15)*mult/5)*5);
   else if(EZ_W[id]!=null){
     // natW: a kg user's first week is written by a kg coach - starting weights land on
     // 2.5 kg plates (the 45 lb bar becomes the 20 kg bar), stored as exact pounds.
