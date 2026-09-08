@@ -8406,7 +8406,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.80';
+var APPV='v5.81';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12752,6 +12752,18 @@ function sendOut(txt,name,isText){
 function pickRestore(){var i=document.getElementById('restoreFile');if(i){i.value='';i.click();}}
 // Restoring REPLACES everything. It asks first, and says what it is about to overwrite, because
 // there is no undo behind it and the thing at stake is every session you have ever logged.
+// When a backup says it is from. The stamp inside the file is toISOString - UTC - and slicing
+// the first ten characters off it printed a UTC date to somebody standing in their own timezone.
+// Anywhere west of Greenwich that means an evening backup is dated TOMORROW: at 8pm on the 7th
+// in UTC-7, the file announced itself as the 8th while the session inside it was filed the 7th.
+// That is the date you read to decide whether it is the right backup, so it has to be your date.
+// The stamp itself stays a full ISO instant - precise and sortable; only the reading is local.
+function bkWhen(iso){
+  if(!iso)return 'an unknown date';
+  var d=new Date(iso);
+  if(isNaN(d.getTime()))return String(iso).slice(0,10);
+  return pretty(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));
+}
 function doRestore(input){
   var f=input&&input.files&&input.files[0];
   if(!f)return;
@@ -12761,7 +12773,7 @@ function doRestore(input){
     try{d=JSON.parse(String(rd.result));}catch(e){}
     if(!d||!d.db||!Array.isArray(d.db.logs)){ask('That file is not a Forge backup. The one RESTORE needs is the forge-backup file ending in .json, made by BACKUP FILE.',null,'Could not read it');return;}
     var inN=d.db.logs.length,haveN=(DB.logs||[]).length;
-    ask('The backup holds '+inN+' logged session'+(inN===1?'':'s')+', from '+(d.at||'an unknown date').slice(0,10)+
+    ask('The backup holds '+inN+' logged session'+(inN===1?'':'s')+', from '+bkWhen(d.at)+
         '. Restoring replaces everything currently in this app'+
         (haveN?', including the '+haveN+' session'+(haveN===1?'':'s')+' here now':'')+'. This cannot be undone.',
       function(){
