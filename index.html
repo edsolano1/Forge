@@ -8389,7 +8389,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.78';
+var APPV='v5.79';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12641,9 +12641,14 @@ function igniteDiamond(cb){
 // load the same URL and still cannot see each other's data, so a file is the only bridge.
 // Version and app go in the header so a future format change can be recognised rather than
 // guessed at.
+// The settings a backup carries, named once. Restore reads the SAME list rather than trusting
+// whatever keys the file happens to hold: a backup is a file that has been off the phone and
+// back, and looping a stranger's keys straight into storage is a wider door than this needs.
+// One list, so the two halves can never drift into disagreeing about what a backup contains.
+var BK_KEYS=['arc_sfx','arc_alert10','arc_notif','arc_motion','arc_sfxoff','arc_autobk','arc_bknudge','arc_lastbk'];
 function backupBlob(){
   var s={};
-  ['arc_sfx','arc_alert10','arc_notif','arc_motion','arc_sfxoff','arc_autobk','arc_bknudge','arc_lastbk'].forEach(function(k){
+  BK_KEYS.forEach(function(k){
     try{var v=localStorage.getItem(k);if(v!==null)s[k]=v;}catch(e){}
   });
   try{s[TKEY]=curTheme();}catch(e){}
@@ -12753,10 +12758,13 @@ function doRestore(input){
         if(!DB.dayEdit)DB.dayEdit={};if(!DB.vOvr)DB.vOvr={};if(!DB.bw)DB.bw=[];
         if(!DB.exBar)DB.exBar={};
         if(DB.walkRun===undefined)DB.walkRun=null;
+        // Only the keys a backup is defined to carry - see BK_KEYS. This used to walk whatever
+        // the file held and write all of it, which is more trust than a file that has left the
+        // phone and come back has earned. The theme is handled separately below.
         var s=d.settings||{};
-        Object.keys(s).forEach(function(k){
-          if(k===TKEY)return;
-          try{localStorage.setItem(k,s[k]);}catch(e){}
+        BK_KEYS.forEach(function(k){
+          if(k===TKEY||s[k]===undefined)return;
+          try{localStorage.setItem(k,String(s[k]));}catch(e){}
         });
         mergeCustom();persistNow();
         try{if(s[TKEY])Store.set(TKEY,s[TKEY]);}catch(e){}
@@ -14327,10 +14335,23 @@ function natW(lb,stepLb){
 // reads "+2.5 kg" instead of 2.5 lb translated into 1.1 kg of nowhere.
 function plateNext(w,down){
   if(!UNIT_KG){var p=w>=40?5:2.5;return down?Math.max(0,w-p):w+p;}
-  var kc=w/LB_PER_KG,ks=kc>=60?5:2.5;
-  var kn=Math.round((kc+(down?-ks:ks))/2.5)*2.5;
-  if(!down&&kn<=kc+0.01)kn+=2.5;
-  if(down&&kn>=kc-0.01)kn-=2.5;
+  // Work from the weight AS SHOWN, the same rule grading follows: dspW rounds kg to the half,
+  // so a 55 lb pin reads 25 kg while dividing to 24.9476 - and stepping from the raw number
+  // floored it to 22.5 and offered 25, which is the weight already on the machine. Snapping to
+  // the displayed half-kilo first means a step always moves the number the user is looking at.
+  var kc=Math.round(w/LB_PER_KG*2)/2,ks=kc>=60?5:2.5;
+  // Step from the LATTICE, not from wherever the weight happens to sit. Rounding the stepped
+  // value to the nearest 2.5 overshot from anything off-lattice: a 20 lb lateral raise reads
+  // 9 kg, and 9 + 2.5 rounded to the nearest 2.5 is 12.5 - a 39% jump offered as one step, on
+  // every weight a pound-era log hands a kg user. Snapping to the lattice first and stepping
+  // from there gives 10, and an already-square weight still moves a full step: 10 to 12.5.
+  // The tolerance is 0.002 of a step, not a hair's breadth, because storage is pounds rounded to
+  // two places: a true 50 kg comes back as 110.23 lb and divides to 49.99955, which a tight
+  // epsilon floors to 47.5 and then steps to 50 - no movement at all. 0.002 is 5 grams against
+  // a 2.5 kg step, far too small to snap to the wrong rung and far too big to be fooled by the
+  // rounding. Both directions use it, or a raise and a drop stop being each other's opposite.
+  var q=down?Math.ceil(kc/2.5-0.002)*2.5:Math.floor(kc/2.5+0.002)*2.5;
+  var kn=down?q-ks:q+ks;
   if(kn<0)kn=0;
   return Math.round(kn*LB_PER_KG*100)/100;
 }
