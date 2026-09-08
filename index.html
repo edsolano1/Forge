@@ -1327,6 +1327,12 @@ body.tut .dayhead-add{display:none;}
 .preset.sm{padding:12px 6px;font-size:12px;font-family:inherit;letter-spacing:.02em;}
 /* the chosen one in a row of presets - same lit treatment the sfx toggle uses when it is on */
 .preset.on{border-color:var(--go);color:var(--go);background:color-mix(in srgb,var(--go) 12%,var(--surface2));}
+/* The muscle row in the exercise picker. One line that scrolls sideways rather than wrapping
+   into a wall of buttons above the list you came to read. Must sit AFTER .preset.sm: the two
+   have equal specificity, so order is what decides the padding. */
+.mfilt{display:flex;gap:6px;overflow-x:auto;padding:11px 0 3px;scrollbar-width:none;}
+.mfilt::-webkit-scrollbar{display:none;}
+.mfilt .preset{flex:0 0 auto;padding:8px 13px;border-radius:9px;font-size:12.5px;}
 .preset.mk-del{border-color:color-mix(in srgb,#c2554a 55%,var(--line));color:#c2554a;}
 .preset.mk-del:hover{border-color:#c2554a;color:#c2554a;}
 .sfx-lbl{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);margin:20px 0 9px;}
@@ -3155,6 +3161,7 @@ body.wcon{overflow:hidden;}
   <div class="sheet">
     <h3>Add an exercise</h3>
     <input class="mk-in" id="mkSearch" placeholder="Search the library" oninput="mkPickList()" autocomplete="off">
+    <div class="mfilt" id="mkFilt"></div>
     <div class="swaplist" id="mkList" style="margin-top:12px"></div>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('mkPickOvl')">CANCEL</div>
@@ -8406,7 +8413,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.81';
+var APPV='v5.82';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12006,8 +12013,48 @@ function mkJoinDone(){
 }
 
 // ---------- the exercise picker ----------
+// ---------- the muscle filter ----------
+// GRP is a MOVEMENT map, and it is right to be: chest-press and chest-fly are different patterns
+// and have to stay apart when the app is choosing a comparable swap. But nobody opens a training
+// app looking for "horizontal row" - they open it wanting to train their back, and the picker
+// answered that with one alphabetical list of 106 where reaching the bench press meant scrolling
+// past the ab machine, the air bike and an assisted dip. This is the reading layer over the
+// movement map, and the only place the two vocabularies meet. Legs stays one bucket on purpose:
+// people say leg day, not quad day, and it still cuts 106 down to about twenty.
+var MUSCLE=[
+  {k:'chest', n:'Chest',     g:['chest-press','chest-fly']},
+  {k:'back',  n:'Back',      g:['back-vertical','back-horizontal']},
+  {k:'delt',  n:'Shoulders', g:['delt-side','delt-rear','delt-press','traps']},
+  {k:'arms',  n:'Arms',      g:['biceps','triceps','forearm']},
+  {k:'legs',  n:'Legs',      g:['quad','glute','hamstring','calf','posterior']},
+  {k:'core',  n:'Core',      g:['core']},
+  {k:'cardio',n:'Cardio',    g:['cardio']},
+  {k:'mob',   n:'Mobility',  g:['mobility']}
+];
+var MKFILT=null;
+function mkFiltOf(k){var m=null;MUSCLE.forEach(function(x){if(x.k===k)m=x;});return m;}
+function mkFiltHit(id){
+  if(!MKFILT)return true;
+  var m=mkFiltOf(MKFILT);
+  return !!m&&m.g.indexOf(grpOf(id))>=0;
+}
+function mkFiltSet(k){
+  MKFILT=(MKFILT===k)?null:k;      // tapping the lit one clears it, so All is never a dead end
+  mkFiltDraw();mkPickList();
+  try{sfxTick&&sfxTick();}catch(e){}
+}
+function mkFiltDraw(){
+  var e=document.getElementById('mkFilt');if(!e)return;
+  e.innerHTML='<button class="preset sm'+(MKFILT?'':' on')+'" onclick="mkFiltSet(null)">All</button>'+
+    MUSCLE.map(function(m){
+      return '<button class="preset sm'+(MKFILT===m.k?' on':'')+'" onclick="mkFiltSet(\''+m.k+'\')">'+m.n+'</button>';
+    }).join('');
+  e.scrollLeft=0;
+}
 function mkPick(){
   document.getElementById('mkSearch').value='';
+  MKFILT=null;      // every open starts on All. A filter left lit from last time reads as the
+  mkFiltDraw();     // library having gone missing, and the row is easy to miss above the list.
   mkPickList();
   document.getElementById('mkPickOvl').classList.add('on');
 }
@@ -12021,6 +12068,7 @@ function mkPickList(){
   for(var k in EX){
     if(k.indexOf('p_')===0)continue;
     if(q&&EX[k].name.toLowerCase().indexOf(q)<0)continue;
+    if(!mkFiltHit(k))continue;
     if(!!EX[k].cardio!==wantCardio)alt.push(k);
     else (DB.cex[k]?mine:lib).push(k);
   }
@@ -12036,9 +12084,15 @@ function mkPickList(){
   };
   var h='';
   if(mine.length)h+='<div class="swaphead">Yours</div>'+mine.map(item).join('');
-  h+=(mine.length?'<div class="swaphead">Library</div>':'')+lib.map(item).join('');
+  // the Library heading used to print off mine.length, so filtering down to your own exercises
+  // left a bare "Library" standing over nothing
+  if(lib.length)h+=(mine.length?'<div class="swaphead">Library</div>':'')+lib.map(item).join('');
   if(alt.length)h+='<div class="swaphead">'+(wantCardio?'Lifting':'Cardio')+'</div>'+alt.map(item).join('');
-  if(!mine.length&&!lib.length&&!alt.length)h+='<div class="mk-empty">Nothing matches. Add it as your own exercise instead.</div>';
+  if(!mine.length&&!lib.length&&!alt.length){
+    var m=mkFiltOf(MKFILT);
+    h+='<div class="mk-empty">'+(m?'Nothing under '+m.n+(q?' matches that search':'')+'. Tap All to see everything.'
+                                 :'Nothing matches. Add it as your own exercise instead.')+'</div>';
+  }
   document.getElementById('mkList').innerHTML=h;
 }
 function mkAddEx(id){
