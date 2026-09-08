@@ -214,3 +214,20 @@ writes through — `mkTouch()`, debounced 500ms. There is no "unsaved" state in 
    Also retired from the home screen the same day: the "Log a walk" side button (cardio
    lives in workouts now; the walk sheet only resurfaces while a walk's clock is running,
    and walk history/streak still show in Progress) and the "hold a workout" week hint.
+
+6. **The wizard asks about CONSTRAINTS, never PREFERENCES** (settled Sep 8). The generated
+   week is the app's opinion of a balanced week, and it stays that way. The wizard may ask
+   what the user *cannot* change — experience, days available, session length, goal, and (when
+   the home pool lands) what equipment they own. It must never ask which muscles they want to
+   train.
+
+   The difference is what the answer does to the program. Equipment is a constraint: owning
+   dumbbells instead of a machine changes which lift fills the squat slot, and the week stays
+   balanced. Muscle is a preference: "arms only" deletes the rest of the body, and a new user
+   asked that question will pick the mirror muscles every time and be handed a worse plan by
+   an app that knew better. Owner's words: *we don't want to guide new users to just focus on
+   one muscle group and disregard the rest.*
+
+   Choosing by muscle is legitimate — it just belongs to somebody building a workout
+   deliberately, which is the BUILDER, where the muscle filter lives (`MKFILT`, `mkFiltHit`,
+   builder-only, no path from `ez*`). Keep that separation when adding to either.
