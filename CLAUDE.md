@@ -79,8 +79,17 @@ const fs=require('fs');const s=fs.readFileSync('index.html','utf8');
 let i=0,n=0,bad=0;
 while((i=s.indexOf('<script',i))>=0){const gt=s.indexOf('>',i),c=s.indexOf('</script>',gt);n++;
   try{new Function(s.slice(gt+1,c));}catch(e){bad++;console.log('block '+n+':',e.message);}i=c+9;}
+let z=0;for(let j=0;j<s.length;j++){const c=s.charCodeAt(j);if(c===0||(c<9)||(c>13&&c<32))z++;}
+console.log(z?'CONTROL BYTES: '+z:'no stray bytes');
 console.log(bad?'FAILED':'all '+n+' blocks parse');"
 ```
+
+The control-byte line is not decoration. An edit once wrote a **NUL byte where a space belonged**,
+inside a string literal (`+'\0'+` instead of `+' '+`). Every block still parsed, because `'\0'` is
+perfectly legal JavaScript — so the gate above passed it. What broke was the app: two strings that
+were supposed to match never did. `grep` also stops working on the file the moment it contains a
+NUL ("Binary file index.html matches"), and git starts treating it as binary. Check the bytes, not
+just the syntax.
 
 **3. Scripted edits mangle escapes.** Prefer the Edit tool with literal text. When a generator is
 unavoidable, never write `'\\n'` inside a heredoc or `node -e` string — the shell and JS layers

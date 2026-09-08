@@ -3442,13 +3442,22 @@ var ALT={
   stcalf:   {name:"Standing Calf Raise Machine",note:"Knees straight - hits the gastrocnemius like the diagonal machine",sets:"50x12\n50x12\n50x12\n50x12",rest:"45 sec"},
   kneeraise:{bw:1,name:"Hanging Knee Raise",note:"From the pull-up bar - knees to chest, no swinging",sets:"0x12\n0x12\n0x12",rest:"45 sec"},
   abmach:   {name:"Ab Crunch Machine",note:"Seated machine crunch - loadable core work",sets:"30x15\n30x15\n30x15",rest:"45 sec"},
-  // ---------- nine lifts that were already drawn ----------
-  // Their animations have been finished, reviewed and sitting in the file the whole time, with
-  // no exercise pointing at them - so the app had no way to put any of them on screen. These are
-  // the nine that read correctly in both views; the bent-over row, the rear delt fly and the side
-  // plank are drawn too but their front views show the wrong movement, and they come back once
-  // that is fixed. Starting weights are deliberately modest: the first session sets the baseline
-  // and the level-up engine climbs from there.
+  // ---------- fourteen lifts that were already drawn ----------
+  // Their animations were finished, reviewed and sitting in this file the whole time with no
+  // exercise pointing at them, so the app had no way to put any of them on screen. Nine went in
+  // at v5.75 and the last five here.
+  //
+  // Those five were held back a build on my say-so: I claimed the bent-over row and the rear
+  // delt fly drew a standing figure for a hinged lift, and that the side plank was missing the
+  // free arm. All three were wrong, and reading the drawings said so. A bent-over row IS a static
+  // hinge, so a front view that holds still through the rep is correct; the hinge lives in the
+  // heights (head 184 against a standing 98, torso compressed 98 to 47). The rear delt fly sits
+  // 86px below the lateral raise it was supposed to be confusable with. And the side plank's
+  // akimbo arm is drawn, with its gap, under a comment saying so. The error was judging 480px
+  // artwork from 300px renders, where a 9px limb lands under 6px and strokes merge.
+  //
+  // Starting weights are deliberately modest: the first session sets the baseline and the
+  // level-up engine climbs from there.
   bbcalf:   {name:"Barbell Calf Raise",note:"Bar on the traps, heels off a block or the floor",sets:"65x15\n65x15\n65x15\n65x15",rest:"45 sec"},
   incbb:    {name:"Incline Barbell Press",wraps:1,note:"30 to 45 degrees - press perpendicular to the bench",sets:"55x8\n55x8\n55x8",rest:"2 min"},
   rdl:      {name:"Romanian Deadlift",note:"Hips back, legs near straight - the stretch is the exercise",sets:"65x8\n65x8\n65x8",rest:"2 min"},
@@ -3458,6 +3467,13 @@ var ALT={
   frontsq:  {name:"Front Squat",note:"Bar on the front rack, elbows high",sets:"45x8\n45x8\n45x8",rest:"3 min"},
   dbohp:    {name:"Dumbbell Shoulder Press",note:"Seated, dumbbells from the ears to overhead",sets:"25x10\n25x10\n25x10",rest:"2 min"},
   rtwist:   {name:"Russian Twist",note:"Both sides = one rep. Turn from the ribs",sets:"10x20\n10x20\n10x20",rest:"45 sec"},
+  bbrow:    {name:"Barbell Bent-Over Row",note:"Hinged at the hips, back flat - pull to the lower ribs",sets:"65x8\n65x8\n65x8",rest:"2 min"},
+  dbrfly:   {name:"Dumbbell Rear Delt Fly",note:"Hinged over, arms sweep out wide",sets:"10x15\n10x15\n10x15",rest:"60 sec"},
+  crunch:   {bw:1,name:"Floor Crunch",note:"Lower back stays down - only the upper back curls",sets:"0x20\n0x20\n0x20",rest:"45 sec"},
+  // No bw flag on purpose, the same call the push-up gets: it starts at nothing and is meant to
+  // take a bar across the hips later, so it keeps its weight box rather than losing it forever.
+  glutebr:  {name:"Glute Bridge",note:"Shoulders on the floor - lay a bar across the hips when it gets easy",sets:"0x15\n0x15\n0x15",rest:"60 sec"},
+  sideplank:{name:"Side Plank",note:"Each side. One straight line, hips stacked",sets:"30 sec\n30 sec\n30 sec",rest:"45 sec"},
   bike:null
 };
 delete ALT.bike;
@@ -3493,7 +3509,8 @@ var ALTGRP={lvchest:'chest-press',dbbench:'chest-press',smbench:'chest-press',pu
   // the nine that were drawn but unreachable. 'traps' is a new group: nothing in the library
   // trained them directly, so the shrug had nowhere to sit and no comparable swap to offer.
   bbcalf:'calf',incbb:'chest-press',rdl:'hamstring',shrug:'traps',mohp:'delt-press',
-  bwsquat:'quad',frontsq:'quad',dbohp:'delt-press',rtwist:'core'};
+  bwsquat:'quad',frontsq:'quad',dbohp:'delt-press',rtwist:'core',
+  bbrow:'back-horizontal',dbrfly:'delt-rear',crunch:'core',glutebr:'glute',sideplank:'core'};
 for(var __g in ALTGRP){GRP[__g]=ALTGRP[__g];}
 for(var __pg in PUMPGRP){GRP[__pg]=PUMPGRP[__pg];}
 function grpOf(id){return GRP[id]||'other';}
@@ -8322,10 +8339,11 @@ var ANIM=(function(){
     cd:[drawDoorwayF,drawDoorwayS],pg:[drawPigeonF,drawPigeonS],hs:[drawHamStrF,drawHamStrS]
   };
   // cards whose first panel is a TOP view rather than a front view
-  // rt comes back with the Russian Twist, which is what it was always for: a rotation is the one
-  // thing a side view cannot show, so the first panel looks down at the mat. sd stays out until
-  // the side plank's own drawing is fixed and it has an exercise again.
-  var TOPF={hb:1,lg:1,pl:1,rt:1,bc:1,ro:1,sr:1,lp:1,mv:1};
+  // rt and sd are back with the Russian Twist and the Side Plank, which is what they were always
+  // for. A rotation is the one thing a side view cannot show, and a side plank drawn from the
+  // front is a vertical line - so both lead with a look down at the mat. They were dropped in
+  // v5.72 as flags naming nothing, which was true then and stopped being true here.
+  var TOPF={hb:1,lg:1,pl:1,rt:1,sd:1,bc:1,ro:1,sr:1,lp:1,mv:1};
   // Forge exercise id -> motion code (p_ pump ids resolve through their base id)
   var MAP={
     bench:'bp',incdb:'id',mbench:'mb',xover:'cc',vbar:'ps',rope:'rp',ohext:'oe',
@@ -8340,9 +8358,10 @@ var ANIM=(function(){
     dbfly:'fy',machrow:'mr',dbrow:'oa',machpd:'ml',bbcurl:'cu',inccurl:'ic',dip:'dp',
     bdip:'bd',machlat:'ma',facepull:'fp',goblet:'gb',smsquat:'ss',bbthrust:'ht',
     stepup:'st',stcalf:'sm',kneeraise:'kr',abmach:'ab',
-    // the nine finished drawings that nothing pointed at until now
+    // the fourteen finished drawings that nothing pointed at until v5.75
     bbcalf:'cf',incbb:'ip',rdl:'rd',shrug:'sh',mohp:'mp',
     bwsquat:'bw',frontsq:'fs',dbohp:'ds',rtwist:'rt',
+    bbrow:'rw',dbrfly:'rf',crunch:'cr',glutebr:'gr',sideplank:'sd',
     p_inc:'id',p_xover:'cc',p_fly:'mf',p_lat:'lr',p_curl:'cb',p_hammer:'hc',
     p_rope:'rp',p_dip:'bd',p_bike:'bc',p_hollow:'hb',p_pdown:'sp',p_lext:'le',p_lcurl:'lc'
   };
@@ -8370,7 +8389,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.75';
+var APPV='v5.76';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8653,7 +8672,12 @@ mohp:{s:"Seat set so the handles sit level with the shoulders, back flat against
 bwsquat:{s:"Feet shoulder width, toes slightly out, arms straight out in front as a counterbalance.",c:["Sit down between the heels, chest tall","Knees track over the toes - out, not in","As deep as you can go without the back rounding","Drive up through the whole foot"],m:"Letting the heels lift. If they float, sit back further rather than straight down."},
 frontsq:{s:"Bar resting across the front of the shoulders, elbows driven high and forward, fingertips under the bar.",c:["Elbows STAY high - the shelf holds the bar, not the hands","Sit straight down with an upright torso","Depth is where the elbows start to drop","Drive up without letting the chest fall forward"],m:"Elbows dropping on the way up. The moment they fall the bar rolls forward and the rep is over."},
 dbohp:{s:"Seated with back support, dumbbells at ear height, palms facing forward, elbows under the wrists.",c:["Press up and slightly together without clanking at the top","Lower until the hands are level with the ears","Ribs down - the back stays against the pad","Each side works alone, so neither can carry the other"],m:"Arching the lower back to finish the press. If the ribs flare, the weight is too heavy."},
-rtwist:{s:"Sitting on the floor, knees bent, leaning back to about 45 degrees with a weight held at the chest.",c:["Turn from the RIBS, not the arms - the weight follows the torso","Touch down beside one hip, then sweep to the other","Both sides together are one rep","Feet may rest down; lifting them is the harder version"],m:"Swinging the arms while the chest stays square. If the ribs are not turning, nothing is being trained."}
+rtwist:{s:"Sitting on the floor, knees bent, leaning back to about 45 degrees with a weight held at the chest.",c:["Turn from the RIBS, not the arms - the weight follows the torso","Touch down beside one hip, then sweep to the other","Both sides together are one rep","Feet may rest down; lifting them is the harder version"],m:"Swinging the arms while the chest stays square. If the ribs are not turning, nothing is being trained."},
+bbrow:{s:"Bar over mid-foot, hinge to about 45 degrees with a flat back, grip just outside the legs, bar hanging under the shoulders.",c:["Pull the bar to the lower ribs, not the chest","Elbows stay close, shoulder blades finish the movement","Hold the hinge - the torso does not pump up and down","Lower under control to fully straight arms"],m:"Standing up with every rep. The hinge is the exercise; the arms are just hooks."},
+dbrfly:{s:"Hinged at the hips to about 45 degrees, back flat, light dumbbells hanging straight below the shoulders.",c:["Raise out WIDE, elbows slightly bent and fixed there","Squeeze the rear shoulders at the top","Lighter than you think - this is a small muscle","No momentum; the torso does not rock"],m:"Turning it into a row. The arms stay long and travel out to the sides, not back to the hips."},
+crunch:{s:"On your back, knees bent, feet flat, fingertips resting at your ears.",c:["Curl the upper back off the floor - the lower back never leaves it","Exhale hard at the top and hold a beat","Lower slow; the head is the last thing down","Fingertips only touch the ears - they never pull"],m:"Yanking the neck with the hands. If the chin is being dragged to the chest, the arms are doing the set."},
+glutebr:{s:"On your back, knees bent, feet flat and close to the hips, arms flat at your sides.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin tucked, ribs down - do not arch the finish","Lower under control; the hips do not drop"],m:"Pushing through the toes. Heels down, or the hamstrings take the set off the glutes."},
+sideplank:{s:"On your side, forearm under the shoulder, legs stacked or the top foot just in front, free hand on the hip.",c:["Lift the hips until the body is one straight line from head to heels","Hips stay STACKED - do not let the top one roll forward","Push the floor away through the forearm","Time each side; the clock is the set"],m:"Hips sagging as the clock runs. When the line breaks the set is over - stop there and keep the honest time."}
 };
 // Pump-day ids strip their p_ and land on these five, whose base ids do not match the strip:
 EXINSTR.inc=EXINSTR.incdb;EXINSTR.fly=EXINSTR.mfly;EXINSTR.lat=EXINSTR.dblat;
@@ -13945,20 +13969,32 @@ function renderHist(){
 // then never seen and never answered, whatever it guarded silently never ran, and answering what
 // looked like one question actually answered the other. They queue now, in the order they were
 // asked, and the next opens as the current one closes - so nothing the app wanted to ask is lost.
-var ASKQ=[];
+var ASKQ=[],ASKCUR=null;
 function ask(msg,onYes,title,yesLabel,onNo,alt){
   var ov=document.getElementById('askOvl');
-  if(ov&&ov.classList.contains('on')){ASKQ.push([msg,onYes,title,yesLabel,onNo,alt]);return;}
+  if(ov&&ov.classList.contains('on')){
+    // Queueing fixed the silent overwrite, and introduced a smaller fault of its own: tapping
+    // six sets in a row while the close-out prompt is up asked the SAME question six times and
+    // made you dismiss it six times. A question already on screen, or already waiting, is not
+    // asked twice - the answer to the copy was always going to be the answer to the original.
+    var sig=String(title)+' '+String(msg);
+    if(ASKCUR===sig)return;
+    for(var i=0;i<ASKQ.length;i++)if(ASKQ[i][6]===sig)return;
+    ASKQ.push([msg,onYes,title,yesLabel,onNo,alt,sig]);
+    return;
+  }
   askNow(msg,onYes,title,yesLabel,onNo,alt);
 }
 // Every exit from the sheet comes through closeOvl, which calls this. The short delay lets the
 // sheet finish closing so the next question reads as a new question rather than a flicker.
 function askDrain(){
+  ASKCUR=null;
   if(!ASKQ.length)return;
   var a=ASKQ.shift();
   setTimeout(function(){askNow(a[0],a[1],a[2],a[3],a[4],a[5]);},120);
 }
 function askNow(msg,onYes,title,yesLabel,onNo,alt){
+  ASKCUR=String(title)+' '+String(msg);   // what is on screen, so a repeat of it is not queued
   document.getElementById('askTitle').textContent=title||'Are you sure?';
   document.getElementById('askMsg').textContent=msg;
   var y=document.getElementById('askYes'),n=document.getElementById('askNo');
