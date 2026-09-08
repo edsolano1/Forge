@@ -8389,7 +8389,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.77';
+var APPV='v5.78';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9215,6 +9215,20 @@ function dayKeyOf(id){
 // targets, its levelled weights and any kept overlay written into real rows, because the
 // copy stops listening to all three the moment it exists. A live session's just-today
 // edits are deliberately NOT baked - a copy is the plan, not today's exception.
+// The first free "<name> 2", "<name> 3"... against every workout the app can currently see.
+// A trailing numeral is stripped before counting, so a third copy reads 3 rather than "2 2".
+function uniqWkName(base){
+  base=String(base||'Workout');
+  var taken={},k;
+  for(k in W)if(W[k]&&W[k].name)taken[String(W[k].name).toLowerCase()]=1;
+  if(!taken[base.toLowerCase()])return base;
+  var stem=base.replace(/\s+\d+$/,'');
+  for(var n=2;n<200;n++){
+    var t=stem+' '+n;
+    if(!taken[t.toLowerCase()])return t;
+  }
+  return base;
+}
 function wkCopy(id){
   var src=DB.custom&&DB.custom[id],w=W[id],copy;
   if(src){
@@ -9247,6 +9261,12 @@ function wkCopy(id){
   }else return null;
   copy.custom=1;copy.made=Date.now();
   copy.name=String(copy.name||'Workout').replace(/^Optional: /,'');
+  // Two cards reading "Full Body A" on two weekdays is the whole trouble this copy creates.
+  // From the moment it exists the two are independent - a raise on one will not move the other -
+  // and nothing anywhere said so. The copy takes the next free numeral, which shows up in every
+  // place the name does: the week, the history, the progress sheet. It is a normal workout name
+  // and the builder can change it to anything.
+  copy.name=uniqWkName(copy.name);
   var nid;
   do{nid='cus'+Date.now().toString(36)+Math.floor(Math.random()*4680).toString(36);}while(DB.custom[nid]);
   DB.custom[nid]=copy;
@@ -9324,6 +9344,19 @@ function dayMap(){
     }
   });
   if(changed){try{saveDB();}catch(e){}}
+  // Say what just happened, the first time it happens. A split is always the result of the user
+  // putting the same piece on a second day, so the explanation lands in the moment it means
+  // something. Once only - after that the numeral on the card carries it - and never during the
+  // boot migration, which splits old data before anybody has asked for anything.
+  if(changed&&typeof homeReady!=='undefined'&&homeReady){
+    var told=true;try{told=localStorage.getItem('arc_splitnote')==='1';}catch(e){}
+    if(!told){
+      try{localStorage.setItem('arc_splitnote','1');}catch(e){}
+      setTimeout(function(){try{ask(
+        'A workout stands on one day at a time, so the second day took its own copy - you will see a number on its card. They can change apart from here: raising the weight on one will not move the other.',
+        null,'It has its own copy now');}catch(e){}},420);
+    }
+  }
   return DB.days;
 }
 // Flattened in weekday order - for anything that just wants "the week's workouts, in order".
