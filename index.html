@@ -8855,7 +8855,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.90';
+var APPV='v5.91';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15663,8 +15663,13 @@ function sfxRest(){
     return sfx(function(t){
       var prev=BUS;BUS=abus||mbus;
       try{
-        [0,0.075, 0.30,0.375, 0.60,0.675].forEach(function(d){
-          pt(t+d,2100,0.045,0.17,'square');
+        // The same buzzer the app plays natively (res/raw/rest_plain.wav): three flat bursts
+        // of a low square, hard on and hard off. A bell is struck once and decays; a buzzer is
+        // held and then stops, and that shape - not the pitch - is what tells them apart.
+        [0,0.44,0.88].forEach(function(d){
+          [140,280,421].forEach(function(f,i){
+            pt(t+d,f,0.30,[0.15,0.06,0.035][i],'square');
+          });
         });
       }finally{BUS=prev;}
     });
