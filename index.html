@@ -8813,7 +8813,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.86';
+var APPV='v5.87';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -18046,7 +18046,14 @@ var TUT_DAYS={
 var TUT_CORE=[0,1,4,5,12,13,14];
 var TUT_STEPS,TUT_SCENE,TUT_COPY;
 function tutBuild(core){
-  var copy=TUTC().steps;
+  // The four theme scripts are FOURTEEN steps and TUT_ALL is sixteen: they were written before
+  // the last two steps existed, and the only reason nobody has seen it is that GENERIC bypasses
+  // them entirely. Turn the themes back on with that gap open and TUT_COPY[14] is undefined -
+  // which is the LAST step of the FIRST-RUN tour, so it would land on a new install first.
+  // Any index a theme has not written borrows the generic words rather than nothing, so a short
+  // theme script can never strand the tour again, and a theme can be filled in a line at a time.
+  var themed=TUTC().steps;
+  var copy=TUT_ALL.map(function(_,i){return themed[i]||GEN_TUT.steps[i];});
   if(core){
     TUT_STEPS=TUT_CORE.map(function(i){return TUT_ALL[i];});
     TUT_SCENE=TUT_CORE.map(function(i){return TUT_SCENE_ALL[i];});
