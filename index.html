@@ -1419,6 +1419,7 @@ body.plain .markglow{display:none;}
    class here rather than by source order - body.plain::after outranks body::after wherever
    the two sit relative to each other. */
 body.plain::after{display:none;}
+body.plain #flame{display:none;}
 body.plain #home::before{display:none;}
 /* The heading face is Marcellus - a serif, and Arcanum's, set on .wordmark a second time
    1500 lines below the first (CLAUDE.md trap 1, still true). Plain takes the app back to its
@@ -8854,7 +8855,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.89';
+var APPV='v5.90';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15662,9 +15663,9 @@ function sfxRest(){
     return sfx(function(t){
       var prev=BUS;BUS=abus||mbus;
       try{
-        pt(t,1800,0.13,0.17,'square');
-        pt(t+0.24,1800,0.13,0.17,'square');
-        pt(t+0.48,2400,0.20,0.18,'square');
+        [0,0.075, 0.30,0.375, 0.60,0.675].forEach(function(d){
+          pt(t+d,2100,0.045,0.17,'square');
+        });
       }finally{BUS=prev;}
     });
   }
@@ -17258,7 +17259,10 @@ function drawFlame(){
   }
   flRAF=requestAnimationFrame(drawFlame);
 }
-function startFlame(){flFrac=1;if(!flRAF)flRAF=requestAnimationFrame(drawFlame);}
+function startFlame(){
+  if(PLAIN())return;                 // no candle, and no animation loop behind a hidden one
+  flFrac=1;if(!flRAF)flRAF=requestAnimationFrame(drawFlame);
+}
 function stopFlame(){
   if(flRAF){cancelAnimationFrame(flRAF);flRAF=null;}
   embers.length=0;
