@@ -43,7 +43,7 @@
     // class arriving one paint late.
     // The fallback has to stay in step with ONE_THEME - there is a note on it saying so.
     if(!th)th='forge';
-    if(th==='light'||th==='forge'||th==='moon')d.classList.add(th);
+    if(th==='light'||th==='forge'||th==='moon'||th==='plain')d.classList.add(th);
   }catch(e){}
   // Motion goes on for the same reason and in the same breath as the theme: set it after the
   // first paint and the ground draws once moving and then stops dead, which is worse than
@@ -1400,6 +1400,34 @@ body.light .ovl{background:rgba(20,24,30,.5);}
    reached this conclusion first - see the sp-mark note: violet on the anvil "read as the
    one cold thing on the screen". Day colours are deliberately left alone - tempering runs
    straw through bronze to violet to blue, so a spread of hues belongs. */
+/* PLAIN. Not a fifth world - it is what is left when a world is taken away, which is the thing
+   worth looking at before the other three come back. Everything STRUCTURAL stays exactly where
+   it is: the same cards, the same radius, the same spacing, the same flow. What goes is the
+   weather - the ambient ground behind the week, the drifting motes, the grain, the vignette and
+   the halo behind the mark. The palette is the base :root with the blue taken out of it, so it
+   reads as neutral rather than as Obsidian with the lights off.
+   Note it does NOT need to fight the four body:not(.light):not(.forge) ornament rules further
+   down. Every one of them styles something inside #bg, and #bg is blanked outright here. */
+html.plain,body.plain{--bg:#0f1113;--surface:#181b1f;--surface2:#212529;--line:#333940;
+  --txt:#eceef0;--txt2:#a0a7b0;--txt3:#6b7480;
+  --go:#7fb2e6;--gold:#e0c98a;--match:var(--go);}
+html.plain{background:#0f1113;}
+body.plain #bg > *{display:none;}
+body.plain .markglow{display:none;}
+/* Two more pieces of weather that live OUTSIDE #bg and so run on every theme: the film of
+   grain over the whole app, and the violet bloom behind the header. Both are scoped by a
+   class here rather than by source order - body.plain::after outranks body::after wherever
+   the two sit relative to each other. */
+body.plain::after{display:none;}
+body.plain #home::before{display:none;}
+/* The heading face is Marcellus - a serif, and Arcanum's, set on .wordmark a second time
+   1500 lines below the first (CLAUDE.md trap 1, still true). Plain takes the app back to its
+   own sans and drops the inscriptional tracking with it. */
+body.plain .wordmark,body.plain .sec-label,body.plain .card-name,body.plain .s-title,
+body.plain .ex-n,body.plain .sect-t,body.plain .sheet h3,body.plain .finishbtn,
+body.plain .ed-ex,body.plain .swaphead,body.plain .tut-t,body.plain .sp-word{
+  font-family:var(--sans);font-weight:600;}
+body.plain .wordmark{font-size:26px;letter-spacing:.02em;}
 html.forge,body.forge{--bg:#0a0605;--surface:#170e09;--surface2:#241510;--line:#4a2718;
   --txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--match:#8f6fbe;}
 body.forge .card,body.forge .exc,body.forge .sheet,body.forge .timer-pill{
@@ -3142,7 +3170,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="themeOvl">
   <div class="sheet" style="max-width:400px">
     <h3>Choose a theme</h3>
-    <p>Each one is its own place, and changes everything: palette, lettering, and the sounds it makes.</p>
+    <p>Colour, lettering and the sounds the app makes. Nothing you have logged changes.</p>
     <div class="mk-acts" id="themeSheet"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('themeOvl')">CLOSE</div></div>
   </div>
@@ -3923,8 +3951,14 @@ var THEMES=[
   ['dark','Obsidian','A dark study. Ink and ledger lines, an orrery turning slowly behind the week.'],
   ['light','Tundra','An expedition depot. Wind across open ice, field notes, ground covered.'],
   ['forge','Forge','A smithy. Heat, hammer and quench \u2014 every finished day a piece worked.'],
-  ['moon','Moonwell','A still pool under the sky. Bowed glass, phases, nothing hurried.']
+  ['moon','Moonwell','A still pool under the sky. Bowed glass, phases, nothing hurried.'],
+  ['plain','Plain','The same app with the weather turned off. Flat ground, no embers, one accent.']
 ];
+// Which of them the picker actually offers. The other three are finished and are coming back
+// under their own v5.x pass; until then the choice is the one worth having now - the app dressed,
+// or the app plain. Widening this list is the whole of "bring the themes back" on the UI side.
+var THEME_SHOW=['forge','plain'];
+function themesShown(){return THEMES.filter(function(t){return THEME_SHOW.indexOf(t[0])>=0;});}
 // The picker used to show a moon for Obsidian and a moon-with-star for Moonwell, and a sun
 // for Frost - two of them read as the same idea and none of them said which theme it was.
 // Each entry is now that theme's own sigil, the same mark it puts on the splash and on
@@ -3935,9 +3969,12 @@ var THEME_IC={
   // than the 100-unit one the glyphs use - same arms, same proportions, half the scale.
   light:'<svg viewBox="0 0 20 20"><path d="M10 2.6v14.8M3.6 6.3l12.8 7.4M16.4 6.3L3.6 13.7M10 5.24L11.68 3.56M10 5.24L8.32 3.56M10 14.76L11.68 16.44M10 14.76L8.32 16.44M5.89 7.6L5.28 5.3M5.89 7.6L3.59 8.21M14.11 12.4L14.72 14.7M14.11 12.4L16.41 11.79M14.11 7.6L16.41 8.21M14.11 7.6L14.72 5.3M5.89 12.4L3.59 11.79M5.89 12.4L5.28 14.7"/></svg>',
   forge:'<svg viewBox="0 0 20 20"><g transform="translate(0.9 0.6) scale(0.94)"><path d="M0.6 9.4L6.5 5.9H19v2.3l-5.2 1.2-.9 4.8 4.2 2v2H3.4v-2l4.2-2-.9-4.8L3.2 10z"/></g></svg>',
-  moon:'<svg viewBox="0 0 20 20"><path d="M10 2.4l2.1 5.5 5.5 2.1-5.5 2.1-2.1 5.5-2.1-5.5L2.4 10l5.5-2.1z"/></svg>'
+  moon:'<svg viewBox="0 0 20 20"><path d="M10 2.4l2.1 5.5 5.5 2.1-5.5 2.1-2.1 5.5-2.1-5.5L2.4 10l5.5-2.1z"/></svg>',
+  // No sigil, on purpose: the other four each stamp their world on the splash and on every
+  // logged set, and this one has no world to stamp. A bare ring is the absence of a mark.
+  plain:'<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.4"/></svg>'
 };
-var THEME_BAR={dark:'#08090c',light:'#eef1f4',forge:'#0a0605',moon:'#0b0812'};
+var THEME_BAR={dark:'#08090c',light:'#eef1f4',forge:'#0a0605',moon:'#0b0812',plain:'#0f1113'};
 // Copy that changes with the theme. Arcanum seals a finished day shut; a smith quenches
 // a finished piece and puts it back in the fire to work it again.
 // Plain words while the app is being got working. Four voices is four ways to be unsure whether
@@ -3947,7 +3984,9 @@ var THEME_BAR={dark:'#08090c',light:'#eef1f4',forge:'#0a0605',moon:'#0b0812'};
 // and the picker are exactly where they were, and this is the only thing standing between them
 // and the sheet. Turning it back on restores the picker AND whatever theme was last chosen,
 // because the stored choice is never overwritten while this is off - it is simply not read.
-var THEMES_ON=0;
+// On again, but the picker only offers what THEME_SHOW lists - Forge and Plain. The other
+// three are still frozen and still whole; this is one door onto two of them, not four.
+var THEMES_ON=1;
 // Changing this means changing the fallback in the head script too. With THEMES_ON off nothing
 // writes baseline:theme, so the head has no way to learn which world this release is - it
 // hardcodes the answer, and if the two drift apart the splash paints one theme and the app
@@ -4055,15 +4094,17 @@ function TXT(k){
 }
 function curTheme(){
   var c=document.documentElement.classList;
-  return c.contains('forge')?'forge':c.contains('moon')?'moon':c.contains('light')?'light':'dark';
+  return c.contains('forge')?'forge':c.contains('moon')?'moon':c.contains('light')?'light'
+        :c.contains('plain')?'plain':'dark';
 }
 function applyTheme(t){
-  if(t!=='light'&&t!=='forge'&&t!=='moon')t='dark';
+  if(t!=='light'&&t!=='forge'&&t!=='moon'&&t!=='plain')t='dark';
   [document.documentElement,document.body].forEach(function(el){
     if(!el)return;
     el.classList.toggle('light',t==='light');
     el.classList.toggle('forge',t==='forge');
     el.classList.toggle('moon',t==='moon');
+    el.classList.toggle('plain',t==='plain');
   });
   // The two header buttons that carried THEME_IC are gone - themes live in Settings now, where
   // the picker already was, so the header was a second door onto the same room.
@@ -4101,7 +4142,7 @@ function themeIcon(t){
 function drawThemeSheet(){
   var e=document.getElementById('themeSheet');if(!e)return;
   var c=curTheme();
-  e.innerHTML=THEMES.map(function(t){
+  e.innerHTML=themesShown().map(function(t){
     return '<div class="thcard'+(t[0]===c?' sel':'')+'" onclick="setTheme(\''+t[0]+'\');drawThemeSheet()">'+
       '<span class="th-ic">'+themeIcon(t[0])+'</span>'+
       '<span class="th-b"><b>'+t[1]+'</b><small>'+t[2]+'</small></span>'+
@@ -4113,7 +4154,7 @@ function drawThemeSheet(){
 // Settings now shows the current theme and opens the one picker.
 function drawThemePick(){
   var e=document.getElementById('themeRow');if(!e)return;
-  var c=curTheme(),n=(THEMES.filter(function(t){return t[0]===c;})[0]||THEMES[0])[1];
+  var c=curTheme(),n=(THEMES.filter(function(t){return t[0]===c;})[0]||themesShown()[0])[1];
   e.innerHTML='<div class="btn" onclick="openThemePick()" style="display:flex;align-items:center;gap:11px;text-align:left">'+
     '<span style="width:18px;height:18px;flex-shrink:0;display:block">'+themeIcon(c)+'</span>'+n+
     '<span style="margin-left:auto;font-size:10px;letter-spacing:.12em">CHANGE</span></div>';
@@ -8813,7 +8854,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.87';
+var APPV='v5.88';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10298,7 +10339,9 @@ var CHK_GLYPH={
   dark: '<g transform="translate(50 50) scale(3.2) translate(-50 -44.5)"><path d="M50 34.5l10 10-10 10-10-10z" fill="none" stroke="currentColor" stroke-width="2.4"/><path class="f" d="M50 40.5l4 4-4 4-4-4z"/></g>',
   light:'<g transform="translate(50 50) scale(2.7) translate(-50 -50)" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none"><path d="'+FLAKE+'"/></g>',
   forge:anvilAt(64,'class="f"'),
-  moon: '<g transform="translate(50 50) scale(2.6) translate(-50 -50)"><path class="f" d="M50 36.5l2.9 10.6L63.5 50l-10.6 2.9L50 63.5l-2.9-10.6L36.5 50l10.6-2.9z"/></g>'
+  moon: '<g transform="translate(50 50) scale(2.6) translate(-50 -50)"><path class="f" d="M50 36.5l2.9 10.6L63.5 50l-10.6 2.9L50 63.5l-2.9-10.6L36.5 50l10.6-2.9z"/></g>',
+  // outline plus a filled centre, the same read as the other four: a ring you have stamped.
+  plain:'<g transform="translate(50 50) scale(2.6) translate(-50 -50)"><circle cx="50" cy="50" r="11" fill="none" stroke="currentColor" stroke-width="2.6"/><circle class="f" cx="50" cy="50" r="4.6"/></g>'
 };
 function chkSvg(){return '<svg class="glyph" viewBox="0 0 100 100">'+(CHK_GLYPH[curTheme()]||CHK_GLYPH.dark)+'</svg>';}
 function refreshChks(){
@@ -10309,7 +10352,10 @@ var MARK_GLYPH={
   dark: '<path d="M50 34.5l10 10-10 10-10-10z" fill="none" stroke="var(--gold)" stroke-width="1.7"/><path d="M50 40.5l4 4-4 4-4-4z" fill="var(--gold)"/>',
   light:'<g stroke="var(--gold)" stroke-width="1.9" stroke-linecap="round"><path d="'+FLAKE+'"/></g>',
   forge:anvilAt(24,'fill="var(--gold)"'),
-  moon: '<path d="M50 36.5l2.9 10.6L63.5 50l-10.6 2.9L50 63.5l-2.9-10.6L36.5 50l10.6-2.9z" fill="var(--gold)"/>'
+  moon: '<path d="M50 36.5l2.9 10.6L63.5 50l-10.6 2.9L50 63.5l-2.9-10.6L36.5 50l10.6-2.9z" fill="var(--gold)"/>',
+  // A ring. The other four are each a world's own sigil and it would be a lie to give this one
+  // a fifth; what it needs is a mark that says nothing, which is a circle and a hole.
+  plain:'<circle cx="50" cy="50" r="10.5" fill="none" stroke="var(--gold)" stroke-width="2.2"/>'
 };
 // cut is the colour showing through the mouth and eye - the ground the mark sits on
 function ouroboros(fill,cut,glyph){
@@ -10325,7 +10371,8 @@ var HEAD_GLYPH={
   dark: '<g transform="translate(50 50) scale(3.4) translate(-50 -44.5)"><path d="M50 34.5l10 10-10 10-10-10z" fill="none" stroke="var(--go)" stroke-width="1.3"/><path d="M50 40.5l4 4-4 4-4-4z" fill="var(--go)"/></g>',
   light:'<g transform="translate(50 50) scale(2.7) translate(-50 -50)" stroke="var(--go)" stroke-width="2" stroke-linecap="round" fill="none"><path d="'+FLAKE+'"/></g>',
   forge:anvilAt(59,'fill="var(--gold)"'),
-  moon: '<g transform="translate(50 50) scale(2.6) translate(-50 -50)"><path d="M50 36.5l2.9 10.6L63.5 50l-10.6 2.9L50 63.5l-2.9-10.6L36.5 50l10.6-2.9z" fill="var(--go)"/></g>'
+  moon: '<g transform="translate(50 50) scale(2.6) translate(-50 -50)"><path d="M50 36.5l2.9 10.6L63.5 50l-10.6 2.9L50 63.5l-2.9-10.6L36.5 50l10.6-2.9z" fill="var(--go)"/></g>',
+  plain:'<g transform="translate(50 50) scale(2.6) translate(-50 -50)"><circle cx="50" cy="50" r="11" fill="none" stroke="var(--go)" stroke-width="2.4"/></g>'
 };
 function renderMark(){
   // Two copies: the mark itself, and the lit twin stacked over it whose opacity is the breath.
@@ -10431,14 +10478,17 @@ window.addEventListener('resize',function(){
 
 // The app is Arcanum. Every other theme is its own place, so each wears its own name on
 // the home screen - the mark underneath is what says it is still the same app.
-function APPNAME(){return MW()?'MOONWELL':FG()?'FORGE':LT()?'TUNDRA':'ARCANUM';}
+// Plain says FORGE, not ARCANUM. The fall-through name is the OLD one, from when a theme
+// and the product were the same thing - it is right for Obsidian and wrong for anything
+// shipping today. Forge is the app now; Plain is Forge with the smithy turned off.
+function APPNAME(){return MW()?'MOONWELL':FG()?'FORGE':LT()?'TUNDRA':PLAIN()?'FORGE':'ARCANUM';}
 function renderName(){
   var w=document.querySelector('.wordmark');
   // Temporary: the build number sits beside the title so it can be read at a glance instead of
   // scrolled to. It goes when the app stops changing several times an hour.
   if(w)w.innerHTML=mkEsc(APPNAME())+'<span class="vtag">'+mkEsc(APPV)+'</span>';
   var sp=document.querySelector('.sp-word');
-  if(sp)sp.textContent=MW()?'Moonwell':FG()?'Forge':LT()?'Tundra':'Arcanum';
+  if(sp)sp.textContent=MW()?'Moonwell':FG()?'Forge':LT()?'Tundra':PLAIN()?'Forge':'Arcanum';
   var wl=document.getElementById('weekLabel');
   if(wl)wl.innerHTML=TXT('week');
 }
@@ -14813,6 +14863,11 @@ var actx=null,mbus=null,nbuf=null,rsend=null,abus=null,BUS=null,fbuf=null,fsend=
 function audioMode(m){
   try{if(navigator.audioSession)navigator.audioSession.type=m;}catch(e){}
 }
+// Named PLAIN, not PL: PL is already the plate calculator state object six hundred lines up, and
+// a hoisted function loses to a var assignment that runs later. Caught at runtime, not by reading.
+// Plain answers false to all three, so every themed branch in the app already falls through to
+// the base behaviour without one of them being touched. That is the whole reason this was cheap.
+function PLAIN(){return curTheme()==='plain';}
 function FG(){return curTheme()==='forge';}
 function MW(){return curTheme()==='moon';}
 function LT(){return curTheme()==='light';}
@@ -19471,7 +19526,10 @@ function sbEnd(){
   var t=await Store.get(TKEY);
   // What is stored is read but not obeyed while there is only one world, so the choice survives
   // untouched for whenever the other three come back.
-  applyTheme(THEMES_ON?(t||'dark'):ONE_THEME);
+  // Unset falls back to ONE_THEME, not 'dark'. Obsidian is the themeless default in the CSS, so
+  // 'dark' here would have opened every existing install on a theme nobody chose the moment the
+  // picker came back - and it is the one theme the picker does not currently offer a way out of.
+  applyTheme(THEMES_ON?(t||ONE_THEME):ONE_THEME);
   renderHome();
   // The retired walk clock: anything still running when the feature ended becomes a
   // logged walk instead of a stranded timer nobody can see or stop.
