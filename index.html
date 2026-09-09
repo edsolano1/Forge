@@ -8854,7 +8854,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.88';
+var APPV='v5.89';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13040,7 +13040,10 @@ function quenchAnvil(cb){
   raf=requestAnimationFrame(frame);
   setTimeout(fin,DUR+600);
 }
-function sessionSeal(cb){return MW()?waxMoon(cb):FG()?quenchAnvil(cb):igniteDiamond(cb);}
+function sessionSeal(cb){
+  if(PLAIN()){if(cb)cb();return;}
+  return MW()?waxMoon(cb):FG()?quenchAnvil(cb):igniteDiamond(cb);
+}
 // Moonwell's finish is the one gesture the theme is named for: a disc waxes from nothing
 // to full, holds, and floods. The phase is built the way a real one is - a half disc, then
 // an ellipse cut out of it or added back to it as the terminator crosses - so the shape is
@@ -15209,7 +15212,9 @@ function applyRoom(){
   // like a crypt. It keeps the tail - there is nowhere in this app without some space around it -
   // but sends a quarter as much, which reads as a hut rather than a hall.
   var f=FG(),m=MW(),l=LT();
-  rsend.gain.value=f?0.06:(m?0.68:(l?0.16:0.42));
+  // Plain is a room with no reverb worth the name - not a hall, not a smithy, a phone on a
+  // bench. 0.04 rather than 0 because a completely dry synth cue reads as a fault.
+  rsend.gain.value=f?0.06:(m?0.68:(l?0.16:(PLAIN()?0.04:0.42)));
   fsend.gain.value=f?0.34:0;
 }
 // A struck anvil. Broadband impact, then an inharmonic ring - the partials are nothing
@@ -15324,6 +15329,8 @@ function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
 // set logged - low struck weight in a stone room
 function sfxLog(){
   if(!sfxAllowed('log'))return;
+  // A set landing, and nothing else said about it: one click with a little body under it.
+  if(PLAIN())return sfx(function(t){nz(t,1100,1.4,0.03,0.20);pt(t,300,0.045,0.09,'sine');});
   if(FG())return sfx(function(t){anvil(t,1180,0.42,0.55);});
   if(MW())return sfx(function(t){glass(t,196,0.9,0.16,0.2);});
   // Tundra kept borrowing this one, and it is the app's most-heard sound - which is most of why
@@ -15341,6 +15348,8 @@ function sfxLog(){
 });}
 // set unchecked - dull low thunk, deliberately unlike the log sound
 function sfxUndo(){
+  // Lower and duller than the log, which is the whole job: it has to be obviously not that.
+  if(PLAIN())return sfx(function(t){nz(t,500,1.0,0.05,0.15);});
   if(FG())return sfx(function(t){          // tongs set down
     nz(t,700,1.0,0.05,0.2);
     [[420,0.35],[610,0.26],[880,0.15]].forEach(function(p){
@@ -15364,6 +15373,13 @@ function sfxUndo(){
 // personal record - something in the room notices
 function sfxPR(){
   if(!sfxAllowed('pr'))return;
+  // Two short clicks, the second higher. Enough to say "that was a record" and over in a
+  // sixth of a second. The base cue this replaces swells a tritone stack over 2.6 seconds.
+  if(PLAIN())return sfx(function(t){
+    pt(t,880,0.05,0.12,'sine');
+    nz(t,2400,2,0.02,0.09);
+    pt(t+0.10,1320,0.06,0.11,'sine');
+  });
   // Beating a record is the one moment worth a different instrument entirely - not the
   // hammer again, but blades meeting.
   // Turned down twice now, both times from the gym rather than the desk: 0.95 dwarfed the
@@ -15639,6 +15655,19 @@ function sfxRest(){
   // music: 5.85s of it, which is long enough for Chrome to ask Android for permanent audio
   // focus. They are synthesised now, they are under four seconds, and Tundra has its own
   // voice rather than borrowing Obsidian's bell.
+  // Three even tones, no swell, no bell. Same band the others were tuned into because that is
+  // what survives a gym and a playlist; everything else about it is deliberately unremarkable.
+  if(PLAIN()){
+    stopRestSrcs();
+    return sfx(function(t){
+      var prev=BUS;BUS=abus||mbus;
+      try{
+        pt(t,1800,0.13,0.17,'square');
+        pt(t+0.24,1800,0.13,0.17,'square');
+        pt(t+0.48,2400,0.20,0.18,'square');
+      }finally{BUS=prev;}
+    });
+  }
   stopRestSrcs();
   sfx(function(t){
     var g=actx.createGain();g.connect(abus||mbus);restKill(g);
@@ -15716,6 +15745,7 @@ function stopRestAlert(){
 }
 // the diamond catching light
 function sfxIgnite(){
+  if(PLAIN())return;
   if(FG())return sfxQuench();
   if(MW())return sfxMoonSeal();
   sfx(function(t){
@@ -15745,6 +15775,7 @@ function sfxMoonSeal(){sfx(function(t){
 });}
 // hold target reached
 function sfxHold(){
+  if(PLAIN())return sfx(function(t){nz(t,1900,1.6,0.018,0.09);});
   if(MW())return sfx(function(t){glass(t,784,1.1,0.13,0.3);});
   // One hard strike and the strap taking it. The cue this replaces was Obsidian's, and it was
   // called dainty - a hold reaching its target should land, not chime.
@@ -15762,6 +15793,7 @@ function sfxHold(){
 // slide grinds DOWN as it loads the rail and settles, and lands on a stop. Same length,
 // opposite gesture - which is most of why the old sound gave the theme away.
 function sfxPage(){
+  if(PLAIN())return;
   // A blade through packed snow. The gust this replaces was two breaths at 0.042 and 0.026, which
   // measured at a peak of 0.01 against 0.09 for Obsidian's page - about 19dB under everything else
   // in the app. It was not a weak idea, it was an inaudible one.
@@ -15805,6 +15837,7 @@ function sfxPage(){
 // Launch. Arcanum riffles a cover open; Forge drags the plate clear of the fire and
 // drops it, so this is the same slide as above but longer, heavier and lower.
 function sfxRiffle(){
+  if(PLAIN())return;
   // Tundra launches on weather: a gust builds, tops out, and falls away, with a second
   // lower body under it so it reads as open ground rather than a vent.
   if(LT())return sfx(function(t){
@@ -15917,6 +15950,7 @@ function flameRun(t,dur,vol){
   b.connect(bf);bf.connect(bg);bg.connect(BUS||mbus);b.start(t);b.stop(t+dur);
 }
 function sfxUnseal(){
+  if(PLAIN())return;
   // The opposite gesture to the seal: the same stack, walked down instead of up.
   if(MW())return sfx(function(t){
     glass(t,392,1.8,0.13,0.5);
@@ -17065,7 +17099,10 @@ function runLavaWipe(mid){
   }
   requestAnimationFrame(frame);
 }
-function runWipe(mid){return FG()?runLavaWipe(mid):runFlameWipe(mid);}
+function runWipe(mid){
+  if(PLAIN()){mid();return;}
+  return FG()?runLavaWipe(mid):runFlameWipe(mid);
+}
 // ---------- flame wipe: heat-field fire that burns up the page ----------
 function wipePalette(){
   var light=document.body.classList.contains('light'),p=new Uint8Array(1024);
