@@ -8813,7 +8813,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.93';
+var APPV='v5.94';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8966,6 +8966,25 @@ function lastFor(exId){
     var L=DB.logs[i];if(!L.entries)continue;
     var sets=[];
     for(var k in L.entries){
+      if(exOfKey(L,k)===exId&&L.entries[k].length)sets=sets.concat(L.entries[k]);
+    }
+    if(sets.length)return {sets:sets,date:L.date};
+  }
+  return null;
+}
+// The same lift, ONE block of it. Readiness and the raise are judged per row: a heavy block and
+// its back-off block have different targets, so each is measured against its own last run. A
+// repeated row's slot ("bench~2") reads only that key; the first row (and every row in a workout
+// that names each lift once) reads the plain keys and ignores the "~" blocks. lastFor above is
+// left as it is for the Last chip, where "last time" honestly means both blocks together.
+function lastForSlot(exId,slot){
+  var s=String(slot||''),rep=s.indexOf('~')>=0;
+  if(!rep)slot=null;
+  for(var i=DB.logs.length-1;i>=0;i--){
+    var L=DB.logs[i];if(!L.entries)continue;
+    var sets=[];
+    for(var k in L.entries){
+      if(rep?(k!==s):(k.indexOf('~')>=0))continue;
       if(exOfKey(L,k)===exId&&L.entries[k].length)sets=sets.concat(L.entries[k]);
     }
     if(sets.length)return {sets:sets,date:L.date};
@@ -9272,8 +9291,8 @@ function gradeClass(e){
   var g=e.g||(e.pr?'pr':'');               // entries logged before grading existed
   return isTop(g)?' ispr':g==='match'?' ismatch':'';
 }
-function isReady(exId,tgts){
-  var L=lastFor(exId);
+function isReady(exId,tgts,slot){
+  var L=lastForSlot(exId,slot);
   if(!L||L.sets.length<tgts.length)return false;
   for(var i=0;i<tgts.length;i++){
     var t=tgts[i],s=L.sets[i];
@@ -9291,7 +9310,8 @@ function readyCount(wk){
   var w=W[wk],n=0;
   w.sections.forEach(function(sec){sec.rows.forEach(function(row){
     var id=typeof row==='string'?row:row[0];
-    if(isReady(id,targetsOf(row)))n++;
+    var slot=(typeof row==='string'?null:((row[1]||{}).slot))||id;
+    if(isReady(id,targetsOf(row),slot))n++;
   });});
   return n;
 }
@@ -9370,9 +9390,15 @@ function levelPlan(wk){
     var rf=rowFor(A&&A.swaps,row,wk);
     var id=rf.exId;
     var tg=rf.data.sets.split('\n').map(parseTarget);
-    if(!isReady(id,tg))return;
-    var L=lastFor(id);
+    // Per row, not per lift: a lift built twice in one day is two rows with two sets of targets,
+    // and each is judged against its own block's last run (lastForSlot). Reading both blocks
+    // joined together compared the back-off row against the heavy sets by index.
+    if(!isReady(id,tg,rf.id))return;
+    var L=lastForSlot(id,rf.id);
     var lines=rf.data.sets.split('\n');
+    // A declined raise is keyed by the row's slot when the row is a repeat, so refusing the
+    // back-off block's offer does not silence the heavy block's, or the other way round.
+    var sk=(String(rf.id).indexOf('~')>=0)?rf.id:id;
     var est=false;
     // The raise steps from the EVIDENCE, not from the old target (Aug 23, the hack squat
     // that asked three times): a log that beat the target by several plate-steps used to
@@ -9431,8 +9457,8 @@ function levelPlan(wk){
     // A declined raise stays declined until the lift is beaten again. The signature pins the
     // refusal to one session and one set of targets, so a newer log - or a target that moved
     // for any other reason - brings the arrow back on its own.
-    if((DB.upSkip||{})[id]===skipSig(id,lines))return;
-    out.push({id:id,name:rf.data.name,from:lines,to:next,est:est});
+    if((DB.upSkip||{})[sk]===skipSig(id,lines))return;
+    out.push({id:id,name:rf.data.name,from:lines,to:next,est:est,slot:rf.id,baseId:rf.baseId,swapped:!!rf.swapId,sk:sk});
   });
   return out;
 }
@@ -9566,14 +9592,19 @@ function applyLevel(){
       if(cw)(cw.sections||[]).forEach(function(sec){
         (sec.rows||[]).forEach(function(row,ri){
           var base=typeof row==='string'?row:row[0];
-          if(base!==p.id)return;
+          // THIS row, by base id AND slot. Matching on the lift alone wrote one raise into every
+          // row that named it, so a heavy block and its back-off block both became heavy sets.
+          // A swapped row keeps the global table: its own sets are not what the day reads.
+          if(p.swapped||base!==(p.baseId||p.id))return;
+          var rs=(typeof row==='string')?base:(((row[1]||{}).slot)||base);
+          if(p.slot&&rs!==p.slot)return;
           if(typeof row==='string')sec.rows[ri]=[base,{sets:p.to.join('\n')}];
           else{row[1]=row[1]||{};row[1].sets=p.to.join('\n');}
           wrote=true;
         });
       });
       if(!wrote)DB.up[p.id]=p.to.join('\n');
-      delete DB.upSkip[p.id];
+      delete DB.upSkip[p.sk||p.id];
     });
     saveDB();closeOvl('lvlOvl');renderHome();
     if(sessionOpen())renderSession();
@@ -9591,7 +9622,7 @@ function skipLevel(){
   lvlAbort();
   var plan=levelPlan(LVLWK);
   DB.upSkip=DB.upSkip||{};
-  plan.forEach(function(p){DB.upSkip[p.id]=skipSig(p.id,p.from);});
+  plan.forEach(function(p){DB.upSkip[p.sk||p.id]=skipSig(p.id,p.from);});
   saveDB();closeOvl('lvlOvl');renderHome();
   if(sessionOpen())renderSession();
 }
@@ -10735,7 +10766,7 @@ function renderSession(){
   // session it names is already gone, and every rowFor(A.swaps,...) below threw on undefined.
   // CUR outlives leaveSession too, which is why "if(CUR)renderSession()" was never the guard.
   if(!w||!A)return;
-  var canRaise={};levelPlan(wk).forEach(function(p){canRaise[p.id]=1;});
+  var canRaise={};levelPlan(wk).forEach(function(p){canRaise[p.slot]=1;});   // by row, not by lift
   // The colour key is gone (user call, mid-session, Aug 26). It existed to explain a
   // three-way grade, and the grade itself was the problem: see gradeClass. A record still
   // reads gold and needs no legend to say so.
@@ -10763,14 +10794,14 @@ function renderSession(){
       var tg=rf.swapId?r.sets.split('\n').map(parseTarget):targetsOf(row,wk);
       var ent=A.entries[id]||[];
       var allDone=tg.length>0&&tg.every(function(_,i){return ent[i];});
-      var L=lastFor(rf.exId),ready=isReady(rf.exId,tg),bst=bestEver(rf.exId);
+      var L=lastFor(rf.exId),ready=isReady(rf.exId,tg,rf.id),bst=bestEver(rf.exId);
       html+='<div class="exc'+(allDone?' alldone':'')+'" id="exc-'+id+'">';
       // ex-body groups everything a press-and-hold actually acts on - the name and the
       // target/last/best under it - so the tour has one box to ring. Ringing the name alone read
       // as "rename this"; the hold changes the exercise, not what it is called. It stops short of
       // the links row below on purpose: Instructions and Add note are not part of what a hold does.
       html+='<div class="ex-h"><div class="ex-body"><div class="ex-nrow">'+DRAGSVG+'<div class="ex-n">'+esc(r.name)+(rf.swapId?' <span style="color:var(--gold);font-size:11px;font-weight:500">SWAPPED</span>':'')+'</div>'+
-            '<div class="ex-tools">'+(ready&&canRaise[rf.exId]?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(CUR)">'+ARROW+'</span>':'')+'<div class="ex-swap" onclick="openSwap(\''+rf.id+'\')" title="Swap exercise"><svg viewBox="0 0 20 20"><path d="M3 7h11l-2.6-2.6M17 13H6l2.6 2.6"/></svg></div></div></div>';
+            '<div class="ex-tools">'+(ready&&canRaise[rf.id]?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(CUR)">'+ARROW+'</span>':'')+'<div class="ex-swap" onclick="openSwap(\''+rf.id+'\')" title="Swap exercise"><svg viewBox="0 0 20 20"><path d="M3 7h11l-2.6-2.6M17 13H6l2.6 2.6"/></svg></div></div></div>';
       // Your own note on the exercise. Keyed on exId, so it follows the lift through a swap and
       // survives every session - machine seat height, a grip, a cue that only matters to you.
       // Separate from r.note, which is the app's own coaching line and is not yours to edit.
