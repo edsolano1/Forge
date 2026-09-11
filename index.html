@@ -2728,7 +2728,7 @@ body.wcon{overflow:hidden;}
   <div id="weekCards"></div>
   <!-- label, hint and cards are one thing to look at, so the tour can light them as one -->
   <div id="extraWrap">
-    <div class="sec-label" id="extraLabel" style="display:none;margin-top:26px">Kept days</div>
+    <div class="sec-label" id="extraLabel" style="display:none;margin-top:26px">Saved workouts</div>
     <div class="mk-hint" id="extraHint" style="display:none">Not part of the week. Open one whenever you want it.</div>
     <div id="extraCards"></div>
   </div>
@@ -2757,7 +2757,7 @@ body.wcon{overflow:hidden;}
   <div class="s-head">
     <div class="iconbtn" onclick="mkBack()"><svg viewBox="0 0 20 20"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></div>
     <div class="s-tb">
-      <div class="s-title" id="mkTitle">Inscribe a day</div>
+      <div class="s-title" id="mkTitle">New workout</div>
       <div class="s-sub" id="mkSub"></div>
     </div>
   </div>
@@ -3049,7 +3049,7 @@ body.wcon{overflow:hidden;}
   <div class="wc-in">
     <div class="wc-mark" id="wcMark"></div>
     <div class="wc-rule"></div>
-    <h1 class="wc-t">Welcome to the Forge</h1>
+    <h1 class="wc-t">Welcome to Forge</h1>
     <p class="wc-s" id="wcIntro"></p>
     <p class="wc-s" id="wcS"></p>
     <div class="wc-picks" id="wcPicks"></div>
@@ -3096,9 +3096,9 @@ body.wcon{overflow:hidden;}
         oninput="setAlertLvl(this.value,true)" onchange="setAlertLvl(this.value)">
       <span class="slider-num num" id="alertNum"></span>
     </div>
-    <div class="sfx-lbl" style="margin-top:14px"><span>Rest over alert</span></div>
+    <div class="sfx-lbl" style="margin-top:14px"><span>Alert when rest ends</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="sfxKeys"></div>
-    <div class="sfx-lbl" style="margin-top:14px"><span>Motion</span></div>
+    <div class="sfx-lbl" style="margin-top:14px"><span>Animation</span></div>
     <div class="presets" id="motionRow"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Weight</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="unitRow"></div>
@@ -3123,16 +3123,17 @@ body.wcon{overflow:hidden;}
     <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="doRestore(this)">
     <div class="sfx-lbl"><span>Tutorial</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr">
-      <button class="preset sm" id="tutBtnShort" onclick="tutStart(1)">Short</button>
+      <button class="preset sm" id="tutBtnShort" onclick="tutStart(1)">Quick</button>
       <button class="preset sm" id="tutBtn" onclick="tutStart()">Full</button>
     </div>
     <!-- The sandbox came off this sheet at release (Aug 23) as a dev tool, and came back
          (v5.41) as a user feature: it replays the whole first run - welcome, ritual,
          generated week - in a copy where nothing is saved, and leaving throws it all away. -->
-    <div class="sfx-lbl"><span>The first run</span></div>
+    <div class="sfx-lbl"><span>Practice run</span></div>
     <div class="presets" style="grid-template-columns:1fr">
-      <button class="preset sm" onclick="sbStart()">TRY IT FRESH &middot; nothing is saved</button>
+      <button class="preset sm" onclick="sbStart()">REPLAY THE FIRST RUN &middot; nothing is saved</button>
     </div>
+    <div class="footnote" style="margin:16px 2px 0;text-align:center"><span id="setVer"></span> &middot; <a href="privacy.html" style="color:inherit">Privacy</a></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('settingsOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -3148,7 +3149,7 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="mkActOvl">
   <div class="sheet" style="max-width:400px">
-    <h3 id="mkActTtl">Reshape this day</h3>
+    <h3 id="mkActTtl">Reshape this workout</h3>
     <p id="mkActSub"></p>
     <div class="mk-acts" id="mkActBody"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('mkActOvl')">CANCEL</div></div>
@@ -3157,7 +3158,7 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="mkSlotOvl">
   <div class="sheet" style="max-width:420px">
-    <h3 id="mkSlotTtl">Which day does it take?</h3>
+    <h3 id="mkSlotTtl">Which day does it go on?</h3>
     <p>The week keeps its seven slots. Your day replaces what is on the one you pick, and the original can be put back any time.</p>
     <div class="lvl-list" id="mkSlotBody"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('mkSlotOvl')">CANCEL</div></div>
@@ -3328,7 +3329,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="histOvl">
   <div class="sheet">
     <div class="hh">
-      <h3 id="histTitle">Session history</h3>
+      <h3 id="histTitle">Workouts finished</h3>
       <div class="hseg" id="histSeg">
         <div class="hsegb on" id="hsegList" onclick="histMode('list')">List</div>
         <div class="hsegb" id="hsegCal" onclick="histMode('cal')">Calendar</div>
@@ -3338,7 +3339,7 @@ body.wcon{overflow:hidden;}
     <textarea id="histTxt" readonly style="position:fixed;left:-9999px;top:0;width:10px;height:10px;opacity:0"></textarea>
     <div class="sheet-btns">
       <div class="btn btn-go" onclick="copyHist()" id="copyHistBtn">COPY ALL</div>
-      <div class="btn" onclick="exportDest('text')">EXPORT FILE</div>
+      <div class="btn" onclick="exportDest('text')">SAVE AS A FILE</div>
       <div class="btn" onclick="closeOvl('histOvl')">CLOSE</div>
     </div>
   </div>
@@ -8811,7 +8812,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.99';
+var APPV='v5.100';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9502,7 +9503,7 @@ function lvlFmt(s){
   s=String(s);
   var m=s.match(/^0x(\d+)$/);
   if(m)return m[1]+' reps';   // a zero-weight line is a rep count, not "0 × 22"
-  return fmtLine(s).replace('x','&thinsp;&times;&thinsp;');
+  return fmtLine(s).replace('×','&thinsp;&times;&thinsp;');
 }
 // What the chip's inline editor is actually editing, read off the target's shape:
 // a zero-weight line edits reps, a timed line edits seconds, anything else the weight.
@@ -10038,7 +10039,7 @@ function markDayDone(id){
   if(openHere(id)){mkNote('This workout has a session open with sets in it. Finish it first.');return;}
   // No confirm. It is a tick you can press again, and asking first put a dialog in front of a
   // decision that undoes itself.
-  DB.logs.push({day:id,date:today(),entries:{},note:'',swaps:{},sealed:1,marked:1});
+  DB.logs.push({day:id,name:(W[id]||{}).name||'',date:today(),entries:{},note:'',swaps:{},sealed:1,marked:1});
   delete DB.active[id];
   saveDB();try{autoBk();}catch(e){}renderHome();
   if(typeof mkRender==='function'&&document.getElementById('make').classList.contains('on'))mkRender();
@@ -10504,6 +10505,7 @@ function renderName(){
   // Temporary: the build number sits beside the title so it can be read at a glance instead of
   // scrolled to. It goes when the app stops changing several times an hour.
   if(w)w.innerHTML=mkEsc(APPNAME())+'<span class="vtag">'+mkEsc(APPV)+'</span>';
+  var sv=document.getElementById('setVer');if(sv)sv.textContent=APPNAME()+' '+APPV;
   var sp=document.querySelector('.sp-word');
   if(sp)sp.textContent=MW()?'Moonwell':FG()?'Forge':LT()?'Tundra':'Arcanum';
   var wl=document.getElementById('weekLabel');
@@ -10850,7 +10852,9 @@ function renderSession(){
       // made a one-off heavy day look like the standard you were meant to hold every set
       // to. It moved to the foot of the card, beside the rest - present, not prescriptive.
       html+='<div class="ex-stats">'+
-            '<span class="ex-stat st-tgt">Target <b>'+r.sets.split('\n').map(fmtLine).join(', ')+'</b></span>'+
+            '<span class="ex-stat st-tgt">Target <b>'+r.sets.split('\n').map(fmtLine).join(', ')+'</b>'+
+              // The unit, once, so nobody has to guess whether 35 is pounds or kilograms (v5.100).
+              (/^[1-9][\d.]*x/.test(String(r.sets))?' '+wUnitName():'')+'</span>'+
             (L?'<span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span>':'')+
             '</div></div>';   // closes ex-stats, then ex-body
       // The button sits beside the instructions because that is where you already look for
@@ -10975,7 +10979,7 @@ function openEdit(id,i,which){
   if(!r)return;
   var cur=parseFloat(document.getElementById((which==='w'?'w-':'r-')+id+'-'+i).value)||0;
   var isSec=(r.sets.split('\n')[i]||'').indexOf('sec')>-1;
-  edCtx={id:id,i:i,which:which,val:cur,isSec:isSec};
+  edCtx={id:id,i:i,which:which,val:cur,open:cur,isSec:isSec};
   document.getElementById('edEx').textContent=r.name;
   document.getElementById('edSet').textContent='Set '+(i+1)+' \u00b7 '+(which==='w'?'Weight':(isSec?'Seconds':'Reps'));
   // The other two branches are whole words, so this one is too - and "kgs" was never a unit.
@@ -11017,7 +11021,10 @@ function saveEdit(){
   // The pad speaks the display unit; storage speaks pounds. A weight converts exactly once
   // here - the input keeps the exact pound value in data-lb and shows the display form.
   if(edCtx.which==='w'){
-    var lb=inW(edCtx.val);
+    // Opened and closed without a change: keep the exact pounds already in data-lb. Converting
+    // the rounded kg display back would turn a 145 lb target into 145.5 (v5.100).
+    var same=(edCtx.val===edCtx.open&&el.dataset.lb!==undefined&&el.dataset.lb!=='');
+    var lb=same?parseFloat(el.dataset.lb)||0:inW(edCtx.val);
     el.dataset.lb=lb;
     el.value=fmtW(lb);
   }else{
@@ -11164,7 +11171,7 @@ document.getElementById('sBack').onclick=function(){
 var swapTarget=null;
 // 'delt-press' has been a group since the overhead press was added and has never had a label, so
 // its swap sheet printed the raw key as a heading. 'traps' is new, for the shrug.
-var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly / isolation','back-vertical':'Vertical pull','back-horizontal':'Horizontal row','biceps':'Biceps','triceps':'Triceps','quad':'Quad / squat pattern','glute':'Glutes / hip extension','hamstring':'Hamstring / leg curl','posterior':'Posterior chain','calf':'Calves','delt-side':'Side delt','delt-rear':'Rear delt','delt-press':'Overhead press','traps':'Traps','core':'Core','forearm':'Forearm','cardio':'Cardio','mobility':'Mobility','other':'Other'};
+var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly','back-vertical':'Pull-down and pull-up','back-horizontal':'Rowing','biceps':'Biceps','triceps':'Triceps','quad':'Squats and leg presses','glute':'Backside and hips','hamstring':'Back of the thigh','posterior':'Back of the body','calf':'Calves','delt-side':'Side of the shoulder','delt-rear':'Back of the shoulder','delt-press':'Overhead press','traps':'Upper back and neck','core':'Core','forearm':'Forearm','cardio':'Cardio','mobility':'Mobility','other':'Other'};
 function swapItem(k){
   return '<div class="swapitem" onclick="doSwap(\''+k+'\')">'+esc(EX[k].name)+'<small>'+EX[k].sets.split('\n').map(fmtLine).join(', ')+'</small></div>';
 }
@@ -11883,7 +11890,7 @@ function mkRender(){
   // so it said "New workout" for the whole session. It follows the name now.
   document.getElementById('mkTitle').textContent=MK.name||MKTXT().t;
   document.getElementById('mkSub').textContent=
-    making?'New workout':(MK.rows.reduce(function(a,r){return a+(r.n||0);},0)+' sets');
+    making?'Give it a name':(function(n){return n+(n===1?' set':' sets');})(MK.rows.reduce(function(a,r){return a+(r.n||0);},0));
   if(!shell){
     // No shared-days chip any more: under the day-to-day model (v4.156) an edit here can
     // only ever touch the one day this workout stands on, so there is nothing to warn about.
@@ -12946,7 +12953,8 @@ function finishNow(){
   var txt=buildExport(wk,A);
   var entries={};
   for(var k in A.entries){var arr=A.entries[k].filter(function(x){return x;});if(arr.length)entries[k]=arr;}
-  DB.logs.push({day:wk,date:A.date,entries:entries,note:A.note||'',swaps:A.swaps||{},sealed:1,wk:A.wk||dayGuess(wk)});
+  // The name rides on the log so history can still say what it was after the workout is deleted.
+  DB.logs.push({day:wk,name:(W[wk]||{}).name||'',date:A.date,entries:entries,note:A.note||'',swaps:A.swaps||{},sealed:1,wk:A.wk||dayGuess(wk)});
   delete DB.active[wk];
   saveDB();
   try{autoBk();}catch(e){}
@@ -13521,7 +13529,7 @@ function routineText(){
 }
 function shareWeek(kind){
   if(!DAYS.some(function(D){return (DB.days[D.k]||[]).some(function(i){return i!=='rest';});})){
-    ask('There is nothing on your week yet. Build a day first and it can be shared.',null,'Nothing to share');
+    ask('There is nothing on your week yet. Build a workout first and it can be shared.',null,'Nothing to share');
     return;
   }
   var isText=kind==='text';
@@ -13666,11 +13674,11 @@ function bkNudge(){
     localStorage.setItem('arc_bknudge','1');
   }catch(e){return;}
   if(autoBkAvail()){
-    ask('Everything you have logged lives only on this phone. Turn on the automatic safety copy? A backup file will quietly refresh itself after every finished workout. Backup & restore in Settings is always there too.',
+    ask('Everything you have logged lives only on this phone. Turn on the automatic safety copy? A backup file will quietly refresh itself after every finished workout. Backup & restore, under your week, is always there too.',
       function(){try{localStorage.setItem('arc_autobk','1');}catch(e){}autoBk(true);},
       'Guard your history?','TURN IT ON');
   }else{
-    ask('Everything you have logged lives only on this phone. A backup that leaves the phone is the safe kind. Backup & restore in Settings makes one.',null,'Guard your history?');
+    ask('Everything you have logged lives only on this phone. A backup that leaves the phone is the safe kind. Backup & restore, under your week, makes one.',null,'Guard your history?');
   }
 }
 // BACKUP turns the sheet's page to the three ways out, each with its explanation in
@@ -14547,7 +14555,7 @@ function deleteLog(i){
     HIST.sel=null;
     if(!DB.logs.length){closeOvl('histOvl');renderHome();return;}
     renderHist();renderHome();
-  },'Delete '+(w?w.name.replace('Optional: ',''):L.day)+'?','DELETE');
+  },'Delete '+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'?','DELETE');
 }
 function histBack(){HIST.sel=null;HIST.ed=null;renderHist();}
 function histMon(d){
@@ -14593,13 +14601,13 @@ function renderHist(){
         }).join('')+'</div></div>';
     }
     body.innerHTML='<div class="hback" onclick="histBack()">&larr; All sessions</div>'+
-      '<div class="hdet-n">'+(w?w.name.replace('Optional: ',''):L.day)+'</div>'+
+      '<div class="hdet-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
       '<div class="hscroll">'+rows+(L.note?'<div class="hnote">'+esc(L.note)+'</div>':'')+'</div>'+
       '<div class="hdel" onclick="deleteLog('+HIST.sel+')"><svg viewBox="0 0 20 20"><path d="M4 6h12M8.5 6V4.5h3V6M6 6l.8 10h6.4L14 6M8.4 8.6v4.8M11.6 8.6v4.8"/></svg>Delete this session</div>';
     return;
   }
   seg.style.visibility='';
-  ttl.textContent='Session history';
+  ttl.textContent='Workouts finished';
   document.getElementById('hsegList').className='hsegb'+(HIST.mode==='list'?' on':'');
   document.getElementById('hsegCal').className='hsegb'+(HIST.mode==='cal'?' on':'');
   if(HIST.mode==='list'){
@@ -14634,8 +14642,8 @@ function renderHist(){
       return '<div class="hrow" style="--hc:'+dayC(L.day)+'" onclick="histOpen('+i+')">'+
           '<div class="hrow-b">'+
             '<div class="hrow-d">'+pretty(L.date)+'</div>'+
-            '<div class="hrow-n">'+(w?w.name.replace('Optional: ',''):L.day)+'</div>'+
-            '<div class="hrow-m">'+s.n+(s.n===1?' set':' sets')+(s.pr?' &middot; <span class="pr">'+s.pr+' record'+(s.pr>1?'s':'')+'</span>':'')+'</div>'+
+            '<div class="hrow-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
+            '<div class="hrow-m">'+(L.marked?'Marked done':s.n+(s.n===1?' set':' sets'))+(s.pr?' &middot; <span class="pr">'+s.pr+' record'+(s.pr>1?'s':'')+'</span>':'')+'</div>'+
           '</div><div class="hrow-a">&rsaquo;</div>'+
         '</div>';
     }).join('');
@@ -14937,7 +14945,7 @@ var SFX_ON=1;
 // a quiet gym, the tick on every logged set, the fanfare on every record.
 // There is no MUTE ALL here on purpose. Alert volume already goes to zero, and a second control
 // that silences everything would be two switches for one decision.
-var SFX_KEYS=[['rest','Rest over alert','When a rest runs out'],
+var SFX_KEYS=[['rest','Alert when rest ends','When a rest runs out'],
               ['log','Set logged','The tick when a set is kept'],
               ['pr','Record','The flourish when you beat one']];
 var SFX_OFF=(function(){
@@ -14979,7 +14987,22 @@ function drawSfxKeys(){
 // a 145 lb bench from round-tripping through "65.8 kg" into a 145.06 that grades as a
 // phantom PR: inputs carry the exact pound value in data-lb while showing kilograms, and
 // anything typed converts exactly once on the way in.
-var UNIT_KG=(function(){try{return localStorage.getItem('arc_kg')==='1';}catch(e){return false;}})();
+var UNIT_KG=(function(){
+  try{
+    var v=localStorage.getItem('arc_kg');
+    if(v!==null)return v==='1';
+    // A fresh install (the welcome has not been answered yet) takes the phone's own habit, so
+    // the generated week lands on kilograms where kilograms are spoken. Written once so it
+    // sticks; Settings can flip it any time. Phones that already ran the app keep pounds (v5.100).
+    if(localStorage.getItem('arc_ownprogram')!=='1'){
+      var lang=String(navigator.language||'').toLowerCase();
+      var kg=!(/^en-(us|lr|mm)$/.test(lang)||lang==='my');
+      localStorage.setItem('arc_kg',kg?'1':'0');
+      return kg;
+    }
+  }catch(e){}
+  return false;
+})();
 var LB_PER_KG=2.20462;
 function dspW(lb){return UNIT_KG?Math.round(lb/LB_PER_KG*2)/2:lb;}   // kg shown to the half
 function fmtW(lb){var v=dspW(lb);return String(v%1?v.toFixed(1):v);}
@@ -15046,7 +15069,10 @@ function dbNext(w,down){
 }
 // a target line like "145x8" with its weight spoken in the current unit
 function fmtLine(s){
-  return String(s).replace(/^([\d.]+)x/,function(_,w){return fmtW(parseFloat(w))+'x';});
+  s=String(s);
+  // A zero-weight line is a rep count, not "0×10" (v5.100).
+  var z=s.match(/^0x(\d+)$/);if(z)return z[1]+' reps';
+  return s.replace(/^([\d.]+)x/,function(_,w){return fmtW(parseFloat(w))+'×';});
 }
 // ---------- distance ----------
 // Its own choice, not a passenger of the weight unit. Plenty of people lift in pounds and
@@ -17627,7 +17653,7 @@ function exEdSave(keep){
 function exEdRemove(){
   var e=EXED;if(!e||exLogged(e.wk,e.id))return;
   var n=document.getElementById('exEdName').textContent;
-  ask('It comes off this day. Nothing already in your history is touched.',
+  ask('It comes off this workout. Nothing already in your history is touched.',
     function(){exEdWrite(true,function(t){t.hide=t.hide||{};t.hide[e.id]=1;});},
     'Remove '+n+'?','REMOVE PERMANENTLY',null,
     {label:'JUST TODAY',fn:function(){exEdWrite(false,function(t){t.hide=t.hide||{};t.hide[e.id]=1;});}});
@@ -17733,7 +17759,7 @@ function exAddList(){
   }).join(''):'<div class="exed-sub">Nothing matches that.</div>';
 }
 function exAddPick(id){
-  ask(EX[id].name+' goes to the foot of the day with its usual targets.',
+  ask(EX[id].name+' goes to the end of this workout with its usual targets.',
     function(){exAddWrite(id,true);},'Add it permanently?','ADD PERMANENTLY',null,
     {label:'JUST TODAY',fn:function(){exAddWrite(id,false);}});
 }
@@ -19504,15 +19530,17 @@ function ezForge(){
     lean:'The lifting stays heavy on purpose. It keeps your muscle while the weight comes off.',
     move:'This week will not maximise any one thing. It makes almost everything better at once, and it is the easiest plan to keep for years, which is the whole trick.'};
   var saved=(EZ.into==='saved');
-  var lead=saved?'It is waiting in Saved workouts. Hold a piece to put it on a day. ':'';
+  var lead=saved?'It is waiting in Saved workouts. Hold one to put it on a day. ':'';
   // The tour offer waits for the philosophy line to be READ, not for a timer - seen on
   // device: fired at 2.4s it landed on top of a note shown at 0.9s, giving the one line
   // that says what the plan believes about a second and a half of life.
   if(EZ_WHY[goal]){
     setTimeout(function(){
-      // One button. The week is already written, so a CANCEL beside LET'S GO promised an undo
-      // that did not exist - and skipped the tour offer on the way out.
-      ask(lead+EZ_WHY[goal],function(){setTimeout(tutOffer,350);},'Your week is forged','SHOW ME THE WEEK',false);
+      // No CANCEL: the week is already written, so a cancel promised an undo that did not exist.
+      // The tour offer used to follow as a SECOND dialog; it is the second button here now, so a
+      // first run meets one box, not two (v5.100). The Quick and Full tours stay in Settings.
+      ask(lead+EZ_WHY[goal],function(){tutSeen();},'Your week is forged','SHOW ME THE WEEK',false,
+        {label:'TAKE THE QUICK TOUR',fn:function(){tutSeen();setTimeout(function(){tutStart(1);},350);}});
     },900);
   }else setTimeout(tutOffer,650);
 }
