@@ -94,6 +94,7 @@
    1.2 is what Barlow reports for normal, so the loaded screen is unchanged to the pixel; what
    changes is that the screen BEFORE it loads is now the same. Anything wanting different
    spacing already states its own line-height and still wins. */
+::selection{background:color-mix(in srgb,var(--go) 45%,transparent);color:inherit;}
 body{font-family:var(--sans);line-height:1.2;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;}
 input,button,textarea{font-family:inherit;}
 /* A long press on a phone is also the browser's own gesture for selecting text and raising
@@ -325,8 +326,8 @@ body.light .daybox.today > .dayglow::before{
   animation-duration:4.8s;}
 body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 
-.daycount{font-size:10px;letter-spacing:.1em;opacity:.75;}
-.dayempty{font-size:12.5px;color:var(--txt3);padding:6px 4px 4px;opacity:.75;}
+.daycount{font-size:11px;letter-spacing:.1em;color:var(--txt3);}
+.dayempty{font-size:12.5px;color:var(--txt3);padding:6px 4px 4px;}
 /* An empty day is a way in, not a caption. Same dashed language as the New day button so the two
    read as the same offer in two places. */
 .dayempty.dayadd{display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;
@@ -613,7 +614,7 @@ body.tut #askOvl{z-index:402;}
 .ring svg{transform:rotate(-90deg);display:block;}
 .ring .trk{stroke:var(--line);}
 .ring .bar{stroke:var(--c);stroke-linecap:round;transition:stroke-dashoffset .45s cubic-bezier(.4,0,.2,1);}
-.ring .lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;letter-spacing:-.04em;color:var(--txt2);font-family:var(--mono);}
+.ring .lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;letter-spacing:-.04em;color:var(--txt2);font-family:var(--mono);}
 .ring.full .bar{stroke:var(--go);}
 .ring.full .lbl{color:var(--go);}
 .s-body{max-width:600px;margin:0 auto;padding:16px 16px 0;}
@@ -650,7 +651,7 @@ body.tut #askOvl{z-index:402;}
 /* The ramp, ticked off and thrown away. Deliberately quieter than a real set row: these are
    not your training and must never read as if they were. */
 .warm-hd{display:flex;align-items:baseline;gap:8px;margin-top:11px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);}
-.warm-hd span{text-transform:none;letter-spacing:0;opacity:.65;}
+.warm-hd span{text-transform:none;letter-spacing:0;color:var(--txt3);}
 .warm-row{display:flex;align-items:center;gap:9px;padding:8px 11px;margin-top:6px;border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:.15s;}
 .warm-row:hover{border-color:#33373d;}
 .warm-row.on{opacity:.45;}
@@ -718,8 +719,8 @@ body.tut #askOvl{z-index:402;}
 .hold.resume{border-color:var(--gold);color:var(--gold);}
 .ex-foot{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:2px 16px 13px;}
 .ex-foot .ex-rest{padding:0;}
-.ex-pr{font-size:10.5px;letter-spacing:.08em;color:var(--txt3);white-space:nowrap;flex:0 0 auto;}
-.ex-pr b{font-weight:600;color:color-mix(in srgb,var(--gold) 72%,var(--txt3));letter-spacing:0;font-size:11.5px;}
+.ex-pr{font-size:12px;letter-spacing:.08em;color:var(--txt3);white-space:nowrap;flex:0 0 auto;}
+.ex-pr b{font-weight:600;color:color-mix(in srgb,var(--gold) 72%,var(--txt3));letter-spacing:0;font-size:12.5px;}
 .ex-rest{font-size:11.5px;color:var(--txt3);padding:2px 16px 13px;}
 
 .notebox{margin:24px 0 0;}
@@ -1345,7 +1346,7 @@ body.tut .dayhead-add{display:none;}
 .sfx-lbl{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);margin:20px 0 9px;}
 /* The sound rows carry a sublabel in a <small> that had no rule at all, so it rendered inline
    and read as one run-on line: "REST ALERTWHEN A REST RUNS OUT". Its own line, a step quieter. */
-.sfx-lbl small{display:block;margin-top:2px;font-size:9.5px;letter-spacing:.07em;color:var(--txt3);opacity:.75;}
+.sfx-lbl small{display:block;margin-top:2px;font-size:11px;letter-spacing:.07em;color:var(--txt3);}
 /* the three sound rows sit as one group, not three headings - the 20px heading gap between
    them read as three separate settings sections and made the sheet twice the height it needed */
 #sfxKeys .sfx-lbl{margin:8px 0 0;}
@@ -1524,8 +1525,8 @@ body.forge .finishbtn{font-size:17px;letter-spacing:.22em;font-weight:700;
      action is the one place the metal should visibly hold heat. Pressing it stokes it. */
   background:linear-gradient(180deg,#f2923a,#cf6c1f);color:#1f0e02;}
 body.forge .finishbtn:active{filter:brightness(1.14);}
-body.forge .card-day{font-size:10px;letter-spacing:.14em;}
-body.forge .pill{font-size:10px;letter-spacing:.06em;}
+body.forge .card-day{font-size:11px;letter-spacing:.14em;}
+body.forge .pill{font-size:11px;letter-spacing:.06em;}
 body.forge .sp-word{font-size:32px;font-weight:800;letter-spacing:.28em;}
 body.forge .sp-tag{letter-spacing:.2em;}
 
@@ -2194,7 +2195,7 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hnav{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--txt2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;}
 .hnav:hover{color:var(--txt);border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
 .hgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-.hdow{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--txt3);text-align:center;padding:2px 0 4px;}
+.hdow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--txt3);text-align:center;padding:2px 0 4px;}
 .hcell{position:relative;aspect-ratio:1;border-radius:9px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:11px;color:var(--txt3);}
 .hcell.pad{opacity:0;}
@@ -2306,7 +2307,7 @@ body.sbx .s-head{padding-top:calc(52px + env(safe-area-inset-top,0px));}
    the first frame, and the bars arriving over the bottom of a box that is flat colour there
    anyway is not something the eye can see. overflow:hidden stays, so any overshoot is clipped
    rather than scrolled. */
-#splash{position:fixed;left:0;top:0;right:0;height:100vh;z-index:200;background:#04050a;perspective:1700px;perspective-origin:0% 50%;transition:background-color .4s ease .34s;}
+#splash{position:fixed;left:0;top:0;right:0;height:100vh;height:100dvh;z-index:200;background:#04050a;perspective:1700px;perspective-origin:0% 50%;transition:background-color .4s ease .34s;}
 #splash.out{pointer-events:none;background:transparent;}
 .sp-leaf{position:absolute;inset:0;transform-origin:left center;
   background:linear-gradient(100deg,var(--surface2) 0%,var(--surface) 44%,#0a0c14 100%);
@@ -2864,7 +2865,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="exNoteOvl">
   <div class="sheet" style="max-width:420px">
     <h3 id="exNoteName">Note</h3>
-    <div class="footnote" style="margin:0 2px 8px">Yours, not the app's. Seat heights, pin numbers, a cue that keeps your form honest. It stays on this exercise every time it comes round.</div>
+    <div class="footnote" style="margin:0 2px 8px">Yours, not the app's. Seat heights, pin numbers, a reminder that keeps your technique right. It stays on this exercise every time it comes round.</div>
     <textarea id="exNoteBox" rows="5" placeholder="Seat 4, back pad 2. Keep elbows tucked."></textarea>
     <!-- The one fact about an exercise the app cannot work out for itself, now settable on
          EVERY exercise rather than only at custom creation: on an assisted machine the
@@ -3226,7 +3227,7 @@ body.wcon{overflow:hidden;}
     </div>
     <div class="ins-s" id="insSetup"></div>
     <ul class="ins-c" id="insCues"></ul>
-    <div class="ins-m"><span>Watch for:</span> <em id="insMistake"></em></div>
+    <div class="ins-m"><span>The usual mistake:</span> <em id="insMistake"></em></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('instrOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -3234,7 +3235,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="swapOvl">
   <div class="sheet">
     <h3>Swap exercise</h3>
-    <p>Machine taken or broken? Comparable options are listed first. Applies to this session only.</p>
+    <p>Machine taken? Similar exercises are listed first. This swap is for today only.</p>
     <input class="mk-in" id="swapSearch" placeholder="Search exercises" autocomplete="off" oninput="swapList()" style="margin-bottom:10px">
     <div class="swaplist" id="swapList"></div>
     <div class="sheet-btns">
@@ -3317,7 +3318,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="bwOvl" style="z-index:300">
   <div class="sheet" style="max-width:400px">
     <h3>Log a weigh-in</h3>
-    <p>One number per day. Entering a date again replaces it; saving it empty removes it.</p>
+    <p>One weight per day. Enter the same date again to replace it. Save it empty to remove it.</p>
     <input class="mk-in" id="bwDate" type="date">
     <input class="mk-in" id="bwW" type="number" inputmode="decimal" placeholder="Weight" style="margin-top:9px">
     <div class="sheet-btns">
@@ -3415,7 +3416,7 @@ var EX = {
   // 2000 is the rower's famous number, but it is METRES and this field is calories - so the
   // default read as several hours against a 200 cal bike sitting next to it. Until distance is
   // a measure the builder can offer, the default is the honest one and the 2k lives in the note.
-  rower:    {cardio:1,name:"Rowing Machine",note:"Legs, then back, then arms, and the reverse coming forward. The classic piece is 2000 m",sets:"200 cal",rest:""},
+  rower:    {cardio:1,name:"Rowing Machine",note:"Legs, then back, then arms, and the reverse coming forward. The classic distance is 2000 m",sets:"200 cal",rest:""},
   jumprope: {cardio:1,name:"Jump Rope",note:"Small hops, wrists doing the turning",sets:"10 min",rest:""},
   outrun:   {cardio:1,name:"Outdoor Run",note:"Route and pace are yours. Log the time",sets:"30 min",rest:""},
   swim:     {cardio:1,name:"Swim",note:"Any stroke. Count the time in the water, not the lengths",sets:"30 min",rest:""},
@@ -3495,7 +3496,7 @@ var ALT={
   bwsquat:  {bw:1,name:"Bodyweight Squat",note:"No equipment. Arms out in front to help you balance",sets:"0x20\n0x20\n0x20",rest:"60 sec"},
   frontsq:  {name:"Front Squat",note:"Bar on the front shoulders, elbows high",sets:"45x8\n45x8\n45x8",rest:"3 min"},
   dbohp:    {name:"Dumbbell Shoulder Press",note:"Seated, dumbbells from the ears to overhead",sets:"25x10\n25x10\n25x10",rest:"2 min"},
-  rtwist:   {name:"Russian Twist",note:"Both sides = one rep. Turn from the ribs",sets:"10x20\n10x20\n10x20",rest:"45 sec"},
+  rtwist:   {name:"Russian Twist",note:"Both sides count as one rep. Turn from the ribs",sets:"10x20\n10x20\n10x20",rest:"45 sec"},
   bbrow:    {name:"Barbell Bent-Over Row",note:"Bent over at the hips, back flat. Pull to the lower ribs",sets:"65x8\n65x8\n65x8",rest:"2 min"},
   dbrfly:   {name:"Dumbbell Rear Delt Fly",note:"Bent over, arms sweep out wide",sets:"10x15\n10x15\n10x15",rest:"60 sec"},
   crunch:   {bw:1,name:"Floor Crunch",note:"Lower back stays down. Only the upper back curls",sets:"0x20\n0x20\n0x20",rest:"45 sec"},
@@ -3529,7 +3530,7 @@ var PUMP={
   p_fly:  {name:"Machine Fly",note:"Full stretch at the back, hard squeeze at the front",sets:"30x15\n30x15\n30x15",rest:"45 sec"},
   p_lat:  {name:"Dumbbell Lateral Raise",note:"Light, high reps. Lead with the elbows, not the hands",sets:"5x15\n5x15\n5x15",rest:"30 sec"},
   p_curl: {name:"Cable Bicep Curl",note:"Keep the cable taut; never let the weight stack touch down",sets:"15x15\n15x15\n15x15",rest:""},
-  p_hammer:{name:"Hammer Curl",note:"Palms facing in. Builds the outer arm thickness",sets:"10x15\n10x15",rest:""},
+  p_hammer:{name:"Hammer Curl",note:"Palms facing in. Works the outside of the upper arm",sets:"10x15\n10x15",rest:""},
   p_rope: {name:"Rope Pushdown",note:"Pull the rope ends apart at the bottom, arms straight. Do this one right after curls, then rest",sets:"15x15\n15x15\n15x15",rest:"30 sec"},
   p_dip:  {bw:1,name:"Bench Dip",note:"Bodyweight. Works the back of the arm. Right after hammer curls, then rest",sets:"0x18\n0x18",rest:"30 sec"},
   p_bike: {bw:1,name:"Bicycle Crunch",note:"Slow and controlled, full rotation. Both twists = one rep",sets:"0x20\n0x20\n0x20",rest:""},
@@ -8812,7 +8813,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.100';
+var APPV='v5.101';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8889,7 +8890,8 @@ function saveSoon(){clearTimeout(saveT);saveT=setTimeout(persistNow,400);}
 var MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var DW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function pretty(iso){var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);return DW[d.getDay()]+' '+MO[d.getMonth()]+' '+d.getDate();}
+// The year appears only once the date is not this year, so two Septembers can be told apart (v5.101).
+function pretty(iso){var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);return DW[d.getDay()]+' '+MO[d.getMonth()]+' '+d.getDate()+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'');}
 
 // Anything the user typed goes through this before it is put into innerHTML. Their own exercise
 // notes are the first free text in the app that gets rendered rather than sat in a textarea.
@@ -9011,8 +9013,8 @@ var W0=Object.assign({},W),EX0=Object.assign({},EX),
 // page, where an exact one exists, is demoted to a reference line at the foot.
 var EXINSTR={
 bench:{s:"Flat bench, eyes under the bar, feet flat, hands a little wider than the shoulders.",c:["Pull the bar out over your chest, not your face","Lower slowly to the lower chest, elbows about 45 degrees out from your sides","Touch, then push the bar up and slightly back toward the hooks","Squeeze the bar hard. A tight grip keeps the shoulders steady"],m:"Bouncing off the chest. The touch is quiet or the weight is too heavy."},
-bsquat:{s:"Bar on the upper back, hands as close as shoulders allow, feet shoulder width, toes slightly out.",c:["Big breath, tense the stomach for a punch","Sit down between your heels, knees pointing over the toes","Go as low as you can while the back stays straight","Push the floor apart on the way up"],m:"Knees falling inward on the way up. Push them out or drop the weight."},
-deadlift:{s:"Bar over mid-foot, shins an inch away. Hips back, bend down, hands outside the legs.",c:["Pull up on the bar until it feels tight before it leaves the floor","Chest up, back flat, hips and shoulders rise together","Push the floor away rather than lifting the bar","Finish tall by squeezing the glutes, not leaning back"],m:"Yanking the bar up with a rounded back. Set the back, tighten the stomach, pull."},
+bsquat:{s:"Bar on the upper back, hands as close as shoulders allow, feet shoulder width, toes slightly out.",c:["Big breath, tense the stomach for a punch","Sit down between your heels, knees pointing over the toes","Go as low as you can while the back stays straight","Press your feet out into the floor as you stand"],m:"Knees falling inward on the way up. Push them out or drop the weight."},
+deadlift:{s:"Bar over mid-foot, shins an inch away. Hips back, bend down, hands outside the legs.",c:["Pull up on the bar until it feels tight before it leaves the floor","Chest up, back flat, hips and shoulders rise together","Stand up by pushing through your feet rather than pulling with your arms","Finish tall by squeezing the glutes, not leaning back"],m:"Yanking the bar up with a rounded back. Set the back, tighten the stomach, pull."},
 ohp:{s:"Bar at the collarbones, grip just outside the shoulders, elbows slightly ahead of the bar.",c:["Tighten the stomach hard before the bar moves","Press up and slightly back, moving the head out of the way then through","Finish with the bar over the ears, arms straight","Squeeze the glutes so the lower back cannot arch"],m:"Leaning back as the bar goes up. The body stays upright like a pillar."},
 incdb:{s:"Bench at 30 to 45 degrees, dumbbells on the thighs, then use a knee to lift each one up to the shoulder.",c:["Start at the shoulders, palms forward or slightly turned in","Press up and slightly together without clanking at the top","Lower until the hands reach chest level: a real stretch, never a strain in the shoulder"],m:"Setting the bench too steep. Past 45 degrees it becomes a shoulder press."},
 mbench:{s:"Seat set so the handles sit level with mid-chest.",c:["Shoulder blades pulled back into the pad and kept there","Press to straight arms without the shoulders rolling forward","Lower slowly to a full stretch. The machine makes slow safe, use that"],m:"Stopping short at the top. Straight arms are part of the lift."},
@@ -9042,7 +9044,7 @@ dblat:{s:"Standing tall, dumbbells at the sides, slight bend in the elbows.",c:[
 // Was written for a pair of dumbbells on an incline bench. The card is the MACHINE reverse fly
 // and the figure is a machine - chest pad, tower, handles - with no dumbbell anywhere in it.
 revfly:{s:"Facing the machine, chest against the pad, seat set so the handles sit at shoulder height. One handle in each hand, arms out in front of you.",c:["Sweep the arms out and back in a wide arc, elbows slightly bent and FIXED there","Squeeze the rear shoulders at the end of the arc","The chest stays on the pad. That is what stops the body helping","Return slow; never let the stack snatch the arms forward"],m:"Bending the elbows more as it gets heavy. That quietly turns this into a row."},
-hthrust:{s:"Upper back on the pad or bench, feet flat, weight over the hips.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin tucked, ribs down. Do not bend the back at the top"],m:"Pushing past flat at the top. The finish is a squeeze, not a back bend."},
+hthrust:{s:"Upper back on the pad or bench, feet flat, weight over the hips.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin down, and do not arch the back at the top"],m:"Pushing past flat at the top. The finish is a squeeze, not a back bend."},
 bbthrust:{s:"Upper back on a bench, bar across the hips with a pad under it, feet flat at shoulder width.",c:["Drive through the heels to a flat line from knees to shoulders","Full glute squeeze at the top, one beat","Lower the hips slowly, do not drop them"],m:"Pushing through the toes. Heels down or the glutes stop working."},
 plank:{s:"Forearms down, elbows under shoulders, body one straight line.",c:["Squeeze the glutes and keep the stomach tight throughout","Push the floor away through the forearms","Hips never drop and never lift up high"],m:"Hips dropping as the clock runs. When the line breaks, the set is over."},
 hollow:{s:"On your back, arms overhead, legs long, lower back pressed into the floor.",c:["Lift shoulders and legs a few inches off the floor","The lower back never leaves the ground","Keep breathing. Do not hold your breath to hold the shape"],m:"Legs too low too soon. Raise them until the back can stay pressed down."},
@@ -9060,7 +9062,7 @@ kneeraise:{s:"Hanging from the bar or on elbow pads, shoulders down away from th
 legraise:{s:"On your back, hands under the hips or flat at the sides.",c:["Raise the legs together to straight up","Lower slowly, stop before the lower back lifts off the floor","The slower the lowering, the better the set"],m:"Letting the lower back lift off the floor at the bottom. Do not lower as far."},
 pullup:{s:"Knees on the pad, assist set so the last rep is hard but clean. Arms straight.",c:["Pull the elbows down to the ribs","Chin over the bar without reaching with the neck","All the way down every rep, arms straight"],m:"Cutting the bottom short. Half a pull-up trains half a back."},
 dip:{s:"Knees on the assist pad, set so the last rep is hard. Stand tall.",c:["Lower until the upper arm is level with the floor","Elbows point back, not out wide","Press to straight arms"],m:"Leaning far forward. That moves the work to the chest; stay upright for the triceps."},
-xover:{s:"Pulleys set high, one handle in each hand, staggered stance, slight forward lean.",c:["Bring the hands down and together in a wide arc","Cross slightly at the bottom and squeeze","Fixed elbow bend the whole way"],m:"Pressing instead of sweeping. The arms arc; they do not push."},
+xover:{s:"Pulleys set high, one handle in each hand, one foot a step ahead, slight forward lean.",c:["Bring the hands down and together in a wide arc","Cross slightly at the bottom and squeeze","Fixed elbow bend the whole way"],m:"Pressing instead of sweeping. The arms arc; they do not push."},
 lowchest:{s:"Pulleys set low, handles at the sides, one foot a step in front.",c:["Sweep low-to-high, hands finishing at shoulder height","Arms nearly straight, only a slight bend at the elbow","Squeeze the upper chest where the hands meet"],m:"Curling the weight up with the biceps. The arc comes from the shoulder."},
 facepull:{s:"Rope at upper chest height, palms facing in, step back until the weight lifts off the stack.",c:["Pull toward the bridge of the nose, elbows high and wide","Finish with knuckles beside the ears","Squeeze between the shoulder blades"],m:"Pulling to the chest with elbows low. That is a row; here the elbows lead high."},
 sapd:{s:"Bar or rope on the high pulley, lean forward a little, arms straight.",c:["Sweep the bar down to the thighs with straight arms","Feel the upper back, not the arms","Let the arms rise fully for the stretch"],m:"Bending the elbows as it travels. It quietly becomes an arm exercise."},
@@ -9070,14 +9072,14 @@ rwcurl:{s:"Forearms supported, wrists past the edge, palms down.",c:["Raise the 
 ,
 // ---------- the 41 that never got words (v5.70): cardio, stretches, the alternates,
 // and the lifts the audit flagged. Same shape as the rest - setup, cues, the one mistake.
-bike:{s:"On your back, hands at your ears, knees up, shins level with the floor.",c:["Bring one knee in as the opposite elbow comes across to meet it","Stretch the other leg out long and OFF the floor","Turn from the ribs, not the neck. The elbow moves because the shoulder turns","Both sides = one rep. Slow beats fast"],m:"Yanking the neck with the hands. Fingertips touch the ears; they never pull."},
+bike:{s:"On your back, hands at your ears, knees up, shins level with the floor.",c:["Bring one knee in as the opposite elbow comes across to meet it","Stretch the other leg out long and OFF the floor","Turn from the ribs, not the neck. The elbow moves because the shoulder turns","Both sides count as one rep. Slow beats fast"],m:"Yanking the neck with the hands. Fingertips touch the ears; they never pull."},
 cbcurl:{s:"Straight bar on the lowest pulley, stand a half step back, elbows pressed against your sides.",c:["Curl the bar up without the elbows drifting forward","Squeeze a beat at the top","Lower all the way. The cable keeps pulling at the bottom where a barbell would rest"],m:"Leaning back to finish the rep. If the shoulders swing, the stack is too heavy."},
 hang:{s:"Full grip on the pull-up bar, hands about shoulder width, step off and hang.",c:["Body long and relaxed. Let the shoulders stretch up toward the ears","Breathe slow; a little sway is fine","Time it, down to the second"],m:"Swinging. A slow sway is fine; swinging on purpose is a different exercise."},
 hack:{s:"Back flat against the sliding back pad, shoulders under the shoulder pads, feet shoulder width on the platform, toes slightly out.",c:["Lower past a right angle at the knee, knees pointing over the toes","Push through the whole foot to slide the pad back up","Lower back stays pressed into the pad the whole rep","If the knees feel it, move the feet higher on the platform"],m:"Heels lifting at the bottom. If they come up, do not go as low, or move the feet higher."},
 plegcurl:{s:"Face down on the machine, kneecaps hanging past the pad's edge, knees lined up with the machine's hinge point, roller on the back of the ankles.",c:["Curl the heels toward the glutes as far as they will go","Hips stay pressed down the whole rep","Lower slow, never let the stack drop"],m:"Kneecaps resting ON the pad. They hang past the edge, so the knee bends freely instead of grinding into the pad."},
 hipraise:{s:"Captain's chair: forearms on the arm pads, back against the back rest, legs hanging.",c:["Draw the knees up toward the chest","Roll the hips up a little at the top. That is the ab part","Lower slowly to straight legs, no swinging"],m:"Swinging into momentum. If the body rocks, pause between reps."},
 clat:{s:"Low pulley at your side, handle in the FAR hand, stand tall.",c:["Raise the arm out to shoulder height, elbow slightly bent","Lead with the elbow, not the hand","Lower slowly against the cable. The way down is half the work","All reps one side, then switch"],m:"Shrugging the shoulder up. The shoulder stays down; only the arm rises."},
-pullover:{s:"One dumbbell, both hands cupped under the top plate, lying on the bench, bell over the chest.",c:["Lower it back behind the head in a wide arc, elbows slightly bent","Stop at a strong stretch, no deeper","Pull it back over the chest along the same arc"],m:"Bending the elbows more as it gets heavy. That turns it into a triceps press."},
+pullover:{s:"One dumbbell, both hands cupped under the top plate, lying on the bench, dumbbell over the chest.",c:["Lower it back behind the head in a wide arc, elbows slightly bent","Stop at a strong stretch, no deeper","Pull it back over the chest along the same arc"],m:"Bending the elbows more as it gets heavy. That turns it into a triceps press."},
 walk:{s:"Outside if you can, a hilly route if you have one.",c:["A pace you can talk through but not sing through","Long steps, arms swinging","30 minutes minimum. The walk works by adding up"],m:"Strolling. This is a brisk pace; you should feel it in the breath."},
 hipflex:{s:"One knee on the floor, the other foot planted out front, torso tall.",c:["Tuck the tailbone under, then sink the hips forward and down","Feel it down the front of the kneeling side's hip","Slow breaths, a little deeper on each exhale"],m:"Bending the lower back instead of sinking. Tuck the tailbone, then lean."},
 chestdr:{s:"Forearms on the doorframe, elbows at shoulder height, one foot through the door.",c:["Lean through gently until the chest opens","Ribs down, back not arched","Hold and breathe; ease deeper, never bounce"],m:"Pushing to pain. A stretch is firm pressure, not a strain."},
@@ -9094,7 +9096,7 @@ outrun:{s:"Route and pace are yours. Log the time.",c:["Start slower than feels 
 swim:{s:"Any stroke you can hold. Count time in the water, not lengths.",c:["Long strokes beat fast ones","Exhale under water, breathe on rhythm","When form falls apart, rest at the wall, then go again"],m:"Holding your breath. Exhale steadily under water or the pace dies."},
 assault:{s:"Seat so the knee keeps a slight bend, hands on the moving bars.",c:["Arms and legs together, push the pace in short bursts","Drive the handles as well as the pedals","Short bursts with rest between beat one long push"],m:"Coasting. The fan only pays back what you put in."},
 lvchest:{s:"Seat set so the handles start at mid-chest, back and head on the pad.",c:["Press forward and up along the machine's path to straight arms","Lower slow until the chest opens","Shoulder blades stay pulled back the whole rep"],m:"Bouncing at the stretch. Touch the bottom quietly and drive."},
-dbbench:{s:"Flat bench, a dumbbell in each hand, use a knee to lift each one up from the thighs.",c:["Start wide at the chest, press up and slightly together","Stop just short of clanking at the top","Lower until the hands reach chest level, elbows about 45 degrees from the sides"],m:"Losing one bell out wide. If a side wobbles, the pair is too heavy."},
+dbbench:{s:"Flat bench, a dumbbell in each hand, use a knee to lift each one up from the thighs.",c:["Start wide at the chest, press up and slightly together","Stop just short of clanking at the top","Lower until the hands reach chest level, elbows about 45 degrees from the sides"],m:"Losing one dumbbell out wide. If a side wobbles, the pair is too heavy."},
 smbench:{s:"Bench centered so the bar lines up over mid-chest. Turn the bar to unhook it, wrists straight.",c:["Bar to the lower chest, elbows about 45 degrees from the sides","Press to straight arms; the rails keep the bar on path","Turn the bar to catch the hooks, then let go"],m:"Bench in the wrong spot under the bar. Line it up before the first rep, not during."},
 pushup:{s:"Hands under the shoulders, body one straight line from head to heels, toes propping the feet.",c:["Chest almost to the floor, elbows pointing back","One straight line: hips never drop and never lift high","Push the floor away to straight arms","Once 20 in a row are easy, feet on a step"],m:"Hips dropping. When the straight line breaks, the reps stop counting."},
 machpd:{s:"Thighs under the pads, hands on the overhead grips, palms facing in.",c:["Pull down to the top of the chest, elbows driving down","Chest tall, a slight lean back, set once and held","Let the arms fully lengthen at the top"],m:"Rocking for reps. The lean is set once, not pumped."},
@@ -9102,7 +9104,7 @@ bbcurl:{s:"Straight or wavy EZ bar, hands shoulder width, elbows pressed to the 
 inccurl:{s:"Bench at 45 to 60 degrees, sit back, arms hanging straight down behind the body.",c:["Curl without letting the elbows travel forward","Feel the stretch at the bottom. That hang is the point","Lower slow to fully straight"],m:"Scooting the elbows forward to make the top easier. The stretch position IS the exercise."},
 machlat:{s:"Seat set so the pads rest just above the elbows, hands light on the grips.",c:["Raise the arms out to shoulder height, no higher","Push with the elbows against the pads, not the hands","Lower slow against the machine"],m:"Raising past shoulder height. Above that line the neck shrugs it up."},
 smsquat:{s:"Bar across the upper back, feet planted a half step in FRONT of the bar, shoulder width.",c:["Sit straight down. The rails allow what the forward feet create","Knees track over the toes","Drive through the whole foot to standing"],m:"Feet directly under the bar. On a Smith machine that folds you forward, so step them out."},
-stepup:{s:"Knee-height box, a dumbbell in each hand, one whole foot planted on top.",c:["Drive through the TOP foot. The bottom leg does not jump","Stand fully tall on the box","Lower slow. The way down is half the rep","All reps one leg, then switch"],m:"Bouncing off the bottom leg. If it pushes, the box is too high or the bells too heavy."},
+stepup:{s:"Knee-height box, a dumbbell in each hand, one whole foot planted on top.",c:["Drive through the TOP foot. The bottom leg does not jump","Stand fully tall on the box","Lower slow. The way down is half the rep","All reps one leg, then switch"],m:"Bouncing off the bottom leg. If it pushes, the box is too high or the dumbbells too heavy."},
 stcalf:{s:"Shoulders under the pads, balls of the feet on the block, heels hanging free.",c:["Drop the heels for a full stretch at the bottom","Drive to full tiptoe and squeeze","Knees straight but never locked. The calves do all of it"],m:"Bouncing. One second up, one second down, every rep."}
 ,
 // ---------- the nine that had a finished animation and no exercise to reach it ----------
@@ -9118,7 +9120,7 @@ rtwist:{s:"Sitting on the floor, knees bent, leaning back to about 45 degrees wi
 bbrow:{s:"Bar over mid-foot, push the hips back and lean over to about 45 degrees with a flat back, hands outside the legs, bar hanging under the shoulders.",c:["Pull the bar to the lower ribs, not the chest","Elbows stay close, shoulder blades finish the movement","Hold the lean. The body does not bob up and down","Lower under control to fully straight arms"],m:"Standing up with every rep. Holding the lean is the exercise; the arms are only hooks."},
 dbrfly:{s:"Bent over at the hips to about 45 degrees, back flat, light dumbbells hanging straight below the shoulders.",c:["Raise out WIDE, elbows slightly bent and fixed there","Squeeze the rear shoulders at the top","Lighter than you think. This is a small muscle","No swinging; the body does not rock"],m:"Turning it into a row. The arms stay long and travel out to the sides, not back to the hips."},
 crunch:{s:"On your back, knees bent, feet flat, fingertips resting at your ears.",c:["Curl the upper back off the floor. The lower back never leaves it","Exhale hard at the top and hold a beat","Lower slow; the head is the last thing down","Fingertips only touch the ears, they never pull"],m:"Yanking the neck with the hands. If the chin is being dragged to the chest, the arms are doing the set."},
-glutebr:{s:"On your back, knees bent, feet flat and close to the hips, arms flat at your sides.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin tucked, ribs down. Do not bend the back at the top","Lower slow. When 20 are easy, weight on the hips"],m:"Pushing through the toes. Heels down, or the hamstrings take the set off the glutes."},
+glutebr:{s:"On your back, knees bent, feet flat and close to the hips, arms flat at your sides.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin down, and do not arch the back at the top","Lower slow. When 20 are easy, weight on the hips"],m:"Pushing through the toes. Heels down, or the hamstrings take the set off the glutes."},
 sideplank:{s:"On your side, forearm under the shoulder, legs stacked or the top foot just in front, free hand on the hip.",c:["Lift the hips until the body is one straight line from head to heels","Top hip stays over the bottom one. Do not let it roll forward","Push the floor away through the forearm","Time each side; the clock is the set"],m:"Hips dropping as the clock runs. When the line breaks the set is over. Stop there and keep the honest time."},
 pullupbw:{s:"Hang at full length from a bar, hands a little wider than the shoulders, knees bent behind you.",c:["Pull the elbows DOWN to the ribs. Think of driving them into your back pockets","Chin over the bar without craning the neck","Lower all the way to straight arms every rep","Six honest reps beat twelve half ones. If you cannot do one yet, jump to the top and lower slowly"],m:"Cutting the bottom short. The full hang is where the back actually works."},
 invrow:{s:"A bar set in a rack (the squat stand) at about hip height. Lie under it, grip a little wider than the shoulders, heels on the floor, body straight from head to heels.",c:["Squeeze the whole body into one line and hold it there","Pull the chest to the bar, elbows back past the ribs","Lower until the arms are straight without letting the hips drop","Walk the feet further out to make it harder, tuck them in to make it easier"],m:"Letting the hips drop first. If the line breaks, the set is over."},
@@ -10590,7 +10592,11 @@ function renderHome(){
       '<div class="card-name">'+W.pump.name+'</div>'+
       '<div class="card-meta">Still open. Pick up where you left off</div></div>':'';
   var pnx=nextUpDay(),n0=0;
-  document.getElementById('weekCards').innerHTML=pumpOpen+DAYS.map(function(d){
+  // A week with nothing on it, nothing logged and nothing saved gets one line of direction, the
+  // thing "I know what I'm building" used to land on without (v5.101).
+  var bare=!DAYS.some(function(d){return (DB.days[d.k]||[]).length;})&&!(DB.logs||[]).length&&!(DB.extra||[]).length&&!TUTON&&!SANDBOX;
+  var hint=bare?'<div class="footnote" style="margin:0 2px 12px">Tap + on any day to build a workout, or use Forge me a week further down to have one built for you.</div>':'';
+  document.getElementById('weekCards').innerHTML=hint+pumpOpen+DAYS.map(function(d){
     var h=dayBox(d,pnx,n0);n0+=(DB.days[d.k]||[]).length;return h;
   }).join('');
   // The wide new-workout bar is gone (Aug 22): every day carries its own + and so does
@@ -10923,7 +10929,7 @@ function renderSession(){
       if(restTxt||prTxt){
         html+='<div class="ex-foot">'+
               '<span class="ex-rest">'+restTxt+'</span>'+
-              (prTxt?'<span class="ex-pr" title="Your personal record on this lift">PR <b>'+prTxt+'</b></span>':'')+
+              (prTxt?'<span class="ex-pr" title="Your best set ever on this lift">Best <b>'+prTxt+'</b></span>':'')+
               '</div>';
       }
       html+='</div>';
@@ -11698,7 +11704,7 @@ function openHeld(id){
 }
 function mkDeleteX(id){
   if(openHere(id)){closeOvl('mkActOvl');mkNote('This workout has a session open. Finish it first.');return;}
-  var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'this day';
+  var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'this workout';
   closeOvl('mkActOvl');
   ask('Delete '+nm+'? Sessions you already logged stay in your history.',function(){
     DB.extra=(DB.extra||[]).filter(function(x){return x!==id;});
@@ -11735,7 +11741,7 @@ function mkSetVar(v){
 }
 function mkDelete(id){
   if(openHere(id)){mkNote('There is an open session on this day. Finish it first.');return;}
-  var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'this day';
+  var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'this workout';
   closeOvl('mkActOvl');
   // Day-to-day model: a workout stands on one day, so a delete can only ever take the day
   // you are looking at. No other day needs naming - none is touched.
@@ -11744,10 +11750,12 @@ function mkDelete(id){
     function(){
       planDropSilent(id);                    // out of whichever day held it, and off the rack
       if(DB.custom)delete DB.custom[id];
+      if(DB.active)delete DB.active[id];     // nothing stale left behind (v5.101)
+      if(DB.vOvr)delete DB.vOvr[id];
       saveDB();mergeCustom();
       try{closeMake();}catch(e){}            // deleted from inside the editor - do not leave it open
       renderHome();
-    },'Delete this day','DELETE');
+    },'Delete this workout','DELETE');
 }
 // Reshaping a day starts from the day that is already there. Building from nothing is still
 // available, but it is the rarer thing and no longer the default.
@@ -12513,7 +12521,7 @@ function mkJoinToggle(j){
   if(mkJoinSel[j])delete mkJoinSel[j];
   else{
     if(1+Object.keys(mkJoinSel).length>=SS_MAX){
-      mkNote('Six is as long as one run gets. Save the rest for the next one.');return;
+      mkNote('A superset holds six at most. Save the rest for the next one.');return;
     }
     mkJoinSel[j]=1;
   }
@@ -13592,7 +13600,7 @@ function weekAdd(d){
   ask(added+' workout'+(added===1?' is':'s are')+' in your saved workouts, under the week. Hold one to put it on a day.',null,'Added');
 }
 function historyText(){
-  return APPNAME()+' \u00b7 full history\n'+DB.logs.length+' sessions\n\n'+
+  return APPNAME()+' \u00b7 full history\n'+DB.logs.length+' session'+(DB.logs.length===1?'':'s')+'\n\n'+
     DB.logs.slice().reverse().map(function(L){
       return buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{}});
     }).join('\n\n------------------------\n\n');
@@ -13948,7 +13956,7 @@ function plArt(){
   if(drew&&!solo)svg+='<text x="'+(W-5)+'" y="15" text-anchor="end" fill="#8e959e" font-size="10" font-family="system-ui">+'+drew+' more each end</text>';
   svg+='<text x="'+cx+'" y="'+(H-6)+'" text-anchor="middle" fill="#6e747c" font-size="10" font-family="system-ui">'+
        (solo?'just the plates &middot; nothing is doubled':
-        mach?'both horns shown &middot; load the same on each':
+        mach?'both pegs shown &middot; load the same on each':
              'both ends shown &middot; this is the whole bar')+'</text>';
   return svg+'</svg>';
 }
@@ -13960,7 +13968,7 @@ function plDraw(){
   if(!PL.on.length){
     r=solo?'No plates yet. Tap what you are holding.'
       :bw?'Just the '+plNum(bw)+' '+u+' bar. Tap a plate to load it.'
-         :'Nothing on the horns yet. Tap a plate to load them.';
+         :'Nothing loaded yet. Tap a plate.';
   }else{
     var c={},order=[];
     PL.on.slice().sort(function(a,b){return b-a;}).forEach(function(p){
@@ -14375,7 +14383,7 @@ function progSeries(id){
   });
 }
 function progChart(S){
-  if(S.length<2)return '<div class="pg-note">Two sessions make a line. One more and this draws.</div>';
+  if(S.length<2)return '<div class="pg-note">Log one more session and a line appears here.</div>';
   var vs=S.map(function(s){return s.v;}),min=Math.min.apply(0,vs),max=Math.max.apply(0,vs);
   var span=(max-min)||1,L=6,Rr=274,T=8,B=64;
   var pts=S.map(function(s,i){
@@ -14452,7 +14460,7 @@ function weekStrip(){
   h+='<div class="pg-row"><div class="pg-n">Sessions this week</div><div class="pg-v">'+t.sess+'</div><div class="pg-d">'+arrow(t.sess-p.sess)+'</div></div>';
   h+='<div class="pg-row"><div class="pg-n">Sets this week</div><div class="pg-v">'+t.sets+'</div><div class="pg-d">'+arrow(t.sets-p.sets)+'</div></div>';
   h+='<div class="pg-row"><div class="pg-n">Weight moved</div><div class="pg-v">'+Math.round(dspW(t.vol)).toLocaleString()+' '+wUnitName()+'</div><div class="pg-d">'+arrow(Math.round(dspW(t.vol-p.vol)))+'</div></div>';
-  h+='<div class="pg-cap">Arrows compare against the week before. A quieter week is information, not a verdict.</div>';
+  h+='<div class="pg-cap">Arrows compare against the week before. A lighter week is fine. It is just a week.</div>';
   return h;
 }
 var PGSEL=null;
@@ -14792,7 +14800,8 @@ function onBackButton(){
   var ez=document.getElementById('ez');
   if(ez&&ez.classList.contains('on')){ezBack();backGuard();return;}
   var wc=document.getElementById('welcome');
-  if(wc&&wc.classList.contains('on')){wcPick(0);backGuard();return;}
+  // On the safety questions back does nothing: skipping them silently wrote no answer (v5.101).
+  if(wc&&wc.classList.contains('on')){if(wc.querySelector('.wc-pick'))wcPick(0);backGuard();return;}
   var ov=topOvl();
   if(ov){                                  // an open sheet closes first
     if(ov.id==='histOvl'&&HIST.sel!==null){histBack();backGuard();return;}
@@ -18325,16 +18334,16 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   yes:'SHOW ME',no:'NOT NOW',steps:[
   {t:'Your week',b:'Seven days, Sunday to Saturday. A day can hold a workout or stay empty. An empty day is just a day off. The + on any day adds a workout to it.'},
   {t:'Open a workout',b:'Tap Push Day, on Tuesday.'},
-  {t:'The set grid',b:'Every row is one set: a weight, the reps, and an anvil at the end to log it. Tap the weight on the first row.'},
+  {t:'The set grid',b:'Every row is one set: a weight, the reps, and a small anvil mark at the end. Tapping the anvil logs the set. Tap the weight on the first row.'},
   {t:'Set the number',b:'Type 25 or more, then tap DONE.'},
   {t:'Log the set',b:'Tap the anvil at the end of the row.'},
-  {t:'The rest timer',b:'That set is saved, and your rest started on its own.<ul><li>−15 and +15 adjust it, SKIP ends it</li><li>It keeps counting with the screen off</li><li>It sounds at zero, but stays silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Volume.</p>'},
+  {t:'The rest timer',b:'That set is saved, and your rest started on its own.<ul><li>−15 and +15 adjust it, SKIP ends it</li><li>It keeps counting with the screen off</li><li>It sounds at zero, but stays silent during this tour</li></ul><p class="tut-fine">Set how loud it is below. You can change it later in Settings.</p>'},
   {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the highlight.'},
   {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
   {t:'How many sets',b:'Add or drop a set. The targets underneath follow along.'},
   {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Those two buttons are how a change is saved. Nothing changed just now, so NEXT closes the sheet.</p>'},
   {t:'Your own notes',b:'Tap Add note on the bench.'},
-  {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a cue that keeps your form honest. It shows up on that exercise every time it comes around.'},
+  {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a reminder that keeps your technique right. It shows up on that exercise every time it comes around.'},
   {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is fine for the tour.'},
   {t:'Logged and saved',b:'Your session is already saved in the app. History lives on this phone, not in a cloud. COPY takes the plain text, to send to anyone or paste into a chat. Closing this changes nothing.'},
   {t:'Locked in',b:'Push Day is locked in. It stays that way until the week turns over, so you work through the other days instead of repeating one.<p>Everything you logged is already in your history.</p>'},
@@ -18353,7 +18362,7 @@ function TUTC(){
       {t:'The rest timer',b:'It starts itself when a set lands.<ul><li>\u221215 and +15 nudge it, SKIP cancels it</li><li>Keeps counting with the screen off</li><li>Sounds at zero \u2014 silent during this tour</li></ul>'},
       {t:'Change it on the spot',b:'Press and hold any exercise. The bench is highlighted.'},
       {t:'What you can change',b:'<ul><li>Rest between sets</li><li>How many sets it runs</li><li>Whether it is on the day at all</li></ul><p>Save it for today only and it clears when the day is sealed. Keep it and every Tuesday carries the change.</p>'},
-      {t:'Your own notes',b:'Tap Add note on any exercise for the things only you need - a seat height, a pin number, a cue that keeps your form honest. It stays on that exercise every time it comes round.'},
+      {t:'Your own notes',b:'Tap Add note on any exercise for the things only you need - a seat height, a pin number, a reminder that keeps your technique right. It stays on that exercise every time it comes round.'},
       {t:'How a set is graded',b:'<div class="tut-g"><div><i style="background:var(--gold)"></i><span><b>Gold</b> &mdash; beats your best ever</span></div><div><i style="background:var(--go)"></i><span><b>Cyan</b> &mdash; matches it</span></div><div><i style="background:var(--txt3)"></i><span><b>Grey</b> &mdash; a first attempt, or under your best</span></div></div><p>The ring in the header counts the whole day. Tap Finish when you are done.</p>'},
       {t:'The export',b:'The tiles across the top are what you just did: sets, weight moved, reps, time, and any records. Below them is the same session written out as plain text. Save it as a note, send it to whoever writes your programme, or paste it into a chat for a review. Closing it changes nothing.'},
       {t:'Sealed',b:'Tuesday is sealed, which only means done for this week. Everything you logged stays in your history and the day comes back around next week. When you want to restart the week early, this button reopens every day at once.'},
@@ -18404,7 +18413,7 @@ function TUTC(){
       {t:'The rest timer',b:'It starts itself when a set lands.<ul><li>\u221215 and +15 nudge it, SKIP cancels it</li><li>Keeps counting with the screen off</li><li>Sounds at zero \u2014 silent during this tour</li></ul>'},
       {t:'Change it on the spot',b:'Press and hold any exercise. The bench is highlighted.'},
       {t:'What you can change',b:'<ul><li>Rest between sets</li><li>How many sets it runs</li><li>Whether it is on the day at all</li></ul><p>Save it for today only and it clears when the day is marked. Keep it and every Tuesday carries the change.</p>'},
-      {t:'Your own notes',b:'Tap Add note on any exercise for the things only you need - a seat height, a pin number, a cue that keeps your form honest. It stays on that exercise every time it comes round.'},
+      {t:'Your own notes',b:'Tap Add note on any exercise for the things only you need - a seat height, a pin number, a reminder that keeps your technique right. It stays on that exercise every time it comes round.'},
       {t:'How a set is graded',b:'<div class="tut-g"><div><i style="background:var(--gold)"></i><span><b>Gold</b> &mdash; beats your best ever</span></div><div><i style="background:var(--go)"></i><span><b>Blue</b> &mdash; matches it</span></div><div><i style="background:var(--txt3)"></i><span><b>Grey</b> &mdash; a first attempt, or under your best</span></div></div><p>The ring in the header counts the whole day. Tap Finish when you are done.</p>'},
       {t:'The export',b:'The tiles across the top are what you just did: sets, weight moved, reps, time, and any records. Below them is the same day written out as plain text. Save it as a note, send it to whoever writes your programme, or paste it into a chat for a review. Closing it changes nothing.'},
       {t:'Marked',b:'Tuesday is marked, which only means done for this week. Everything you logged stays in your logs and the day comes back around next week. When you want to restart the week early, this button reopens every day at once.'},
@@ -19064,7 +19073,7 @@ function wcSafetyDraw(){
       '<button class="wc-yn-b'+(v===true?' on':'')+'" data-k="'+k+'" data-v="1" onclick="wcSafeSet(\''+k+'\',true)">Yes</button>'+
       '</div>';
   }
-  wcStage('Two quick questions first',
+  wcStage('Glad you are here. Two quick questions first',
     '<div class="wc-q">Any injury, pain, or medical condition that currently limits how you move or exercise?'+pair('q1')+'</div>'+
     '<div class="wc-q">Has a doctor ever told you to avoid or limit exercise?'+pair('q2')+'</div>'+
     '<div class="wc-note">Forge gives general fitness guidance, not medical advice.</div>');
@@ -19212,7 +19221,7 @@ var EZ_STEPS=[
 // 'saved' parks it in Saved workouts instead, because an existing user already HAS a week
 // and a generator that overwrites a Tuesday nobody asked it to touch is a bug with steps.
 function ezOpen(into){
-  if(into==='saved'&&(DB.extra||[]).length>5){mkNote('Saved workouts is nearly full. A forged week can be up to five workouts. Clear some room first.','Not enough room');return;}
+  if(into==='saved'&&(DB.extra||[]).length>5){mkNote('Saved workouts is nearly full. A built week can be up to five workouts. Clear some room first.','Not enough room');return;}
   // done:false is the reset of the one-forge-per-run latch - see ezPick.
   EZ={step:0,level:null,days:null,goal:null,kit:null,into:into||'days',done:false};
   document.getElementById('ez').classList.add('on');
@@ -19512,8 +19521,9 @@ function ezForge(){
       if(DB.days[day].indexOf(id)<0)DB.days[day].push(id);
     });
   }
-  // Both cardio-leaning goals carry the walk: the cheapest habit with the longest reach.
-  if(goal==='lean'||goal==='move'){
+  // Both cardio-leaning goals carry the walk: the cheapest habit with the longest reach. So does
+  // a one-day week, because the option promised "walks the rest of the week" (v5.101).
+  if(goal==='lean'||goal==='move'||days===1){
     var wid='cus'+Date.now().toString(36)+'w';
     DB.custom[wid]={name:'Power Walk',custom:1,made:Date.now(),kind:'cardio',tag:'Yours',time:'Anytime',color:'#e0b667',
       sections:[{title:'Straight sets',ss:false,rows:[['walk',{sets:'30 min',rest:''}]]}]};
