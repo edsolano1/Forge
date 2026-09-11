@@ -38,9 +38,33 @@ main constraint on how to work in it. See **Traps** below before editing.
   Frost and Moonwell stay frozen (`THEMES_ON=0`) — check whether a selector is theme-scoped
   before changing it.
 
+## Settled in September 2026 (binding on new copy and code)
+
+- **Gold requires holding the weight** (`holdsWeight`, v5.96). A set never earns gold lighter
+  than the set it beats. Score is still Epley; no rep cap (rejected: it would strip gold from
+  15-rep isolation work). Colours: gold = beat, violet = matched, nothing = under. No bronze.
+- **Instructions and card notes are plain English** (v5.97). No lockout, brace, hinge, sternum,
+  lats, scapula, pike. Say what it means. Card notes never carry one-body advice ("if the knee
+  complains") or expert escalation ("plate on the back"); a progression is a last cue for everyone.
+  A glossary sheet is parked; inline tap-a-word links were rejected.
+- **No dashes in user copy, including " - "** (v5.98). Period, comma, colon or rewrite. Ranges
+  (2-3 min) and compounds (pull-up) are fine. Check `—` escapes too; grep misses them.
+- **Level-ups are per row** (v5.94): `lastForSlot`, `isReady(exId,tgts,slot)`, plan items carry
+  `slot`; `applyLevel` matches base id AND slot. `lastFor` stays cross-slot for the Last chip.
+- **`ask()` has two more knobs**: `onNo===false` hides CANCEL (a statement with one answer);
+  the 7th arg names the no-button (NOT NOW). The queue signature moved to index 7.
+- **Every user-typed string is `esc()`'d where it lands in HTML** (names, notes, custom links).
+- **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
+  strength and underfills "move"; longer would only add rest.
+- The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated
+  phones, never a fresh install. Leave them.
+
 ## Verifying
 
-Rendering claims cannot be verified in a desktop browser. Both are Chromium, so the numbers always
+Rendering claims cannot be verified in a desktop browser.
+
+**Restarting the Browser-pane preview server hands the tab FRESH storage.** An empty app after
+a restart is the pane, not the build. Prove persistence with create → reload → check. Both are Chromium, so the numbers always
 look right and have been wrong three separate times.
 
 The phone is adb-paired. **adb lives at `C:\Android\Sdk\platform-tools`** — not on PATH, not under

@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.86** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.98** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -17,14 +17,14 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 | Area | State |
 |---|---|
 | Week board | Seven days, up to 3 workouts each; per-day completion ("locked in"); a visible Saved workouts box under the week; when the last day locks, the app offers to unlock the week (v4.157) |
-| Sessions | Write-through logging, grading, PR flare, rest timers, molten-bar notification (Android) |
+| Sessions | Write-through logging, grading (gold beats your last session or your best, violet matches your best, and gold always requires holding or adding weight), PR flare, rest timers, molten-bar notification (Android) |
 | Builder | The one editor for everything — per-set targets, supersets, per-row lift/cardio measures |
 | Mid-session edits | Hold an exercise → the real builder opens → one question at Finish: *add permanently, or just today?* |
 | Level-ups | Per-day targets, per-lift history; machine lattice learning; kg-native plate steps |
 | Progress | 8-week volume bars, this-week-vs-last rows, per-exercise est-1RM charts |
 | Units | lb/kg toggle (Settings); storage stays pounds forever; zero-drift round-tripping |
 | Library | 114 exercises, each tagged with the muscle it trains and the equipment it needs. Neutral starting weights (nobody's personal log), full names, searchable swap sheet, and a muscle filter in the builder |
-| Instructions | Every exercise has written setup, cues and the one mistake that actually happens — plus a moving figure, drawn front and side. No links out; the app owns the teaching |
+| Instructions | Every exercise has written setup, cues and the one mistake that actually happens, in words a first-timer can follow (no gym jargon since v5.97), plus a moving figure drawn front and side. No links out; the app owns the teaching |
 | Without a gym | The wizard asks what you own: a gym, a barbell at home, dumbbells and a bench, just dumbbells, or nothing but a floor. Every slot in the generated week is filled with something you can actually perform, and a slot with no honest answer is left out rather than faked |
 | Warm-ups | Plate-accurate ramps on loaded lifts, never counted in your stats |
 | Plate calculator | A drawing of the loaded bar, both ends, plates tapped on as chips; per-lift bar memory; kg-native |
@@ -35,6 +35,16 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 | Bodyweight | One weigh-in a day inside Progress, canonical pounds, neutral deltas |
 
 ---
+
+## The September review (v5.92 to v5.98)
+
+A full first-user pass on 10 Sep 2026 (the report is a private artifact, linked from the handoff)
+found 15 bugs, three of which could silently rewrite targets. All shipped: kg readiness now compares
+weights as shown; a lift built twice in one workout levels up per block; one stray weight can no
+longer teach a 1 lb machine step; the beginner press slot is a real press; every user-typed name
+is escaped; the number pad opens with the keyboard up. Then, from the owner's own first run:
+plain-language instructions on every card, no dashes anywhere a user reads, a safety screen that
+lights answers in place, and gold that requires holding the weight. Verified on the phone.
 
 ## What's still left to do
 
