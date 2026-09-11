@@ -8813,7 +8813,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.95';
+var APPV='v5.96';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9228,16 +9228,31 @@ function bestEver(exId,excludeIdx){
 // normal week is actually measured against - your own last time, not the best day you ever
 // had. bestEver still exists and still owns the PR line at the foot of the card; it just
 // stopped being the bar every ordinary set was held up to.
-function lastScore(exId){
+function lastScore(exId){var b=lastBest(exId);return b?b.score:null;}
+// The best single set of the last session, WITH the set itself - the weight rule below needs
+// to know what was on the bar, not only what it scored.
+function lastBest(exId){
   var L=lastFor(exId);
   if(!L||!L.sets||!L.sets.length)return null;
   var best=null;
   L.sets.forEach(function(s){
     if(!s)return;
     var sc=setScore(exId,s);
-    if(best===null||sc>best)best=sc;
+    if(best===null||sc>best.score)best={score:sc,set:s};
   });
   return best;
+}
+// The weight rule (owner call, 11 Sep): gold is for holding the weight and adding reps, or for
+// adding weight. It never lights on a LIGHTER set than the one it is beating, however the score
+// comes out - the estimate flatters long sets, so 80x20 outscored 100x8 and going lighter and
+// longer read as progress, which is the opposite of what the week is built to do. Assisted
+// lifts invert (less help is heavier); bodyweight and timed work carry no weight to hold.
+function holdsWeight(exId,set,against){
+  if(!set||!against)return true;
+  if(set.unit==='sec'||against.unit==='sec')return true;
+  var a=gradeW(set.w),b=gradeW(against.w);
+  if(!a&&!b)return true;
+  return invEx(exId)?(a<=b):(a>=b);
 }
 function isPR(exId,set){return setGrade(exId,set)==='pr';}
 // How this set stands against your best ever for the lift:
@@ -9264,13 +9279,13 @@ function setGrade(exId,set){
   var b=bestEver(exId);
   if(!b)return 'first';                    // nothing to beat yet - set the baseline
   var s=setScore(exId,set),bs=setScore(exId,b);
-  if(s>bs+0.0001)return 'pr';              // an all-time record, and rare by definition
+  if(s>bs+0.0001&&holdsWeight(exId,set,b))return 'pr';   // an all-time record, and rare by definition
   // Beating your OWN LAST TIME is the thing training is actually made of, and it was going
   // unmarked - gold only ever fired on a lifetime best, so a year of steady progress could
   // pass without the app ever saying well done. 'up' reads gold too, but it is NOT recorded
   // as a record: e.pr stays off, so the count on the finish sheet still means what it says.
-  var ls=lastScore(exId);
-  if(ls!==null&&s>ls+0.0001)return 'up';
+  var lb=lastBest(exId);
+  if(lb&&s>lb.score+0.0001&&holdsWeight(exId,set,lb.set))return 'up';
   if(Math.abs(s-bs)<=0.0001)return 'match';
   return 'under';                          // stored, never shown - see gradeClass
 }
