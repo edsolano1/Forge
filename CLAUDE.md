@@ -208,6 +208,9 @@ writes through — `mkTouch()`, debounced 500ms. There is no "unsaved" state in 
    bars (gold = biggest week) plus plain this-week-vs-last rows for sessions, sets, and
    weight moved (`weekBuckets`/`weekStrip`). Marked-done days carry no sets and do not count
    as sessions. Full gap analysis against Hevy/Strong/Jefit exists as a published artifact.
+   **The Progress button is shelved (owner's call, Aug 23):** `showProgress` and the sheet are
+   intact but nothing on the home footer opens them. Do not report it as a bug, and do not
+   polish the sheet's copy until the button comes back.
 3. **Kilograms.** The toggle shipped in v4.141 as a display skin: storage stays pounds
    forever, the Units toggle (Settings) converts at render and converts input back exactly
    once. Session inputs carry the exact pound value in `data-lb` while showing kg — that is
