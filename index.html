@@ -8817,7 +8817,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.105';
+var APPV='v5.106';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11172,7 +11172,10 @@ function toggleSet(id,i,rest,unit){
       // Hearing it as your FIRST completion sound teaches the wrong thing twice over: it sets the
       // fanfare as the normal noise, and it spends the moment before there is anything to spend
       // it on. The flare still shows; only the sound is held back.
-      if(gr==='pr'&&!TUTON){sfxPR();vib([40,60,40,60,140]);}
+      // Gold always sounds like gold (owner, 12 Sep 2026): beating last session earns the same
+      // fanfare as a lifetime best. Two golds that sounded different were one gold too many.
+      // A first-ever set stays quiet, as above.
+      if((gr==='pr'||gr==='up')&&!TUTON){sfxPR();vib([40,60,40,60,140]);}
       else{sfxLog();vib(35);}
       if(cb){
         cb.classList.remove('flare','pr');void cb.offsetWidth;

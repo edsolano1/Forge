@@ -43,6 +43,8 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **Gold requires holding the weight** (`holdsWeight`, v5.96). A set never earns gold lighter
   than the set it beats. Score is still Epley; no rep cap (rejected: it would strip gold from
   15-rep isolation work). Colours: gold = beat, violet = matched, nothing = under. No bronze.
+  **Gold always sounds like gold** (v5.106): beating last session and a lifetime best play the
+  same fanfare. Never split gold into kinds by sound or shade; a first-ever set stays quiet.
 - **Instructions and card notes are plain English** (v5.97). No lockout, brace, hinge, sternum,
   lats, scapula, pike. Say what it means. Card notes never carry one-body advice ("if the knee
   complains") or expert escalation ("plate on the back"); a progression is a last cue for everyone.
