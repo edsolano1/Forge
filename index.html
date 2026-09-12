@@ -370,6 +370,7 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .sec-row .sec-label{margin:0;}
 .wk-flip{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt2);border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 10px;cursor:pointer;white-space:nowrap;transition:.15s;}
 .wk-flip:hover{color:var(--txt);border-color:#33373d;}
+.wk-flip[hidden]{display:none;}
 .wk-flip svg{width:15px;height:15px;stroke-width:1.6;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
 /* The perspective lives INSIDE the transform, never on #home: a perspective on the home
    screen made it the containing block for every fixed sheet inside it (Settings landed
@@ -8865,7 +8866,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.115';
+var APPV='v5.116';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
