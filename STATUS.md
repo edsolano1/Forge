@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.101** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.107** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -28,7 +28,7 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 | Without a gym | The wizard asks what you own: a gym, a barbell at home, dumbbells and a bench, just dumbbells, or nothing but a floor. Every slot in the generated week is filled with something you can actually perform, and a slot with no honest answer is left out rather than faked |
 | Warm-ups | Plate-accurate ramps on loaded lifts, never counted in your stats |
 | Plate calculator | A drawing of the loaded bar, both ends, plates tapped on as chips; per-lift bar memory; kg-native |
-| The watch | Log sets from the wrist: week → workout → lift → set, a rest screen with 3-2-1 haptics, redo any logged set, swap a lift mid-session |
+| The watch | Log sets from the wrist: week → workout → lift → set, a rest screen with 3-2-1 haptics, redo any logged set, swap a lift mid-session. Since watch 1.2 (12 Sep 2026): the phone's Forge palette and ember ground, no bold, a 44sp weight, 48dp targets, supersets shown as one lassoed group on the overview and stacked on the set and rest screens so either half is one tap, and the wrist walks a superset A1 B1 A2 B2 |
 | First run | A safety screen, three behavioural questions, session length, what equipment you have, and a goal — then a week built to the answers |
 | Sounds | One master volume dial for everything, including the native screen-off alert |
 | Backup | Plain-text export via share sheet; JSON backup/restore; an opt-in safety copy that refreshes itself after every finished session; week sharing that adds rather than replaces |
@@ -45,6 +45,17 @@ longer teach a 1 lb machine step; the beginner press slot is a real press; every
 is escaped; the number pad opens with the keyboard up. Then, from the owner's own first run:
 plain-language instructions on every card, no dashes anywhere a user reads, a safety screen that
 lights answers in place, and gold that requires holding the weight. Verified on the phone.
+
+## The mark, the sound, and the watch (v5.102 to v5.107, 11 to 12 Sep 2026)
+
+The owner's own hammer-and-anvil mark went in everywhere (v5.102): launch, welcome, header, set
+button, watermark, splash glyph, launcher and notification icons, with the phone APK rebuilt
+(versionCode 200). Gold now always sounds like gold (v5.106): beating last session plays the
+same fanfare as a lifetime best. The crossover side view stands its tower behind the lifter
+(v5.103). The watch got its second pass (web v5.104 to v5.107, watch 1.2 to 1.4): the wrist
+walks a superset in running order, sees both halves together, corrects a set on either half in
+one tap without losing its place, shows supersets lassoed on the overview, and wears the phone's
+palette. All verified on the SM-R960 except the live set screen, which waits for a real session.
 
 ## The beginner pass (v5.99 to v5.101, 11 Sep 2026)
 
