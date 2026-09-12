@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.98** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.101** · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -21,7 +21,7 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 | Builder | The one editor for everything — per-set targets, supersets, per-row lift/cardio measures |
 | Mid-session edits | Hold an exercise → the real builder opens → one question at Finish: *add permanently, or just today?* |
 | Level-ups | Per-day targets, per-lift history; machine lattice learning; kg-native plate steps |
-| Progress | 8-week volume bars, this-week-vs-last rows, per-exercise est-1RM charts |
+| Progress | 8-week volume bars, this-week-vs-last rows, per-exercise est-1RM charts. Built and intact, but the button is shelved (owner call, Aug 23) until the sheet reads as true numbers; nothing on the home screen opens it today |
 | Units | lb/kg toggle (Settings); storage stays pounds forever; zero-drift round-tripping |
 | Library | 114 exercises, each tagged with the muscle it trains and the equipment it needs. Neutral starting weights (nobody's personal log), full names, searchable swap sheet, and a muscle filter in the builder |
 | Instructions | Every exercise has written setup, cues and the one mistake that actually happens, in words a first-timer can follow (no gym jargon since v5.97), plus a moving figure drawn front and side. No links out; the app owns the teaching |
@@ -45,6 +45,24 @@ longer teach a 1 lb machine step; the beginner press slot is a real press; every
 is escaped; the number pad opens with the keyboard up. Then, from the owner's own first run:
 plain-language instructions on every card, no dashes anywhere a user reads, a safety screen that
 lights answers in place, and gold that requires holding the weight. Verified on the phone.
+
+## The beginner pass (v5.99 to v5.101, 11 Sep 2026)
+
+A second full pass, this time as someone who has never lifted, on a Fold-width preview, with five
+agents reading the code in parallel (onboarding, session and builder, phone readability, Progress
+and Settings, and every user-facing string). 62 findings; all but a handful shipped across three
+builds. The ones that mattered: the first-run flag was written at boot, so one refresh mid-welcome
+skipped the safety questions and the wizard for good (now written when the welcome is answered);
+Workout Settings lost a rename, a day move or a measure change if you left with the back arrow
+(now autosaved like everything else); gold and violet were never explained anywhere a real user
+could reach (now one line on the first finish sheet, under "Your first one is in the book"); the
+builder ran on 10 px labels and 26 to 30 px buttons (now 12 px and 34 to 38 px). A fresh install
+takes its weight unit from the phone's locale, once, so kg users get a kg week. The wizard's
+blurbs, the swap-sheet headings, the tour, Settings and the instructions lost their remaining gym
+words; "seal" is gone from the live voice; the tour offer is a button on "Your week is forged"
+instead of a second dialog. Left on purpose: capitalised words for emphasis inside about twenty
+instructions, reordering inside a superset, the three-button level-up sheet, and two layout
+questions (splash overlap, rest chips wrapping in the builder) that only the phone can answer.
 
 ## What's still left to do
 
