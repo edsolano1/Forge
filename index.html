@@ -8817,7 +8817,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.104';
+var APPV='v5.105';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16332,6 +16332,9 @@ function wearNext(){
       var maxN=0;b.mem.forEach(function(m){if(m.tg.length>maxN)maxN=m.tg.length;});
       for(var s=0;s<maxN;s++)b.mem.forEach(function(m){if(m.tg[s])order.push([m,s]);});
     }else b.mem.forEach(function(m){m.tg.forEach(function(_,s){order.push([m,s]);});});
+    // An aim on either half of a superset aims the whole pair, so the wrist keeps alternating
+    // instead of running one half to the end.
+    var blockAimed=!!(WEARFOCUS&&b.ss&&b.mem.some(function(m){return m.id===WEARFOCUS;}));
     order.forEach(function(p){
       var m=p[0],s=p[1];
       if(m.ent[s])return;
@@ -16339,7 +16342,10 @@ function wearNext(){
       if(!out)out=c;
       // A tapped lift becomes the aim; a tapped unlogged set becomes the current one. Sets
       // may be done out of order, the phone always allowed that.
-      if(WEARFOCUS&&m.id===WEARFOCUS&&!aimed&&(WEARSET==null||WEARSET===s))aimed=c;
+      if(WEARFOCUS&&!aimed){
+        if(WEARSET!=null){if(m.id===WEARFOCUS&&WEARSET===s)aimed=c;}
+        else if(blockAimed||m.id===WEARFOCUS)aimed=c;
+      }
     });
   });
   // the lift you jumped to is finished: stop aiming and rejoin the running order
