@@ -8862,7 +8862,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.113';
+var APPV='v5.114';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9882,6 +9882,9 @@ function dayMap(){
     for(var i=0;i<arr.length;i++){
       var id=arr[i];
       if(id==='rest'||id===mkHeld)continue;
+      // On a two week program the SAME workout on two days is the point (A B A, then B A B):
+      // one set of targets, one progression. No copy is made while the program is on (v5.114).
+      if(twoOn())continue;
       if(!seen[id]){seen[id]=d.k;continue;}
       if(seen[id]===d.k)continue;
       var nid=wkCopy(id);
@@ -19544,6 +19547,13 @@ var EZ_STEPS=[
     [2,'Twice a week or more','Nearly every week, showing up',ezScale(3,3)]];}},
   {t:'How many days a week?',s:'Only count days you will actually show up. Fewer days done beats more days planned.',
    k:'days',opts:function(){return ezDays().map(function(d){return [d[0],d[1],d[2],d[3]];});}},
+  // Still a constraint, not a preference: how the person's weeks RUN. Most repeat; the classic
+  // beginner barbell programs alternate two workouts across three days, A B A then B A B,
+  // which one board cannot say (v5.114).
+  {t:'One week, or two that alternate?',s:'Most plans repeat the same week. Some swap two workouts back and forth, so one week is A B A and the next is B A B.',
+   k:'weeks',opts:function(){return [
+    [1,'One week','The same days every week',ezScale(1,2)],
+    [2,'Two weeks','They take turns. You get a second board to flip to',ezScale(2,2)]];}},
   {t:'How long is a session?',s:'Count the time you actually have, door to door. The week is trimmed to fit, not crammed.',
    k:'len',opts:function(){return [
     [30,'30 minutes','The big lifts only. Nothing extra',ezClock(30)],
@@ -19860,19 +19870,34 @@ function ezForge(){
       color:MK_COLS[order.length%MK_COLS.length],sections:sections};
     madeBy[d.n]=id;order.push(id);
   });
+  var two=(EZ.weeks===2);
   if(EZ.into==='saved'){
     DB.extra=DB.extra||[];
     order.forEach(function(id){if(DB.extra.indexOf(id)<0)DB.extra.push(id);});
   }else{
+    var order2=null;
+    // Two alternating weeks (v5.114). Three days is the classic case: two workouts, A B A one
+    // week and B A B the next, so the third generated day is not used. Any other count gets
+    // Week 2 as a copy of Week 1 to change from, which is honest about what alternates.
+    if(two&&EZ.days===3&&order.length>=2){
+      var A=order[0],B=order[1],C=order[2];
+      order=[A,B,A];order2=[B,A,B];
+      if(C&&C!==A&&C!==B)delete DB.custom[C];
+    }else if(two)order2=order.slice();
     slots.forEach(function(day,i){
       var id=order[i];
       DB.days[day]=DB.days[day]||[];
       if(DB.days[day].indexOf(id)<0)DB.days[day].push(id);
     });
+    if(two){
+      DB.two={on:1,anchor:weekStartTs(),live:0,view:0,other:{}};
+      DAYS.forEach(function(d){DB.two.other[d.k]=[];});
+      slots.forEach(function(day,i){var id=order2[i];if(id&&DB.two.other[day].indexOf(id)<0)DB.two.other[day].push(id);});
+    }
   }
   // Both cardio-leaning goals carry the walk: the cheapest habit with the longest reach. So does
   // a one-day week, because the option promised "walks the rest of the week" (v5.101).
-  if(goal==='lean'||goal==='move'||days===1){
+  if(goal==='lean'||goal==='move'||EZ.days===1){
     var wid='cus'+Date.now().toString(36)+'w';
     DB.custom[wid]={name:'Power Walk',custom:1,made:Date.now(),kind:'cardio',tag:'Yours',time:'Anytime',color:'#e0b667',
       sections:[{title:'Straight sets',ss:false,rows:[['walk',{sets:'30 min',rest:''}]]}]};
@@ -19890,6 +19915,7 @@ function ezForge(){
     move:'This week will not maximise any one thing. It makes almost everything better at once, and it is the easiest plan to keep for years, which is the whole trick.'};
   var saved=(EZ.into==='saved');
   var lead=saved?'It is waiting in Saved workouts. Hold one to put it on a day. ':'';
+  if(two&&!saved)lead+='Week 2 is behind this one. Flip to it under Saturday. ';
   // The tour offer waits for the philosophy line to be READ, not for a timer - seen on
   // device: fired at 2.4s it landed on top of a note shown at 0.9s, giving the one line
   // that says what the plan believes about a second and a half of life.

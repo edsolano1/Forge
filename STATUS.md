@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.112** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.114** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -29,7 +29,7 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 | Warm-ups | Plate-accurate ramps on loaded lifts, never counted in your stats |
 | Plate calculator | A drawing of the loaded bar, both ends, plates tapped on as chips; per-lift bar memory; kg-native |
 | The watch | Log sets from the wrist: week → workout → lift → set, a rest screen with 3-2-1 haptics, redo any logged set, swap a lift mid-session. Since watch 1.2 (12 Sep 2026): the phone's Forge palette and ember ground, no bold, a 44sp weight, 48dp targets, supersets shown as one lassoed group on the overview and stacked on the set and rest screens so either half is one tap, and the wrist walks a superset A1 B1 A2 B2 |
-| First run | A safety screen, three behavioural questions, session length, what equipment you have, and a goal — then a week built to the answers |
+| First run | A safety screen, three behavioural questions, days, one week or two that alternate (v5.114), session length, what equipment you have, and a goal — then a week built to the answers |
 | Sounds | One master volume dial for everything, including the native screen-off alert |
 | Backup | Plain-text export via share sheet; JSON backup/restore; an opt-in safety copy that refreshes itself after every finished session; week sharing that adds rather than replaces |
 | Bodyweight | One weigh-in a day inside Progress, canonical pounds, neutral deltas |
@@ -59,7 +59,7 @@ palette. All verified on the SM-R960 except the live set screen, which waits for
 
 ## Missed days, the week sheet, and two weeks (v5.108 to v5.112, 12 Sep 2026)
 
-From the owner's own Saturday: a Tuesday skipped looked no different from a Friday still to come. Now a passed day still undone wears a quiet Waiting pill, the turnover note names what did not happen and says nothing is owed, and saved cards lost their redundant SAVED tag. Workouts finished opens on the week (a seven-day strip, workouts done of planned, sets, records, that week's sessions; Month and All behind it; walk totals behind one row). And the two week program: a second board behind the first for A B A, B A B weeks, alternating by the calendar, flipped over to build, switched on and off under Saturday, with the other week's workouts moving to Saved when it is switched off. Then two trims from the same conversation: three or more Waiting pills collapse into one calm line above the week (v5.111), and the whole-week UNLOCK button left the footer in favour of UNLOCK THIS ONE on a locked card's hold menu, the one thing people actually needed it for (v5.112).
+From the owner's own Saturday: a Tuesday skipped looked no different from a Friday still to come. Now a passed day still undone wears a quiet Waiting pill, the turnover note names what did not happen and says nothing is owed, and saved cards lost their redundant SAVED tag. Workouts finished opens on the week (a seven-day strip, workouts done of planned, sets, records, that week's sessions; Month and All behind it; walk totals behind one row). And the two week program: a second board behind the first for A B A, B A B weeks, alternating by the calendar, flipped over to build, switched on and off under Saturday, with the other week's workouts moving to Saved when it is switched off. Then two trims from the same conversation: three or more Waiting pills collapse into one calm line above the week (v5.111), and the whole-week UNLOCK button left the footer in favour of UNLOCK THIS ONE on a locked card's hold menu, the one thing people actually needed it for (v5.112). The flip's perspective moved off the home screen after it offset Settings and let the page scroll sideways (v5.113), and the wizard now asks one week or two, building A B A / B A B from two workouts for a three-day week (v5.114).
 
 ## The beginner pass (v5.99 to v5.101, 11 Sep 2026)
 
