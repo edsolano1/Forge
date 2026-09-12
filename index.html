@@ -5603,22 +5603,26 @@ var ANIM=(function(){
   function drawCrossS(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    seg(x,[352,104],[352,430],6,LINE);             // the stand, behind-high
-    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(346,126,8,0,7);x.stroke();
-    var hip=[210,244], sho=[214,146];
+    // The lifter faces RIGHT (toes at 236), so "behind" is the LEFT of the box. v5.103: the
+    // stand used to be drawn at x=352, in front of the lifter, with the cable coming from
+    // ahead. The tower now stands behind, and the cable runs from up-behind the shoulder
+    // forward into the hand, which is how a crossover is actually strung.
+    seg(x,[104,104],[104,430],6,LINE);             // the stand, behind-high
+    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(110,126,8,0,7);x.stroke();
+    var hip=[230,244], sho=[234,146];
     seg(x,hip,sho,11);
-    seg(x,hip,[210,424],10);
-    seg(x,[202,424],[236,424],9);
-    seg(x,sho,[214,120],8);
-    dot(x,[214,98],19);
-    // the arm sweeps downhill from behind-high to out front at hip height
-    var hand=[lerp(300,262,k), lerp(178,296,k)];
-    var e=[lerp(262,240,k), lerp(170,240,k)];
+    seg(x,hip,[230,424],10);
+    seg(x,[222,424],[256,424],9);
+    seg(x,sho,[234,120],8);
+    dot(x,[234,98],19);
+    // the arm starts up and back toward the pulley, and sweeps down and forward to hip height
+    var hand=[lerp(168,286,k), lerp(176,296,k)];
+    var e=[lerp(196,262,k), lerp(168,236,k)];
     seg(x,sho,e,9);seg(x,e,hand,9);
     x.globalAlpha=.35;
-    seg(x,sho,[lerp(296,258,k),lerp(182,300,k)],8);  // the far arm, ghosted
+    seg(x,sho,[lerp(172,282,k),lerp(180,300,k)],8);  // the far arm, ghosted
     x.globalAlpha=1;
-    seg(x,[342,132],[hand[0]+6,hand[1]-8],4,LINE);   // the cable
+    seg(x,[114,132],[hand[0]-6,hand[1]-8],4,LINE);   // the cable, from behind
     dot(x,hand,6,GO);
   }
 
@@ -8813,7 +8817,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.102';
+var APPV='v5.103';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
