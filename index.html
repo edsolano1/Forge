@@ -8860,7 +8860,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.110';
+var APPV='v5.111';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9915,6 +9915,20 @@ function planIds(){
 }
 function onPlan(id){return !!dayKeyOf(id);}
 function dayFull(k){return ((DB.days||{})[k]||[]).length>=DAY_MAX;}
+// How many placed workouts on passed weekdays this week are still undone (the Waiting ones).
+function waitingCount(){
+  if(twoOff())return 0;
+  var lw=loggedThisWeek(),today=new Date().getDay(),n=0;
+  DAYS.forEach(function(d){
+    if(d.js>=today)return;
+    (DB.days[d.k]||[]).forEach(function(id){
+      if(!W[id]||wkVar(id))return;
+      if(loggedCount(id)>0||lwOn(lw,id,d.k))return;
+      n++;
+    });
+  });
+  return n;
+}
 // ============================================================
 // THE TWO WEEK PROGRAM (v5.110)
 // ============================================================
@@ -10035,6 +10049,9 @@ function planCard(id,i,nx,dk){
   // skipped, it is waiting: open it any day before the week turns over (v5.108).
   var dObj=null;DAYS.forEach(function(x){if(x.k===dk)dObj=x;});
   var waiting=!offw&&!live&&!sealed&&!v&&dObj&&dObj.js<new Date().getDay();
+  // Three or more waiting days would tag most of the board: then the week carries one calm
+  // line instead (see renderHome) and the cards stay plain (v5.111).
+  if(waiting&&waitingCount()>=3)waiting=false;
   var pills='';
   if(live)pills+='<span class="pill pill-live">Resume '+loggedCount(id)+'/'+totalSets(id)+'</span>';
   else if(sealed)pills+='<span class="pill pill-done">'+LOCKI+TXT('done')+'</span>';
@@ -10760,6 +10777,9 @@ function renderHome(){
   // thing "I know what I'm building" used to land on without (v5.101).
   var bare=!DAYS.some(function(d){return (DB.days[d.k]||[]).length;})&&!(DB.logs||[]).length&&!(DB.extra||[]).length&&!TUTON&&!SANDBOX;
   var hint=bare?'<div class="footnote" style="margin:0 2px 12px">Tap + on any day to build a workout, or use Forge me a week further down to have one built for you.</div>':'';
+  // A rough week gets one calm line, not a board full of Waiting pills (v5.111).
+  var wc=waitingCount();
+  if(!bare&&wc>=3)hint+='<div class="footnote" style="margin:0 2px 12px">'+(wc===3?'Three':wc===4?'Four':wc===5?'Five':wc===6?'Six':wc)+' workouts from earlier this week are still open. Any of them, any day.</div>';
   // Two week program: the label says which board this is, and a control under Saturday flips
   // to the other one or switches the program on and off (v5.110).
   var wl=document.getElementById('weekLabel');
