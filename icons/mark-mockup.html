@@ -1,0 +1,125 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Forge Mark Mockup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap">
+<style>
+:root{--bg:#0a0605;--card:#170e09;--s2:#241510;--line:#3a2a20;--txt:#f0e4d6;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:Barlow,system-ui,sans-serif;padding:28px 20px 60px}
+h1{font-family:"Barlow Condensed";font-size:34px;margin:0 0 4px;letter-spacing:.02em}
+.sub{color:var(--txt3);margin:0 0 30px;max-width:60ch}
+h2{font-family:"Barlow Condensed";font-size:20px;letter-spacing:.1em;text-transform:uppercase;color:var(--go);margin:40px 0 12px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:760px}
+.pane{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.pane .lbl{position:absolute;top:8px;right:10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3)}
+.pane.new .lbl{color:var(--gold)}
+.note{color:var(--txt3);font-size:14px;max-width:60ch;margin:10px 0 0}
+svg{display:block}
+/* launch / welcome */
+.launch{height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.launch .word{font-family:"Barlow Condensed";font-size:40px;letter-spacing:.14em;text-transform:uppercase}
+.launch .rule{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.launch .tag{font-size:13px;color:var(--txt3);letter-spacing:.06em}
+.mark{color:var(--gold);filter:drop-shadow(0 0 16px rgba(255,138,31,.45))}
+/* header */
+.head{display:flex;align-items:center;gap:12px;padding:6px 2px}
+.head .wm{font-family:"Barlow Condensed";font-size:30px;letter-spacing:.14em;text-transform:uppercase}
+.head .v{font-family:"Barlow Condensed";font-size:12px;color:var(--txt3);margin-left:4px}
+.head .tl{font-size:13px;color:var(--txt2);margin-left:auto}
+/* set row */
+.srow{display:flex;align-items:center;gap:8px;background:var(--s2);border-radius:12px;padding:10px 10px;margin-top:8px}
+.sno{width:22px;height:22px;border-radius:7px;background:#2c1a13;color:var(--txt3);font-size:12px;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,monospace}
+.inp{width:58px;text-align:center;font-family:ui-monospace,monospace;font-size:19px;border-bottom:1px solid var(--line);padding:4px 0}
+.mul{color:var(--txt3)}
+.chk{margin-left:auto;width:42px;height:42px;border-radius:10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--txt3)}
+.chk.done{background:var(--gold);border-color:var(--gold);color:#0b0c0e}
+/* watermark */
+.week{height:230px;position:relative}
+.week .bgwm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--gold);opacity:.07}
+.week .day{position:relative;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12px;letter-spacing:.14em;color:var(--txt3)}
+/* icons */
+.icons{display:flex;gap:22px;align-items:flex-end;flex-wrap:wrap}
+.ic{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px;color:var(--txt3)}
+.tile{border-radius:22%;background:#0a0605;display:flex;align-items:center;justify-content:center;color:var(--gold);box-shadow:0 0 0 1px #2a1a12}
+.tile.lt{background:#f3ebe2;color:#1a100b}
+.statusbar{background:#2b2b2b;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px;color:#eee;font-size:13px}
+</style>
+
+<h1>Forge mark, mocked up</h1>
+<p class="sub">Left is what the app draws today. Right is your traced mark in the same place, at the same size and colour. Nothing here is wired into the app.</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- current anvil (the app's ANVIL path, 100 box) -->
+    <path id="oldAnvil" d="M10 26L74 26C83 26 91 28 97 33C90 38 82 41 70 42L66 42C62 51 60 55 60 60C64 65 69 69 75 72L75 80L25 80L25 72C31 69 36 65 40 60C40 55 38 51 34 42L30 42L10 42Z"/>
+    <!-- current full logo -->
+    <g id="oldLogo">
+      <g transform="translate(6 16) scale(.86)"><use href="#oldAnvil"/></g>
+      <g transform="translate(34 20) rotate(-24)"><rect x="-10" y="-10.5" width="20" height="21" rx="3.5"/><rect x="9" y="-3.4" width="40" height="6.8" rx="3.4"/></g>
+      <circle cx="11" cy="27" r="2.2"/><circle cx="6.5" cy="17" r="1.5"/><circle cx="62" cy="24" r="1.8"/>
+    </g>
+    <!-- new full mark (1240 box) -->
+    <g id="newLogo">
+      <path d="M130 590 H1120 L1050 668 L1010 700 H840 C800 740 770 790 760 830 C752 870 770 910 830 950 L900 1000 V1060 H345 V1000 L415 950 C475 910 493 870 485 830 C475 790 445 740 405 700 H235 L190 668 Z"/>
+      <path d="M494 346 L642 284 Q656 279 662 292 L746 526 Q752 542 738 548 L590 590 Q576 594 570 580 L488 362 Q482 350 494 346 Z"/>
+      <path d="M686 372 L1132 176 Q1148 170 1156 184 L1182 240 Q1188 254 1174 260 L718 450 Z"/>
+      <path d="M340 328 L522 500 L404 442 Z"/><path d="M258 446 L506 568 L398 556 Z"/>
+      <path d="M842 418 L760 546 L748 526 Z"/><path d="M958 468 L850 566 L764 572 Z"/>
+    </g>
+    <!-- new anvil alone -->
+    <path id="newAnvil" d="M130 590 H1120 L1050 668 L1010 700 H840 C800 740 770 790 760 830 C752 870 770 910 830 950 L900 1000 V1060 H345 V1000 L415 950 C475 910 493 870 485 830 C475 790 445 740 405 700 H235 L190 668 Z"/>
+  </defs>
+</svg>
+
+<h2>1. Launch panel and welcome</h2>
+<div class="pair">
+  <div class="pane"><span class="lbl">Now</span><div class="launch">
+    <svg class="mark" viewBox="0 0 100 100" width="104" height="104" fill="currentColor"><use href="#oldLogo"/></svg>
+    <div class="rule"></div><div class="word">Forge</div><div class="tag">Loading</div></div></div>
+  <div class="pane new"><span class="lbl">New</span><div class="launch">
+    <svg class="mark" viewBox="60 130 1130 980" width="112" height="98" fill="currentColor"><use href="#newLogo"/></svg>
+    <div class="rule"></div><div class="word">Forge</div><div class="tag">Loading</div></div></div>
+</div>
+<p class="note">Same gold, same glow. Yours is heavier and wider, which suits a launch screen. The welcome uses the same mark at 68 px.</p>
+
+<h2>2. Header, anvil alone</h2>
+<div class="pair">
+  <div class="pane"><span class="lbl">Now</span><div class="head">
+    <svg viewBox="0 0 100 100" width="36" height="36" style="color:var(--gold)"><g transform="translate(50 50) scale(.59) translate(-53.5 -53)"><use href="#oldAnvil" fill="currentColor" transform="scale(1)"/></g></svg>
+    <span class="wm">Forge</span><span class="v">V5.102</span></div></div>
+  <div class="pane new"><span class="lbl">New</span><div class="head">
+    <svg viewBox="100 560 1050 530" width="36" height="36" style="color:var(--gold)"><use href="#newAnvil" fill="currentColor"/></svg>
+    <span class="wm">Forge</span><span class="v">V5.102</span></div></div>
+</div>
+
+<h2>3. The set button, 22 px glyph</h2>
+<div class="pair">
+  <div class="pane"><span class="lbl">Now</span>
+    <div class="srow"><span class="sno">1</span><span class="inp">145</span><span class="mul">×</span><span class="inp">8</span>
+      <span class="chk"><svg viewBox="0 0 100 100" width="22" height="22"><g transform="translate(50 50) scale(.64) translate(-53.5 -53)"><use href="#oldAnvil" fill="currentColor"/></g></svg></span></div>
+    <div class="srow"><span class="sno">2</span><span class="inp">145</span><span class="mul">×</span><span class="inp">8</span>
+      <span class="chk done"><svg viewBox="0 0 100 100" width="22" height="22"><g transform="translate(50 50) scale(.64) translate(-53.5 -53)"><use href="#oldAnvil" fill="currentColor"/></g></svg></span></div></div>
+  <div class="pane new"><span class="lbl">New</span>
+    <div class="srow"><span class="sno">1</span><span class="inp">145</span><span class="mul">×</span><span class="inp">8</span>
+      <span class="chk"><svg viewBox="100 560 1050 530" width="22" height="22"><use href="#newAnvil" fill="currentColor"/></svg></span></div>
+    <div class="srow"><span class="sno">2</span><span class="inp">145</span><span class="mul">×</span><span class="inp">8</span>
+      <span class="chk done"><svg viewBox="100 560 1050 530" width="22" height="22"><use href="#newAnvil" fill="currentColor"/></svg></span></div></div>
+</div>
+<p class="note">This is the one you tap hundreds of times. Yours has a squarer horn and a straighter waist, so it stays crisp at 22 px. The current one's curved horn softens into a blob at this size.</p>
+
+<h2>4. Watermark behind the week</h2>
+<div class="pair">
+  <div class="pane"><span class="lbl">Now</span><div class="week">
+    <div class="bgwm"><svg viewBox="0 0 100 100" width="200" height="200"><g transform="translate(50 50) scale(.76) translate(-53.5 -53)"><use href="#oldAnvil" fill="currentColor"/></g></svg></div>
+    <div class="day">SUNDAY</div><div class="day">MONDAY</div><div class="day">TUESDAY</div></div></div>
+  <div class="pane new"><span class="lbl">New</span><div class="week">
+    <div class="bgwm"><svg viewBox="100 560 1050 530" width="200" height="200"><use href="#newAnvil" fill="currentColor"/></svg></div>
+    <div class="day">SUNDAY</div><div class="day">MONDAY</div><div class="day">TUESDAY</div></div></div>
+</div>
+
+<h2>5. Launcher icon and notification</h2>
+<div class="icons">
+  <div class="ic"><div class="tile" style="width:96px;height:96px"><svg viewBox="60 130 1130 980" width="72" height="62" fill="currentColor"><use href="#newLogo"/></svg></div>Launcher, dark</div>
+  <div class="ic"><div class="tile lt" style="width:96px;height:96px"><svg viewBox="60 130 1130 980" width="72" height="62" fill="currentColor"><use href="#newLogo"/></svg></div>Launcher, light tile</div>
+  <div class="ic"><div class="tile" style="width:48px;height:48px"><svg viewBox="60 130 1130 980" width="36" height="31" fill="currentColor"><use href="#newLogo"/></svg></div>48 px</div>
+  <div class="ic"><div class="statusbar"><svg viewBox="100 560 1050 530" width="22" height="22" fill="#fff"><use href="#newAnvil"/></svg> Rest over · Back to it</div>Notification, anvil only</div>
+</div>
+<p class="note">Android paints the notification icon flat white and tiny, so it gets the anvil alone. The launcher keeps the full mark; at 48 px the sparks fade to specks, which is fine, the shape still reads.</p>
