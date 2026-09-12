@@ -56,6 +56,7 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **`ask()` has two more knobs**: `onNo===false` hides CANCEL (a statement with one answer);
   the 7th arg names the no-button (NOT NOW). The queue signature moved to index 7.
 - **Every user-typed string is `esc()`'d where it lands in HTML** (names, notes, custom links).
+- **Unlocking is per card** (v5.112). `unsealOne(id)` on the hold menu of a locked card; the footer UNLOCK THE WEEK button is gone and must not come back. `unsealAll`/`doUnseal` survive only for the end-of-week "go round again" dialog. A passed day still undone shows a Waiting pill; three or more collapse into one line (`waitingCount`).
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
   strength and underfills "move"; longer would only add rest.
 - The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated
