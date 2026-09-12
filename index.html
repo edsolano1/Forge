@@ -368,12 +368,14 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .two-ctl svg{width:17px;height:17px;stroke-width:1.6;}
 .two-off{text-align:center;font-size:12px;color:var(--txt3);padding:4px 0 2px;cursor:pointer;}
 .two-off:hover{color:var(--txt2);}
-#weekCards{transform-origin:50% 50%;backface-visibility:hidden;}
+/* The perspective lives INSIDE the transform, never on #home: a perspective on the home
+   screen made it the containing block for every fixed sheet inside it (Settings landed
+   offset) and let the page scroll sideways (v5.113, seen on the phone). */
+#weekCards{transform-origin:50% 50%;}
 #weekCards.flip-out{animation:flipout .26s cubic-bezier(.55,0,.8,.4) forwards;}
 #weekCards.flip-in{animation:flipin .40s cubic-bezier(.2,.7,.2,1) both;}
-#home{perspective:1400px;}
-@keyframes flipout{from{transform:rotateY(0);opacity:1;}to{transform:rotateY(88deg);opacity:.35;}}
-@keyframes flipin{from{transform:rotateY(-88deg);opacity:.35;}to{transform:rotateY(0);opacity:1;}}
+@keyframes flipout{from{transform:perspective(1400px) rotateY(0);opacity:1;}to{transform:perspective(1400px) rotateY(88deg);opacity:.35;}}
+@keyframes flipin{from{transform:perspective(1400px) rotateY(-88deg);opacity:.35;}to{transform:perspective(1400px) rotateY(0);opacity:1;}}
 @media (prefers-reduced-motion:reduce){#weekCards.flip-out,#weekCards.flip-in{animation:none;}}
 .blk.dragging{z-index:60;opacity:.94;transition:none;}
 .blk.dragging .exc{box-shadow:0 20px 44px -14px rgba(0,0,0,.65);}
@@ -8860,7 +8862,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.112';
+var APPV='v5.113';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
