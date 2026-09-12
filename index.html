@@ -2683,7 +2683,7 @@ body.wcon{overflow:hidden;}
         <g class="i">
           <g class="gy gy-dark"><path d="M50 34.5l10 10-10 10-10-10z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M50 40.5l4 4-4 4-4-4z" fill="currentColor"/></g>
           <g class="gy gy-light" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M50 36v28M38 43l24 14M62 43L38 57M50 41L53.2 37.8M50 41L46.8 37.8M50 59L53.2 62.2M50 59L46.8 62.2M42.2 45.5L41.1 41.1M42.2 45.5L37.9 46.6M57.8 54.5L58.9 58.9M57.8 54.5L62.1 53.4M57.8 45.5L62.1 46.6M57.8 45.5L58.9 41.1M42.2 54.5L37.9 53.4M42.2 54.5L41.1 58.9"/></g>
-          <g class="gy gy-forge" transform="translate(50 50) scale(1.3) translate(-9.8 -12.05)"><path d="M0.6 9.4L6.5 5.9H19v2.3l-5.2 1.2-.9 4.8 4.2 2v2H3.4v-2l4.2-2-.9-4.8L3.2 10z" fill="currentColor"/></g>
+          <g class="gy gy-forge" transform="translate(50 50) scale(1.3) translate(-10 -10) translate(-2.6 -6.7) scale(0.0202)"><path d="M130 590H1120L1050 668L1010 700H840C800 740 770 790 760 830C752 870 770 910 830 950L900 1000V1060H345V1000L415 950C475 910 493 870 485 830C475 790 445 740 405 700H235L190 668Z" fill="currentColor"/></g>
           <g class="gy gy-moon"><path d="M50 36.5l2.9 10.6L63.5 50l-10.6 2.9L50 63.5l-2.9-10.6L36.5 50l10.6-2.9z" fill="currentColor"/></g>
         </g>
       </svg>
@@ -3934,7 +3934,7 @@ var THEME_IC={
   // The same barbed flake as FLAKE further down, redrawn for this table's 20-unit box rather
   // than the 100-unit one the glyphs use - same arms, same proportions, half the scale.
   light:'<svg viewBox="0 0 20 20"><path d="M10 2.6v14.8M3.6 6.3l12.8 7.4M16.4 6.3L3.6 13.7M10 5.24L11.68 3.56M10 5.24L8.32 3.56M10 14.76L11.68 16.44M10 14.76L8.32 16.44M5.89 7.6L5.28 5.3M5.89 7.6L3.59 8.21M14.11 12.4L14.72 14.7M14.11 12.4L16.41 11.79M14.11 7.6L16.41 8.21M14.11 7.6L14.72 5.3M5.89 12.4L3.59 11.79M5.89 12.4L5.28 14.7"/></svg>',
-  forge:'<svg viewBox="0 0 20 20"><g transform="translate(0.9 0.6) scale(0.94)"><path d="M0.6 9.4L6.5 5.9H19v2.3l-5.2 1.2-.9 4.8 4.2 2v2H3.4v-2l4.2-2-.9-4.8L3.2 10z"/></g></svg>',
+  forge:'<svg viewBox="0 0 20 20"><g transform="translate(-2.6 -6.7) scale(0.0202)"><path d="M130 590H1120L1050 668L1010 700H840C800 740 770 790 760 830C752 870 770 910 830 950L900 1000V1060H345V1000L415 950C475 910 493 870 485 830C475 790 445 740 405 700H235L190 668Z"/></g></svg>',
   moon:'<svg viewBox="0 0 20 20"><path d="M10 2.4l2.1 5.5 5.5 2.1-5.5 2.1-2.1 5.5-2.1-5.5L2.4 10l5.5-2.1z"/></svg>'
 };
 var THEME_BAR={dark:'#08090c',light:'#eef1f4',forge:'#0a0605',moon:'#0b0812'};
@@ -8813,7 +8813,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.101';
+var APPV='v5.102';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10290,7 +10290,14 @@ var OU_EYE={x:'55.37',y:'16.12',r:'1.5'};
 // wider than the waist.
 // Content spans x 10-97 and y 26-80, so its centre is 53.5,53 - that is what anvilAt puts
 // on the middle of the box. Nothing should hand-write that transform again.
-var ANVIL='M10 26L74 26C83 26 91 28 97 33C90 38 82 41 70 42L66 42C62 51 60 55 60 60C64 65 69 69 75 72L75 80L25 80L25 72C31 69 36 65 40 60C40 55 38 51 34 42L30 42L10 42Z';
+// v5.102: the owner's own mark. Same 100-unit box, same width (x 10-97) and the same centre
+// (53.5,53) as the old anvil, so anvilAt and every caller are untouched. It is shorter than
+// the old one (y 32-74 instead of 26-80): a flat top slab with bevelled ends, a waist that
+// curves in and a foot that flares back out. The full mark with the hammer lives in LOGO.
+var ANVIL='M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L19.2 42L15.3 39.2Z';
+// The same anvil at the size it was traced (a 1240 box), for the full mark below and for the
+// small theme glyphs that scale it themselves.
+var ANVIL_RAW='M130 590H1120L1050 668L1010 700H840C800 740 770 790 760 830C752 870 770 910 830 950L900 1000V1060H345V1000L415 950C475 910 493 870 485 830C475 790 445 740 405 700H235L190 668Z';
 // ============================================================
 // THE LOGO - one definition, one place
 // ============================================================
@@ -10302,6 +10309,19 @@ var ANVIL='M10 26L74 26C83 26 91 28 97 33C90 38 82 41 70 42L66 42C62 51 60 55 60
 // Drawn in currentColor so it takes the theme's own gold without being told, and with no
 // hard-coded size - callers set width/height and the viewBox does the rest.
 var LOGO={
+  id:'hammer-anvil-2',
+  // v5.102: the owner's traced mark, in the box it was drawn in. The view box is cropped to the
+  // ink (x 60-1190, y 130-1110) so the mark fills whatever size the caller asks for.
+  vb:'60 130 1130 980',
+  body:
+    '<path d="'+ANVIL_RAW+'"/>'+
+    '<path d="M494 346L642 284Q656 279 662 292L746 526Q752 542 738 548L590 590Q576 594 570 580L488 362Q482 350 494 346Z"/>'+
+    '<path d="M686 372L1132 176Q1148 170 1156 184L1182 240Q1188 254 1174 260L718 450Z"/>'+
+    '<path d="M340 328L522 500L404 442Z"/><path d="M258 446L506 568L398 556Z"/>'+
+    '<path d="M842 418L760 546L748 526Z"/><path d="M958 468L850 566L764 572Z"/>'
+};
+// The previous mark, kept so the drawing notes below still make sense; nothing reads it.
+var LOGO_V1={
   id:'anvil-hammer',
   vb:'0 0 100 100',
   // Painter's order matters and got it wrong the first time: the anvil was drawn LAST, so it
