@@ -8860,7 +8860,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.111';
+var APPV='v5.112';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10170,6 +10170,24 @@ function doUnseal(){
   DB.logs.forEach(function(l){l.unsealed=1;});
   saveDB();renderHome();
 }
+// One workout, this week only (v5.112). A finished session stays in history and stops
+// counting as this week's lock; a day merely marked done is simply lifted off.
+function unsealOne(id){
+  var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'this workout';
+  closeOvl('mkActOvl');
+  ask('Unlock '+nm+'? It opens again this week. Everything you logged stays in your history.',function(){
+    var ws=weekStartTs(),we=ws+7*86400000;
+    for(var i=DB.logs.length-1;i>=0;i--){
+      var l=DB.logs[i];
+      if(l.day!==id||!l.sealed||l.unsealed)continue;
+      var t=new Date(l.date+'T12:00:00').getTime();
+      if(t<ws||t>=we)continue;
+      if(l.marked&&!Object.keys(l.entries||{}).length)DB.logs.splice(i,1);else l.unsealed=1;
+    }
+    saveDB();renderHome();
+    try{sfxUnseal();}catch(e){}
+  },'Unlock this one','UNLOCK');
+}
 // Done without a set in it. Marking and skipping are the same act as far as the week is
 // concerned - both say "this one is behind me" - so there is one action rather than two words
 // for the same thing. What it writes is a sealed log with no entries, which is exactly what the
@@ -10837,7 +10855,9 @@ function renderHome(){
         :'<svg viewBox="0 0 20 20"><path d="M10 13V3M6.5 9.5L10 13l3.5-3.5M3.5 15.5h13"/></svg>')+
         (fgw?'Store<br>&amp; recover':'Backup<br>&amp; restore')+'</div>'+
     '</div>'+
-    '<div class="unsealbtn'+(Object.keys(loggedThisWeek()).length?'':' idle')+'" onclick="unsealAll()"><svg viewBox="0 0 20 20"><rect x="3.5" y="9.5" width="10.5" height="7.5" rx="2"/><path d="M11.5 9.5V6.5a3 3 0 0 1 6 0"/></svg>'+TXT('unsealBtn')+'</div>'+
+    // The whole-week UNLOCK button came off the footer (owner call, 12 Sep 2026): the week
+    // resets on its own, the end-of-week dialog still offers another round, and the one real
+    // need, reopening a single workout, lives on that card's hold menu now (unsealOne).
     '<div style="text-align:center;margin-top:18px;font-size:11px;letter-spacing:.14em;opacity:.32">'+APPNAME()+' '+APPV+'</div>';
   // Saving to this device is the normal case and needs no announcement. The other two
   // do: synced storage is worth knowing about, and memory mode means nothing persists.
@@ -11858,7 +11878,10 @@ function mkActions(id,dk){
   var off=held
     ?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF '+held.n.toUpperCase())+'</div>'
     :(onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF THE WEEK')+'</div>':'');
+  // Locked this week: the first thing offered is to open just this one again (v5.112).
+  var locked=loggedCount(id)===0&&lwOn(loggedThisWeek(),id,dk);
   document.getElementById('mkActBody').innerHTML=
+    (locked?'<div class="btn btn-go" onclick="unsealOne(\''+id+'\')">UNLOCK THIS ONE</div>':'')+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     off+
@@ -11881,7 +11904,9 @@ function mkActionsX(id){
   var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'This workout';
   document.getElementById('mkActTtl').textContent=nm;
   document.getElementById('mkActSub').textContent='';
+  var locked=loggedCount(id)===0&&!!loggedThisWeek()[id];
   document.getElementById('mkActBody').innerHTML=
+    (locked?'<div class="btn btn-go" onclick="unsealOne(\''+id+'\')">UNLOCK THIS ONE</div>':'')+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(null,\''+id+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     '<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDeleteX(\''+id+'\')">DELETE THIS WORKOUT</div>';
@@ -18629,7 +18654,7 @@ var TUT_ALL=[
   // Ends here. Dragging a workout between days and the rack underneath were both steps once, and
   // both came out: a grip you drag is close enough to self-evident that spending two of sixteen
   // steps on it costs more attention than it buys.
-  {sel:'#foot .unsealbtn',pad:6,sweep:true,last:true,nudge:'Tap DONE to close the tour.'}
+  {sel:'#foot .footbar',pad:6,sweep:true,last:true,nudge:'Tap DONE to close the tour.'}
 ];
 function tutOn(id){var e=document.getElementById(id);return !!(e&&e.classList.contains('on'));}
 function tutW(){var e=document.getElementById('w-dbbench-0');return e?parseFloat(e.value)||0:0;}
@@ -18669,7 +18694,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is fine for the tour.'},
   {t:'Logged and saved',b:'Your session is already saved in the app. History lives on this phone, not in a cloud. COPY takes the plain text, to send to anyone or paste into a chat. Closing this changes nothing.'},
   {t:'Locked in',b:'Push Day is locked in. It stays that way until the week turns over, so you work through the other days instead of repeating one.<p>Everything you logged is already in your history.</p>'},
-  {t:'Unlock the week',b:'Each day you finish locks until the week turns over. This button unlocks every locked day at once, if you want another round early. Nothing is deleted either way.'}]};
+  {t:'Your history',b:'Workouts finished holds every session you have logged, week by week. Backup and restore keeps a copy off the phone. A locked day opens again on its own when the week turns over, and holding a locked card offers to unlock just that one.'}]};
 function TUTC(){
   var t=curTheme();
   var C={
