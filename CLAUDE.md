@@ -172,6 +172,7 @@ finish it" is correct English about a different thing.
   workout first; the split runs when the builder closes). `DB.up` (applied level-ups) now
   scopes to built-ins and swapped-in lifts only — custom rows carry their own targets, baked
   once under the `DB.upScoped` flag, and `R()` skips the table for custom workouts.
+- **The two week program (v5.110).** `DB.two={on,anchor,live,view,other}`. `DB.days` is ALWAYS the board on show, so every reader of it is unchanged; the other week's board is `DB.two.other`. `twoSync()` (called from `dayMap`) compares the current week's parity against `anchor` and swaps the boards when the live week changes. `liveDays()` returns this calendar week's board even while the other is on show; use it wherever the meaning is THIS week (glow, turnover note, watch, Waiting pill). `twoFlip()` swaps boards to look at the other week; `twoToggle()` turns the program on or off, and off moves the other week's workouts to Saved. A workout may stand on both boards; that is the same workout, not a copy.
 - `EX` — the exercise library. `cardio:1` marks cardio; `inv:1` marks assisted (less weight is
   better, and grading, readiness and level-up all invert on it); `bw:1` marks bodyweight.
 - `W` — workout definitions. `sections:[{title, ss, rows}]` where a row is `[exId,{sets,rest}]`.

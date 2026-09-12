@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.107** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.110** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -16,7 +16,7 @@ It works fully offline, ships as one HTML file, and stores everything on the dev
 
 | Area | State |
 |---|---|
-| Week board | Seven days, up to 3 workouts each; per-day completion ("locked in"); a visible Saved workouts box under the week; when the last day locks, the app offers to unlock the week (v4.157) |
+| Week board | Seven days, up to 3 workouts each; an optional second week behind the first (two week program, v5.110) that alternates with it by the calendar and flips over to build; a passed day still undone says Waiting (v5.108); per-day completion ("locked in"); a visible Saved workouts box under the week; when the last day locks, the app offers to unlock the week (v4.157) |
 | Sessions | Write-through logging, grading (gold beats your last session or your best, violet matches your best, and gold always requires holding or adding weight), PR flare, rest timers, molten-bar notification (Android) |
 | Builder | The one editor for everything — per-set targets, supersets, per-row lift/cardio measures |
 | Mid-session edits | Hold an exercise → the real builder opens → one question at Finish: *add permanently, or just today?* |
@@ -56,6 +56,10 @@ same fanfare as a lifetime best. The crossover side view stands its tower behind
 walks a superset in running order, sees both halves together, corrects a set on either half in
 one tap without losing its place, shows supersets lassoed on the overview, and wears the phone's
 palette. All verified on the SM-R960 except the live set screen, which waits for a real session.
+
+## Missed days, the week sheet, and two weeks (v5.108 to v5.110, 12 Sep 2026)
+
+From the owner's own Saturday: a Tuesday skipped looked no different from a Friday still to come. Now a passed day still undone wears a quiet Waiting pill, the turnover note names what did not happen and says nothing is owed, and saved cards lost their redundant SAVED tag. Workouts finished opens on the week (a seven-day strip, workouts done of planned, sets, records, that week's sessions; Month and All behind it; walk totals behind one row). And the two week program: a second board behind the first for A B A, B A B weeks, alternating by the calendar, flipped over to build, switched on and off under Saturday, with the other week's workouts moving to Saved when it is switched off.
 
 ## The beginner pass (v5.99 to v5.101, 11 Sep 2026)
 

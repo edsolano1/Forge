@@ -363,6 +363,18 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .bank-add svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;}
 .bank-forge{gap:7px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;}
 .bank-forge svg{width:17px;height:17px;stroke-width:1.6;}
+/* the two week program control under Saturday, and the flip itself */
+.two-ctl{gap:8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-top:10px;}
+.two-ctl svg{width:17px;height:17px;stroke-width:1.6;}
+.two-off{text-align:center;font-size:12px;color:var(--txt3);padding:4px 0 2px;cursor:pointer;}
+.two-off:hover{color:var(--txt2);}
+#weekCards{transform-origin:50% 50%;backface-visibility:hidden;}
+#weekCards.flip-out{animation:flipout .26s cubic-bezier(.55,0,.8,.4) forwards;}
+#weekCards.flip-in{animation:flipin .40s cubic-bezier(.2,.7,.2,1) both;}
+#home{perspective:1400px;}
+@keyframes flipout{from{transform:rotateY(0);opacity:1;}to{transform:rotateY(88deg);opacity:.35;}}
+@keyframes flipin{from{transform:rotateY(-88deg);opacity:.35;}to{transform:rotateY(0);opacity:1;}}
+@media (prefers-reduced-motion:reduce){#weekCards.flip-out,#weekCards.flip-in{animation:none;}}
 .blk.dragging{z-index:60;opacity:.94;transition:none;}
 .blk.dragging .exc{box-shadow:0 20px 44px -14px rgba(0,0,0,.65);}
 /* While a block is being dragged the whole list collapses to name rows: a three-deep
@@ -8848,7 +8860,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.109';
+var APPV='v5.110';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9823,6 +9835,7 @@ function dayMap(){
     DB.slots={};DB.plan=[];
     try{saveDB();}catch(e){}
   }
+  try{twoSync();}catch(e){}
   DAYS.forEach(function(d){
     DB.days[d.k]=(DB.days[d.k]||[]).filter(function(id){return !!W[id];}).slice(0,DAY_MAX);
   });
@@ -9902,6 +9915,73 @@ function planIds(){
 }
 function onPlan(id){return !!dayKeyOf(id);}
 function dayFull(k){return ((DB.days||{})[k]||[]).length>=DAY_MAX;}
+// ============================================================
+// THE TWO WEEK PROGRAM (v5.110)
+// ============================================================
+// A second board behind the first, for people whose weeks alternate (A B A, then B A B).
+// DB.days is always the board on SHOW - every drag, drop, builder placement and card reads
+// it unchanged. DB.two holds the rest: on, anchor (the week start when it was switched on,
+// which was Week 1), live (which board this calendar week is), view (which board is on
+// show), other (the board not on show). At each launch the parity of the current week
+// against the anchor says which board is live; if that changed, the boards swap so the
+// live one is the one everything reads. liveDays() is for the handful of places that mean
+// THIS week even while the other board is being looked at: the glow, the turnover note,
+// the watch, and the Waiting pill.
+function twoOn(){return !!(DB.two&&DB.two.on);}
+function twoParity(){if(!twoOn())return 0;var wk=7*86400000;return Math.abs(Math.round((weekStartTs()-DB.two.anchor)/wk))%2;}
+function twoOff(){return twoOn()&&DB.two.view!==DB.two.live;}   // looking at the week that is not this one
+function liveDays(){return twoOff()?(DB.two.other||{}):DB.days;}
+function twoSwapBoards(){var t=DB.days;DB.days=DB.two.other||{};DB.two.other=t;DAYS.forEach(function(d){DB.days[d.k]=DB.days[d.k]||[];});}
+// Called from dayMap on every pass: the calendar decides which board is live.
+function twoSync(){
+  if(!twoOn())return;
+  var p=twoParity();
+  if(p!==DB.two.live){
+    if(DB.two.view===DB.two.live){twoSwapBoards();DB.two.view=p;}
+    DB.two.live=p;
+    try{saveDB();}catch(e){}
+  }
+}
+// Turn the board over to the other week. Animated: the week folds away, the other side lands.
+function twoFlip(){
+  if(!twoOn())return;
+  var el=document.getElementById('weekCards');
+  var go=function(){twoSwapBoards();DB.two.view=1-DB.two.view;saveDB();renderHome();window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-90),behavior:'instant'});};
+  if(!el||MOTION==='off'){go();return;}
+  el.classList.remove('flip-in');el.classList.add('flip-out');
+  setTimeout(function(){
+    go();
+    var el2=document.getElementById('weekCards');
+    el2.classList.remove('flip-out');el2.classList.add('flip-in');
+    setTimeout(function(){el2.classList.remove('flip-in');},420);
+  },260);
+  try{sfxLog();}catch(e){}
+}
+// The switch itself, asked before it acts either way.
+function twoToggle(){
+  if(!twoOn()){
+    ask('You are switching to a two week program. This board becomes Week 1, and a second board, Week 2, opens behind it. The two take turns: the calendar decides which one is this week, and you can flip over to see or build the other one any time.',
+      function(){
+        DB.two={on:1,anchor:weekStartTs(),live:0,view:0,other:{}};
+        DAYS.forEach(function(d){DB.two.other[d.k]=[];});
+        saveDB();renderHome();
+        setTimeout(twoFlip,350);            // land on the empty Week 2 so it is obvious where to build
+      },'Two week program','SWITCH TO TWO WEEKS');
+    return;
+  }
+  var otherIds=[];DAYS.forEach(function(d){((twoOff()?DB.days:DB.two.other)[d.k]||[]).forEach(function(id){if(id!=='rest'&&otherIds.indexOf(id)<0)otherIds.push(id);});});
+  var liveIds=[];DAYS.forEach(function(d){(liveDays()[d.k]||[]).forEach(function(id){liveIds.push(id);});});
+  var moving=otherIds.filter(function(id){return liveIds.indexOf(id)<0&&W[id];});
+  ask('You are switching to a one week program. This week\'s board stays as your week.'+
+      (moving.length?' The '+(moving.length===1?'workout':moving.length+' workouts')+' on the other week ('+moving.map(function(id){return W[id].name.replace('Optional: ','');}).join(', ')+') '+(moving.length===1?'moves':'move')+' to Saved workouts.':''),
+    function(){
+      if(twoOff())twoSwapBoards();          // show the live board
+      DB.extra=DB.extra||[];
+      moving.forEach(function(id){if(DB.extra.indexOf(id)<0&&DB.extra.length<BANK_MAX)DB.extra.push(id);});
+      delete DB.two;
+      saveDB();renderHome();
+    },'One week program','SWITCH TO ONE WEEK');
+}
 function wkDefault(id){var e=null;WEEK.forEach(function(x){if(x.wk===id)e=x;});return e;}
 // The one you are on if a session is open, otherwise the first one not yet finished this week.
 function nextUp(ids){
@@ -9915,8 +9995,8 @@ function nextUp(ids){
 // Returns "id@weekday" so the twin that is already sealed never wears the glow its Friday
 // self still deserves.
 function nextUpDay(){
-  var pairs=[];
-  DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){pairs.push([id,d.k]);});});
+  var pairs=[],LD=liveDays();
+  DAYS.forEach(function(d){(LD[d.k]||[]).forEach(function(id){pairs.push([id,d.k]);});});
   var i,p;
   for(i=0;i<pairs.length;i++){p=pairs[i];if(loggedCount(p[0])>0&&(DB.active[p[0]]||{}).wk===p[1])return p[0]+'@'+p[1];}
   for(i=0;i<pairs.length;i++){p=pairs[i];if(loggedCount(p[0])>0)return p[0]+'@'+p[1];}
@@ -9947,13 +10027,14 @@ function planCard(id,i,nx,dk){
   var v=wkVar(id),mine=!!(DB.custom&&DB.custom[id]),e=wkDefault(id);
   // gate on the plan itself: a lit arrow must always have something behind it. Readiness
   // also counts timed rows, which have no weight to add and never enter the plan.
-  var live=loggedCount(id)>0,rdy=v?0:levelPlan(id).length;
-  var sealed=!live&&lwOn(loggedThisWeek(),id,dk);
-  var up=(id+'@'+dk===nx);
+  var offw=twoOff();   // the other week's board: a plan, not this week's state
+  var live=!offw&&loggedCount(id)>0,rdy=v?0:levelPlan(id).length;
+  var sealed=!offw&&!live&&lwOn(loggedThisWeek(),id,dk);
+  var up=!offw&&(id+'@'+dk===nx);
   // A weekday that has already passed this week with its workout still undone. It is not
   // skipped, it is waiting: open it any day before the week turns over (v5.108).
   var dObj=null;DAYS.forEach(function(x){if(x.k===dk)dObj=x;});
-  var waiting=!live&&!sealed&&!v&&dObj&&dObj.js<new Date().getDay();
+  var waiting=!offw&&!live&&!sealed&&!v&&dObj&&dObj.js<new Date().getDay();
   var pills='';
   if(live)pills+='<span class="pill pill-live">Resume '+loggedCount(id)+'/'+totalSets(id)+'</span>';
   else if(sealed)pills+='<span class="pill pill-done">'+LOCKI+TXT('done')+'</span>';
@@ -9976,10 +10057,11 @@ function planCard(id,i,nx,dk){
 // A day and whatever is in it. Empty is a legitimate state - that is a rest day - so it still
 // draws its header and a place to drop into rather than vanishing.
 function dayBox(d,nx,n0){
-  var ids=(DB.days[d.k]||[]),isToday=(new Date().getDay()===d.js);
+  var offw=twoOff();
+  var ids=(DB.days[d.k]||[]),isToday=!offw&&(new Date().getDay()===d.js);
   // Every piece off this day's fire is finished: the whole bench cools, header and all.
   var ltw=loggedThisWeek();
-  var quenched=ids.length&&ids.every(function(id){return loggedCount(id)===0&&lwOn(ltw,id,d.k);});
+  var quenched=!offw&&ids.length&&ids.every(function(id){return loggedCount(id)===0&&lwOn(ltw,id,d.k);});
   var h='<div class="daybox'+(isToday?' today':'')+(ids.length?'':' empty')+(quenched?' quenched':'')+'" data-day="'+d.k+'">'+(isToday?'<i class="dayglow"></i>':'');
   // No count. How many a day can hold is not something to be reminded of on every day you own -
   // it only matters at the moment you try to exceed it, and it says so then.
@@ -10048,9 +10130,9 @@ function lwOn(lw,id,dk){var m=lw[id];return !!(m&&(m['*']||(dk?m[dk]:Object.keys
 // Which weekday a session most likely belongs to when nobody said: the first day on the week
 // holding this workout that is not already sealed, falling back to the first that holds it.
 function dayGuess(wk){
-  var lw=loggedThisWeek(),first=null,free=null;
+  var lw=loggedThisWeek(),first=null,free=null,LD=liveDays();
   DAYS.forEach(function(d){
-    if((DB.days[d.k]||[]).indexOf(wk)<0)return;
+    if((LD[d.k]||[]).indexOf(wk)<0)return;
     if(first===null)first=d.k;
     if(free===null&&!lwOn(lw,wk,d.k))free=d.k;
   });
@@ -10112,8 +10194,8 @@ function unmarkDayDone(id){
 }
 // Every day on the week done, with something actually on the week to have done.
 function weekAllDone(){
-  var lw=loggedThisWeek(),any=false,ok=true;
-  DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){
+  var lw=loggedThisWeek(),any=false,ok=true,LD=liveDays();
+  DAYS.forEach(function(d){(LD[d.k]||[]).forEach(function(id){
     if(wkVar(id))return;                     // rest is not something you finish, and an
                                              // OPTIONAL day skipped is not a week left open
     any=true;
@@ -10144,7 +10226,10 @@ function weekHello(){
   // last week. Rest and optional days are not things you miss.
   var missed=[];
   try{
-    DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){
+    // On a two week program the board that was live LAST week is the one to judge.
+    var LD=twoOn()?(DB.two.view===DB.two.live?(DB.two.other||{}):DB.days):DB.days;
+    if(!twoOn())LD=DB.days;
+    DAYS.forEach(function(d){(LD[d.k]||[]).forEach(function(id){
       if(wkVar(id)||!W[id])return;
       var hit=(DB.logs||[]).some(function(l){
         if(l.day!==id||!l.sealed||l.unsealed)return false;
@@ -10675,9 +10760,17 @@ function renderHome(){
   // thing "I know what I'm building" used to land on without (v5.101).
   var bare=!DAYS.some(function(d){return (DB.days[d.k]||[]).length;})&&!(DB.logs||[]).length&&!(DB.extra||[]).length&&!TUTON&&!SANDBOX;
   var hint=bare?'<div class="footnote" style="margin:0 2px 12px">Tap + on any day to build a workout, or use Forge me a week further down to have one built for you.</div>':'';
-  document.getElementById('weekCards').innerHTML=hint+pumpOpen+DAYS.map(function(d){
+  // Two week program: the label says which board this is, and a control under Saturday flips
+  // to the other one or switches the program on and off (v5.110).
+  var wl=document.getElementById('weekLabel');
+  if(wl)wl.textContent=twoOn()?('Week '+(DB.two.view+1)+(twoOff()?' · next week':' · this week')):'Your Week';
+  var twoCtl=twoOn()
+    ?'<div class="bank-add two-ctl" onclick="twoFlip()" title="Flip to the other week"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10l-3-3M16 12H6l3 3"/></svg><span>Flip to week '+(2-DB.two.view)+(twoOff()?' · this week':' · next week')+'</span></div>'+
+     '<div class="two-off" onclick="twoToggle()">Back to a one week program</div>'
+    :'<div class="bank-add two-ctl" onclick="twoToggle()" title="Two week program"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h14M3 10h14M3 15h9"/></svg><span>Two week program</span></div>';
+  document.getElementById('weekCards').innerHTML=hint+(twoOff()?'':pumpOpen)+DAYS.map(function(d){
     var h=dayBox(d,pnx,n0);n0+=(DB.days[d.k]||[]).length;return h;
-  }).join('');
+  }).join('')+twoCtl;
   // The wide new-workout bar is gone (Aug 22): every day carries its own + and so does
   // Saved workouts, and two pluses stacked at the foot of the page read as a mistake.
   // Multi-day placement lives on in Workout Settings, where the day grid still is.
@@ -16503,9 +16596,9 @@ function wearTargetText(t){
 // it quick is to never send it work it cannot use. A dozen short strings, once, when nothing
 // is running. The set screen already carries everything needed once a day is open.
 function wearWeek(){
-  var out=[],done=loggedThisWeek();
+  var out=[],done=loggedThisWeek(),LD=liveDays();
   DAYS.forEach(function(D){
-    (DB.days[D.k]||[]).forEach(function(id){
+    (LD[D.k]||[]).forEach(function(id){
       if(id==='rest')return;
       var w=W[id]||DB.custom[id];
       if(!w)return;
@@ -16525,8 +16618,8 @@ function wearWeek(){
 // made the watch able to show only the plan and never the improvisation.
 // Same shape and same restraint as the week - names and set counts, nothing more.
 function wearSaved(){
-  var onDay={},out=[];
-  DAYS.forEach(function(D){(DB.days[D.k]||[]).forEach(function(id){onDay[id]=1;});});
+  var onDay={},out=[],LD=liveDays();
+  DAYS.forEach(function(D){(LD[D.k]||[]).forEach(function(id){onDay[id]=1;});});
   (DB.extra||[]).forEach(function(id){
     if(onDay[id])return;                  // it is on the week; it belongs up there instead
     var w=W[id]||DB.custom[id];
