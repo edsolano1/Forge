@@ -8817,7 +8817,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.106';
+var APPV='v5.107';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16454,6 +16454,10 @@ function wearDetail(id){
   // the wrist point at one when the machine it wanted is taken.
   var A=(CUR===id)?DB.active[id]:null;
   var nx=A?wearNext():null;
+  // Which rows run together. The wrist draws a superset as one group, the way the phone
+  // does, so the overview says at a glance what pairs with what (v5.107).
+  var grpOf={};
+  try{edBlocks(id).forEach(function(b,bi){if(b.ss&&b.ids.length>1)b.ids.forEach(function(rid){grpOf[rid]=bi;});});}catch(e){}
   edAllRows(id).forEach(function(row){
     var d=null;try{d=R(row,id);}catch(e){}
     if(!d)return;
@@ -16471,9 +16475,11 @@ function wearDetail(id){
       lines=String(rf.data.sets||'').split(String.fromCharCode(10));
       d={name:rf.data.name,sets:rf.data.sets};
     }
+    var baseId=(typeof row==='string'?row:row[0]);
     rows.push({i:rid,n:(d.name||rid),s:lines.length,t:fmtLine(lines[0]||''),
                l:(lines.length>1?lines.map(function(x){return fmtLine(x);}):undefined),
-               d:done,c:!!(nx&&nx.id===rid)});
+               d:done,c:!!(nx&&nx.id===rid),
+               g:(grpOf[baseId]!==undefined?grpOf[baseId]:(grpOf[rid]!==undefined?grpOf[rid]:undefined))});
   });
   return {id:id,name:(w.name||'').replace('Optional: ',''),rows:rows};
 }
