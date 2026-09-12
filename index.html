@@ -8817,7 +8817,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.103';
+var APPV='v5.104';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16275,43 +16275,86 @@ function wearSwap(rowId,k){
   wearPush(CUR);   // the overview is what the wrist returns to, so it rides along fresh
 }
 var WEARSET=null;
+// A LOGGED set tapped on the wrist opens as a correction (v5.104). It used to ride WEARFOCUS,
+// which meant fixing set 1 of the other half of a superset also moved the running aim there,
+// and after SAVE SET the watch sat on that lift instead of going back to where you were.
+// A correction is its own thing: it steals no aim and clears itself when saved.
+var WEARREDO=null;
 function wearPick(rowId,setIdx){
   if(!CUR||!DB.active[CUR])return;
+  var s=(typeof setIdx==='number'&&setIdx>=0)?setIdx:null;
+  var E=(s!=null)?((DB.active[CUR].entries[rowId]||[])[s]):null;
+  if(E){WEARREDO={i:rowId,s:s};wearPush();return;}
+  WEARREDO=null;
   WEARFOCUS=rowId||null;
-  WEARSET=(typeof setIdx==='number'&&setIdx>=0)?setIdx:null;
+  WEARSET=s;
   wearPush();
+}
+// The session as the wrist walks it: every block, every member row with its targets and its
+// logged entries, in the phone's own order (edBlocks, so a regrouped day reads the same on
+// both). A superset block is flagged so the order and the payload can treat it as one.
+function wearRows(){
+  var wk=CUR,A=DB.active[wk],blocks=[];
+  if(!A)return blocks;
+  edBlocks(wk).forEach(function(b){
+    var mem=[];
+    (b.rows||[]).forEach(function(row){
+      var rf=rowFor(A.swaps,row,wk);
+      var tg=rf.swapId?rf.data.sets.split(String.fromCharCode(10)).map(parseTarget):targetsOf(row,wk);
+      mem.push({row:row,rf:rf,id:rf.id,tg:tg,ent:A.entries[rf.id]||[]});
+    });
+    if(mem.length)blocks.push({ss:!!b.ss&&mem.length>1,mem:mem});
+  });
+  return blocks;
 }
 function wearNext(){
   if(!CUR||!DB.active[CUR])return null;
-  var wk=CUR,A=DB.active[wk],out=null,aimed=null;
-  edAllRows(wk).forEach(function(row){
-    if(out&&aimed)return;
-    if(out&&!WEARFOCUS)return;
-    var rf=rowFor(A.swaps,row,wk),id=rf.id;
-    var tg=rf.swapId?rf.data.sets.split(String.fromCharCode(10)).map(parseTarget):targetsOf(row,wk);
-    var ent=A.entries[id]||[];
-    // A specific set was tapped. Unlogged, it simply becomes the current one - sets may be
-    // done out of order, the phone always allowed that. LOGGED, it opens as a redo: the
-    // numbers shown are what was written down, and saving overwrites that entry the same
-    // way the phone's own edit pad does.
-    if(WEARFOCUS&&id===WEARFOCUS&&WEARSET!=null&&tg[WEARSET]&&!aimed){
-      var e=ent[WEARSET],t0=tg[WEARSET];
-      aimed={id:id,exId:rf.exId,name:rf.data.name||'',i:WEARSET,n:tg.length,
-             t:(e?{type:t0.type,w:(e.w!=null?e.w:t0.w),r:(e.r!=null?e.r:t0.r),unit:t0.unit}:t0),
-             bw:!!rf.data.bw,redo:!!e};
+  var blocks=wearRows(),out=null,aimed=null;
+  function cand(m,i){return {id:m.id,exId:m.rf.exId,name:m.rf.data.name||'',i:i,n:m.tg.length,t:m.tg[i],bw:!!m.rf.data.bw};}
+  // A correction in progress comes first. The numbers shown are what was written down, and
+  // saving overwrites that entry the same way the phone's own edit pad does.
+  if(WEARREDO){
+    var hit=null;
+    blocks.forEach(function(b){b.mem.forEach(function(m){if(!hit&&m.id===WEARREDO.i&&m.tg[WEARREDO.s]&&m.ent[WEARREDO.s])hit=m;});});
+    if(hit){
+      var e=hit.ent[WEARREDO.s],t0=hit.tg[WEARREDO.s],c0=cand(hit,WEARREDO.s);
+      c0.t={type:t0.type,w:(e.w!=null?e.w:t0.w),r:(e.r!=null?e.r:t0.r),unit:t0.unit};
+      c0.redo=true;
+      return c0;
     }
-    for(var i=0;i<tg.length;i++){
-      if(!ent[i]){
-        var cand={id:id,exId:rf.exId,name:rf.data.name||'',i:i,n:tg.length,t:tg[i],bw:!!rf.data.bw};
-        if(!out)out=cand;
-        if(WEARFOCUS&&id===WEARFOCUS&&!aimed)aimed=cand;
-        return;
-      }
-    }
+    WEARREDO=null;
+  }
+  // Inside a superset the members alternate - A1, B1, A2, B2 - which is how the phone runs
+  // them. Walking row by row sent the wrist through all of A before any of B (v5.104).
+  blocks.forEach(function(b){
+    var order=[];
+    if(b.ss){
+      var maxN=0;b.mem.forEach(function(m){if(m.tg.length>maxN)maxN=m.tg.length;});
+      for(var s=0;s<maxN;s++)b.mem.forEach(function(m){if(m.tg[s])order.push([m,s]);});
+    }else b.mem.forEach(function(m){m.tg.forEach(function(_,s){order.push([m,s]);});});
+    order.forEach(function(p){
+      var m=p[0],s=p[1];
+      if(m.ent[s])return;
+      var c=cand(m,s);
+      if(!out)out=c;
+      // A tapped lift becomes the aim; a tapped unlogged set becomes the current one. Sets
+      // may be done out of order, the phone always allowed that.
+      if(WEARFOCUS&&m.id===WEARFOCUS&&!aimed&&(WEARSET==null||WEARSET===s))aimed=c;
+    });
   });
   // the lift you jumped to is finished: stop aiming and rejoin the running order
   if(WEARFOCUS&&!aimed){WEARFOCUS=null;WEARSET=null;}
   return aimed||out;
+}
+// Every set of one lift as the wrist draws it: done sets carry what was logged and how it
+// graded (gold beat, violet matched), the rest their targets, all in the display unit.
+function wearLadder(m,curIdx){
+  return m.tg.map(function(t2,j){
+    var e2=m.ent[j];
+    var o={t:e2?(e2.w?fmtW(e2.w)+'×'+e2.r:String(e2.r)):wearTargetText(t2),d:!!e2,c:(j===curIdx)};
+    if(e2){var g=e2.g||(e2.pr?'pr':'');if(g&&g!=='under')o.g=g;}
+    return o;
+  });
 }
 function wearTargetText(t){
   if(!t)return '';
@@ -16379,7 +16422,7 @@ function wearOpen(id){
   }
   var w=W[id]||DB.custom[id];
   if(!w)return;
-  WEARFOCUS=null;WEARSET=null;   // a fresh session never inherits the last one's aim
+  WEARFOCUS=null;WEARSET=null;WEARREDO=null;   // a fresh session never inherits the last one's aim
   var dk=dayKeyOf(id);
   try{openWNow(id,dk);}catch(e){}
   wearPush();
@@ -16453,20 +16496,18 @@ function wearPush(detailId){
     // where you are but never what the whole climb looks like - a pyramid reads as a
     // mystery one rung at a time. Done sets carry what was actually logged, the rest
     // their targets, all in the display unit like everything else that crosses.
+    // When that lift is one half of a superset, the whole superset rides along as grp: every
+    // member with its own ladder, so the wrist can show the pair together and a wrong weight
+    // on the other half is one tap away instead of a trip back through the overview (v5.104).
     try{
-      var A2=DB.active[CUR],lad=null;
-      edAllRows(CUR).forEach(function(row){
-        if(lad)return;
-        var rf2=rowFor(A2.swaps,row,CUR);
-        if(rf2.id!==nx.id)return;
-        var tg2=rf2.swapId?rf2.data.sets.split(String.fromCharCode(10)).map(parseTarget):targetsOf(row,CUR);
-        var ent2=A2.entries[nx.id]||[];
-        lad=tg2.map(function(t2,j){
-          var e2=ent2[j];
-          return {t:e2?(e2.w?fmtW(e2.w)+'×'+e2.r:String(e2.r)):wearTargetText(t2),d:!!e2,c:(j===nx.i)};
+      wearRows().forEach(function(b){
+        if(st.sets)return;
+        b.mem.forEach(function(m){
+          if(st.sets||m.id!==nx.id)return;
+          st.sets=wearLadder(m,nx.i);
+          if(b.ss)st.grp=b.mem.map(function(m2){return {i:m2.id,n:m2.rf.data.name||'',sets:wearLadder(m2,m2.id===nx.id?nx.i:-1)};});
         });
       });
-      if(lad)st.sets=lad;
     }catch(e){}
     if(detailId){var d2=wearDetail(detailId);if(d2)st.detail=d2;}
   }
@@ -16566,10 +16607,12 @@ function wearDoLog(id,i,w,r){
     if(E){
       if(typeof w==='number'&&isFinite(w)&&w>=0)E.w=Math.round(inW(w)*100)/100;
       if(typeof r==='number'&&isFinite(r)&&r>0)E.r=r;
+      // Re-grade the corrected set, as the phone's own edit pad does (v5.104).
+      try{var g=setGrade(nx.exId,E);E.g=g;if(g==='pr')E.pr=1;else delete E.pr;}catch(e){}
       saveDB();
       try{renderSession();}catch(e){}
     }
-    WEARSET=null;
+    WEARREDO=null;WEARSET=null;
     wearPush();
     return;
   }
