@@ -366,8 +366,11 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 /* the two week program control under Saturday, and the flip itself */
 .two-ctl{gap:8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-top:10px;}
 .two-ctl svg{width:17px;height:17px;stroke-width:1.6;}
-.two-off{text-align:center;font-size:12px;color:var(--txt3);padding:4px 0 2px;cursor:pointer;}
-.two-off:hover{color:var(--txt2);}
+.sec-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 12px;}
+.sec-row .sec-label{margin:0;}
+.wk-flip{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt2);border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 10px;cursor:pointer;white-space:nowrap;transition:.15s;}
+.wk-flip:hover{color:var(--txt);border-color:#33373d;}
+.wk-flip svg{width:15px;height:15px;stroke-width:1.6;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
 /* The perspective lives INSIDE the transform, never on #home: a perspective on the home
    screen made it the containing block for every fixed sheet inside it (Settings landed
    offset) and let the page scroll sideways (v5.113, seen on the phone). */
@@ -2768,7 +2771,7 @@ body.wcon{overflow:hidden;}
   </div>
   <div class="storenote" id="storeNote"></div>
 
-  <div class="sec-label" id="weekLabel">Your Week</div>
+  <div class="sec-row"><div class="sec-label" id="weekLabel">Your Week</div><div class="wk-flip" id="weekFlip" onclick="twoFlip()" hidden></div></div>
   <div class="mk-hint" id="weekHint"></div>
   <div id="weekCards"></div>
   <!-- label, hint and cards are one thing to look at, so the tour can light them as one -->
@@ -8862,7 +8865,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.114';
+var APPV='v5.115';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10806,11 +10809,12 @@ function renderHome(){
   // Two week program: the label says which board this is, and a control under Saturday flips
   // to the other one or switches the program on and off (v5.110).
   var wl=document.getElementById('weekLabel');
-  if(wl)wl.textContent=twoOn()?('Week '+(DB.two.view+1)+(twoOff()?' · next week':' · this week')):'Your Week';
-  var twoCtl=twoOn()
-    ?'<div class="bank-add two-ctl" onclick="twoFlip()" title="Flip to the other week"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10l-3-3M16 12H6l3 3"/></svg><span>Flip to week '+(2-DB.two.view)+(twoOff()?' · this week':' · next week')+'</span></div>'+
-     '<div class="two-off" onclick="twoToggle()">Back to a one week program</div>'
-    :'<div class="bank-add two-ctl" onclick="twoToggle()" title="Two week program"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h14M3 10h14M3 15h9"/></svg><span>Two week program</span></div>';
+  if(wl)wl.textContent=twoOn()?('Week '+(DB.two.view+1)+(twoOff()?', next week':', this week')):'Your Week';
+  // The flip sits beside the week label (v5.115); the one button under Saturday switches the
+  // program on or off and reads the same either way.
+  var wf=document.getElementById('weekFlip');
+  if(wf){wf.hidden=!twoOn();if(twoOn())wf.innerHTML='<svg viewBox="0 0 20 20"><path d="M4 8h10l-3-3M16 12H6l3 3"/></svg><span>Flip to week '+(2-DB.two.view)+(twoOff()?', this week':', next week')+'</span>';}
+  var twoCtl='<div class="bank-add two-ctl" onclick="twoToggle()" title="'+(twoOn()?'One week program':'Two week program')+'"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(twoOn()?'<path d="M3 7h14M3 13h9"/>':'<path d="M3 5h14M3 10h14M3 15h9"/>')+'</svg><span>'+(twoOn()?'One week program':'Two week program')+'</span></div>';
   document.getElementById('weekCards').innerHTML=hint+(twoOff()?'':pumpOpen)+DAYS.map(function(d){
     var h=dayBox(d,pnx,n0);n0+=(DB.days[d.k]||[]).length;return h;
   }).join('')+twoCtl;
