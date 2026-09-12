@@ -158,13 +158,19 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .pill-today{background:var(--c);color:#0b0c0e;}
 .pill-live{background:var(--go);color:#0b0c0e;}
 .pill-ready{background:color-mix(in srgb,var(--go) 15%,transparent);color:var(--go);}
+/* a passed day still undone: quiet, outlined, not a scolding */
+.pill-wait{background:transparent;border:1px solid color-mix(in srgb,var(--txt3) 55%,transparent);color:var(--txt3);}
+.card.waiting .card-name{color:var(--txt2);}
 /* Level up: a lit arrow rather than a word. The old RISE/ASCEND/HEAT labels made you read
    four different nouns to find the one day that was ready. */
 .lvl{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:9px;
   border:1px solid color-mix(in srgb,var(--go) 45%,transparent);cursor:pointer;
   background:color-mix(in srgb,var(--go) 12%,transparent);color:var(--go);
   position:relative;transition:background .15s;}
-.lvl svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+/* position + z-index: the pulsing ::after below is absolutely positioned and paints AFTER the
+   in-flow svg, so on the phone the arrow sometimes vanished under it until a scroll repainted
+   the card (seen 12 Sep). Lifting the arrow above the glow layer ends that. */
+.lvl svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;position:relative;z-index:1;}
 .lvl:hover{background:color-mix(in srgb,var(--go) 24%,transparent);}
 .lvl:active{transform:scale(.94);}
 /* box-shadow inside @keyframes is the other cause named at the top of the ground rules, and
@@ -8817,7 +8823,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.107';
+var APPV='v5.108';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9919,17 +9925,24 @@ function planCard(id,i,nx,dk){
   var live=loggedCount(id)>0,rdy=v?0:levelPlan(id).length;
   var sealed=!live&&lwOn(loggedThisWeek(),id,dk);
   var up=(id+'@'+dk===nx);
+  // A weekday that has already passed this week with its workout still undone. It is not
+  // skipped, it is waiting: open it any day before the week turns over (v5.108).
+  var dObj=null;DAYS.forEach(function(x){if(x.k===dk)dObj=x;});
+  var waiting=!live&&!sealed&&!v&&dObj&&dObj.js<new Date().getDay();
   var pills='';
   if(live)pills+='<span class="pill pill-live">Resume '+loggedCount(id)+'/'+totalSets(id)+'</span>';
   else if(sealed)pills+='<span class="pill pill-done">'+LOCKI+TXT('done')+'</span>';
-  else if(rdy)pills+='<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\''+id+'\')">'+ARROW+'</span>';
+  else{
+    if(waiting)pills+='<span class="pill pill-wait" title="This day has passed. Open it any day this week">Waiting</span>';
+    if(rdy)pills+='<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\''+id+'\')">'+ARROW+'</span>';
+  }
   // Compressed: the name sits on the top line, level with the grip, and the second line is just
   // the size of the day. The ADD-ON tag went because the meta already says Optional, and YOURS
   // because whose day it is has never been something you needed telling twice.
   // DB.restLabel first: what the rest day is FOR is the user's own, not the app's to state.
   var ts=totalSets(id),tsw=ts+(ts===1?' set':' sets');
   var meta=v==='rest'?(DB.restLabel||(e&&e.label)||'Rest'):(v==='opt'?'Optional &middot; '+tsw:tsw);
-  return '<div class="card'+(v?' '+v:'')+(sealed?' sealed':'')+(up?' upnext':'')+'" data-base="'+id+'" style="--c:'+dayC(id)+';--gd:-'+(i*0.77).toFixed(2)+'s" onclick="mkTap(\''+id+'\',\''+dk+'\')">'+
+  return '<div class="card'+(v?' '+v:'')+(sealed?' sealed':'')+(up?' upnext':'')+(waiting?' waiting':'')+'" data-base="'+id+'" style="--c:'+dayC(id)+';--gd:-'+(i*0.77).toFixed(2)+'s" onclick="mkTap(\''+id+'\',\''+dk+'\')">'+
     (sealed?'<svg class="seal" viewBox="0 0 100 100">'+ouroboros('var(--gold)','var(--surface)',false)+'</svg>':'')+
     '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
       '<span class="card-r">'+pills+CARDGRIP+'</span></div>'+
@@ -9972,9 +9985,11 @@ function xcard(id,i){
   else if(rdy)pills+='<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\''+id+'\')">'+ARROW+'</span>';
   return '<div class="card'+(sealed?' sealed':'')+'" data-extra="'+id+'" style="--c:'+dayC(id)+';--gd:-'+(i*0.63).toFixed(2)+'s" onclick="mkTap(\''+id+'\')">'+
     (sealed?'<svg class="seal" viewBox="0 0 100 100">'+ouroboros('var(--gold)','var(--surface)',false)+'</svg>':'')+
-    '<div class="card-top">'+dayLbl(MKTXT().xc)+'<span style="display:flex;gap:0;align-items:center">'+pills+CARDGRIP+'</span></div>'+
-    '<div class="card-name">'+esc(w.name.replace('Optional: ',''))+'</div>'+
-    '<div class="card-meta">'+totalSets(id)+' sets</div></div>';
+    // No SAVED tag: the card already sits under the Saved workouts heading (v5.108). The name
+    // takes the top line, level with the grip, the same shape as a week card.
+    '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
+      '<span class="card-r">'+pills+CARDGRIP+'</span></div>'+
+    '<div class="card-meta">'+(function(n){return n+(n===1?' set':' sets');})(totalSets(id))+'</div></div>';
 }
 function extraIds(){return (DB.extra||[]).filter(function(id){return !!W[id];});}
 
@@ -10099,7 +10114,22 @@ function weekHello(){
     if(t>=prev&&t<+ws)any=true;
   });
   if(!any)return;
-  ask('The week turned over. Every day is unlocked and ready to go, and last week is saved in your history.',null,'A new week','OK');
+  // Name what did not happen, so the quiet reset never reads as the app not noticing (v5.108).
+  // Judged against the board as it stands now: each placed workout with no finished log inside
+  // last week. Rest and optional days are not things you miss.
+  var missed=[];
+  try{
+    DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){
+      if(wkVar(id)||!W[id])return;
+      var hit=(DB.logs||[]).some(function(l){
+        if(l.day!==id||!l.sealed||l.unsealed)return false;
+        var t=new Date(l.date+'T12:00:00').getTime();return t>=prev&&t<+ws;
+      });
+      if(!hit)missed.push(W[id].name.replace('Optional: ',''));
+    });});
+  }catch(e){}
+  var tail=missed.length?' '+(missed.length===1?missed[0]+' did not happen last week. It is':missed.slice(0,-1).join(', ')+' and '+missed[missed.length-1]+' did not happen last week. They are')+' back on the board, unlocked, no catching up owed.':'';
+  ask('The week turned over. Every day is unlocked and ready to go, and last week is saved in your history.'+tail,null,'A new week','OK');
 }
 // Offered once per week, and only after the last day is done. Finishing the week left you with
 // nothing to do and a button you had to know about; this says the round is over and offers the
