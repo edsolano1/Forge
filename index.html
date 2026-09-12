@@ -2201,6 +2201,30 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hnav{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--txt2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;}
 .hnav:hover{color:var(--txt);border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
 .hgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+/* the week strip: seven days, lit where something happened, gold where a record fell */
+.hwk{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px;}
+.hwk-c{position:relative;border-radius:10px;border:1px solid transparent;padding:7px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--txt3);--hc:var(--go);}
+.hwk-c i{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.08em;}
+.hwk-c b{font-family:var(--mono);font-weight:500;font-size:15px;color:var(--txt2);}
+.hwk-c.fut{opacity:.45;}
+.hwk-c.has{background:var(--surface2);border-color:color-mix(in srgb,var(--hc) 45%,var(--line));cursor:pointer;}
+.hwk-c.has b{color:var(--txt);}
+.hwk-c.has::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--hc);}
+.hwk-c.pr::after{background:var(--gold);box-shadow:0 0 8px var(--gold);}
+.hwk-c.walk{border-style:dashed;border-color:color-mix(in srgb,var(--gold) 40%,var(--line));cursor:pointer;}
+.hwk-c.now{border-color:var(--txt3);}
+.hwk-c.now i{color:var(--go);}
+.hwk-c.sel{background:color-mix(in srgb,var(--go) 16%,transparent);border-color:var(--go);}
+.hnav.off{opacity:.25;pointer-events:none;}
+.hsub{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin:2px 0 10px;}
+.hnone{color:var(--txt3);font-size:13.5px;padding:14px 4px 18px;text-align:center;}
+/* the three numbers the week adds up to */
+.hstat{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.hstat>div{background:var(--surface2);padding:12px 10px 11px;text-align:center;}
+.hstat b{display:block;font-family:var(--mono);font-weight:500;font-size:24px;letter-spacing:-.03em;color:var(--txt);line-height:1.1;}
+.hstat b small{font-size:11px;color:var(--txt3);letter-spacing:0;margin-left:4px;font-weight:400;}
+.hstat b.gold{color:var(--gold);}
+.hstat span{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--txt3);margin-top:5px;}
 .hdow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--txt3);text-align:center;padding:2px 0 4px;}
 .hcell{position:relative;aspect-ratio:1;border-radius:9px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:11px;color:var(--txt3);}
@@ -3338,8 +3362,9 @@ body.wcon{overflow:hidden;}
     <div class="hh">
       <h3 id="histTitle">Workouts finished</h3>
       <div class="hseg" id="histSeg">
-        <div class="hsegb on" id="hsegList" onclick="histMode('list')">List</div>
-        <div class="hsegb" id="hsegCal" onclick="histMode('cal')">Calendar</div>
+        <div class="hsegb on" id="hsegWeek" onclick="histMode('week')">Week</div>
+        <div class="hsegb" id="hsegCal" onclick="histMode('cal')">Month</div>
+        <div class="hsegb" id="hsegList" onclick="histMode('list')">All</div>
       </div>
     </div>
     <div id="histBody"></div>
@@ -8823,7 +8848,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.108';
+var APPV='v5.109';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14572,13 +14597,113 @@ function showHistory(){
     return buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{}});
   }).join('\n\n------------------------\n\n');
   document.getElementById('histTxt').value=out;
-  HIST.sel=null;HIST.mon=null;
+  HIST.sel=null;HIST.mon=null;HIST.wk0=null;HIST.day=null;
+  if(HIST.mode==='walks')HIST.mode='week';
   try{hcSyncProbe();}catch(e){}
   renderHist();
   document.getElementById('histOvl').classList.add('on');
 }
-var HIST={mode:'list',mon:null,sel:null};
-function histMode(m){HIST.mode=m;HIST.sel=null;HIST.ed=null;renderHist();}
+// Week first (owner, 12 Sep 2026): the sheet opens on what you did THIS week, because that is
+// the unit the app plans in. Month is the calendar; All is the flat list; walks and their
+// totals live behind one row instead of sitting on top of everything.
+var HIST={mode:'week',mon:null,sel:null,wk0:null,day:null};
+function histMode(m){HIST.mode=m;HIST.sel=null;HIST.ed=null;HIST.day=null;renderHist();}
+function histWeek(d){HIST.wk0=(HIST.wk0||weekStartTs())+d*7*86400000;HIST.day=null;renderHist();}
+function histDay(iso){HIST.day=(HIST.day===iso?null:iso);renderHist();}
+// One card for a session or a walk, shared by every view of this sheet.
+function histRowHtml(it){
+  if(it.walk){
+    var wk=it.walk;
+    var meta=(wk.min||0)+' min'+
+      (wk.dist?' &middot; '+fmtDist(wk.dist):'')+(wk.steps?' &middot; '+Math.round(wk.steps).toLocaleString()+' steps':'')+
+      (wk.kcal?' &middot; '+Math.round(wk.kcal)+' cal':'')+
+      (wk.bpm?' &middot; '+Math.round(wk.bpm)+' bpm':'');
+    return '<div class="hrow hwalk" onclick="walkRm('+it.wi+')">'+
+      '<div class="hrow-b">'+
+        '<div class="hrow-d">'+pretty(wk.date)+'</div>'+
+        '<div class="hrow-n">Walk</div>'+
+        '<div class="hrow-m">'+meta+'</div>'+
+      '</div>'+
+    '</div>';
+  }
+  var i=it.log,L=DB.logs[i],w=W[L.day],s=histSetsOf(L);
+  return '<div class="hrow" style="--hc:'+dayC(L.day)+'" onclick="histOpen('+i+')">'+
+      '<div class="hrow-b">'+
+        '<div class="hrow-d">'+pretty(L.date)+'</div>'+
+        '<div class="hrow-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
+        '<div class="hrow-m">'+(L.marked?'Marked done':s.n+(s.n===1?' set':' sets'))+(s.pr?' &middot; <span class="pr">'+s.pr+' record'+(s.pr>1?'s':'')+'</span>':'')+'</div>'+
+      '</div><div class="hrow-a">&rsaquo;</div>'+
+    '</div>';
+}
+// Sessions and walks together, newest first, optionally inside [t0,t1).
+function histItems(t0,t1){
+  var items=[];
+  DB.logs.forEach(function(L,i){
+    var t=new Date(L.date+'T12:00:00').getTime();
+    if(t0!==undefined&&(t<t0||t>=t1))return;
+    items.push({t:t,log:i});
+  });
+  (DB.walks||[]).forEach(function(wk,wi){
+    var t=wk.ts||new Date(wk.date+'T12:00:00').getTime();
+    if(t0!==undefined&&(t<t0||t>=t1))return;
+    items.push({t:t,walk:wk,wi:wi});
+  });
+  items.sort(function(a,b){return b.t-a.t;});
+  return items;
+}
+function isoOf(t){var d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+// The week: seven days across the top, what you did under them.
+function histWeekHtml(){
+  var day=86400000,ws=weekStartTs(),wk0=HIST.wk0||ws,wk1=wk0+7*day,todayIso=isoOf(Date.now());
+  var items=histItems(wk0,wk1);
+  var byIso={};items.forEach(function(it){var k=isoOf(it.t);(byIso[k]=byIso[k]||[]).push(it);});
+  // the strip
+  var strip='';
+  for(var i=0;i<7;i++){
+    var t=wk0+i*day,iso=isoOf(t),list=byIso[iso]||[];
+    var sess=list.some(function(x){return x.log!==undefined&&!DB.logs[x.log].marked;});
+    var walk=list.some(function(x){return x.walk;});
+    var pr=list.some(function(x){return x.log!==undefined&&histSetsOf(DB.logs[x.log]).pr>0;});
+    var col='';
+    if(sess){var L0=DB.logs[list.filter(function(x){return x.log!==undefined;})[0].log];col=' style="--hc:'+dayC(L0.day)+'"';}
+    strip+='<div class="hwk-c'+(sess?' has':'')+(walk&&!sess?' walk':'')+(pr?' pr':'')+(iso===todayIso?' now':'')+(t>Date.now()?' fut':'')+(HIST.day===iso?' sel':'')+'"'+col+
+      (list.length?' onclick="histDay(\''+iso+'\')"':'')+'><i>'+DW[new Date(t).getDay()].slice(0,1)+'</i><b>'+new Date(t).getDate()+'</b></div>';
+  }
+  var off=Math.round((ws-wk0)/(7*day));
+  var title=off===0?'This week':off===1?'Last week':(MO[new Date(wk0).getMonth()]+' '+new Date(wk0).getDate()+' to '+MO[new Date(wk1-day).getMonth()]+' '+new Date(wk1-day).getDate());
+  var h='<div class="hcal-h"><div class="hnav" onclick="histWeek(-1)">&lsaquo;</div>'+
+    '<div class="hcal-t">'+title+'</div>'+
+    '<div class="hnav'+(off===0?' off':'')+'" onclick="'+(off===0?'':'histWeek(1)')+'">&rsaquo;</div></div>'+
+    '<div class="hwk">'+strip+'</div>';
+  if(HIST.day){
+    var dl=byIso[HIST.day]||[];
+    h+='<div class="hsub">'+pretty(HIST.day)+'</div>';
+    h+='<div class="hscroll">'+(dl.length?dl.map(histRowHtml).join(''):'<div class="hnone">Nothing logged this day.</div>')+'</div>';
+    return h;
+  }
+  // what the week added up to
+  var sess=0,sets=0,recs=0,doneIds={};
+  items.forEach(function(it){
+    if(it.log===undefined)return;
+    var L=DB.logs[it.log],s=histSetsOf(L);
+    if(L.marked||!s.n)return;
+    sess++;sets+=s.n;recs+=s.pr;doneIds[L.day]=1;
+  });
+  var planned=0,done=0;
+  DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){if(wkVar(id)||!W[id])return;planned++;if(doneIds[id])done++;});});
+  var walks=items.filter(function(it){return it.walk;}).length;
+  h+='<div class="hstat">'+
+    '<div><b>'+(planned?done+'<small>of '+planned+'</small>':sess)+'</b><span>'+(planned?'workouts done':(sess===1?'workout':'workouts'))+'</span></div>'+
+    '<div><b>'+sets+'</b><span>'+(sets===1?'set':'sets')+'</span></div>'+
+    '<div><b'+(recs?' class="gold"':'')+'>'+recs+'</b><span>'+(recs===1?'record':'records')+'</span></div>'+
+    '</div>';
+  var sessions=items.filter(function(it){return it.log!==undefined;});
+  h+='<div class="hscroll">'+(sessions.length?sessions.map(histRowHtml).join(''):'<div class="hnone">'+(off===0?'Nothing finished yet this week.':'Nothing finished this week.')+'</div>')+
+    ((DB.walks||[]).length?'<div class="hrow hwalk hadd" onclick="histMode(\'walks\')">WALKS'+(walks?' &middot; '+walks+' this week':'')+' &rsaquo;</div>':
+      '<div class="hrow hwalk hadd" onclick="openWalkAdd()">+ ADD A WALK</div>')+
+    '</div>';
+  return h;
+}
 function histOpen(i){HIST.sel=i;HIST.ed=null;renderHist();}
 // ---------- correcting a sealed set ----------
 function histEditSet(key,si){
@@ -14673,52 +14798,24 @@ function renderHist(){
   }
   seg.style.visibility='';
   ttl.textContent='Workouts finished';
+  document.getElementById('hsegWeek').className='hsegb'+(HIST.mode==='week'||HIST.mode==='walks'?' on':'');
   document.getElementById('hsegList').className='hsegb'+(HIST.mode==='list'?' on':'');
   document.getElementById('hsegCal').className='hsegb'+(HIST.mode==='cal'?' on':'');
+  if(HIST.mode==='week'){body.innerHTML=histWeekHtml();return;}
+  if(HIST.mode==='walks'){
+    // The walk totals and the walks themselves, behind one row off the week (v5.109).
+    var wl=histItems().filter(function(it){return it.walk;});
+    body.innerHTML='<div class="hback" onclick="histMode(\'week\')">&larr; This week</div>'+
+      '<div class="hscroll">'+walkStrip()+hcSyncRow()+
+      '<div class="hrow hwalk hadd" onclick="openWalkAdd()">+ ADD A WALK</div>'+
+      wl.map(histRowHtml).join('')+'</div>';
+    return;
+  }
   if(HIST.mode==='list'){
-    var out='';
     // Sessions and walks shuffle into ONE list by date (user call, Aug 24): a walk wears
     // the same card as a session, told apart by the gold date line, the dashed edge and
-    // having no page behind it.
-    var items=[];
-    DB.logs.forEach(function(L,i){
-      items.push({t:new Date(L.date+'T12:00:00').getTime(),log:i});
-    });
-    (DB.walks||[]).forEach(function(wk,wi){
-      items.push({t:wk.ts||new Date(wk.date+'T12:00:00').getTime(),walk:wk,wi:wi});
-    });
-    items.sort(function(a,b){return b.t-a.t;});
-    out=items.map(function(it){
-      if(it.walk){
-        var wk=it.walk;
-        var meta=(wk.min||0)+' min'+
-          (wk.dist?' &middot; '+fmtDist(wk.dist):'')+(wk.steps?' &middot; '+Math.round(wk.steps).toLocaleString()+' steps':'')+
-          (wk.kcal?' &middot; '+Math.round(wk.kcal)+' cal':'')+
-          (wk.bpm?' &middot; '+Math.round(wk.bpm)+' bpm':'');
-        return '<div class="hrow hwalk" onclick="walkRm('+it.wi+')">'+
-          '<div class="hrow-b">'+
-            '<div class="hrow-d">'+pretty(wk.date)+'</div>'+
-            '<div class="hrow-n">Walk</div>'+
-            '<div class="hrow-m">'+meta+'</div>'+
-          '</div>'+
-        '</div>';
-      }
-      var i=it.log,L=DB.logs[i],w=W[L.day],s=histSetsOf(L);
-      return '<div class="hrow" style="--hc:'+dayC(L.day)+'" onclick="histOpen('+i+')">'+
-          '<div class="hrow-b">'+
-            '<div class="hrow-d">'+pretty(L.date)+'</div>'+
-            '<div class="hrow-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
-            '<div class="hrow-m">'+(L.marked?'Marked done':s.n+(s.n===1?' set':' sets'))+(s.pr?' &middot; <span class="pr">'+s.pr+' record'+(s.pr>1?'s':'')+'</span>':'')+'</div>'+
-          '</div><div class="hrow-a">&rsaquo;</div>'+
-        '</div>';
-    }).join('');
-    // Everything rides INSIDE the scroller: standing above it, the walk totals and the
-    // add button stretched the sheet past the screen and shoved its own buttons off the
-    // bottom (user note, Aug 24).
-    body.innerHTML='<div class="hscroll">'+walkStrip()+
-      hcSyncRow()+
-      '<div class="hrow hwalk hadd" onclick="openWalkAdd()">+ ADD A WALK</div>'+
-      out+'</div>';
+    // having no page behind it. Everything rides INSIDE the scroller (user note, Aug 24).
+    body.innerHTML='<div class="hscroll">'+histItems().map(histRowHtml).join('')+'</div>';
     return;
   }
   var m=HIST.mon||(HIST.mon=histLatestMon());
