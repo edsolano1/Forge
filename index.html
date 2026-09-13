@@ -969,7 +969,7 @@ body.tut .bg-rules,body.tut .bg-rules > i,body.tut .bg-wm svg{animation-play-sta
 /* A confirm has to clear any sheet that is already open. Every .ovl shares z-index 200,
    so #askOvl lost on DOM order - which is what hid the blocked-notifications message
    behind the timer sheet, leaving only a dimmed window. */
-#askOvl{z-index:300;}
+#askOvl{z-index:320;}   /* above the 300-level sheets, so Keep the change? lands on top of them */
 .sheet{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;}
 .sheet h3{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.02em;color:var(--txt);margin-bottom:5px;}
 .sheet p{font-size:13px;color:var(--txt3);margin-bottom:16px;line-height:1.55;}
@@ -8885,7 +8885,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.122';
+var APPV='v5.123';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14506,6 +14506,7 @@ function openPlates(id,lb,row){
     document.getElementById('plType').value=want?plNum(want):'';
   }
   document.getElementById('plTitle').textContent=name||'Plate calculator';
+  PL.open0={bar:PL.bar,on:PL.on.slice()};   // what the sheet opened with, so back can tell a change from a look
   plDraw();
   document.getElementById('plateOvl').classList.add('on');
 }
@@ -15097,6 +15098,22 @@ function askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel){
   }
   document.getElementById('askOvl').classList.add('on');
 }
+// Back on a sheet that holds an unsaved change asks first, the way a document does (v5.123).
+// Only the sheets with a real SAVE or ADD are listed; the rest close as before. SAVE runs the
+// sheet's own save, which closes it; DISCARD closes it with nothing written.
+var UNSAVED={
+  editOvl:{dirty:function(){return !!edCtx&&edRead()!==edCtx.open;},save:function(){saveEdit();}},
+  plateOvl:{dirty:function(){return !!PL.open0&&(PL.bar!==PL.open0.bar||PL.on.join()!==PL.open0.on.join());},save:function(){plSave();}},
+  bwOvl:{dirty:function(){return !!document.getElementById('bwW').value;},save:function(){bwSave();}},
+  walkAddOvl:{dirty:function(){return !!document.getElementById('waMin').value;},save:function(){walkAddSave();}},
+  mkCexOvl:{dirty:function(){return !!document.getElementById('mkCexName').value.trim();},save:function(){mkSaveCex();}}
+};
+function backCloses(id){
+  var u=UNSAVED[id],d=false;
+  try{d=!!(u&&u.dirty());}catch(e){}
+  if(!d){closeOvl(id);return;}
+  ask('You changed something on this sheet and have not saved it.',function(){u.save();},'Keep the change?','SAVE',function(){closeOvl(id);},null,'DISCARD');
+}
 function closeOvl(id){
   if(id==='lvlOvl')lvlAbort();
   if(id==='instrOvl')insAnimStop();
@@ -15159,7 +15176,7 @@ function onBackButton(){
     // Through closeOvl rather than stripping the class here: it is what aborts a level-up
     // mid-transfer so nothing is written, stops an instruction animation, and hands the ask
     // sheet on to whatever queued behind it. Backing out used to strand all three.
-    closeOvl(ov.id);backGuard();return;
+    backCloses(ov.id);backGuard();return;
   }
   if(sessionOpen()){leaveSession();backGuard();return;}
   // The day editor is a full screen like a session, but it is not .ovl and not #session, so back
