@@ -342,6 +342,7 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .dayempty.dayadd:hover{background:color-mix(in srgb,var(--go) 8%,transparent);
   border-color:color-mix(in srgb,var(--go) 60%,var(--line));}
 .dayempty.dayadd:active{transform:scale(.99);}
+.dayempty.dayadd.quiet{padding:8px 4px;color:color-mix(in srgb,var(--go) 70%,var(--txt3));}
 .dayempty.dayadd svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0;}
 /* a day with no room left still shows, so the grid keeps its shape and you can see WHY */
 .mk-slot.full{opacity:.42;cursor:default;}
@@ -8883,7 +8884,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.118';
+var APPV='v5.119';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10119,7 +10120,11 @@ function dayBox(d,nx,n0){
   // started empty there is nothing on the rack and nothing on the other days, so every day read
   // as a dead end and the only way in was the New day button at the very bottom of the page -
   // which is not where somebody looking at an empty Tuesday is looking. It builds into this day.
-  if(!ids.length)h+='<div class="dayempty dayadd" onclick="openNewDay(\''+d.k+'\')">'+PLUS+'Add a workout</div>';
+  // The words stay only while the whole board is empty (v5.119). Once one workout stands
+  // anywhere, an empty day is a plus and a drop target, nothing more: five days each saying
+  // Add a workout was the clutter, not the plus.
+  if(!ids.length){var bare0=!DAYS.some(function(x){return (DB.days[x.k]||[]).length;});
+    h+='<div class="dayempty dayadd'+(bare0?'':' quiet')+'" onclick="openNewDay(\''+d.k+'\')" title="Add a workout">'+PLUS+(bare0?'Add a workout':'')+'</div>';}
   else ids.forEach(function(id,n){h+=planCard(id,n0+n,nx,d.k);});
   return h+'</div>';
 }
