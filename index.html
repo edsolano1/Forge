@@ -343,6 +343,7 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .dayempty.dayadd:hover{background:color-mix(in srgb,var(--go) 8%,transparent);
   border-color:color-mix(in srgb,var(--go) 60%,var(--line));}
 .dayempty.dayadd:active{transform:scale(.99);}
+.inp.pl-landed{border-color:var(--go);box-shadow:0 0 0 2px color-mix(in srgb,var(--go) 30%,transparent);transition:box-shadow .6s,border-color .6s;}
 .dayempty.dayadd.quiet{padding:8px 4px;color:color-mix(in srgb,var(--go) 70%,var(--txt3));}
 .dayempty.dayadd svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;flex-shrink:0;}
 /* a day with no room left still shows, so the grid keeps its shape and you can see WHY */
@@ -8885,7 +8886,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.120';
+var APPV='v5.121';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11135,7 +11136,7 @@ function renderSession(){
             // through to the card. openPlates looks the name up itself now.
             (wplan.length?'<a class="warm-btn" onclick="event.stopPropagation();warmToggle(\x27'+id+'\x27)">'+
               '<svg viewBox="0 0 20 20"><path d="M4 15.5h12"/><path d="M6 12l2.5-3.5L11 11l2.5-3.5"/></svg> Warm-up</a>':'')+
-            (showPl?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+plw+')">'+
+            (showPl?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+plw+',\''+id+'\')">'+
               '<svg viewBox="0 0 20 20"><path d="M2 10h16"/><path d="M5 6.5v7M7.5 5v10M12.5 5v10M15 6.5v7"/></svg> Plates</a>':'')+
             '</div>';
       if(wplan.length)html+='<div class="warm" id="warm-'+id+'"></div>';
@@ -14303,11 +14304,27 @@ var PLKEEP={};
 function plSave(){
   barRemember(PL.id,PL.bar);          // this lift uses this bar from now on
   PLKEEP[PL.id]=PL.on.slice();
+  // What you loaded is what you are about to lift (v5.121): the total lands in the next
+  // unlogged set of the row this opened from. The plan's target is untouched; sets already
+  // logged are untouched. An empty bar writes nothing.
+  try{plLand();}catch(e){}
   closeOvl('plateOvl');
   try{sfxLog();}catch(e){}
 }
 // The universal undo. Nothing was committed on the way in, so walking away IS the undo -
 // the lift keeps the bar it had and whatever was on it before this sheet opened.
+function plLand(){
+  if(!PL.row||!PL.on.length)return;
+  var lb=inW(plTotal());if(!(lb>0))return;
+  for(var i=0;i<60;i++){
+    var sr=document.getElementById('sr-'+PL.row+'-'+i),w=document.getElementById('w-'+PL.row+'-'+i);
+    if(!sr||!w)return;
+    if(sr.classList.contains('done')||w.type==='hidden')continue;
+    w.dataset.lb=lb;w.value=fmtW(lb);
+    w.classList.add('pl-landed');setTimeout(function(){w.classList.remove('pl-landed');},900);
+    return;
+  }
+}
 function plCancel(){closeOvl('plateOvl');}
 function plClear(){PL.want=null;PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(e){}}
 // Who gets the plate calculator: ANY lift measured in weight. Not a list of lifts I
@@ -14456,11 +14473,12 @@ function plateEx(id,name){
   return PL_RX.test(n);
 }
 function plMachine(id,name){return !!PL_MACH[id]||/\b(leg press|hack)\b/i.test(name||'');}
-function openPlates(id,lb){
+function openPlates(id,lb,row){
   var ex=null;try{ex=R(id);}catch(e){}
   var name=(ex&&ex.name)||(EX[id]&&EX[id].name)||'';
   PL.name=name;
   PL.id=id||'';
+  PL.row=row||'';                     // the session row this was opened from, so SAVE has somewhere to land
   // This lift’s own bar - the one it was last given, or a sensible guess from its name if
   // it has never been asked. Set OUTRIGHT, never inherited from whichever sheet was open
   // last, which is how a NO BAR chosen on the leg press used to follow you to the bench.
