@@ -1371,6 +1371,11 @@ body.tut .dayhead-add{display:none;}
 /* The sound rows carry a sublabel in a <small> that had no rule at all, so it rendered inline
    and read as one run-on line: "REST ALERTWHEN A REST RUNS OUT". Its own line, a step quieter. */
 .sfx-lbl small{display:block;margin-top:2px;font-size:11px;letter-spacing:.07em;color:var(--txt3);}
+/* Settings is read in sections (v5.117): a section title with a hairline, then its rows. The first row label under a title loses its top gap. */
+.set-sec{display:flex;align-items:center;gap:10px;margin:26px 0 2px;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--txt2);}
+.set-sec:after{content:"";flex:1;height:1px;background:var(--line);}
+.set-sec:first-of-type{margin-top:12px;}
+.set-sec+.sfx-lbl{margin-top:10px;}
 /* the three sound rows sit as one group, not three headings - the 20px heading gap between
    them read as three separate settings sections and made the sheet twice the height it needed */
 #sfxKeys .sfx-lbl{margin:8px 0 0;}
@@ -3139,7 +3144,8 @@ body.wcon{overflow:hidden;}
          one dial (how loud), because those are the two a gym actually forces. -->
     <!-- Volume first, then the Rest alert as a two-button row beneath it (user note,
          Aug 23): every row on the sheet now reads the same way as Motion and Units. -->
-    <div class="sfx-lbl" style="margin-top:4px"><span>Volume</span></div>
+    <div class="set-sec">Sound</div>
+    <div class="sfx-lbl"><span>Volume</span></div>
     <div class="slider-row" id="alertLvl">
       <input type="range" id="alertRange" min="0" max="10" step="1"
         oninput="setAlertLvl(this.value,true)" onchange="setAlertLvl(this.value)">
@@ -3147,7 +3153,8 @@ body.wcon{overflow:hidden;}
     </div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Alert when rest ends</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="sfxKeys"></div>
-    <div class="sfx-lbl" style="margin-top:14px"><span>Animation</span></div>
+    <div class="set-sec">Preferences</div>
+    <div class="sfx-lbl"><span>Animation</span></div>
     <div class="presets" id="motionRow"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Weight</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="unitRow"></div>
@@ -3162,7 +3169,8 @@ body.wcon{overflow:hidden;}
     <!-- Walks flow in from Health Connect, the phone's own health vault - Samsung Health and
          watch apps write into it, Forge reads walks back out. Only shown where the native
          plugin exists (the Android app); the row hides itself on the open web. -->
-    <div class="sfx-lbl" id="hcLbl" style="display:none;margin-top:14px"><span>Walks</span></div>
+    <div class="set-sec" id="hcSec" style="display:none">Walks</div>
+    <div class="sfx-lbl" id="hcLbl" style="display:none"><span>Health Connect</span></div>
     <div class="presets" id="hcRow" style="display:none;grid-template-columns:1fr">
       <button class="preset sm" id="hcBtn" onclick="hcConnect()">Connect to Health Connect</button>
     </div>
@@ -3170,6 +3178,7 @@ body.wcon{overflow:hidden;}
     <!-- Backup is off the sheet for this release. doBackup/pickRestore/doRestore are untouched and
          the file input stays, so the pair is two lines of markup away from coming back. -->
     <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="doRestore(this)">
+    <div class="set-sec">Learn</div>
     <div class="sfx-lbl"><span>Tutorial</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr">
       <button class="preset sm" id="tutBtnShort" onclick="tutStart(1)">Quick</button>
@@ -8866,7 +8875,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.116';
+var APPV='v5.117';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16947,12 +16956,13 @@ function HS(){
   }catch(e){}
   return null;
 }
+function hcSecShow(on){var e=document.getElementById('hcSec');if(e)e.style.display=on?'':'none';}
 function hcDraw(){
   var hs=HS(),l=document.getElementById('hcLbl'),r=document.getElementById('hcRow'),
       n=document.getElementById('hcNote'),b=document.getElementById('hcBtn');
   if(!l||!r||!n||!b)return;
-  if(!hs){l.style.display='none';r.style.display='none';n.style.display='none';return;}
-  l.style.display='';r.style.display='';n.style.display='';
+  if(!hs){l.style.display='none';r.style.display='none';n.style.display='none';hcSecShow(false);return;}
+  l.style.display='';r.style.display='';n.style.display='';hcSecShow(true);
   hs.status().then(function(s){
     if(s.status!=='ok'){
       b.textContent='Health Connect not available';
@@ -16965,7 +16975,7 @@ function hcDraw(){
       if(g.granted){
         // Connected, so this row is done. SYNC WALKS NOW lives in Session history, beside
         // the walks themselves, where pressing it shows the result rather than describing it.
-        l.style.display='none';r.style.display='none';n.style.display='none';
+        l.style.display='none';r.style.display='none';n.style.display='none';hcSecShow(false);
       }else{
         b.textContent='Connect to Health Connect';
         n.textContent='Walks recorded by Samsung Health or your watch flow in automatically. Forge only reads them, and nothing leaves the phone.';
