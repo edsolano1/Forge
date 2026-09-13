@@ -1372,10 +1372,10 @@ body.tut .dayhead-add{display:none;}
    and read as one run-on line: "REST ALERTWHEN A REST RUNS OUT". Its own line, a step quieter. */
 .sfx-lbl small{display:block;margin-top:2px;font-size:11px;letter-spacing:.07em;color:var(--txt3);}
 /* Settings is read in sections (v5.117): a section title with a hairline, then its rows. The first row label under a title loses its top gap. */
-.set-sec{display:flex;align-items:center;gap:10px;margin:26px 0 2px;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--txt2);}
-.set-sec:after{content:"";flex:1;height:1px;background:var(--line);}
-.set-sec:first-of-type{margin-top:12px;}
-.set-sec+.sfx-lbl{margin-top:10px;}
+.set-card{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025);padding:4px 14px 16px;margin-top:14px;}
+.set-sec{text-align:center;font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--txt);padding:10px 0 8px;border-bottom:1px solid var(--line);margin:0 -14px 4px;}
+.set-card .sfx-lbl{margin-top:16px;}
+.set-sec+.sfx-lbl{margin-top:12px;}
 /* the three sound rows sit as one group, not three headings - the 20px heading gap between
    them read as three separate settings sections and made the sheet twice the height it needed */
 #sfxKeys .sfx-lbl{margin:8px 0 0;}
@@ -3144,6 +3144,7 @@ body.wcon{overflow:hidden;}
          one dial (how loud), because those are the two a gym actually forces. -->
     <!-- Volume first, then the Rest alert as a two-button row beneath it (user note,
          Aug 23): every row on the sheet now reads the same way as Motion and Units. -->
+    <div class="set-card">
     <div class="set-sec">Sound</div>
     <div class="sfx-lbl"><span>Volume</span></div>
     <div class="slider-row" id="alertLvl">
@@ -3153,6 +3154,14 @@ body.wcon{overflow:hidden;}
     </div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Alert when rest ends</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="sfxKeys"></div>
+    <!-- Whether a finished rest can actually reach you. Native only, and only when there is
+         something to DO about it: once the alerts are getting through, this row has nothing
+         left to say and takes itself off the sheet. -->
+    <div class="sfx-lbl" id="ntLbl" style="display:none;margin-top:14px"><span>Rest alerts</span></div>
+    <div class="presets" id="ntRow" style="display:none;grid-template-columns:1fr"></div>
+    <div class="footnote" id="ntNote" style="display:none;margin:6px 2px 0"></div>
+    </div>
+    <div class="set-card">
     <div class="set-sec">Preferences</div>
     <div class="sfx-lbl"><span>Animation</span></div>
     <div class="presets" id="motionRow"></div>
@@ -3160,24 +3169,22 @@ body.wcon{overflow:hidden;}
     <div class="presets" style="grid-template-columns:1fr 1fr" id="unitRow"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Distance</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="distRow"></div>
-    <!-- Whether a finished rest can actually reach you. Native only, and only when there is
-         something to DO about it: once the alerts are getting through, this row has nothing
-         left to say and takes itself off the sheet. -->
-    <div class="sfx-lbl" id="ntLbl" style="display:none;margin-top:14px"><span>Rest alerts</span></div>
-    <div class="presets" id="ntRow" style="display:none;grid-template-columns:1fr"></div>
-    <div class="footnote" id="ntNote" style="display:none;margin:6px 2px 0"></div>
+    </div>
     <!-- Walks flow in from Health Connect, the phone's own health vault - Samsung Health and
          watch apps write into it, Forge reads walks back out. Only shown where the native
          plugin exists (the Android app); the row hides itself on the open web. -->
-    <div class="set-sec" id="hcSec" style="display:none">Walks</div>
+    <div class="set-card" id="hcSec" style="display:none">
+    <div class="set-sec">Walks</div>
     <div class="sfx-lbl" id="hcLbl" style="display:none"><span>Health Connect</span></div>
     <div class="presets" id="hcRow" style="display:none;grid-template-columns:1fr">
       <button class="preset sm" id="hcBtn" onclick="hcConnect()">Connect to Health Connect</button>
     </div>
     <div class="footnote" id="hcNote" style="display:none;margin:6px 2px 0"></div>
+    </div>
     <!-- Backup is off the sheet for this release. doBackup/pickRestore/doRestore are untouched and
          the file input stays, so the pair is two lines of markup away from coming back. -->
     <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="doRestore(this)">
+    <div class="set-card">
     <div class="set-sec">Learn</div>
     <div class="sfx-lbl"><span>Tutorial</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr">
@@ -3190,6 +3197,7 @@ body.wcon{overflow:hidden;}
     <div class="sfx-lbl"><span>Practice run</span></div>
     <div class="presets" style="grid-template-columns:1fr">
       <button class="preset sm" onclick="sbStart()">REPLAY THE FIRST RUN &middot; nothing is saved</button>
+    </div>
     </div>
     <div class="footnote" style="margin:16px 2px 0;text-align:center"><span id="setVer"></span> &middot; <a href="privacy.html" style="color:inherit">Privacy</a></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('settingsOvl')">CLOSE</div></div>
@@ -8875,7 +8883,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.117';
+var APPV='v5.118';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
