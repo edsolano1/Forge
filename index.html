@@ -3292,6 +3292,7 @@ body.wcon{overflow:hidden;}
       <figure style="flex:1;max-width:172px;margin:0"><canvas id="insCvF" width="480" height="480" style="width:100%;height:auto;border-radius:8px"></canvas><figcaption id="insCapF" style="font-size:10px;letter-spacing:.16em;color:#8d8378;text-align:center;margin-top:2px">FRONT</figcaption></figure>
       <figure style="flex:1;max-width:172px;margin:0"><canvas id="insCvS" width="480" height="480" style="width:100%;height:auto;border-radius:8px"></canvas><figcaption style="font-size:10px;letter-spacing:.16em;color:#8d8378;text-align:center;margin-top:2px">SIDE</figcaption></figure>
     </div>
+    <div class="presets" id="insKb" style="display:none;grid-template-columns:1fr 1fr;margin:0 0 12px"></div>
     <div class="ins-s" id="insSetup"></div>
     <ul class="ins-c" id="insCues"></ul>
     <div class="ins-m"><span>The usual mistake:</span> <em id="insMistake"></em></div>
@@ -4346,6 +4347,22 @@ var ANIM=(function(){
     x.fillStyle="#15171b";x.beginPath();x.arc(c[0],c[1],r,0,7);x.fill();
     x.strokeStyle=GO;x.lineWidth=7;x.beginPath();x.arc(c[0],c[1],r,0,7);x.stroke();
     dot(x,c,6,GO);
+  }
+  // The weight held in both hands, drawn about its centre: an upright dumbbell (two heads and
+  // the handle) or, when the lifter says so, a kettlebell (the ball with its handle on top).
+  // The hands sit at the TOP of either one, so callers place the centre a little below the hands.
+  function held(x,c){
+    if(KBNOW){
+      x.fillStyle="#15171b";x.beginPath();x.arc(c[0],c[1]+6,15,0,7);x.fill();
+      x.strokeStyle=GO;x.lineWidth=6;x.beginPath();x.arc(c[0],c[1]+6,15,0,7);x.stroke();
+      x.beginPath();x.arc(c[0],c[1]-12,10,Math.PI*1.05,Math.PI*1.95);x.stroke();   // the handle
+      return;
+    }
+    x.fillStyle=GO;
+    x.fillRect(c[0]-13,c[1]-18,26,9);              // the top head
+    seg(x,[c[0],c[1]-9],[c[0],c[1]+9],5,GO);       // the handle
+    x.fillStyle=GO;
+    x.fillRect(c[0]-13,c[1]+9,26,9);               // the bottom head
   }
   function ground(x,x1,x2,y){x.strokeStyle=LINE;x.lineWidth=6;x.lineCap="round";x.beginPath();x.moveTo(x1,y);x.lineTo(x2,y);x.stroke();}
 
@@ -5445,11 +5462,7 @@ var ANIM=(function(){
     var e=[sho[0]+4,sho[1]+46];
     seg(x,sho,e,8);seg(x,e,[db[0]-6,db[1]-8],8);
     dot(x,[db[0]-5,db[1]-9],5);                    // the hand under the top head
-    x.fillStyle=GO;
-    x.fillRect(db[0]-13,db[1]-18,26,9);            // the top head
-    seg(x,[db[0],db[1]-9],[db[0],db[1]+9],5,GO);   // the handle
-    x.fillStyle=GO;
-    x.fillRect(db[0]-13,db[1]+9,26,9);             // the bottom head
+    held(x,db);
   }
   function drawGobletF(x,t){
     x.clearRect(0,0,480,480);ground(x,110,370,432);
@@ -5468,11 +5481,7 @@ var ANIM=(function(){
     seg(x,[cx-42,shoY+4],E1,8);seg(x,E1,[cx-13,shoY+26],8);
     seg(x,[cx+42,shoY+4],E2,8);seg(x,E2,[cx+13,shoY+26],8);
     dot(x,[cx-13,shoY+26],5);dot(x,[cx+13,shoY+26],5);
-    x.fillStyle=GO;
-    x.fillRect(cx-16,shoY+14,32,9);                // the top head
-    seg(x,[cx,shoY+23],[cx,shoY+41],5,GO);         // the handle
-    x.fillStyle=GO;
-    x.fillRect(cx-16,shoY+41,32,9);                // the bottom head
+    held(x,[cx,shoY+32]);
     dot(x,[cx,shoY-q.headOff*Math.cos(q.lean*Math.PI/180)],19);
   }
 
@@ -6027,10 +6036,12 @@ var ANIM=(function(){
     seg(x,[ankle[0]-8,424],[ankle[0]+26,424],9);
     seg(x,sho,P(hip,-(90-lean),98+26),8);
     dot(x,head,19);
-    // the dumbbell hangs from both hands between the legs
-    var hand=[sho[0]+28, sho[1]+108];              // forward of the knee - a held weight, not a joint marker
-    seg(x,sho,[sho[0]+16,sho[1]+56],8);seg(x,[sho[0]+16,sho[1]+56],hand,8);
-    plate(x,hand,15);
+    // both arms hang long from the shoulder; the hands cup the top of the weight and it hangs
+    // between the legs, below the hips (v5.124). It used to be a ring at the knee.
+    var hand=[sho[0]+12, sho[1]+96];
+    seg(x,sho,[sho[0]+8,sho[1]+50],8);seg(x,[sho[0]+8,sho[1]+50],hand,8);
+    dot(x,hand,5);
+    held(x,[hand[0],hand[1]+20]);
   }
   function drawSumoF(x,t){
     x.clearRect(0,0,480,480);ground(x,110,370,432);
@@ -6048,10 +6059,11 @@ var ANIM=(function(){
     seg(x,[cx,hipY],[cx,shoY],11);
     seg(x,[cx-42,shoY+4],[cx+42,shoY+4],10);
     seg(x,[cx,shoY],[cx,shoY-26],8);
-    // both arms hang to the dumbbell between the legs
-    var dy=shoY+112;
-    seg(x,[cx-42,shoY+8],[cx-12,dy-6],8);seg(x,[cx+42,shoY+8],[cx+12,dy-6],8);
-    plate(x,[cx,dy],15);
+    // both arms hang long to the weight between the legs, hands cupping its top
+    var hy=shoY+100;
+    seg(x,[cx-42,shoY+8],[cx-8,hy],8);seg(x,[cx+42,shoY+8],[cx+8,hy],8);
+    dot(x,[cx-8,hy],5);dot(x,[cx+8,hy],5);
+    held(x,[cx,hy+20]);
     dot(x,[cx,shoY-lerp(48,42,k)*Math.cos(lean*R)],19);
   }
 
@@ -8885,7 +8897,11 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.123';
+// Which weight the figure holds on the lifts that take either. DB.kb[exId]=1 means kettlebell;
+// KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
+var KBNOW=false;var KB_OK={sumo:1,goblet:1};
+function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
+var APPV='v5.124';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9229,10 +9245,14 @@ function openInstr(exId){
   if(!d&&!ANIM.of(exId))return;              // nothing to show at all
   var name=(EX[exId]&&EX[exId].name)||exId;
   document.getElementById('insName').textContent=name;
+  KBNOW=!!(KB_OK[exId]&&DB.kb&&DB.kb[exId]);
+  var kbRow=document.getElementById('insKb');
+  if(kbRow){kbRow.style.display=KB_OK[exId]?'':'none';
+    if(KB_OK[exId])kbRow.innerHTML='<button class="preset sm'+(KBNOW?'':' on')+'" onclick="kbSet(\''+exId+'\',false)">Dumbbell</button><button class="preset sm'+(KBNOW?' on':'')+'" onclick="kbSet(\''+exId+'\',true)">Kettlebell</button>';}
   var su=document.getElementById('insSetup'),ul=document.getElementById('insCues'),mi=document.getElementById('insMistake');
   if(d){                                     // the written half, when the lift has words
     su.style.display='';ul.style.display='';mi.parentNode.style.display='';
-    su.textContent=d.s;
+    su.textContent=KBNOW?d.s.replace(/dumbbell/gi,function(m){return m[0]==='D'?'Kettlebell':'kettlebell';}):d.s;
     ul.innerHTML='';
     d.c.forEach(function(c){var li=document.createElement('li');li.textContent=c;ul.appendChild(li);});
     mi.textContent=d.m;
