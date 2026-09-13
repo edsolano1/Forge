@@ -141,7 +141,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 /* The name shares the top line with the grip now, so it must not wrap the row taller than the
    grip - a long day name ellipses instead. */
 .card-top .card-name{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.card-r{display:flex;gap:0;align-items:center;flex:0 0 auto;}
+.card-r{display:flex;gap:8px;align-items:center;flex:0 0 auto;}
 .card-day{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--c);}
 .card-name{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.022em;color:var(--txt);line-height:1.2;}
 .card-meta{font-size:12px;color:var(--txt3);margin-top:2px;}
@@ -272,7 +272,8 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
    one keeps its header and offers somewhere to drop, because empty is a real answer - it is a
    rest day - not an absence. */
 .daybox{border:1px solid var(--line);border-radius:14px;padding:7px 8px 1px;margin-bottom:7px;
-  background:color-mix(in srgb,var(--surface) 45%,transparent);transition:border-color .15s,background .15s;}
+  background:var(--surface);transition:border-color .15s,background .15s;}
+/* A day holding a workout is solid (v5.120); only an empty day is clear. Done days keep their own quenched look. */
 .daybox.empty{padding-bottom:7px;background:transparent;border-style:dashed;}
 .dayhead{display:flex;align-items:center;justify-content:space-between;gap:10px;
   font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
@@ -8884,7 +8885,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.119';
+var APPV='v5.120';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10083,7 +10084,7 @@ function planCard(id,i,nx,dk){
   if(live)pills+='<span class="pill pill-live">Resume '+loggedCount(id)+'/'+totalSets(id)+'</span>';
   else if(sealed)pills+='<span class="pill pill-done">'+LOCKI+TXT('done')+'</span>';
   else{
-    if(waiting)pills+='<span class="pill pill-wait" title="This day has passed. Open it any day this week">Waiting</span>';
+    if(waiting)pills+='<span class="pill pill-wait" title="This day has passed. Open it any day this week">Still open</span>';
     if(rdy)pills+='<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\''+id+'\')">'+ARROW+'</span>';
   }
   // Compressed: the name sits on the top line, level with the grip, and the second line is just
