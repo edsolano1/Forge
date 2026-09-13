@@ -2922,7 +2922,7 @@ body.wcon{overflow:hidden;}
   <div class="sheet" style="max-width:420px">
     <h3 id="exNoteName">Note</h3>
     <div class="footnote" style="margin:0 2px 8px">Yours, not the app's. Seat heights, pin numbers, a reminder that keeps your technique right. It stays on this exercise every time it comes round.</div>
-    <textarea id="exNoteBox" rows="5" placeholder="Seat 4, back pad 2. Keep elbows tucked."></textarea>
+    <textarea id="exNoteBox" rows="5" placeholder="Seat 4, back pad 2. Keep elbows tucked." oninput="exNoteAuto()"></textarea>
     <!-- The one fact about an exercise the app cannot work out for itself, now settable on
          EVERY exercise rather than only at custom creation: on an assisted machine the
          number is how much it holds up for you, so progress runs down instead of up. -->
@@ -2933,8 +2933,7 @@ body.wcon{overflow:hidden;}
     </div>
     <div class="footnote" style="margin:8px 2px 0">For assisted machines, where less weight means you did more of the work yourself. Grading, readiness and level-ups all follow it.</div>
     <div class="sheet-btns">
-      <div class="btn" onclick="closeOvl('exNoteOvl')">CANCEL</div>
-      <div class="btn btn-go" onclick="saveExNote()">SAVE</div>
+      <div class="btn btn-go" onclick="saveExNote()">DONE</div>
     </div>
   </div>
 </div>
@@ -8886,7 +8885,7 @@ function insAnimShow(exId){
   var fr=function(t){a[0](cf,t);a[1](cs,t);insAnimRAF=requestAnimationFrame(fr);};
   insAnimRAF=requestAnimationFrame(fr);
 }
-var APPV='v5.121';
+var APPV='v5.122';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8989,19 +8988,28 @@ function exNoteInvSet(v){
 function exNoteInvToggle(){
   var b=document.getElementById('exNoteInv');
   exNoteInvSet(!b.classList.contains('on'));
+  exNoteCommit();
 }
-function saveExNote(){
+// The note saves itself as it is typed (v5.122): a gym note is written between sets with one
+// hand, and a SAVE button that had to be found and hit was how notes went missing. DONE just
+// closes. The library flag commits the moment it is ticked, for the same reason.
+var exNoteT=null;
+function exNoteAuto(){clearTimeout(exNoteT);exNoteT=setTimeout(exNoteCommit,350);}
+function exNoteCommit(){
   if(!exNoteFor)return;
+  clearTimeout(exNoteT);
   var v=document.getElementById('exNoteBox').value.trim();
   if(!DB.exNotes)DB.exNotes={};
   if(v)DB.exNotes[exNoteFor]=v; else delete DB.exNotes[exNoteFor];  // empty clears it
-  // The override is only stored when it DIFFERS from the library's own flag, so ticking a
-  // machine back to its default leaves no residue behind.
   var want=document.getElementById('exNoteInv').classList.contains('on');
   var lib=!!(EX[exNoteFor]&&EX[exNoteFor].inv);
   if(!DB.exInv)DB.exInv={};
   if(want!==lib)DB.exInv[exNoteFor]=want?1:0; else delete DB.exInv[exNoteFor];
   saveDB();
+}
+function saveExNote(){
+  if(!exNoteFor)return;
+  exNoteCommit();
   closeOvl('exNoteOvl');exNoteFor=null;
   renderSession();
 }
