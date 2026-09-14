@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.114** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.124** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -57,9 +57,13 @@ walks a superset in running order, sees both halves together, corrects a set on 
 one tap without losing its place, shows supersets lassoed on the overview, and wears the phone's
 palette. All verified on the SM-R960 except the live set screen, which waits for a real session.
 
+## The Saturday after the gym (v5.115 to v5.124, 12 Sep 2026)
+
+Small things the owner hit in one session, each shipped the same evening. The two week flip moved up beside the week label and the on or off switch under Saturday reads the same either way (v5.115, v5.116 fixed a pill that hid in name only: a hidden attribute loses to display:flex, see the traps). Settings reads in four panels, Sound, Preferences, Walks (phone only, until connected) and Learn, each with a centred title (v5.117, v5.118). Empty days show a plus alone once the week holds anything; a bare week keeps the words (v5.119). A passed day says Still open, not Waiting; a day holding a workout is solid and only empty days are clear (v5.120). SAVE on the plate calculator lands the loaded total in the next unlogged set (v5.121). Exercise notes save as they are typed, DONE just closes (v5.122). Back on a sheet with an unsaved change asks Keep the change? with SAVE and DISCARD, the number pad, plate calculator, weigh-in, hand-entered walk and new exercise sheet (v5.123). The sumo squat holds a real upright dumbbell in both views, and sumo and goblet offer Dumbbell or Kettlebell on the instruction sheet, remembered per exercise in DB.kb (v5.124). Parked with a brief: generated artwork for the 33 wizard cards (icons/wizard-cards-brief.md).
+
 ## Missed days, the week sheet, and two weeks (v5.108 to v5.112, 12 Sep 2026)
 
-From the owner's own Saturday: a Tuesday skipped looked no different from a Friday still to come. Now a passed day still undone wears a quiet Waiting pill, the turnover note names what did not happen and says nothing is owed, and saved cards lost their redundant SAVED tag. Workouts finished opens on the week (a seven-day strip, workouts done of planned, sets, records, that week's sessions; Month and All behind it; walk totals behind one row). And the two week program: a second board behind the first for A B A, B A B weeks, alternating by the calendar, flipped over to build, switched on and off under Saturday, with the other week's workouts moving to Saved when it is switched off. Then two trims from the same conversation: three or more Waiting pills collapse into one calm line above the week (v5.111), and the whole-week UNLOCK button left the footer in favour of UNLOCK THIS ONE on a locked card's hold menu, the one thing people actually needed it for (v5.112). The flip's perspective moved off the home screen after it offset Settings and let the page scroll sideways (v5.113), and the wizard now asks one week or two, building A B A / B A B from two workouts for a three-day week (v5.114).
+From the owner's own Saturday: a Tuesday skipped looked no different from a Friday still to come. Now a passed day still undone wears a quiet Still open pill (Waiting until v5.120), the turnover note names what did not happen and says nothing is owed, and saved cards lost their redundant SAVED tag. Workouts finished opens on the week (a seven-day strip, workouts done of planned, sets, records, that week's sessions; Month and All behind it; walk totals behind one row). And the two week program: a second board behind the first for A B A, B A B weeks, alternating by the calendar, flipped over to build, switched on and off under Saturday, with the other week's workouts moving to Saved when it is switched off. Then two trims from the same conversation: three or more Waiting pills collapse into one calm line above the week (v5.111), and the whole-week UNLOCK button left the footer in favour of UNLOCK THIS ONE on a locked card's hold menu, the one thing people actually needed it for (v5.112). The flip's perspective moved off the home screen after it offset Settings and let the page scroll sideways (v5.113), and the wizard now asks one week or two, building A B A / B A B from two workouts for a three-day week (v5.114).
 
 ## The beginner pass (v5.99 to v5.101, 11 Sep 2026)
 
