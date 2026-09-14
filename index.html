@@ -2622,7 +2622,7 @@ body.forge .ez-t{letter-spacing:.06em;text-transform:uppercase;font-size:21px;}
 .ez-art .gear{animation:ezSpin 11.4s linear infinite;}
 .ez-art .gl{transform-origin:29.5px 46px;}
 .ez-art .gr{transform-origin:70.5px 54.3px;animation-direction:reverse;}
-html.mo-calm .ez-art .gear,html.mo-off .ez-art .gear{animation:none;}
+html.mo-off .ez-art .gear{animation:none;}
 @media (prefers-reduced-motion:reduce){.ez-art .gear{animation:none;}}
 /* session length: an hourglass with 30, 45 or 60 minutes of sand in the top, draining into the pile below */
 .ez-art .hg-top-30{animation:hgTop30 9s cubic-bezier(.4,0,.9,.6) infinite;}
@@ -2641,14 +2641,14 @@ html.mo-calm .ez-art .gear,html.mo-off .ez-art .gear{animation:none;}
 @keyframes hgGrain{0%{transform:translateY(0);opacity:0;}8%{opacity:1;}88%{opacity:1;}100%{transform:translateY(31px);opacity:0;}}
 .ez-art .hg-stream{animation:hgStream 9s linear infinite;}
 @keyframes hgStream{0%,70%{opacity:1;}74%,100%{opacity:0;}}
-html.mo-calm .ez-art .hg-top,html.mo-calm .ez-art .hg-bot,html.mo-calm .ez-art .hg-stream,html.mo-calm .ez-art .hg-grain,html.mo-off .ez-art .hg-top,html.mo-off .ez-art .hg-bot,html.mo-off .ez-art .hg-stream,html.mo-off .ez-art .hg-grain{animation:none;}
-html.mo-calm .ez-art .hg-bot,html.mo-off .ez-art .hg-bot{transform:scaleY(.5);}
+html.mo-off .ez-art .hg-top,html.mo-off .ez-art .hg-bot,html.mo-off .ez-art .hg-stream,html.mo-off .ez-art .hg-grain{animation:none;}
+html.mo-off .ez-art .hg-bot{transform:scaleY(.5);}
 @media (prefers-reduced-motion:reduce){.ez-art .hg-top,.ez-art .hg-bot,.ez-art .hg-stream,.ez-art .hg-grain{animation:none;}}
 /* build muscle: a sheen crosses the armour, then a long rest before the next */
 .ez-art .arm-sheen{animation:armSheen 4.2s ease-in-out infinite;}
 @keyframes armSheen{0%{transform:translateX(-10px);}40%,100%{transform:translateX(150px);}}
 .ez-art .arm-sheen{transform-box:view-box;transform-origin:50px 50px;}
-html.mo-calm .ez-art .arm-sheen,html.mo-off .ez-art .arm-sheen{animation:none;opacity:0;}
+html.mo-off .ez-art .arm-sheen{animation:none;opacity:0;}
 @media (prefers-reduced-motion:reduce){.ez-art .arm-sheen{animation:none;opacity:0;}}
 /* the ingot stacks light one ingot at a time, hold together, then rest and go again */
 .ez-art .ig{opacity:.32;}
@@ -2682,7 +2682,7 @@ html.mo-calm .ez-art .arm-sheen,html.mo-off .ez-art .arm-sheen{animation:none;op
 @keyframes ig5_3{0%,40.9%{opacity:.32;}54.5%,89.4%{opacity:1;}100%{opacity:.32;}}
 .ez-art .ig-5-4{animation:ig5_4 6.6s ease-in-out infinite;}
 @keyframes ig5_4{0%,54.5%{opacity:.32;}68.2%,89.4%{opacity:1;}100%{opacity:.32;}}
-html.mo-calm .ez-art .bk-leaf,html.mo-off .ez-art .bk-leaf,html.mo-calm .ez-art .ig,html.mo-off .ez-art .ig{animation:none;opacity:1;}
+html.mo-off .ez-art .bk-leaf,html.mo-off .ez-art .ig{animation:none;opacity:1;}
 @media (prefers-reduced-motion:reduce){.ez-art .bk-leaf,.ez-art .ig{animation:none;}.ez-art .ig{opacity:1;}}
 .ez-art svg.mo-glow{animation:ezGlow 3.8s ease-in-out infinite;}
 /* the anvil screen's glow grows with the answer: faint, warm, bright. Never a neon sign. */
@@ -2708,7 +2708,7 @@ html.mo-calm .ez-art .bk-leaf,html.mo-off .ez-art .bk-leaf,html.mo-calm .ez-art 
 .ez-art svg.mo-step{animation:ezStep 1.9s ease-in-out infinite;}
 @keyframes ezStep{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-2.5px) rotate(2deg);}}
 .ez-card.picked .ez-art svg{filter:none;}
-html.mo-calm .ez-art svg{animation:none;}
+/* Low keeps the wizard moving (v5.135): it is a one-time pass and the owner wants it seen. Off still stops it. */
 html.mo-off .ez-card,html.mo-off .ez-art svg,html.mo-off .ez-card.picked .ez-art svg{animation:none;}
 @media (prefers-reduced-motion:reduce){.ez-card,.ez-art svg,.ez-card.picked .ez-art svg{animation:none;}}
 .ez-card:hover{border-color:color-mix(in srgb,var(--go) 45%,var(--line));}
@@ -9014,7 +9014,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.134';
+var APPV='v5.135';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
