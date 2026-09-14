@@ -2649,6 +2649,9 @@ body.wcon{overflow:hidden;}
   transition:border-color .14s,color .14s,background .14s;}
 .wc-yn-b:hover{border-color:color-mix(in srgb,var(--gold) 45%,var(--line));}
 .wc-yn-b.on{background:var(--gold);border-color:var(--gold);color:#1b1409;}
+.wc-go{margin-top:6px;text-align:center;}
+.wc-go:disabled{opacity:.42;cursor:default;pointer-events:none;}
+.wc-go:not(:disabled){border-color:var(--gold);}
 .wc-note{width:100%;text-align:center;font-size:11.5px;color:var(--txt3);margin-top:2px;}
 @media(max-width:360px){.wc-t{font-size:28px;}.wc-in{max-width:300px;}}
 /* Motion Off means the screen still arrives, it just arrives already there. */
@@ -8901,7 +8904,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.124';
+var APPV='v5.125';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -19520,7 +19523,8 @@ function wcSafetyDraw(){
   wcStage('Glad you are here. Two quick questions first',
     '<div class="wc-q">Any injury, pain, or medical condition that currently limits how you move or exercise?'+pair('q1')+'</div>'+
     '<div class="wc-q">Has a doctor ever told you to avoid or limit exercise?'+pair('q2')+'</div>'+
-    '<div class="wc-note">Forge gives general fitness guidance, not medical advice.</div>');
+    '<div class="wc-note">Forge gives general fitness guidance, not medical advice. Exercise is your own decision and your own risk. By continuing you accept that, and the <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit">privacy policy</a>.</div>'+
+    '<button class="wc-pick wc-go" id="wcGo" onclick="wcSafeGo()" disabled><b>Continue</b><small>Answer both to go on</small></button>');
 }
 // Light the chosen answer in place. This used to redraw the whole stage, which replays the
 // screen's entrance, so every tap looked like a refresh onto the same questions (owner, 11 Sep).
@@ -19531,16 +19535,17 @@ function wcSafeMark(){
     b.classList.toggle('on',v!==null&&v!==undefined&&(v?'1':'0')===b.getAttribute('data-v'));
   }
 }
+// The screen no longer moves on by itself (owner, 13 Sep): both answers light in place and
+// CONTINUE is the one deliberate act that records them, with the acknowledgement beside it.
 function wcSafeSet(k,v){
   WC_SAFE[k]=v;
   wcSafeMark();
-  if(WC_SAFE.q1===null||WC_SAFE.q2===null)return;
-  // Both answered. A beat so the second answer is seen lit before the screen moves on.
-  if(!wcSafeSet.pending){wcSafeSet.pending=true;setTimeout(function(){wcSafeSet.pending=false;wcSafeGo();},260);}
+  var go=document.getElementById('wcGo');
+  if(go){var ok=WC_SAFE.q1!==null&&WC_SAFE.q2!==null;go.disabled=!ok;go.querySelector('small').textContent=ok?'Both answered':'Answer both to go on';}
 }
 function wcSafeGo(){
   if(WC_SAFE.q1===null||WC_SAFE.q2===null)return;
-  DB.safety={q1:WC_SAFE.q1,q2:WC_SAFE.q2,at:new Date().toISOString().slice(0,10)};
+  DB.safety={q1:WC_SAFE.q1,q2:WC_SAFE.q2,ack:1,at:new Date().toISOString().slice(0,10)};   // ack: the not-medical-advice and privacy line was on screen when CONTINUE was pressed
   saveDB();
   if(WC_SAFE.q1||WC_SAFE.q2){
     wcStage('One thing before you start',
