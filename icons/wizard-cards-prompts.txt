@@ -1,0 +1,64 @@
+FORGE WIZARD CARD ART. 33 SQUARE PICTURES.
+
+Read the STYLE block first. It applies to every picture. Then make the groups one at a time, all pictures in a group in one go, so they match each other exactly. Return each picture as its own 1024 x 1024 PNG named as shown.
+
+STYLE (applies to all 33)
+- Flat, single colour on a dark ground. Ember orange #D97B2E on near black #0A0605.
+- One pale gold #E8B86D highlight is allowed per picture, at most one small element.
+- Either a solid silhouette or a single weight line drawing. Pick one for the whole set and keep it.
+- No gradients, no shadows, no texture, no photo realism, no 3D. Think enamel pin or woodcut.
+- Square. Subject centred, filling about 60 percent of the frame, even empty margin all round.
+- No text, no letters, no numbers anywhere in the picture.
+- Same line weight and same level of detail in every picture. They sit side by side in an app.
+- The app's mark is a hammer coming down on an anvil. Forge, ember, iron and heat are on brand.
+- Nothing cartoonish. No faces, no people, no mascots.
+- Must be easy to trace into a clean vector afterwards: few shapes, clean edges, no tiny detail.
+
+GROUP 1. Have you followed a real program? (4 pictures, same forge drawn 4 ways)
+xp1-never.png   A cold forge: anvil beside an unlit hearth, no glow at all.
+xp1-6mo.png     The same hearth with one coal just beginning to glow.
+xp1-2yr.png     The same hearth with a small bed of glowing coals.
+xp1-over.png    The same hearth with a full fire roaring.
+
+GROUP 2. Do you know your working weights? (3 pictures, same ledger)
+xp2-no.png      A closed ledger book, plain cover.
+xp2-some.png    The ledger open, two short lines written on the page.
+xp2-yes.png     The ledger open, lines filling the page to the bottom.
+
+GROUP 3. The last three months, honestly? (3 pictures, same hammer)
+xp3-none.png    A hammer laid flat on a bench.
+xp3-onoff.png   The hammer mid swing with a broken, dotted arc behind it.
+xp3-steady.png  The hammer mid swing with a solid, complete arc behind it.
+
+GROUP 4. How many days a week? (5 pictures, IDENTICAL drawing, only the fill changes)
+days-1.png      Seven small squares in a row. The first one filled, the rest outlined.
+days-2.png      Same row, first two filled.
+days-3.png      Same row, first three filled.
+days-4.png      Same row, first four filled.
+days-5.png      Same row, first five filled, last two outlined.
+
+GROUP 5. One week, or two that alternate? (2 pictures)
+weeks-1.png     A single closed ring.
+weeks-2.png     Two rings linked like two links of a chain.
+
+GROUP 6. How long is a session? (3 pictures, IDENTICAL clock, only the shaded wedge changes)
+len-30.png      A plain clock face, no numbers, no hands. Half of the face shaded.
+len-45.png      Same clock, three quarters shaded.
+len-60.png      Same clock, the whole face shaded.
+
+GROUP 7. What do you train with? (5 pictures)
+kit-gym.png     A cable machine tower, side on, one clean silhouette.
+kit-home.png    A loaded barbell resting in a squat rack.
+kit-dbb.png     A flat bench with one dumbbell lying on it.
+kit-dbo.png     A pair of dumbbells, one standing upright, one lying down.
+kit-none.png    A rolled exercise mat on bare floorboards.
+
+GROUP 8. What is it for? (4 pictures)
+goal-strong.png An anvil, heavy and squat, seen edge on.
+goal-muscle.png A stack of forged iron ingots, three high.
+goal-lean.png   A single flame, tall and clean.
+goal-move.png   Three curved lines of wind, moving left to right.
+
+GROUP 9. The welcome screen (2 pictures)
+wc-build.png    The hammer raised above the anvil, about to strike.
+wc-know.png     A blueprint style grid of seven empty boxes in a row, one for each day.
