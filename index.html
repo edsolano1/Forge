@@ -2601,6 +2601,19 @@ body.forge .ez-t{letter-spacing:.06em;text-transform:uppercase;font-size:21px;}
   background:var(--surface);border:1px solid var(--line);border-radius:14px;
   padding:15px 16px;margin-bottom:11px;transition:border-color .15s,transform .1s;color:var(--txt);}
 .ez-card:active{transform:scale(.985);}
+/* Wizard motion (v5.127): cards rise in with a stagger, every icon shares one slow breathe offset
+   card to card, and the tapped icon answers once before the screen moves on. Each screen replaces
+   the last, so nothing carries over. Low motion keeps the entrance only; Off keeps nothing. */
+.ez-card{animation:ezIn .42s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*70ms);}
+@keyframes ezIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.ez-art svg{transform-origin:50% 55%;animation:ezBreathe 3.8s ease-in-out infinite;animation-delay:calc(var(--i,0)*-.55s);}
+@keyframes ezBreathe{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-1.5px) scale(1.045);}}
+.ez-card.picked{border-color:var(--gold);}
+.ez-card.picked .ez-art svg{animation:ezHit .38s cubic-bezier(.3,1.5,.4,1) 1 both;}
+@keyframes ezHit{0%{transform:scale(1);}45%{transform:translateY(-3px) scale(1.2);}100%{transform:scale(1.06);}}
+html.mo-calm .ez-art svg{animation:none;}
+html.mo-off .ez-card,html.mo-off .ez-art svg,html.mo-off .ez-card.picked .ez-art svg{animation:none;}
+@media (prefers-reduced-motion:reduce){.ez-card,.ez-art svg,.ez-card.picked .ez-art svg{animation:none;}}
 .ez-card:hover{border-color:color-mix(in srgb,var(--go) 45%,var(--line));}
 .ez-card b{display:block;font-size:15.5px;font-weight:600;}
 .ez-card small{display:block;margin-top:3px;font-size:11.5px;line-height:1.45;color:var(--txt3);}
@@ -8904,7 +8917,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.126';
+var APPV='v5.127';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -19742,20 +19755,23 @@ function ezBack(){
 // The latch has to OUTLIVE the forge, not just wrap it: ezForge is synchronous, so a flag
 // released in a finally is already down again by the time a second tap 120ms later lands. It
 // stays down until ezOpen starts a new run, which is the only moment another week is wanted.
-function ezPick(k,v){
-  if(EZ.done)return;
+function ezPick(k,v,el){
+  if(EZ.done||EZ.picking)return;
   EZ[k]=v;
-  if(EZ.step<EZ_STEPS.length-1){EZ.step++;ezRender();return;}
-  EZ.done=true;
-  ezForge();
+  var go=function(){EZ.picking=false;if(EZ.step<EZ_STEPS.length-1){EZ.step++;ezRender();return;}EZ.done=true;ezForge();};
+  // The tapped card lights and its icon answers once before the screen moves on (v5.127).
+  // Motion off skips the beat entirely.
+  if(!el||MOTION==='off'){go();return;}
+  EZ.picking=true;el.classList.add('picked');
+  setTimeout(go,300);
 }
 function ezRender(){
   var st=EZ_STEPS[EZ.step];
   document.getElementById('ezDots').innerHTML=EZ_STEPS.map(function(_,i){
     return '<i'+(i<=EZ.step?' class="on"':'')+'></i>';}).join('');
   var h='<div class="ez-t">'+st.t+'</div><div class="ez-s">'+st.s+'</div>';
-  st.opts().forEach(function(o){
-    h+='<button class="ez-card" onclick="ezPick(\''+st.k+'\','+(typeof o[0]==='string'?'\''+o[0]+'\'':o[0])+')">'+
+  st.opts().forEach(function(o,n){
+    h+='<button class="ez-card" style="--i:'+n+'" onclick="ezPick(\''+st.k+'\','+(typeof o[0]==='string'?'\''+o[0]+'\'':o[0])+',this)">'+
        '<span class="ez-art">'+o[3]+'</span><span><b>'+o[1]+'</b><small>'+o[2]+'</small></span></button>';
   });
   var body=document.getElementById('ezBody');
