@@ -133,9 +133,11 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .iconbtn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--txt2);flex-shrink:0;transition:.15s;}
 .iconbtn:hover{color:var(--txt);border-color:#33373d;}
 
-.card{position:relative;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:9px 12px;cursor:pointer;transition:transform .12s,border-color .15s,background .15s;margin-bottom:6px;user-select:none;overflow:hidden;}
+/* Three levels on the board (v5.136): the ground, the day panel, the card. The card sits a step
+   lighter than its day with a lit top edge and a soft drop beneath, so the edges read. */
+.card{position:relative;border:1px solid color-mix(in srgb,var(--line) 62%,#9a6a48);border-radius:var(--r);background:var(--surface2);box-shadow:inset 0 1px 0 rgba(255,205,160,.09),0 5px 14px -8px rgba(0,0,0,.7);padding:9px 12px;cursor:pointer;transition:transform .12s,border-color .15s,background .15s;margin-bottom:6px;user-select:none;overflow:hidden;}
 .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c);}
-.card:hover{border-color:color-mix(in srgb,var(--c) 45%,var(--line));background:var(--surface2);transform:translateY(-1px);}
+.card:hover{border-color:color-mix(in srgb,var(--c) 45%,var(--line));background:color-mix(in srgb,var(--surface2) 88%,#fff);transform:translateY(-1px);}
 .card:active{transform:scale(.994);}
 .card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:0;}
 /* The name shares the top line with the grip now, so it must not wrap the row taller than the
@@ -271,8 +273,8 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 /* A day is a container: header, then whatever is in it, growing and shrinking to fit. An empty
    one keeps its header and offers somewhere to drop, because empty is a real answer - it is a
    rest day - not an absence. */
-.daybox{border:1px solid var(--line);border-radius:14px;padding:7px 8px 1px;margin-bottom:7px;
-  background:var(--surface);transition:border-color .15s,background .15s;}
+.daybox{border:1px solid color-mix(in srgb,var(--line) 78%,#8a5a3a);border-radius:14px;padding:7px 8px 1px;margin-bottom:7px;
+  background:color-mix(in srgb,var(--surface) 82%,var(--bg));transition:border-color .15s,background .15s;}
 /* A day holding a workout is solid (v5.120); only an empty day is clear. Done days keep their own quenched look. */
 .daybox.empty{padding-bottom:7px;background:transparent;border-style:dashed;}
 .dayhead{display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -1433,9 +1435,11 @@ body.light .ovl{background:rgba(20,24,30,.5);}
    straw through bronze to violet to blue, so a spread of hues belongs. */
 html.forge,body.forge{--bg:#0a0605;--surface:#170e09;--surface2:#241510;--line:#4a2718;
   --txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--match:#8f6fbe;}
-body.forge .card,body.forge .exc,body.forge .sheet,body.forge .timer-pill{
+body.forge .exc,body.forge .sheet,body.forge .timer-pill{
   background:linear-gradient(180deg,rgba(255,150,70,.06),rgba(255,150,70,.012)),var(--surface);
   border-top-color:rgba(255,178,110,.14);}
+/* the board card: a step lighter than its day, warm at the top, so it stands off the panel (v5.136) */
+body.forge .card{background:linear-gradient(180deg,rgba(255,150,70,.08),rgba(255,150,70,.015)),var(--surface2);}
 body.forge #home::before{background:radial-gradient(closest-side,rgba(255,110,24,.24),rgba(150,34,8,.09) 52%,transparent 74%);}
 /* The workshop itself, behind the board. It sits on a fixed layer under everything, so the
    fire stays put while the week scrolls over it. body goes transparent for forge only -
@@ -1665,7 +1669,8 @@ body.moon .sp-word{font-size:25px;letter-spacing:.42em;}
 .sheet h3,.ed-ex{letter-spacing:.05em;}
 .finishbtn{font-size:15px;letter-spacing:.16em;text-transform:uppercase;}
 .card-day{letter-spacing:.14em;font-family:var(--mono);font-weight:400;font-size:10px;}
-.card,.exc,.sheet,.timer-pill{background:linear-gradient(180deg,rgba(190,214,255,.05),rgba(190,214,255,.008)),var(--surface);border-top-color:rgba(198,220,255,.11);}
+/* .card left this list in v5.136: the board card has its own level and lit edge now */
+.exc,.sheet,.timer-pill{background:linear-gradient(180deg,rgba(190,214,255,.05),rgba(190,214,255,.008)),var(--surface);border-top-color:rgba(198,220,255,.11);}
 /* fine obsidian grain - polished stone, not paper */
 body::after{content:'';position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:.16;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");}
 body.light::after{opacity:.22;mix-blend-mode:multiply;}
@@ -9014,7 +9019,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.135';
+var APPV='v5.136';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
