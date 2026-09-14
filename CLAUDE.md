@@ -57,7 +57,7 @@ main constraint on how to work in it. See **Traps** below before editing.
   the 7th arg names the no-button (NOT NOW). The queue signature moved to index 7.
 - **Every user-typed string is `esc()`'d where it lands in HTML** (names, notes, custom links).
 - **Unlocking is per card** (v5.112). `unsealOne(id)` on the hold menu of a locked card; the footer UNLOCK THE WEEK button is gone and must not come back. `unsealAll`/`doUnseal` survive only for the end-of-week "go round again" dialog. A passed day still undone shows a Waiting pill; three or more collapse into one line (`waitingCount`).
-- **Sheets guard their edits** (v5.123). Back on a sheet with an unsaved change asks Keep the change? (SAVE or DISCARD) through  in ; register a dirty test and a save there when adding a sheet with a SAVE or ADD. CANCEL buttons still cancel outright. Notes autosave (v5.122); the plate calculator SAVE writes the total into the next unlogged set (, v5.121). Held weight:  draws a dumbbell or, when  is on for that exercise (, ), a kettlebell.
+- **Sheets guard their edits** (v5.123). Back on a sheet with an unsaved change asks Keep the change? (SAVE or DISCARD) through `UNSAVED[id]` in `backCloses`; register a dirty test and a save there when adding a sheet with a SAVE or ADD. CANCEL buttons still cancel outright. Notes autosave (v5.122); the plate calculator SAVE writes the total into the next unlogged set (`plLand`, v5.121). Held weight: `held(x,c)` draws a dumbbell or, when `KBNOW` is on for that exercise (`DB.kb`, `KB_OK`), a kettlebell.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
   strength and underfills "move"; longer would only add rest.
 - The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated
@@ -137,7 +137,8 @@ broken once in v5.3 because the function was tested directly instead of by click
 rendered button — **click the real element, not the handler.**
 
 **5. `hidden` loses to any author `display` rule.** `[hidden]` is `display:none` in the UA sheet
-only. An element with `display:flex` in the stylesheet ignores it completely.
+only. An element with `display:flex` in the stylesheet ignores it completely. Bit again in v5.115
+(the week flip pill); the fix is a `.class[hidden]{display:none}` line beside the class.
 
 ---
 
