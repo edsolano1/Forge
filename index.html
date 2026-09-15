@@ -2259,6 +2259,34 @@ body.forge .dayempty.dayadd:hover{background:#130b07;border-color:#3a2214;}
 body.forge .daybox.dropok .dayempty.dayadd,body.forge .daybox.dropok{background:color-mix(in srgb,var(--go) 12%,#0e0805);}
 body.forge .two-ctl{border-style:solid;border-color:#4a2c1c;background:#130c09;color:var(--txt2);}
 
+/* ---- The ground, v5.141: the hearth (owner picked H, 14 Sep). ----
+   Near black. One hearth sits low behind the board and its light rises to catch the plates'
+   bottom edges. No drifting bloom, no bloom over the header, no anvil in the dark. Embers are
+   fewer and stay near the hearth. Still one fixed layer painted once; only opacity breathes. */
+html.forge{background:#070403;}
+body.forge::before{
+  background:
+    radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.55) 0%,rgba(190,60,10,.22) 40%,transparent 70%),
+    radial-gradient(140% 80% at 50% 120%,rgba(255,90,20,.14),transparent 60%),
+    radial-gradient(150% 100% at 50% 40%,transparent 40%,rgba(4,2,1,.6) 100%),
+    linear-gradient(180deg,#070403 0%,#0a0605 55%,#0d0705 100%);
+  filter:none;}
+body.forge #home::before{display:none;}
+body.forge #bg > .bg-light{top:auto;bottom:-34vh;left:50%;width:120vw;height:70vw;max-width:none;max-height:none;   /* #bg > * sets inset:0 at id strength, so this needs the id too */
+  background:radial-gradient(closest-side,rgba(255,120,30,.22),transparent 70%);
+  animation:hearthbreath 5.2s ease-in-out infinite;transform:translateX(-50%);}
+@keyframes hearthbreath{0%,100%{opacity:.5;}50%{opacity:.9;}}
+body.forge .bg-wm svg{opacity:0;}
+body.forge .bg-motes i:nth-child(n+15){display:none;}
+body.forge .bg-motes i{animation-name:emberlow;}
+@keyframes emberlow{
+  0%{transform:translate3d(0,104vh,0) rotate(var(--ln,16deg)) scale(.5);opacity:0;}
+  8%{opacity:1;}
+  45%{transform:translate3d(calc(var(--dx,1) * 5vw),74vh,0) rotate(var(--ln,16deg)) scale(.9);opacity:.85;}
+  75%{opacity:.4;}
+  100%{transform:translate3d(calc(var(--dx,1) * 9vw),52vh,0) rotate(var(--ln,16deg)) scale(.7);opacity:0;}}
+body.forge .bg-vig{background:radial-gradient(130% 100% at 50% 30%,transparent 45%,rgba(3,1,1,.7) 100%);}
+
 .pill-done{background:transparent;border:1px solid color-mix(in srgb,var(--gold) 42%,transparent);color:var(--gold);
   display:inline-flex;align-items:center;gap:4px;}
 .pill-done svg{width:10px;height:10px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;}
@@ -9105,7 +9133,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.140';
+var APPV='v5.141';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
