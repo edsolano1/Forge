@@ -361,6 +361,18 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
   border:1px dashed color-mix(in srgb,var(--go) 30%,var(--line));
   background:color-mix(in srgb,var(--go) 3%,transparent);min-height:16px;}
 .bank-empty{font-size:12px;color:var(--txt3);text-align:center;padding:13px 10px;line-height:1.55;margin-bottom:6px;}
+/* the Saved fold header (v5.138) */
+.sv-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 10px;}
+.sv-tog{display:flex;align-items:center;gap:8px;background:none;border:0;padding:6px 4px 6px 0;margin:0;color:inherit;cursor:pointer;font:inherit;}
+.sv-head .sec-label{margin:0;}
+.sv-chev{width:16px;height:16px;fill:none;stroke:var(--txt3);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;transform:rotate(-90deg);}
+.sv-head.open .sv-chev{transform:rotate(0deg);}
+.sv-acts{display:flex;gap:8px;align-items:center;}
+.sv-btn{height:32px;min-width:32px;padding:0 8px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--txt2);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;transition:.15s;}
+.sv-btn:hover{color:var(--txt);border-color:#33373d;}
+.sv-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;}
+.sv-forge{color:var(--go);border-color:color-mix(in srgb,var(--go) 34%,var(--line));}
+#extraCards[hidden],#extraHint[hidden]{display:none;}
 .bank-add{display:flex;align-items:center;justify-content:center;padding:9px;margin:2px 0 6px;
   border:1px dashed color-mix(in srgb,var(--go) 34%,var(--line));border-radius:11px;color:var(--go);
   cursor:pointer;transition:background .15s;}
@@ -2936,9 +2948,14 @@ body.wcon{overflow:hidden;}
   <div id="weekCards"></div>
   <!-- label, hint and cards are one thing to look at, so the tour can light them as one -->
   <div id="extraWrap">
-    <div class="sec-label" id="extraLabel" style="display:none;margin-top:26px">Saved workouts</div>
-    <div class="mk-hint" id="extraHint" style="display:none">Not part of the week. Open one whenever you want it.</div>
-    <div id="extraCards"></div>
+    <!-- Saved is folded by default (v5.138): one line under the week, the shelf one tap away and still
+         on the same page so drag and hold keep working. The plus and Forge me a week sit on the line. -->
+    <div class="sv-head" id="extraLabel">
+      <button class="sv-tog" onclick="savedToggle()" aria-expanded="false"><svg class="sv-chev" viewBox="0 0 20 20"><path d="M6 8l4 4 4-4"/></svg><span class="sec-label" id="extraLabelTxt">Saved workouts</span></button>
+      <span class="sv-acts"><button class="sv-btn sv-forge" onclick="ezOpen('saved')" title="Forge me a week"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 13h9c1.5 0 3 .4 4 1-1 .8-2.6 1.5-4.5 1.5H10c-.7 1.5-1 2.2-1 3H6c0-.8-.3-1.5-1-3H3z"/><path d="M5 11l1.5-2M8 10.5l.5-2.2M11 11l1.2-1.8" stroke-linecap="round"/></svg><span>Forge me a week</span></button><button class="sv-btn" onclick="openNewSaved()" title="New saved workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></span>
+    </div>
+    <div class="mk-hint" id="extraHint" hidden>Not part of the week. Open one whenever you want it.</div>
+    <div id="extraCards" hidden></div>
   </div>
   <div class="sides" id="sides"></div>
   <div class="foot" id="foot"></div>
@@ -9052,7 +9069,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.137';
+var APPV='v5.138';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11030,16 +11047,10 @@ function renderHome(){
   // there was no way to find out the place existed, so nothing ever went in it. It is a real
   // box now (v4.157), dashed against the week's solid days so it reads as storage, standing
   // whether or not it holds anything - and when it is empty the box itself says what it is for.
-  document.getElementById('extraCards').innerHTML=(xs.length?xs.map(xcard).join('')
-    :'<div class="bank-empty">Nothing saved yet. A workout without a day waits here. Drag one down, or hold it and choose MOVE TO SAVED WORKOUTS.</div>')+
-    '<div class="bank-add" onclick="openNewSaved()" title="New saved workout">'+PLUS+'</div>'+
-    '<div class="bank-add bank-forge" onclick="ezOpen(\x27saved\x27)" title="Forge me a week">'+
-    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 13h9c1.5 0 3 .4 4 1-1 .8-2.6 1.5-4.5 1.5H10c-.7 1.5-1 2.2-1 3H6c0-.8-.3-1.5-1-3H3z"/><path d="M5 11l1.5-2M8 10.5l.5-2.2M11 11l1.2-1.8" stroke-linecap="round"/></svg>'+
-    '<span>Forge me a week</span></div>';
-  document.getElementById('extraLabel').textContent=MKTXT().xl;
-  document.getElementById('extraLabel').style.display='';
-  document.getElementById('extraHint').style.display=xs.length?'':'none';
-  document.getElementById('extraHint').innerHTML='Not part of the week. Open one whenever you want it.';
+  document.getElementById('extraCards').innerHTML=xs.length?xs.map(xcard).join('')
+    :'<div class="bank-empty">Nothing saved yet. Drag a workout down here, or hold one and choose MOVE TO SAVED WORKOUTS.</div>';
+  document.getElementById('extraLabelTxt').textContent=MKTXT().xl;
+  savedApply(xs.length);
   mkBindCards();
   cardBind();
   syncPumpBtn();
@@ -11946,7 +11957,22 @@ function openNewDay(k){
   MK.shellOpen=true;mkRender();
 }
 // The + inside Saved workouts: same minimal making screen, destination the bank.
+// The Saved fold (v5.138). Shut by default; remembered. Anything that puts a workout INTO Saved
+// opens it, so the thing you just moved is never out of sight.
+var SAVED_OPEN=(function(){try{return localStorage.getItem('arc_savedopen')==='1';}catch(e){return false;}})();
+function savedToggle(){SAVED_OPEN=!SAVED_OPEN;try{localStorage.setItem('arc_savedopen',SAVED_OPEN?'1':'0');}catch(e){}savedApply();try{sfxTick&&sfxTick();}catch(e){}}
+function savedOpen(){if(!SAVED_OPEN){SAVED_OPEN=true;try{localStorage.setItem('arc_savedopen','1');}catch(e){}}savedApply();}
+function savedApply(n){
+  var h=document.getElementById('extraLabel'),c=document.getElementById('extraCards'),t=document.getElementById('extraHint');
+  if(!h||!c)return;
+  if(n===undefined)n=extraIds().length;
+  h.classList.toggle('open',SAVED_OPEN);
+  var b=h.querySelector('.sv-tog');if(b)b.setAttribute('aria-expanded',SAVED_OPEN?'true':'false');
+  c.hidden=!SAVED_OPEN;
+  if(t)t.hidden=!(SAVED_OPEN&&n>0);
+}
 function openNewSaved(){
+  savedOpen();
   openMake(null,null,false,null);
   MK.fixDay=null;MK.fixBank=1;
   MK.shellOpen=true;mkRender();
@@ -12089,8 +12115,8 @@ function mkActions(id,dk){
   // on (the rest day just comes off, Pump Day lives on its own button), so for them the
   // honest label is still the removal. DELETE stays the only destroyer.
   var off=held
-    ?'<div class="btn" onclick="planDropDay(\''+id+'\',\''+held.k+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF '+held.n.toUpperCase())+'</div>'
-    :(onDays.length?'<div class="btn" onclick="mkRestore(\''+id+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF THE WEEK')+'</div>':'');
+    ?'<div class="btn" onclick="savedOpen();planDropDay(\''+id+'\',\''+held.k+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF '+held.n.toUpperCase())+'</div>'
+    :(onDays.length?'<div class="btn" onclick="savedOpen();mkRestore(\''+id+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF THE WEEK')+'</div>':'');
   // Locked this week: the first thing offered is to open just this one again (v5.112).
   var locked=loggedCount(id)===0&&lwOn(loggedThisWeek(),id,dk);
   document.getElementById('mkActBody').innerHTML=
@@ -18494,7 +18520,7 @@ function cardEnd(){
   var d=CDRAG;if(!d)return;CDRAG=null;
   var box=d.slot.parentNode,key=null,bank=false;
   if(box){
-    if(box.id==='extraCards')bank=true;
+    if(box.id==='extraCards'){bank=true;savedOpen();}
     else key=box.getAttribute&&box.getAttribute('data-day');
   }
   // Index is read off the slot's own position, so it is exactly what was on screen.
