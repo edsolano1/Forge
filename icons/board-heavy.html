@@ -1,0 +1,86 @@
+<title>Week Board Heavy Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Marcellus&display=swap">
+<style>
+:root{--bg:#0a0605;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;color-scheme:dark;}
+body{background:var(--bg);color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:64ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:54px;}
+.phone{background:radial-gradient(120% 70% at 50% 92%,rgba(255,110,24,.22),transparent 60%),radial-gradient(60% 40% at 20% 30%,rgba(255,110,24,.08),transparent 70%),var(--bg);border-radius:14px;padding:14px 12px 16px;}
+.lbl{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt2);margin:0 0 10px;}
+.hd{display:flex;justify-content:space-between;align-items:center;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);text-shadow:0 1px 2px rgba(0,0,0,.7);}
+.plus{color:var(--txt3);font-size:15px;line-height:1;font-weight:400;}
+.nm{font-family:Marcellus,serif;font-size:16.5px;letter-spacing:.01em;color:var(--txt);}
+.meta{font-size:11.5px;color:var(--txt2);margin-top:2px;}
+.grip{color:var(--txt3);font-size:14px;}
+.pill{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;border:1px solid rgba(255,138,31,.55);color:var(--gold);border-radius:6px;padding:3px 7px;background:#1a0d06;}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.today .hd{color:var(--go);}
+
+/* E. the slab: one solid bench behind the whole week, plates set into it, slots cut for empty days */
+.e .slab{background:#160d09;border:1px solid #3a2214;border-top-color:#5a3520;border-radius:16px;padding:12px 10px 4px;box-shadow:0 1px 0 rgba(255,215,170,.06) inset,0 18px 40px -18px rgba(0,0,0,.9),0 0 0 1px #0a0605;}
+.e .day{margin-bottom:12px;}
+.e .hd{padding:0 4px 7px;}
+.e .card{position:relative;overflow:hidden;border-radius:10px;padding:11px 12px 11px 17px;background:#241610;border:1px solid #6a3f26;border-top-color:#8a5433;border-bottom-color:#2a170f;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 3px 0 #0d0806,0 6px 14px -6px rgba(0,0,0,.8);}
+.e .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(90deg,#ffc074,#d97b2e 55%,#8a3f10);}
+.e .today .card{border-color:#a0521c;border-top-color:#d27a34;box-shadow:inset 0 1px 0 rgba(255,215,170,.2),0 3px 0 #0d0806,0 0 20px -6px rgba(255,120,30,.45);}
+.e .slot{border-radius:10px;background:#0f0906;box-shadow:inset 0 2px 5px rgba(0,0,0,.8),inset 0 -1px 0 rgba(255,215,170,.05);padding:10px;text-align:center;color:#7a5a44;font-size:15px;line-height:1;}
+
+/* F. iron plates: no slab, heavy opaque plates straight on the ground, machined double edge, the rail kept */
+.f .list{position:relative;padding-left:16px;}
+.f .list::before{content:"";position:absolute;left:3px;top:8px;bottom:8px;width:3px;border-radius:3px;background:linear-gradient(180deg,#7a4a2c,#3a2214 60%,#2a1810);box-shadow:0 0 0 1px #0a0605;}
+.f .day{position:relative;margin-bottom:14px;}
+.f .day::before{content:"";position:absolute;left:-16.5px;top:4px;width:10px;height:10px;border-radius:50%;background:#3a2214;border:2px solid var(--bg);box-shadow:0 0 0 1.5px #6a3f26;}
+.f .today::before{background:var(--gold);box-shadow:0 0 0 1.5px #a0521c,0 0 12px rgba(255,138,31,.8);}
+.f .hd{padding:0 2px 7px;}
+.f .card{position:relative;overflow:hidden;border-radius:9px;padding:12px 12px 12px 18px;background:#1f1310;
+  border:1.5px solid #6a3f26;border-top-color:#8f5836;box-shadow:inset 0 1px 0 rgba(255,215,170,.18),inset 0 -2px 0 rgba(0,0,0,.6),0 0 0 1px #0a0605,0 8px 18px -8px rgba(0,0,0,.95);}
+.f .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(90deg,#ffd08a,#e0842f 50%,#8a3f10);}
+.f .today .card{border-color:#b85d20;border-top-color:#e08a3c;box-shadow:inset 0 1px 0 rgba(255,215,170,.22),inset 0 -2px 0 rgba(0,0,0,.6),0 0 0 1px #0a0605,0 0 22px -6px rgba(255,120,30,.5);}
+.f .slot{border-radius:9px;background:#110a07;border:1.5px solid #2e1a10;box-shadow:inset 0 2px 5px rgba(0,0,0,.85);padding:9px;text-align:center;color:#7a5a44;font-size:15px;line-height:1;}
+
+/* G. blackened steel: darkest plates, hot rail, day name stamped as a tab on the plate's shoulder */
+.g .day{margin-bottom:14px;position:relative;}
+.g .tab{display:inline-flex;align-items:center;gap:8px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2);background:#1a100b;border:1px solid #4a2c1c;border-bottom:0;border-radius:8px 8px 0 0;padding:6px 10px 5px;margin-left:8px;}
+.g .today .tab{color:#ffd9b5;background:#3a1d0c;border-color:#a0521c;}
+.g .tab i{width:7px;height:7px;border-radius:50%;background:#4a2c1c;display:inline-block;}
+.g .today .tab i{background:var(--gold);box-shadow:0 0 10px rgba(255,138,31,.9);}
+.g .plus{position:absolute;right:8px;top:4px;}
+.g .card{position:relative;overflow:hidden;border-radius:10px;padding:12px 12px 12px 18px;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),inset 0 0 0 1px rgba(0,0,0,.4),0 10px 22px -10px rgba(0,0,0,.95);}
+.g .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);box-shadow:0 0 12px rgba(255,120,30,.5);}
+.g .today .card{border-color:#a0521c;box-shadow:inset 0 1px 0 rgba(255,215,170,.18),0 0 24px -6px rgba(255,120,30,.55),0 10px 22px -10px rgba(0,0,0,.95);}
+.g .slot{border-radius:10px;background:#0e0805;border:1px solid #2a1810;box-shadow:inset 0 2px 6px rgba(0,0,0,.9);padding:9px;text-align:center;color:#6e5443;font-size:15px;line-height:1;}
+.g .nm{font-size:17px;}
+</style>
+<h1>Week board, three heavy directions</h1>
+<p class="lead">Same week. All three are opaque, with no light through the surfaces, no dashes, and heavier type on heavier edges. Pick one, or point at pieces.</p>
+<div class="opts">
+
+<section class="opt e"><h2>E. The slab</h2><p class="why">One solid bench behind the whole week. Plates sit in it with a hard drop shadow, like blocks on a table. Empty days are slots cut into the bench. The glow lives around the slab, never through it.</p>
+<div class="phone"><div class="lbl">Your week</div><div class="slab">
+<div class="day"><div class="hd"><span>Sunday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="hd"><span>Monday · Today</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="hd"><span>Tuesday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day"><div class="hd"><span>Wednesday</span></div><div class="slot">+</div></div>
+</div></div></section>
+
+<section class="opt f"><h2>F. Iron plates</h2><p class="why">The rail and stops stay from the current board, but the plates become heavy: fully opaque, a thicker machined double edge, a wider rail with a hot core. No slab, so the glow stays as atmosphere around solid objects.</p>
+<div class="phone"><div class="lbl">Your week</div><div class="list">
+<div class="day"><div class="hd"><span>Sunday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="hd"><span>Monday · Today</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="hd"><span>Tuesday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day"><div class="hd"><span>Wednesday</span></div><div class="slot">+</div></div>
+</div></div></section>
+
+<section class="opt g"><h2>G. Blackened steel</h2><p class="why">Darkest of the three. The day name is stamped as a tab on the plate's shoulder with its own stop, so label and plate are one object. The rail runs hot with a glow. Today's tab turns to embers.</p>
+<div class="phone"><div class="lbl">Your week</div>
+<div class="day"><div class="tab"><i></i>Sunday</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="tab"><i></i>Monday · Today</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="tab"><i></i>Tuesday</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day"><div class="tab"><i></i>Wednesday</div><div class="slot">+</div></div>
+</div></section>
+
+</div>
