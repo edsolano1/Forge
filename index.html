@@ -372,6 +372,7 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .sv-btn:hover{color:var(--txt);border-color:#33373d;}
 .sv-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;}
 .sv-forge{color:var(--go);border-color:color-mix(in srgb,var(--go) 34%,var(--line));}
+#svForgeIco{width:19px;height:19px;fill:currentColor;stroke:none;}
 #extraCards[hidden],#extraHint[hidden]{display:none;}
 .bank-add{display:flex;align-items:center;justify-content:center;padding:9px;margin:2px 0 6px;
   border:1px dashed color-mix(in srgb,var(--go) 34%,var(--line));border-radius:11px;color:var(--go);
@@ -3046,7 +3047,7 @@ body.wcon{overflow:hidden;}
          on the same page so drag and hold keep working. The plus and Forge me a week sit on the line. -->
     <div class="sv-head" id="extraLabel">
       <button class="sv-tog" onclick="savedToggle()" aria-expanded="false"><svg class="sv-chev" viewBox="0 0 20 20"><path d="M6 8l4 4 4-4"/></svg><span class="sec-label" id="extraLabelTxt">Saved workouts</span></button>
-      <span class="sv-acts"><button class="sv-btn sv-forge" onclick="ezOpen('saved')" title="Forge me a week"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 13h9c1.5 0 3 .4 4 1-1 .8-2.6 1.5-4.5 1.5H10c-.7 1.5-1 2.2-1 3H6c0-.8-.3-1.5-1-3H3z"/><path d="M5 11l1.5-2M8 10.5l.5-2.2M11 11l1.2-1.8" stroke-linecap="round"/></svg><span>Forge me a week</span></button><button class="sv-btn" onclick="openNewSaved()" title="New saved workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></span>
+      <span class="sv-acts"><button class="sv-btn sv-forge" onclick="ezOpen('saved')" title="Forge me a week"><svg viewBox="0 0 100 100" id="svForgeIco"></svg><span>Forge me a week</span></button><button class="sv-btn" onclick="openNewSaved()" title="New saved workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></span>
     </div>
     <div class="mk-hint" id="extraHint" hidden>Not part of the week. Open one whenever you want it.</div>
     <div id="extraCards" hidden></div>
@@ -9166,7 +9167,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.143';
+var APPV='v5.144';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11055,6 +11056,7 @@ function renderSides(){
   var open=loggedCount('pump');
   // The walk chip is gone with the walk clock (Option A, Aug 23): cardio lives inside
   // workouts, and a walk is a row on a day - the Cardio piece, or any row you add.
+  el.innerHTML='';return;   // Pump day moved into Saved (v5.144); the bar is retired
   el.innerHTML=
     '<div class="side" id="sidePump" onclick="openPump()">'+
       '<span class="side-i" style="color:var(--gold)">'+pumpIconSvg()+'</span><b>Pump day</b>'+
@@ -11147,10 +11149,17 @@ function renderHome(){
   // there was no way to find out the place existed, so nothing ever went in it. It is a real
   // box now (v4.157), dashed against the week's solid days so it reads as storage, standing
   // whether or not it holds anything - and when it is empty the box itself says what it is for.
-  document.getElementById('extraCards').innerHTML=xs.length?xs.map(xcard).join('')
-    :'<div class="bank-empty">Nothing saved yet. Drag a workout down here, or hold one and choose MOVE TO SAVED WORKOUTS.</div>';
+  // Pump day sits at the head of Saved as a built-in card (v5.144): it is a workout without a day,
+  // which is exactly what Saved holds. The old bar under the board is gone.
+  var po=loggedCount('pump');
+  var pumpCard='<div class="card pumpcard" style="--c:'+dayC('pump')+'" onclick="openPump()"><div class="card-top"><span class="card-name">'+esc(W.pump.name)+'</span>'+
+    '<span class="card-r">'+(po?'<span class="pill pill-live">Resume '+po+'/'+totalSets('pump')+'</span>':'')+'</span></div>'+
+    '<div class="card-meta">'+(po?'Still open. Pick up where you left off':'Bonus, 35 to 45 minutes. Any day')+'</div></div>';
+  var fi=document.getElementById('svForgeIco');if(fi&&!fi.innerHTML)fi.innerHTML=anvilAt(59,'fill="currentColor"');
+  document.getElementById('extraCards').innerHTML=pumpCard+(xs.length?xs.map(xcard).join('')
+    :'<div class="bank-empty">Your own saved workouts sit here too. Drag one down, or hold one and choose MOVE TO SAVED WORKOUTS.</div>');
   document.getElementById('extraLabelTxt').textContent=MKTXT().xl;
-  savedApply(xs.length);
+  savedApply(xs.length+1);
   mkBindCards();
   cardBind();
   syncPumpBtn();
