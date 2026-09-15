@@ -1,0 +1,102 @@
+<title>Week Board Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Marcellus&display=swap">
+<style>
+:root{--bg:#0a0605;--surface:#170e09;--surface2:#241510;--line:#4a2718;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;color-scheme:dark;}
+body{background:var(--bg);color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:64ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:54px;}
+.phone{background:radial-gradient(120% 70% at 50% 92%,rgba(255,110,24,.16),transparent 60%),var(--bg);border-radius:14px;padding:14px 12px 16px;}
+.lbl{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt2);margin:0 0 10px;}
+.hd{display:flex;justify-content:space-between;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
+.hd b{font-weight:400;color:var(--txt3);}
+.plus{color:var(--txt3);font-size:14px;line-height:1;}
+.nm{font-family:Marcellus,serif;font-size:16px;letter-spacing:.01em;color:var(--txt);}
+.meta{font-size:11px;color:var(--txt3);margin-top:2px;}
+.grip{color:var(--txt3);font-size:14px;}
+.pill{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;border:1px solid rgba(255,138,31,.45);color:var(--gold);border-radius:6px;padding:3px 7px;}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+
+/* A. current (v5.136) */
+.a .day{border:1px solid color-mix(in srgb,var(--line) 78%,#8a5a3a);border-radius:14px;padding:7px 8px 1px;margin-bottom:7px;background:color-mix(in srgb,var(--surface) 82%,var(--bg));}
+.a .day .hd{padding:1px 3px 6px;}
+.a .card{border:1px solid color-mix(in srgb,var(--line) 62%,#9a6a48);border-radius:13px;background:linear-gradient(180deg,rgba(255,150,70,.08),rgba(255,150,70,.015)),var(--surface2);box-shadow:inset 0 1px 0 rgba(255,205,160,.09),0 5px 14px -8px rgba(0,0,0,.7);padding:9px 12px;margin-bottom:6px;}
+.a .day.today{border-color:color-mix(in srgb,#ff8a1f 42%,var(--line));box-shadow:0 0 0 3px rgba(255,138,31,.08);}
+.a .day.today .hd{color:var(--go);}
+.a .day.empty{background:transparent;border-style:dashed;padding-bottom:7px;}
+.a .add{border:1px dashed color-mix(in srgb,var(--go) 34%,var(--line));border-radius:10px;padding:8px;text-align:center;color:color-mix(in srgb,var(--go) 70%,var(--txt3));}
+
+/* B. forged plates: recessed tray, bevelled plate, ember rail */
+.b .day{border-radius:14px;padding:8px 8px 2px;margin-bottom:8px;background:#0d0806;box-shadow:inset 0 2px 6px rgba(0,0,0,.65),inset 0 -1px 0 rgba(255,180,120,.06);border:1px solid #2e1a10;}
+.b .day .hd{padding:0 3px 7px;}
+.b .card{position:relative;overflow:hidden;border-radius:11px;padding:10px 12px 10px 16px;margin-bottom:6px;background:linear-gradient(180deg,#2c1a12,#1d110b);border:1px solid #5a3520;border-top-color:#7a4c30;box-shadow:inset 0 1px 0 rgba(255,215,170,.14),inset 0 -1px 0 rgba(0,0,0,.5),0 6px 16px -8px rgba(0,0,0,.8);}
+.b .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#ffb35c,#d97b2e 60%,#7a3a12);}
+.b .day.today{border-color:#a0521c;box-shadow:inset 0 2px 6px rgba(0,0,0,.65),0 0 18px -4px rgba(255,120,30,.35);}
+.b .day.today .hd{color:var(--go);}
+.b .day.empty{background:transparent;box-shadow:none;border:1px dashed #3a2214;padding-bottom:8px;}
+.b .add{border:1px dashed color-mix(in srgb,var(--go) 30%,var(--line));border-radius:9px;padding:8px;text-align:center;color:color-mix(in srgb,var(--go) 70%,var(--txt3));}
+
+/* C. the rail: no trays, one ember spine down the left, days as stops on it */
+.c .list{position:relative;padding-left:14px;}
+.c .list::before{content:"";position:absolute;left:3px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,#5a3520,#3a2214);border-radius:2px;}
+.c .day{position:relative;margin-bottom:12px;}
+.c .day::before{content:"";position:absolute;left:-14.5px;top:5px;width:9px;height:9px;border-radius:50%;background:#3a2214;border:2px solid var(--bg);box-shadow:0 0 0 1px #5a3520;}
+.c .day.today::before{background:var(--gold);box-shadow:0 0 0 1px #a0521c,0 0 12px rgba(255,138,31,.7);}
+.c .day .hd{padding:0 2px 6px;}
+.c .day.today .hd{color:var(--go);}
+.c .card{border-radius:12px;padding:10px 12px;margin-bottom:6px;background:linear-gradient(180deg,#261610,#1a0f0a);border:1px solid #5a3520;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 8px 20px -10px rgba(0,0,0,.85);}
+.c .day.empty .add{border:1px dashed #3a2214;border-radius:10px;padding:7px;text-align:center;color:var(--txt3);}
+.c .day.empty .hd{color:#6e5443;}
+
+/* D. the ledger: day label in a left column, card to the right, today's row lit */
+.d .day{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:stretch;margin-bottom:8px;}
+.d .tab{border-radius:10px;background:#120b07;border:1px solid #2e1a10;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;color:var(--txt3);padding:6px 0;}
+.d .tab small{font-size:9px;letter-spacing:.08em;margin-top:3px;color:#6e5443;}
+.d .day.today .tab{background:linear-gradient(180deg,#3a1d0c,#25120a);border-color:#a0521c;color:var(--gold);}
+.d .day.today .tab small{color:var(--go);}
+.d .card{border-radius:12px;padding:10px 12px;background:linear-gradient(180deg,#281711,#1b100a);border:1px solid #5a3520;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 6px 16px -9px rgba(0,0,0,.8);display:flex;align-items:center;}
+.d .card>div{flex:1;}
+.d .day.today .card{border-color:#a0521c;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 0 16px -4px rgba(255,120,30,.3);}
+.d .day.empty .card{background:transparent;border:1px dashed #3a2214;box-shadow:none;justify-content:center;color:var(--txt3);padding:9px;}
+.d .day.empty .tab{background:transparent;border-style:dashed;}
+</style>
+<h1>Week board, four directions</h1>
+<p class="lead">Same week, same words, same ember. A is what is live now. B, C and D each push the separation a different way while keeping the forge. Pick one, or point at pieces of two.</p>
+<div class="opts">
+
+<section class="opt a"><h2>A. Now (v5.136)</h2><p class="why">Three flat levels. Panel, then card a step lighter with a lit edge. Quiet, but the boxes still nest inside boxes.</p>
+<div class="phone"><div class="lbl">Your week</div>
+<div class="day"><div class="hd"><span>Sunday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="hd"><span>Monday · Today</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="hd"><span>Tuesday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day empty"><div class="hd"><span>Wednesday</span></div><div class="add">+</div></div>
+</div></section>
+
+<section class="opt b"><h2>B. Forged plates</h2><p class="why">The day is a recessed tray cut into the bench. The card is a bevelled plate lying in it, with the ember rail back on its left edge. Most tactile of the four.</p>
+<div class="phone"><div class="lbl">Your week</div>
+<div class="day"><div class="hd"><span>Sunday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="hd"><span>Monday · Today</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="hd"><span>Tuesday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day empty"><div class="hd"><span>Wednesday</span></div><div class="add">+</div></div>
+</div></section>
+
+<section class="opt c"><h2>C. The rail</h2><p class="why">No trays at all. One ember spine runs down the left and each day is a stop on it, today's stop lit. Cards float on the ground with a real shadow. Least ink, most air.</p>
+<div class="phone"><div class="lbl">Your week</div><div class="list">
+<div class="day"><div class="hd"><span>Sunday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="hd"><span>Monday · Today</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="hd"><span>Tuesday</span><span class="plus">+</span></div><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day empty"><div class="hd"><span>Wednesday</span></div><div class="add">+</div></div>
+</div></div></section>
+
+<section class="opt d"><h2>D. The ledger</h2><p class="why">The day name moves into a small tab on the left, the card takes the rest of the width. Today's tab and card both light. Reads like a schedule, and the workout name gets more room.</p>
+<div class="phone"><div class="lbl">Your week</div>
+<div class="day"><div class="tab">SUN</div><div class="card"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div>
+<div class="day today"><div class="tab">MON<small>Today</small></div><div class="card"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div>
+<div class="day"><div class="tab">TUE</div><div class="card"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div>
+<div class="day empty"><div class="tab">WED</div><div class="card">+</div></div>
+</div></section>
+
+</div>
