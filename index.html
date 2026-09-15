@@ -9167,7 +9167,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.144';
+var APPV='v5.145';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10413,7 +10413,7 @@ function dayBox(d,nx,n0){
   // board shows the other week's dates.
   var dnum=new Date(weekStartTs()+((twoOn()&&twoOff())?7:0)*864e5+d.js*864e5).getDate();
   h+='<div class="dayhead"><span title="'+d.n+(isToday?', today':'')+'"><b class="dh-n">'+d.n.slice(0,3).toUpperCase()+'</b><b class="dh-d">'+dnum+'</b></span>'+
-     (ids.length&&ids.length<DAY_MAX?'<span class="dayhead-add" onclick="openNewDay(\''+d.k+'\')" title="Add another workout to '+d.n+'">'+PLUS+'</span>':'')+
+     (false&&ids.length&&ids.length<DAY_MAX?'<span class="dayhead-add" onclick="openNewDay(\''+d.k+'\')" title="Add another workout to '+d.n+'">'+PLUS+'</span>':'')+
      '</div>';
   // "Drag a workout here" is only an instruction if you HAVE a workout to drag. On a week that
   // started empty there is nothing on the rack and nothing on the other days, so every day read
@@ -12232,6 +12232,8 @@ function mkActions(id,dk){
     (locked?'<div class="btn btn-go" onclick="unsealOne(\''+id+'\')">UNLOCK THIS ONE</div>':'')+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
+    // Adding a second workout to this day moved here from the day column (v5.145).
+    (held&&held.k!=='rest'&&(DB.days[held.k]||[]).length<DAY_MAX?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openNewDay(\''+held.k+'\')">ADD ANOTHER WORKOUT TO '+held.n.toUpperCase()+'</div>':'')+
     off+
     (mine?'<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDelete(\''+id+'\')">DELETE THIS WORKOUT</div>':'');
   openHeld('mkActOvl');
