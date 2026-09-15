@@ -1,0 +1,89 @@
+<title>Forge Ground Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Marcellus&display=swap">
+<style>
+:root{--bg:#0a0605;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:64ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:72px;}
+.phone{position:relative;overflow:hidden;border-radius:18px;padding:16px 12px 26px;min-height:520px;isolation:isolate;}
+.phone>*{position:relative;z-index:2;}
+.lbl{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt2);margin:0 0 10px;}
+.wm{font-family:Marcellus,serif;font-size:20px;letter-spacing:.15em;text-transform:uppercase;color:var(--txt);margin:0 0 2px;}
+.wm small{display:block;font:11px "Bricolage Grotesque",sans-serif;letter-spacing:.02em;color:var(--txt3);text-transform:none;margin:2px 0 18px;}
+/* the G board, shared */
+.day{margin-bottom:14px;position:relative;}
+.tab{display:inline-flex;align-items:center;gap:8px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2);background:#1a100b;border:1px solid #4a2c1c;border-bottom:0;border-radius:8px 8px 0 0;padding:6px 10px 5px;margin-left:8px;}
+.today .tab{color:#ffd9b5;background:#3a1d0c;border-color:#a0521c;}
+.tab i{width:7px;height:7px;border-radius:50%;background:#4a2c1c;display:inline-block;}
+.today .tab i{background:var(--gold);box-shadow:0 0 10px rgba(255,138,31,.9);}
+.plus{position:absolute;right:8px;top:4px;color:var(--txt3);font-size:15px;line-height:1;}
+.card{position:relative;overflow:hidden;border-radius:10px;padding:12px 12px 12px 18px;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),inset 0 0 0 1px rgba(0,0,0,.4),0 10px 22px -10px rgba(0,0,0,.95);}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);box-shadow:0 0 12px rgba(255,120,30,.5);}
+.today .card{border-color:#a0521c;box-shadow:inset 0 1px 0 rgba(255,215,170,.18),0 0 24px -6px rgba(255,120,30,.55),0 10px 22px -10px rgba(0,0,0,.95);}
+.slot{border-radius:10px;background:#0e0805;border:1px solid #2a1810;box-shadow:inset 0 2px 6px rgba(0,0,0,.9);padding:9px;text-align:center;color:#6e5443;font-size:15px;line-height:1;}
+.nm{font-family:Marcellus,serif;font-size:17px;color:var(--txt);}
+.meta{font-size:11.5px;color:var(--txt2);margin-top:2px;}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.grip{color:var(--txt3);font-size:14px;}
+.pill{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;border:1px solid rgba(255,138,31,.55);color:var(--gold);border-radius:6px;padding:3px 7px;background:#1a0d06;}
+.grain{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.5;mix-blend-mode:overlay;}
+
+/* H. the hearth: near black, one hearth low behind the board, light rising */
+.h .phone{background:
+  radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.55),rgba(190,60,10,.22) 40%,transparent 70%),
+  radial-gradient(140% 80% at 50% 120%,rgba(255,90,20,.14),transparent 60%),
+  linear-gradient(180deg,#06 0,#0b0705 100%),#080504;}
+.h .ember{position:absolute;bottom:0;left:0;right:0;height:60%;z-index:1;pointer-events:none;
+  background:radial-gradient(2px 2px at 20% 80%,rgba(255,170,80,.9),transparent 60%),radial-gradient(2px 2px at 65% 70%,rgba(255,150,60,.8),transparent 60%),radial-gradient(1.5px 1.5px at 40% 55%,rgba(255,140,50,.7),transparent 60%),radial-gradient(2px 2px at 80% 88%,rgba(255,170,80,.9),transparent 60%),radial-gradient(1.5px 1.5px at 30% 40%,rgba(255,120,40,.5),transparent 60%);}
+
+/* I. soot and stone: textured near black, almost no glow, a cold edge of light along the top */
+.i .phone{background:
+  linear-gradient(180deg,rgba(255,200,150,.05),transparent 22%),
+  radial-gradient(80% 40% at 50% 112%,rgba(255,110,30,.18),transparent 70%),
+  #090605;}
+
+/* J. hammered iron: iron grain with a brushed diagonal, the hearth off to one side, a faint anvil */
+.j .phone{background:
+  radial-gradient(70% 50% at 8% 100%,rgba(255,120,30,.5),rgba(190,60,10,.18) 45%,transparent 72%),
+  repeating-linear-gradient(115deg,rgba(255,255,255,.018) 0 2px,transparent 2px 7px),
+  linear-gradient(180deg,#0c0806,#0a0605 60%,#0d0806),#0b0705;}
+.j .anvil{position:absolute;right:-8%;top:34%;width:66%;z-index:1;opacity:.07;pointer-events:none;}
+</style>
+<svg width="0" height="0" style="position:absolute"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.85 0 0 0 0 0.62 0 0 0 0 0.42 0 0 0 .55 0"/></filter></svg>
+<h1>The ground, three directions</h1>
+<p class="lead">The same blackened steel board on three different grounds. Each keeps the ember palette; they differ in where the light comes from and what the ground is made of.</p>
+<div class="opts">
+
+<section class="opt h"><h2>H. The hearth</h2><p class="why">Near black. One hearth sits low behind the board and its light rises, catching the bottom edges of the plates. A few embers drift up near it and nowhere else. The plates read as lit from below, the way iron does at a forge.</p>
+<div class="phone"><div class="ember"></div>
+<div class="wm">Forge<small>Heat · strike · repeat</small></div><div class="lbl">Your week</div>
+<div class="day"><div class="tab"><i></i>Sunday</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="tab"><i></i>Monday · Today</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="tab"><i></i>Tuesday</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day"><div class="tab"><i></i>Wednesday</div><div class="slot">+</div></div>
+</div></section>
+
+<section class="opt i"><h2>I. Soot and stone</h2><p class="why">The quietest. A near black ground with a fine grain, like soot on stone, a cold edge of light along the top and only a trace of hearth at the foot. The plates and the ember rails do all the talking. Heaviest by contrast, calmest by mood.</p>
+<div class="phone"><svg class="grain" width="100%" height="100%"><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+<div class="wm">Forge<small>Heat · strike · repeat</small></div><div class="lbl">Your week</div>
+<div class="day"><div class="tab"><i></i>Sunday</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="tab"><i></i>Monday · Today</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="tab"><i></i>Tuesday</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day"><div class="tab"><i></i>Wednesday</div><div class="slot">+</div></div>
+</div></section>
+
+<section class="opt j"><h2>J. Hammered iron</h2><p class="why">The ground is iron itself: a brushed diagonal grain over near black, the hearth off to the lower left so light falls across the board at an angle, and a faint anvil standing in the dark behind the plates. The most workshop of the three.</p>
+<div class="phone"><svg class="grain" width="100%" height="100%"><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+<svg class="anvil" viewBox="0 0 100 60" fill="#f3d9a6"><path d="M4 14h44c8 0 16 2 22 6-6 4-14 8-24 8h-4c-4 8-6 12-6 16 4 4 8 8 14 10v6H24v-6c6-2 10-6 14-10 0-4-2-8-6-16H4z"/></svg>
+<div class="wm">Forge<small>Heat · strike · repeat</small></div><div class="lbl">Your week</div>
+<div class="day"><div class="tab"><i></i>Sunday</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="tab"><i></i>Monday · Today</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="tab"><i></i>Tuesday</div><span class="plus">+</span><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day"><div class="tab"><i></i>Wednesday</div><div class="slot">+</div></div>
+</div></section>
+
+</div>
