@@ -1,0 +1,89 @@
+<title>Level Up Raise Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--surface:#170e09;--line:#4a2718;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:64ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:90px;}
+.phone{border-radius:18px;padding:18px 12px 20px;background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.35),transparent 70%),#070403;}
+.sheet{border-radius:16px;background:linear-gradient(180deg,rgba(255,150,70,.06),rgba(255,150,70,.012)),#170e09;border:1px solid #4a2718;border-top-color:#6a3f26;padding:18px 14px 16px;box-shadow:0 20px 40px -20px rgba(0,0,0,.9);}
+.hd{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.hd svg{width:34px;height:34px;fill:var(--gold);flex-shrink:0;}
+h3{font-family:"Bricolage Grotesque",sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0;line-height:1.15;}
+.sub{color:var(--txt2);font-size:12.5px;margin:0 0 14px;}
+.name{font-family:Marcellus,serif;font-size:15.5px;color:var(--txt);}
+.chip{display:inline-flex;align-items:center;font:500 10px "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 7px;}
+.chip.sets{color:var(--txt3);border:1px solid #3a2214;}
+.chip.est{color:#c9a06e;border:1px solid #5a3d24;background:#1d130c;}
+.chip.up{color:#1b0f06;background:var(--gold);font-weight:600;}
+.row{position:relative;overflow:hidden;border-radius:10px;padding:10px 12px 11px 16px;margin-bottom:8px;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12);}
+.row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+.nums{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.from{font:500 16px "IBM Plex Mono",monospace;color:var(--txt3);}
+.from small,.to small{font-size:10px;margin-left:2px;color:var(--txt2);}
+.arrow{color:var(--go);font-size:15px;}
+.to{font:600 21px "IBM Plex Mono",monospace;color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.45);}
+.go{margin-top:14px;border-radius:12px;background:linear-gradient(180deg,#f0942f,#c9651c);color:#1b0f06;text-align:center;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:13px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,235,200,.5),0 8px 20px -8px rgba(255,120,30,.7);}
+.skip{margin-top:12px;text-align:center;font-size:12px;color:var(--txt3);letter-spacing:.04em;}
+/* the raised state, shared: the plate cools to gold-edged iron with a struck mark */
+.row.done{border-color:#a0521c;background:linear-gradient(180deg,#1f130c,#150d09);}
+.row.done::before{background:linear-gradient(180deg,#ffd08a,#ffb35c);box-shadow:0 0 12px rgba(255,160,60,.6);}
+.row.done .from{text-decoration:line-through;opacity:.6;}
+.mark{display:inline-flex;align-items:center;gap:6px;font:600 10.5px "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
+.mark i{width:16px;height:16px;border-radius:50%;background:var(--gold);color:#1b0f06;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-style:normal;box-shadow:0 0 10px rgba(255,138,31,.7);}
+
+/* P. a RAISE button on every plate */
+.p .btn{margin-left:auto;font:800 11px "Bricolage Grotesque",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#1b0f06;background:linear-gradient(180deg,#f0942f,#c9651c);border-radius:9px;padding:9px 12px;box-shadow:inset 0 1px 0 rgba(255,235,200,.5);white-space:nowrap;}
+.p .nums{align-items:center;}
+
+/* Q. the whole plate is the button: press it and it strikes */
+.q .row{cursor:pointer;}
+.q .hint{margin-left:auto;font:500 10px "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
+.q .row:not(.done){border-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 0 0 1px rgba(255,138,31,.12),0 0 18px -6px rgba(255,120,30,.35);}
+
+/* R. the new number is the control: a big pressable pill you tap to lock in */
+.r .pill{margin-left:auto;display:inline-flex;align-items:baseline;gap:4px;font:600 20px "IBM Plex Mono",monospace;color:var(--gold);border:1.5px solid var(--gold);border-radius:10px;padding:5px 11px;box-shadow:0 0 14px -4px rgba(255,138,31,.6),inset 0 0 0 1px rgba(255,138,31,.15);}
+.r .pill small{font-size:10px;letter-spacing:.06em;color:#e0a874;}
+.r .pill.hold{border-style:dashed;color:#e0a874;box-shadow:none;}
+.r .foot{display:flex;gap:10px;align-items:center;margin-top:6px;}
+</style>
+<h1>Raising lifts one at a time, three directions</h1>
+<p class="lead">All three are the ledger layout. In each one the bench has already been raised so you can see the struck state, the incline press is next, and the plank still waits. The bottom button always raises whatever is left; "Not this time" stays quiet.</p>
+<div class="opts">
+
+<section class="opt p"><h2>P. A button per plate</h2><p class="why">The plainest: every plate has its own small RAISE. Tap it and the plate strikes, the old number crosses out, the mark appears. Nothing to learn, and the big button at the foot does the rest.</p>
+<div class="phone"><div class="sheet">
+<div class="hd"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg><h3>3 lifts levelled up</h3></div>
+<p class="sub">You cleared every set. Raise them one by one, or all at once.</p>
+<div class="row done"><div class="top"><span class="name">Bench Press</span><span class="mark"><i>✓</i>Raised</span></div><div class="nums"><span class="from">135<small>lb</small></span><span class="arrow">➜</span><span class="to">140<small>lb × 8</small></span><span class="chip up">+5 lb</span></div></div>
+<div class="row"><div class="top"><span class="name">Incline Dumbbell Press</span><span class="chip est">estimated</span></div><div class="nums"><span class="from">50<small>lb</small></span><span class="arrow">➜</span><span class="to">55<small>lb × 10</small></span><span class="btn">Raise</span></div></div>
+<div class="row"><div class="top"><span class="name">Plank</span><span class="chip sets">2 holds</span></div><div class="nums"><span class="from">40<small>sec</small></span><span class="arrow">➜</span><span class="to">45<small>sec</small></span><span class="btn">Raise</span></div></div>
+<div class="go">Raise the rest</div><div class="skip">Not this time</div>
+</div></div></section>
+
+<section class="opt q"><h2>Q. Press the plate</h2><p class="why">No small buttons. A plate that is waiting glows faintly at its edges and says "tap to raise" in the corner. Press anywhere on it and it strikes. The cleanest sheet, and the most like hitting the thing with a hammer.</p>
+<div class="phone"><div class="sheet">
+<div class="hd"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg><h3>3 lifts levelled up</h3></div>
+<p class="sub">You cleared every set. Press a lift to raise it, or raise them all.</p>
+<div class="row done"><div class="top"><span class="name">Bench Press</span><span class="mark"><i>✓</i>Raised</span></div><div class="nums"><span class="from">135<small>lb</small></span><span class="arrow">➜</span><span class="to">140<small>lb × 8</small></span><span class="chip up">+5 lb</span></div></div>
+<div class="row"><div class="top"><span class="name">Incline Dumbbell Press</span><span class="hint">tap to raise</span></div><div class="nums"><span class="from">50<small>lb</small></span><span class="arrow">➜</span><span class="to">55<small>lb × 10</small></span><span class="chip up">+5 lb</span><span class="chip est">estimated</span></div></div>
+<div class="row"><div class="top"><span class="name">Plank</span><span class="hint">tap to raise</span></div><div class="nums"><span class="from">40<small>sec</small></span><span class="arrow">➜</span><span class="to">45<small>sec</small></span><span class="chip up">+5 sec</span></div></div>
+<div class="go">Raise the rest</div><div class="skip">Not this time</div>
+</div></div></section>
+
+<section class="opt r"><h2>R. The number is the button</h2><p class="why">The new number sits in a big gold pill on the right. Tap it to lock it in; hold it to change it first. The number itself is the reward and the control, so there is nothing else on the plate to look at.</p>
+<div class="phone"><div class="sheet">
+<div class="hd"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg><h3>3 lifts levelled up</h3></div>
+<p class="sub">Tap a new number to lock it in. Hold it to change it first.</p>
+<div class="row done"><div class="top"><span class="name">Bench Press</span><span class="mark"><i>✓</i>Raised</span></div><div class="foot"><span class="from">135 lb</span><span class="arrow">➜</span><span class="to">140<small> lb × 8</small></span><span class="chip up">+5 lb</span></div></div>
+<div class="row"><div class="top"><span class="name">Incline Dumbbell Press</span><span class="pill hold">55<small>lb</small></span></div><div class="foot"><span class="from">50 lb × 10</span><span class="chip up">+5 lb</span><span class="chip est">estimated</span></div></div>
+<div class="row"><div class="top"><span class="name">Plank</span><span class="pill">45<small>sec</small></span></div><div class="foot"><span class="from">40 sec, 2 holds</span><span class="chip up">+5 sec</span></div></div>
+<div class="go">Raise the rest</div><div class="skip">Not this time</div>
+</div></div></section>
+
+</div>
