@@ -2318,6 +2318,57 @@ body.forge .daybox.quenched .dayhead{background:#171716;border-color:#343433;}
 body.forge .daybox.quenched .dayhead > span:first-child{background:transparent;border:0;color:#84827f;}
 body.forge .daybox.quenched .dh-d{color:#84827f;}
 
+/* ---- The level-up sheet, v5.147: the ledger of gains (owner picked M, then P for the per-lift RAISE). ---- */
+.lvl-hd{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.lvl-mark{width:34px;height:34px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,138,31,.45));}
+.lvl-hd h3{margin:0;font-size:19px;line-height:1.15;}
+#lvlOvl .sheet > p{color:var(--txt2);font-size:12.5px;margin:0 0 12px;}
+.lvl-list{gap:8px;max-height:calc(var(--usablevh) * .52);}
+.lvl-row{position:relative;overflow:hidden;border-radius:10px;padding:10px 12px 11px 16px;margin:0;
+  background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12);
+  animation:lvlIn .4s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*60ms);}
+@keyframes lvlIn{from{opacity:.3;transform:translateY(8px);}to{opacity:1;transform:none;}}   /* never from 0: a paused clock must not hide a plate */
+.lvl-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.lvl-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+.lvl-n{font-family:'Marcellus',serif;font-size:15.5px;font-weight:400;color:var(--txt);margin:0;}
+.lvl-tags{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.lvl-chip{display:inline-flex;align-items:center;font:500 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 7px;white-space:nowrap;}
+.lvl-chip.sets{color:var(--txt3);border:1px solid #3a2214;}
+.lvl-chip.est{color:#c9a06e;border:1px solid #5a3d24;background:#1d130c;}
+.lvl-chip.up{color:#1b0f06;background:var(--gold);font-weight:600;}
+.lvl-d{display:flex;flex-wrap:wrap;align-items:center;gap:8px 9px;font-size:13px;color:var(--txt3);white-space:nowrap;}
+.lvl-g{position:relative;display:inline-flex;align-items:baseline;gap:8px;}
+.lvl-gn{font:500 11px var(--mono);color:var(--txt3);font-style:normal;}
+.lvl-from{font:500 16px var(--mono);color:var(--txt3);}
+.lvl-from b,.lvl-to b{font-weight:inherit;color:inherit;}
+.lvl-from small,.lvl-to small{font-size:10px;margin-left:2px;color:var(--txt2);letter-spacing:.03em;}
+.lvl-arrow{color:var(--go);font-style:normal;font-size:14px;align-self:center;}
+.lvl-to{font:600 21px var(--mono);color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.45);border-radius:7px;padding:0 3px;}
+.lvl-to.up{cursor:pointer;}
+.lvl-to.up:hover{background:rgba(255,138,31,.12);}
+.lvl-raise{margin-left:auto;font:800 11px 'Bricolage Grotesque',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#1b0f06;
+  background:linear-gradient(180deg,#f0942f,#c9651c);border:0;border-radius:9px;padding:9px 12px;cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,235,200,.5),0 4px 12px -6px rgba(255,120,30,.7);}
+.lvl-raise:active{transform:scale(.97);}
+.lvl-row.done{border-color:#a0521c;background:linear-gradient(180deg,#1f130c,#150d09);}
+.lvl-row.done::before{background:linear-gradient(180deg,#ffd08a,#ffb35c);box-shadow:0 0 12px rgba(255,160,60,.6);}
+.lvl-row.done .lvl-from{text-decoration:line-through;opacity:.6;}
+.lvl-mark-done{display:inline-flex;align-items:center;gap:6px;font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
+.lvl-mark-done i{width:16px;height:16px;border-radius:50%;background:var(--gold);color:#1b0f06;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-style:normal;box-shadow:0 0 10px rgba(255,138,31,.7);}
+.lvl-foot{margin-top:14px;}
+.lvl-go{width:100%;box-sizing:border-box;padding:14px;font-weight:800;letter-spacing:.14em;
+  background:linear-gradient(180deg,#f0942f,#c9651c);color:#1b0f06;border-color:transparent;
+  box-shadow:inset 0 1px 0 rgba(255,235,200,.5),0 8px 20px -8px rgba(255,120,30,.7);}
+.lvl-skip{margin-top:12px;text-align:center;font-size:12px;color:var(--txt3);letter-spacing:.04em;cursor:pointer;padding:6px;}
+.lvl-skip:hover{color:var(--txt2);}
+#lvlOvl.busy .lvl-foot,#lvlOvl.busy .lvl-raise{pointer-events:none;opacity:.5;}
+/* the strike, re-pointed at the new pieces */
+.lvl-row.xfer .lvl-from{animation:drain .5s ease-in forwards;animation-delay:var(--sd);}
+.lvl-row.xfer .lvl-to{animation:charge .62s cubic-bezier(.3,1.5,.4,1) forwards;animation-delay:calc(var(--sd) + .26s);display:inline-block;}
+.lvl-row.xfer .lvl-raise{opacity:0;transition:opacity .3s;}
+html.mo-off .lvl-row{animation:none;}
+@media (prefers-reduced-motion:reduce){.lvl-row{animation:none;}}
+
 .pill-done{background:transparent;border:1px solid color-mix(in srgb,var(--gold) 42%,transparent);color:var(--gold);
   display:inline-flex;align-items:center;gap:4px;}
 .pill-done svg{width:10px;height:10px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;}
@@ -3327,15 +3378,14 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="lvlOvl">
   <div class="sheet" style="max-width:440px">
-    <h3 id="lvlTitle">Level up</h3>
+    <!-- The ledger of gains (v5.147): the mark, the count, then a plate per lift with its own
+         RAISE. The foot raises whatever is left. CANCEL is gone; back and tapping outside do that. -->
+    <div class="lvl-hd"><svg class="lvl-mark" id="lvlMark" viewBox="0 0 100 100"></svg><h3 id="lvlTitle">Level up</h3></div>
     <p id="lvlSub"></p>
     <div id="lvlList" class="lvl-list"></div>
-    <div class="sheet-btns" id="lvlSkipRow">
-      <div class="btn" onclick="skipLevel()">DON'T RAISE TARGETS</div>
-    </div>
-    <div class="sheet-btns">
-      <div class="btn" onclick="lvlAbort();closeOvl('lvlOvl')">CANCEL</div>
-      <div class="btn btn-go" id="lvlGo" onclick="applyLevel()">RAISE TARGETS</div>
+    <div class="lvl-foot">
+      <div class="btn btn-go lvl-go" id="lvlGo" onclick="applyLevel()">RAISE ALL</div>
+      <div class="lvl-skip" id="lvlSkipRow" onclick="skipLevel()">Not this time</div>
     </div>
   </div>
 </div>
@@ -9167,7 +9217,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.146';
+var APPV='v5.147';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9885,13 +9935,16 @@ function openLevel(wk){
   LVLWK=wk;LVLED=null;
   LVLPLAN=levelPlan(wk);
   var plan=LVLPLAN,W1=W[wk];
-  document.getElementById('lvlTitle').textContent='Level up \u00b7 '+(W1?W1.name:'');
+  plan.forEach(function(p){p.done=false;});
+  var mk=document.getElementById('lvlMark');if(mk&&!mk.innerHTML)mk.innerHTML=anvilAt(59,'fill="var(--gold)"');
+  document.getElementById('lvlTitle').textContent=plan.length?(plan.length===1?'1 lift levelled up':plan.length+' lifts levelled up'):'Nothing to raise yet';
   var go=document.getElementById('lvlGo');
   document.getElementById('lvlSub').textContent=plan.length?
-    'These lifts met every target last session. Press a new weight to change it, confirm to set the targets.':
-    'Nothing to raise here yet.';
+    'You cleared every set'+(W1?' of '+W1.name.replace('Optional: ',''):'')+'. Raise them one by one, or all at once. Tap a new number to change it first.':
+    'Meet every target in a session and the lifts that earned a raise show up here.';
   go.style.display=plan.length?'':'none';
   document.getElementById('lvlSkipRow').style.display=plan.length?'':'none';
+  lvlFoot();
   lvlRender();
   document.getElementById('lvlOvl').classList.add('on');
 }
@@ -9906,28 +9959,57 @@ function lvlGroups(p){
   });
   return g;
 }
+// One plate per lift. Each group of identical sets is one line: the old number quiet, the new one
+// big and gold and tappable, the jump as an ember chip. A raised plate keeps its numbers and wears
+// the mark instead of the button.
+function lvlDelta(f,t){
+  var k=lvlKind(t),a=parseTarget(f),b=parseTarget(t);
+  if(k==='r'){var dr=(b.r||0)-(a.r||0);return dr?((dr>0?'+':'')+dr+' reps'):'';}
+  if(k==='s'){var ds=(b.r||0)-(a.r||0);return ds?((ds>0?'+':'')+ds+' sec'):'';}
+  var dw=dspW(b.w||0)-dspW(a.w||0);dw=Math.round(dw*100)/100;
+  return dw?((dw>0?'+':'')+dw+' '+wUnitName()):'';
+}
+function lvlNum(t,full){
+  var k=lvlKind(t),p=parseTarget(t);
+  if(k==='r')return '<b>'+(p.r||0)+'</b><small>reps</small>';
+  if(k==='s')return '<b>'+(p.r||0)+'</b><small>sec</small>';
+  return '<b>'+fmtW(p.w||0)+'</b><small>'+wUnitName()+(full?' \u00d7 '+(p.r||0):'')+'</small>';
+}
 function lvlRender(){
   var plan=LVLPLAN||[];
   document.getElementById('lvlList').innerHTML=plan.map(function(p,pi){
-    return '<div class="lvl-row"><div class="lvl-n">'+esc(p.name)+'</div><div class="lvl-d">'+
-      lvlGroups(p).map(function(x,gi){
-        if(LVLED&&LVLED.pi===pi&&LVLED.gi===gi){
-          var kind=lvlKind(x.t),t0=parseTarget(x.t);
-          var v0=kind==='w'?fmtW(t0.w):t0.r;
-          var em=kind==='w'?wUnitName():kind==='r'?'reps':'sec';
-          return '<span class="mk-sr open"><input class="mk-num sm" type="number" inputmode="decimal" step="'+(kind==='w'?'0.5':'1')+'" value="'+v0+'" oninput="lvlEditVal(this.value)"><em>'+em+'</em>'+
-                 '<button class="mk-rest-ok" onclick="lvlEditOK()">OK</button></span>';
-        }
-        return '<span>'+(x.n>1?x.n+'&times; ':'')+'<b>'+lvlFmt(x.f)+'</b> &rarr; '+
-          '<b class="up'+(p.est?' est':'')+'" onclick="lvlEdit('+pi+','+gi+')" title="Level up to a different weight">'+(p.est?'~':'')+lvlFmt(x.t)+
-          '<svg viewBox="0 0 20 20"><path d="M4 16l.9-3.6L13.5 3.8l2.7 2.7-8.6 8.6L4 16z"/></svg></b><i class="lvl-spark"></i></span>';
-      }).join('')+'</div></div>';
-  }).join('')+
-  // Only when something on the sheet is a guess. An app-wide hedge would read as the app
-  // doubting everything; scoped to the lifts that have not shown their machine yet, it is
-  // simply honest about which numbers are calibration and which are knowledge.
-  (plan.some(function(p){return p.est;})?
-    '<div class="footnote" style="margin-top:10px">~ is an estimated jump: this lift has not shown the app its machine\u2019s steps yet. If your equipment\u2019s next weight is different, tap the number and set it. Stacks are learned from what you log.</div>':'');
+    var gs=lvlGroups(p),sets=p.from.length,kind=lvlKind(p.to[0]||'');
+    var setsChip='<span class="lvl-chip sets">'+sets+(kind==='s'?(sets===1?' hold':' holds'):(sets===1?' set':' sets'))+'</span>';
+    var tags=(p.est?'<span class="lvl-chip est" title="The app has not seen this lift\u2019s machine steps yet, so the jump is plate math. Tap the number if yours is different.">estimated</span>':'')+
+             (p.done?'<span class="lvl-mark-done"><i>\u2713</i>Raised</span>':setsChip);
+    var lines=gs.map(function(x,gi){
+      if(LVLED&&LVLED.pi===pi&&LVLED.gi===gi){
+        var k=lvlKind(x.t),t0=parseTarget(x.t);
+        var v0=k==='w'?fmtW(t0.w):t0.r;
+        var em=k==='w'?wUnitName():k==='r'?'reps':'sec';
+        return '<span class="mk-sr open"><input class="mk-num sm" type="number" inputmode="decimal" step="'+(k==='w'?'0.5':'1')+'" value="'+v0+'" oninput="lvlEditVal(this.value)"><em>'+em+'</em>'+
+               '<button class="mk-rest-ok" onclick="lvlEditOK()">OK</button></span>';
+      }
+      return '<span class="lvl-g">'+(gs.length>1?'<em class="lvl-gn">'+x.n+'\u00d7</em>':'')+
+        '<span class="lvl-from">'+lvlNum(x.f,false)+'</span><i class="lvl-arrow">\u279c</i>'+
+        '<span class="lvl-to'+(p.done?'':' up')+'"'+(p.done?'':' onclick="lvlEdit('+pi+','+gi+')" title="Tap to set a different number"')+'>'+lvlNum(x.t,true)+'</span>'+
+        '<i class="lvl-spark"></i></span>';
+    }).join('');
+    var d=lvlDelta(gs[0].f,gs[0].t);
+    return '<div class="lvl-row'+(p.done?' done':'')+'" style="--i:'+pi+'" data-pi="'+pi+'">'+
+      '<div class="lvl-top"><span class="lvl-n">'+esc(p.name)+'</span><span class="lvl-tags">'+tags+'</span></div>'+
+      '<div class="lvl-d">'+lines+(d?'<span class="lvl-chip up">'+d+'</span>':'')+
+        (p.done?'':'<button class="lvl-raise" onclick="raiseOne('+pi+')">Raise</button>')+'</div></div>';
+  }).join('');
+  lvlFoot();
+}
+// The foot button says what is left to do.
+function lvlFoot(){
+  var plan=LVLPLAN||[],go=document.getElementById('lvlGo'),sk=document.getElementById('lvlSkipRow');
+  if(!go)return;
+  var left=plan.filter(function(p){return !p.done;}).length;
+  go.textContent=left===0?'DONE':(left===plan.length?'RAISE ALL':'RAISE THE REST');
+  if(sk)sk.style.display=(plan.length&&left)?'':'none';
 }
 function lvlEdit(pi,gi){
   if(LVLBUSY)return;
@@ -9957,24 +10039,45 @@ function lvlEditOK(){
   LVLED=null;lvlRender();
 }
 var LVLBUSY=false,LVLT=null;
-function applyLevel(){
-  if(LVLBUSY)return;                       // a second tap mid-animation must not double-write
-  if(LVLED)lvlEditOK();                    // a number still sitting in its input counts as said
-  var plan=LVLPLAN||levelPlan(LVLWK);      // the cached plan - it may carry hand-corrected offers
-  if(!plan.length){closeOvl('lvlOvl');return;}
+// The write, shared by RAISE on a plate and by the foot button. Lands in THIS workout's own rows,
+// one day's copy, nobody else's; a lift with no row to carry it falls back to the global table.
+function lvlWrite(items){
+  DB.up=DB.up||{};DB.upSkip=DB.upSkip||{};
+  items.forEach(function(p){
+    var wrote=false,cw=DB.custom[LVLWK];
+    if(cw)(cw.sections||[]).forEach(function(sec){
+      (sec.rows||[]).forEach(function(row,ri){
+        var base=typeof row==='string'?row:row[0];
+        if(p.swapped||base!==(p.baseId||p.id))return;
+        var rs=(typeof row==='string')?base:(((row[1]||{}).slot)||base);
+        if(p.slot&&rs!==p.slot)return;
+        if(typeof row==='string')sec.rows[ri]=[base,{sets:p.to.join('\n')}];
+        else{row[1]=row[1]||{};row[1].sets=p.to.join('\n');}
+        wrote=true;
+      });
+    });
+    if(!wrote)DB.up[p.id]=p.to.join('\n');
+    delete DB.upSkip[p.sk||p.id];
+    p.done=true;
+  });
+  saveDB();
+}
+// Strike the given plates: the old number drains, the spark crosses, the new number charges, then
+// the write lands and the sheet redraws with those plates marked Raised.
+function lvlStrike(items,after){
+  if(LVLBUSY||!items.length)return;
+  if(LVLED)lvlEditOK();
   LVLBUSY=true;
-  var rows=document.querySelectorAll('#lvlList .lvl-row');
   document.getElementById('lvlOvl').classList.add('busy');
-  // The spark runs from the trailing edge of the old figure to the leading edge of the new
-  // one, so it tracks the real text rather than a guessed distance.
-  var last=0;
-  [].forEach.call(rows,function(r,i){
-    var d=i*0.11;
+  var last=0,n=0;
+  items.forEach(function(p){
+    var r=document.querySelector('#lvlList .lvl-row[data-pi="'+LVLPLAN.indexOf(p)+'"]');if(!r)return;
+    var d=n*0.11;n++;
     r.style.setProperty('--sd',d+'s');
-    [].forEach.call(r.querySelectorAll('.lvl-d span'),function(sp){
-      var bs=sp.querySelectorAll('b'),k=sp.querySelector('.lvl-spark');
-      if(!k||bs.length<2)return;
-      var o=sp.getBoundingClientRect(),a=bs[0].getBoundingClientRect(),b=bs[1].getBoundingClientRect();
+    [].forEach.call(r.querySelectorAll('.lvl-d .lvl-g'),function(sp){
+      var a0=sp.querySelector('.lvl-from'),b0=sp.querySelector('.lvl-to'),k=sp.querySelector('.lvl-spark');
+      if(!k||!a0||!b0)return;
+      var o=sp.getBoundingClientRect(),a=a0.getBoundingClientRect(),b=b0.getBoundingClientRect();
       k.style.setProperty('--x0',(a.right-o.left)+'px');
       k.style.setProperty('--x1',(b.left-o.left+b.width*0.5)+'px');
     });
@@ -9982,34 +10085,28 @@ function applyLevel(){
     last=d;
   });
   sfxIgnite();
+  var wait=MOTION==='off'?0:(last+1.05)*1000;
   LVLT=setTimeout(function(){
-    LVLT=null;
-    DB.up=DB.up||{};DB.upSkip=DB.upSkip||{};
-    // The raise lands in THIS workout's own rows - one day's copy, nobody else's. Only a
-    // lift with no row to carry it (swapped in, or standing on a built-in day) falls back
-    // to the global table, which is exactly the scope those two already live at.
-    plan.forEach(function(p){
-      var wrote=false,cw=DB.custom[LVLWK];
-      if(cw)(cw.sections||[]).forEach(function(sec){
-        (sec.rows||[]).forEach(function(row,ri){
-          var base=typeof row==='string'?row:row[0];
-          // THIS row, by base id AND slot. Matching on the lift alone wrote one raise into every
-          // row that named it, so a heavy block and its back-off block both became heavy sets.
-          // A swapped row keeps the global table: its own sets are not what the day reads.
-          if(p.swapped||base!==(p.baseId||p.id))return;
-          var rs=(typeof row==='string')?base:(((row[1]||{}).slot)||base);
-          if(p.slot&&rs!==p.slot)return;
-          if(typeof row==='string')sec.rows[ri]=[base,{sets:p.to.join('\n')}];
-          else{row[1]=row[1]||{};row[1].sets=p.to.join('\n');}
-          wrote=true;
-        });
-      });
-      if(!wrote)DB.up[p.id]=p.to.join('\n');
-      delete DB.upSkip[p.sk||p.id];
-    });
-    saveDB();closeOvl('lvlOvl');renderHome();
-    if(sessionOpen())renderSession();
-  },(last+1.05)*1000);
+    LVLT=null;LVLBUSY=false;
+    document.getElementById('lvlOvl').classList.remove('busy');
+    lvlWrite(items);
+    after();
+  },wait);
+}
+function raiseOne(pi){
+  var p=LVLPLAN&&LVLPLAN[pi];if(!p||p.done)return;
+  lvlStrike([p],function(){
+    lvlRender();renderHome();if(sessionOpen())renderSession();
+  });
+}
+function applyLevel(){
+  if(LVLBUSY)return;
+  var plan=LVLPLAN||levelPlan(LVLWK);
+  var left=plan.filter(function(p){return !p.done;});
+  if(!left.length){closeOvl('lvlOvl');renderHome();if(sessionOpen())renderSession();return;}
+  lvlStrike(left,function(){
+    closeOvl('lvlOvl');renderHome();if(sessionOpen())renderSession();
+  });
 }
 // Any exit from the sheet drops a pending write. Without this the animation's timeout still
 // fires after a cancel and raises the targets anyway.
@@ -10021,9 +10118,9 @@ function lvlAbort(){
 }
 function skipLevel(){
   lvlAbort();
-  var plan=levelPlan(LVLWK);
+  var plan=(LVLPLAN&&LVLPLAN.length)?LVLPLAN:levelPlan(LVLWK);
   DB.upSkip=DB.upSkip||{};
-  plan.forEach(function(p){DB.upSkip[p.sk||p.id]=skipSig(p.id,p.from);});
+  plan.forEach(function(p){if(p.done)return;DB.upSkip[p.sk||p.id]=skipSig(p.id,p.from);});
   saveDB();closeOvl('lvlOvl');renderHome();
   if(sessionOpen())renderSession();
 }
