@@ -3033,7 +3033,7 @@ body.wcon{overflow:hidden;}
     <!-- The quick timer lives in a session, not out here. A rest belongs to a set, and the week
          board is where you choose a day rather than where you time one. The same button is still
          in the session header, which is the only place it had anything to time. -->
-    <div class="iconbtn" onclick="openSettings()" title="Settings" style="margin-left:auto"><svg viewBox="0 0 20 20"><path d="M3 6h5.5M13.5 6H17M3 14h3.5M11.5 14H17"/><circle cx="11" cy="6" r="2.5"/><circle cx="9" cy="14" r="2.5"/></svg></div>
+    <div class="iconbtn" onclick="openSettings()" title="Settings" style="margin-left:auto"><svg viewBox="0 0 20 20"><path d="M10 3.2l1.1 1.9 2.1-.5.6 2.1 2.1.6-.5 2.1 1.9 1.1-1.9 1.1.5 2.1-2.1.6-.6 2.1-2.1-.5L10 16.8l-1.1-1.9-2.1.5-.6-2.1-2.1-.6.5-2.1L2.7 9.5l1.9-1.1-.5-2.1 2.1-.6.6-2.1 2.1.5z"/><circle cx="10" cy="10" r="2.6"/></svg></div>
   </div>
   <div class="storenote" id="storeNote"></div>
 
@@ -3063,7 +3063,7 @@ body.wcon{overflow:hidden;}
       <div class="s-sub" id="sSub"></div>
     </div>
     <div class="iconbtn" onclick="openTimerSheet()" title="Quick timer"><svg viewBox="0 0 20 20"><circle cx="10" cy="11" r="6.5"/><path d="M10 8v3.2l2.2 1.6M7 2.5h6"/></svg></div>
-    <div class="iconbtn" onclick="openSettings()" title="Settings"><svg viewBox="0 0 20 20"><path d="M3 6h5.5M13.5 6H17M3 14h3.5M11.5 14H17"/><circle cx="11" cy="6" r="2.5"/><circle cx="9" cy="14" r="2.5"/></svg></div>
+    <div class="iconbtn" onclick="openSettings()" title="Settings"><svg viewBox="0 0 20 20"><path d="M10 3.2l1.1 1.9 2.1-.5.6 2.1 2.1.6-.5 2.1 1.9 1.1-1.9 1.1.5 2.1-2.1.6-.6 2.1-2.1-.5L10 16.8l-1.1-1.9-2.1.5-.6-2.1-2.1-.6.5-2.1L2.7 9.5l1.9-1.1-.5-2.1 2.1-.6.6-2.1 2.1.5z"/><circle cx="10" cy="10" r="2.6"/></svg></div>
     <div class="ring" id="ring">
       <svg width="42" height="42"><circle class="trk" cx="21" cy="21" r="17" fill="none" stroke-width="3.5"/><circle class="bar" id="ringBar" cx="21" cy="21" r="17" fill="none" stroke-width="3.5" stroke-dasharray="106.8" stroke-dashoffset="106.8"/></svg>
       <div class="lbl" id="ringLbl">0/0</div>
@@ -3433,6 +3433,9 @@ body.wcon{overflow:hidden;}
     <div class="presets" style="grid-template-columns:1fr 1fr" id="unitRow"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Distance</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="distRow"></div>
+    <div class="sfx-lbl" style="margin-top:14px"><span>Week</span></div>
+    <div class="presets" style="grid-template-columns:1fr 1fr" id="twoRow"></div>
+    <div class="footnote" style="margin:6px 2px 0">Two weeks take turns by the calendar, and you flip to the other one from the week label.</div>
     </div>
     <!-- Walks flow in from Health Connect, the phone's own health vault - Samsung Health and
          watch apps write into it, Forge reads walks back out. Only shown where the native
@@ -9163,7 +9166,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.142';
+var APPV='v5.143';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11132,10 +11135,10 @@ function renderHome(){
   // program on or off and reads the same either way.
   var wf=document.getElementById('weekFlip');
   if(wf){wf.hidden=!twoOn();if(twoOn())wf.innerHTML='<svg viewBox="0 0 20 20"><path d="M4 8h10l-3-3M16 12H6l3 3"/></svg><span>Flip to week '+(2-DB.two.view)+(twoOff()?', this week':', next week')+'</span>';}
-  var twoCtl='<div class="bank-add two-ctl" onclick="twoToggle()" title="'+(twoOn()?'One week program':'Two week program')+'"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(twoOn()?'<path d="M3 7h14M3 13h9"/>':'<path d="M3 5h14M3 10h14M3 15h9"/>')+'</svg><span>'+(twoOn()?'One week program':'Two week program')+'</span></div>';
+  // The one week / two week switch lives in Settings now (v5.143); it was a row on the board.
   document.getElementById('weekCards').innerHTML=hint+(twoOff()?'':pumpOpen)+DAYS.map(function(d){
     var h=dayBox(d,pnx,n0);n0+=(DB.days[d.k]||[]).length;return h;
-  }).join('')+twoCtl;
+  }).join('');
   // The wide new-workout bar is gone (Aug 22): every day carries its own + and so does
   // Saved workouts, and two pluses stacked at the foot of the page read as a mistake.
   // Multi-day placement lives on in Workout Settings, where the day grid still is.
@@ -15773,6 +15776,13 @@ function distSet(on){
   try{if(document.getElementById('histOvl').classList.contains('on'))renderHist();}catch(e){}
   try{sfxLog();}catch(e){}
 }
+function drawTwoRow(){
+  var e=document.getElementById('twoRow');if(!e)return;
+  var on=twoOn();
+  e.innerHTML='<button class="preset sm'+(on?'':' on')+'" onclick="twoPick(false)">One week</button><button class="preset sm'+(on?' on':'')+'" onclick="twoPick(true)">Two weeks</button>';
+}
+// The switch still asks before it acts (twoToggle); the row just redraws once the answer lands.
+function twoPick(want){if(!!want===twoOn())return;closeOvl('settingsOvl');twoToggle();}
 function drawDistRow(){
   var e=document.getElementById('distRow');if(!e)return;
   e.innerHTML=[['0','Miles'],['1','Kilometres']].map(function(u){
@@ -18191,7 +18201,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();ntDraw();hcDraw();
+  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();ntDraw();hcDraw();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   // The two tour buttons say which LENGTH they are, so the theme's word for "Tutorial" no longer
