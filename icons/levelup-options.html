@@ -1,0 +1,96 @@
+<title>Level Up Sheet Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--surface:#170e09;--line:#4a2718;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:64ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:72px;}
+.phone{position:relative;border-radius:18px;padding:18px 12px 20px;min-height:560px;background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.35),transparent 70%),#070403;display:flex;align-items:flex-start;justify-content:center;}
+.sheet{width:100%;border-radius:16px;background:linear-gradient(180deg,rgba(255,150,70,.06),rgba(255,150,70,.012)),#170e09;border:1px solid #4a2718;border-top-color:#6a3f26;padding:18px 16px 16px;box-shadow:0 20px 40px -20px rgba(0,0,0,.9);}
+.mono{font-family:"IBM Plex Mono",monospace;}
+.name{font-family:Marcellus,serif;font-size:15.5px;color:var(--txt);}
+.chip{display:inline-flex;align-items:center;font:500 10px "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 7px;}
+.chip.sets{color:var(--txt3);border:1px solid #3a2214;}
+.chip.est{color:#c9a06e;border:1px solid #5a3d24;background:#1d130c;}
+.chip.up{color:#1b0f06;background:var(--gold);font-weight:600;}
+.go{margin-top:16px;border-radius:12px;background:linear-gradient(180deg,#f0942f,#c9651c);color:#1b0f06;text-align:center;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:13px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,235,200,.5),0 8px 20px -8px rgba(255,120,30,.7);}
+.skip{margin-top:12px;text-align:center;font-size:12px;color:var(--txt3);letter-spacing:.04em;}
+
+/* M. the ledger of gains: plate rows, big numbers side by side */
+.m .hd{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.m .hd svg{width:34px;height:34px;fill:var(--gold);flex-shrink:0;}
+.m h3{font-family:"Bricolage Grotesque",sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0;line-height:1.15;}
+.m .sub{color:var(--txt2);font-size:12.5px;margin:0 0 14px;}
+.m .row{position:relative;overflow:hidden;border-radius:10px;padding:10px 12px 11px 16px;margin-bottom:8px;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12);}
+.m .row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.m .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+.m .nums{display:flex;align-items:baseline;gap:10px;}
+.m .from{font:500 17px "IBM Plex Mono",monospace;color:var(--txt3);}
+.m .arrow{color:var(--go);font-size:16px;}
+.m .to{font:600 22px "IBM Plex Mono",monospace;color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.45);}
+.m .to small{font-size:11px;color:var(--txt2);margin-left:3px;letter-spacing:.04em;}
+.m .from small{font-size:10px;margin-left:2px;}
+
+/* N. the strike: one big number at a time, the raise as a stamp, lifts as a compact list */
+.n .hd{text-align:center;margin-bottom:12px;}
+.n .hd svg{width:44px;height:44px;fill:var(--gold);filter:drop-shadow(0 0 10px rgba(255,138,31,.6));}
+.n h3{font-family:"Bricolage Grotesque",sans-serif;font-size:20px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;margin:6px 0 0;line-height:1.1;}
+.n .sub{color:var(--txt2);font-size:12.5px;margin:4px 0 0;}
+.n .list{border-top:1px solid #3a2214;margin-top:12px;}
+.n .li{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;padding:11px 2px;border-bottom:1px solid #2a1810;}
+.n .li .name{grid-column:1;}
+.n .li .chips{grid-column:1;display:flex;gap:6px;}
+.n .li .stamp{grid-column:2;grid-row:1 / span 2;font:600 15px "IBM Plex Mono",monospace;color:var(--gold);border:1.5px solid var(--gold);border-radius:8px;padding:6px 9px;transform:rotate(-3deg);box-shadow:0 0 14px -4px rgba(255,138,31,.6);}
+.n .li .stamp small{display:block;font-size:9px;font-weight:500;letter-spacing:.12em;color:#e0a874;text-transform:uppercase;}
+
+/* O. the bar: each lift is a horizontal bar that fills to the new number */
+.o h3{font-family:"Bricolage Grotesque",sans-serif;font-size:19px;font-weight:700;margin:0 0 2px;}
+.o .sub{color:var(--txt2);font-size:12.5px;margin:0 0 14px;}
+.o .li{margin-bottom:14px;}
+.o .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.o .to{font:600 18px "IBM Plex Mono",monospace;color:var(--gold);}
+.o .to small{font-size:11px;color:var(--txt2);margin-left:3px;}
+.o .bar{height:10px;border-radius:6px;background:#1a100b;border:1px solid #3a2214;position:relative;overflow:hidden;}
+.o .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,#8a3f10,#d97b2e 70%,#ffb35c);box-shadow:0 0 10px rgba(255,120,30,.5);}
+.o .bar b{position:absolute;top:-1px;bottom:-1px;width:2px;background:#f8e6d4;opacity:.7;}
+.o .foot{display:flex;justify-content:space-between;margin-top:5px;font:500 10.5px "IBM Plex Mono",monospace;color:var(--txt3);}
+</style>
+<h1>The level-up sheet, three directions</h1>
+<p class="lead">Same three lifts that just cleared every target: a bench, an incline dumbbell press the app is still estimating, and a plank. Each direction leads with the win, keeps one big button, and tucks the "not this time" away.</p>
+<div class="opts">
+
+<section class="opt m"><h2>M. The ledger of gains</h2><p class="why">Each lift is a plate like the board. Old number small and quiet, new number big and gold, the jump as an ember chip. The set count and the estimate become chips instead of symbols and footnotes.</p>
+<div class="phone"><div class="sheet">
+<div class="hd"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg><h3>3 lifts levelled up</h3></div>
+<p class="sub">You cleared every set. Here is what comes next.</p>
+<div class="row"><div class="top"><span class="name">Bench Press</span><span class="chip sets">3 sets</span></div><div class="nums"><span class="from">135<small>lb</small></span><span class="arrow">➜</span><span class="to">140<small>lb × 8</small></span><span class="chip up">+5 lb</span></div></div>
+<div class="row"><div class="top"><span class="name">Incline Dumbbell Press</span><span style="display:flex;gap:6px"><span class="chip est">estimated</span><span class="chip sets">3 sets</span></span></div><div class="nums"><span class="from">50<small>lb</small></span><span class="arrow">➜</span><span class="to">55<small>lb × 10</small></span><span class="chip up">+5 lb</span></div></div>
+<div class="row"><div class="top"><span class="name">Plank</span><span class="chip sets">2 sets</span></div><div class="nums"><span class="from">40<small>sec</small></span><span class="arrow">➜</span><span class="to">45<small>sec</small></span><span class="chip up">+5 sec</span></div></div>
+<div class="go">Raise targets</div><div class="skip">Not this time</div>
+</div></div></section>
+
+<section class="opt n"><h2>N. The strike</h2><p class="why">Centred and loud. The mark glows over a stamped headline. Each lift is one line with the new number stamped at the right like a mark on iron. Tightest read, most ceremony.</p>
+<div class="phone"><div class="sheet">
+<div class="hd"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg><h3>Level up</h3><p class="sub">Three lifts cleared every set. The targets move.</p></div>
+<div class="list">
+<div class="li"><span class="name">Bench Press</span><span class="chips"><span class="chip sets">3 × 8</span><span class="chip sets">was 135</span></span><span class="stamp">140 lb<small>+5</small></span></div>
+<div class="li"><span class="name">Incline Dumbbell Press</span><span class="chips"><span class="chip sets">3 × 10</span><span class="chip sets">was 50</span><span class="chip est">estimated</span></span><span class="stamp">55 lb<small>+5</small></span></div>
+<div class="li"><span class="name">Plank</span><span class="chips"><span class="chip sets">2 holds</span><span class="chip sets">was 40</span></span><span class="stamp">45 sec<small>+5</small></span></div>
+</div>
+<div class="go">Raise targets</div><div class="skip">Not this time</div>
+</div></div></section>
+
+<section class="opt o"><h2>O. The bar</h2><p class="why">Progress you can see. Each lift is a bar that fills from the old number to the new one, the tick marks where you were. Reads like a gauge on a machine. Calmest of the three, and the most about the number growing.</p>
+<div class="phone"><div class="sheet">
+<h3>3 lifts levelled up</h3><p class="sub">You cleared every set. The bars show the move.</p>
+<div class="li"><div class="top"><span class="name">Bench Press</span><span class="to">140<small>lb</small></span></div><div class="bar"><i style="width:72%"></i><b style="left:66%"></b></div><div class="foot"><span>135 lb, 3 × 8</span><span>+5 lb</span></div></div>
+<div class="li"><div class="top"><span class="name">Incline Dumbbell Press <span class="chip est">estimated</span></span><span class="to">55<small>lb</small></span></div><div class="bar"><i style="width:60%"></i><b style="left:52%"></b></div><div class="foot"><span>50 lb, 3 × 10</span><span>+5 lb</span></div></div>
+<div class="li"><div class="top"><span class="name">Plank</span><span class="to">45<small>sec</small></span></div><div class="bar"><i style="width:56%"></i><b style="left:48%"></b></div><div class="foot"><span>40 sec, 2 holds</span><span>+5 sec</span></div></div>
+<div class="go">Raise targets</div><div class="skip">Not this time</div>
+</div></div></section>
+
+</div>
