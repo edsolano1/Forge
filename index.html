@@ -2202,7 +2202,7 @@ body.forge .daybox::before{content:'';position:absolute;left:-17.5px;top:4px;wid
   background:#3a2214;border:2px solid var(--bg);box-shadow:0 0 0 1px #5a3520;}
 body.forge .daybox.empty{padding-bottom:13px;}
 body.forge .daybox.empty::before{background:#2a1810;box-shadow:0 0 0 1px #3a2214;}
-body.forge .daybox.empty .dayhead{color:#6e5443;}
+body.forge .daybox.empty .dayhead{color:var(--txt3);}
 body.forge .daybox.today{border:0;box-shadow:none;}
 body.forge .daybox.today::before{background:var(--gold);box-shadow:0 0 0 1px #a0521c,0 0 12px rgba(255,138,31,.75);}
 body.forge .daybox.today > .dayglow{display:none;}
@@ -2210,7 +2210,9 @@ body.forge .daybox.quenched{border:0;background:transparent;}
 body.forge .daybox.quenched::before{background:#2c2c2b;box-shadow:0 0 0 1px #3a3a38;}
 body.forge .daybox.dropok{background:color-mix(in srgb,var(--go) 9%,transparent);border-radius:12px;}
 body.forge .daybox.dropfull{background:color-mix(in srgb,#c2554a 10%,transparent);border-radius:12px;}
-body.forge .dayhead{padding:0 2px 7px;}
+/* Day names read against the glowing ground (v5.139): the brighter brown, a touch larger, and a
+   hair of shadow so the ember behind them never washes them out. Empty days one step quieter. */
+body.forge .dayhead{padding:0 2px 7px;color:var(--txt2);font-size:11.5px;text-shadow:0 1px 2px rgba(0,0,0,.7);}
 body.forge .card{border-radius:12px;padding:10px 12px 10px 16px;overflow:hidden;
   background:linear-gradient(180deg,#2c1a12,#1d110b);border:1px solid #5a3520;border-top-color:#7a4c30;
   box-shadow:inset 0 1px 0 rgba(255,215,170,.14),inset 0 -1px 0 rgba(0,0,0,.5),0 7px 18px -9px rgba(0,0,0,.85);}
@@ -9069,7 +9071,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.138';
+var APPV='v5.139';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
