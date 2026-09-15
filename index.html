@@ -2332,28 +2332,28 @@ body.forge .daybox.quenched .dh-d{color:#84827f;}
 .lvl-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
 .lvl-n{font-family:'Marcellus',serif;font-size:15.5px;font-weight:400;color:var(--txt);margin:0;}
 .lvl-tags{display:flex;gap:6px;align-items:center;flex-shrink:0;}
-.lvl-chip{display:inline-flex;align-items:center;font:500 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 7px;white-space:nowrap;}
+.lvl-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-weight:500;font-size:9.5px;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 7px;white-space:nowrap;}
 .lvl-chip.sets{color:var(--txt3);border:1px solid #3a2214;}
 .lvl-chip.est{color:#c9a06e;border:1px solid #5a3d24;background:#1d130c;}
 .lvl-chip.up{color:#1b0f06;background:var(--gold);font-weight:600;}
 .lvl-d{display:flex;flex-wrap:wrap;align-items:center;gap:8px 9px;font-size:13px;color:var(--txt3);white-space:nowrap;}
 .lvl-g{position:relative;display:inline-flex;align-items:baseline;gap:8px;}
-.lvl-gn{font:500 11px var(--mono);color:var(--txt3);font-style:normal;}
-.lvl-from{font:500 16px var(--mono);color:var(--txt3);}
+.lvl-gn{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--txt3);font-style:normal;}
+.lvl-from{font-family:var(--mono);font-weight:500;font-size:16px;color:var(--txt3);}
 .lvl-from b,.lvl-to b{font-weight:inherit;color:inherit;}
 .lvl-from small,.lvl-to small{font-size:10px;margin-left:2px;color:var(--txt2);letter-spacing:.03em;}
 .lvl-arrow{color:var(--go);font-style:normal;font-size:14px;align-self:center;}
-.lvl-to{font:600 21px var(--mono);color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.45);border-radius:7px;padding:0 3px;}
+.lvl-to{font-family:var(--mono);font-weight:600;font-size:22px;color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.45);border-radius:7px;padding:0 3px;}
 .lvl-to.up{cursor:pointer;}
 .lvl-to.up:hover{background:rgba(255,138,31,.12);}
-.lvl-raise{margin-left:auto;font:800 11px 'Bricolage Grotesque',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#1b0f06;
+.lvl-raise{margin-left:auto;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#1b0f06;
   background:linear-gradient(180deg,#f0942f,#c9651c);border:0;border-radius:9px;padding:9px 12px;cursor:pointer;
   box-shadow:inset 0 1px 0 rgba(255,235,200,.5),0 4px 12px -6px rgba(255,120,30,.7);}
 .lvl-raise:active{transform:scale(.97);}
 .lvl-row.done{border-color:#a0521c;background:linear-gradient(180deg,#1f130c,#150d09);}
 .lvl-row.done::before{background:linear-gradient(180deg,#ffd08a,#ffb35c);box-shadow:0 0 12px rgba(255,160,60,.6);}
 .lvl-row.done .lvl-from{text-decoration:line-through;opacity:.6;}
-.lvl-mark-done{display:inline-flex;align-items:center;gap:6px;font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
+.lvl-mark-done{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
 .lvl-mark-done i{width:16px;height:16px;border-radius:50%;background:var(--gold);color:#1b0f06;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-style:normal;box-shadow:0 0 10px rgba(255,138,31,.7);}
 .lvl-foot{margin-top:14px;}
 .lvl-go{width:100%;box-sizing:border-box;padding:14px;font-weight:800;letter-spacing:.14em;
@@ -9217,7 +9217,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.147';
+var APPV='v5.148';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9980,7 +9980,7 @@ function lvlRender(){
   document.getElementById('lvlList').innerHTML=plan.map(function(p,pi){
     var gs=lvlGroups(p),sets=p.from.length,kind=lvlKind(p.to[0]||'');
     var setsChip='<span class="lvl-chip sets">'+sets+(kind==='s'?(sets===1?' hold':' holds'):(sets===1?' set':' sets'))+'</span>';
-    var tags=(p.est?'<span class="lvl-chip est" title="The app has not seen this lift\u2019s machine steps yet, so the jump is plate math. Tap the number if yours is different.">estimated</span>':'')+
+    var tags=(p.est?'<span class="lvl-chip est" title="Approximate: the app has not seen this lift\u2019s machine steps yet, so the jump is plate math. Tap the number if yours is different.">approx</span>':'')+
              (p.done?'<span class="lvl-mark-done"><i>\u2713</i>Raised</span>':setsChip);
     var lines=gs.map(function(x,gi){
       if(LVLED&&LVLED.pi===pi&&LVLED.gi===gi){
