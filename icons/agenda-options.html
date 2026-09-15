@@ -1,0 +1,80 @@
+<title>Week Agenda Samples</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:64ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:54px;}
+.phone{position:relative;overflow:hidden;border-radius:18px;padding:16px 12px 20px;height:640px;
+  background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.55),rgba(190,60,10,.22) 40%,transparent 70%),linear-gradient(180deg,#070403,#0a0605 55%,#0d0705);}
+.phone::after{content:"one phone screen";position:absolute;right:10px;bottom:6px;font:10px "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:#6e5443;}
+.lbl{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt2);margin:0 0 10px;}
+.wm{font-family:Marcellus,serif;font-size:20px;letter-spacing:.15em;text-transform:uppercase;color:var(--txt);margin:0 0 14px;}
+.nm{font-family:Marcellus,serif;font-size:16px;color:var(--txt);}
+.meta{font-size:11px;color:var(--txt2);margin-top:1px;}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.grip{color:var(--txt3);font-size:14px;}
+.pill{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;border:1px solid rgba(255,138,31,.55);color:var(--gold);border-radius:6px;padding:3px 7px;background:#1a0d06;}
+.sv{margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt2);}
+.sv span{font-weight:400;font-size:11px;letter-spacing:.06em;color:var(--go);border:1px solid rgba(217,123,46,.4);border-radius:8px;padding:5px 9px;}
+
+/* shared agenda pieces */
+.day{display:grid;grid-template-columns:46px 1fr;gap:8px;align-items:stretch;margin-bottom:8px;}
+.col{border-radius:9px;background:#1a100b;border:1px solid #4a2c1c;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 0;
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:10.5px;letter-spacing:.14em;color:var(--txt2);}
+.col b{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:14px;letter-spacing:0;color:var(--txt);margin-top:2px;}
+.today .col{background:#3a1d0c;border-color:#a0521c;color:#ffd9b5;box-shadow:0 0 14px -4px rgba(255,120,30,.6);}
+.today .col b{color:#fff;}
+.card{position:relative;overflow:hidden;border-radius:10px;padding:10px 12px 10px 17px;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 10px 22px -10px rgba(0,0,0,.95);display:flex;align-items:center;}
+.card>.row{flex:1;}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);box-shadow:0 0 12px rgba(255,120,30,.5);}
+.today .card{border-color:#a0521c;box-shadow:inset 0 1px 0 rgba(255,215,170,.18),0 0 24px -6px rgba(255,120,30,.55),0 10px 22px -10px rgba(0,0,0,.95);}
+.empty .col{background:#0f0906;border-color:#2a1810;color:var(--txt3);}
+.empty .col b{color:var(--txt3);}
+.slot{border-radius:9px;background:#0e0805;border:1px solid #2a1810;box-shadow:inset 0 2px 6px rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;color:#6e5443;font-size:15px;}
+
+/* K: agenda, empty days as a thin row */
+.k .empty{grid-template-rows:34px;}
+.k .empty .col{padding:2px 0;flex-direction:row;gap:6px;font-size:10px;}
+.k .empty .col b{font-size:11px;margin:0;}
+
+/* L: agenda, denser, empty days folded into one line listing them */
+.l .day{margin-bottom:7px;}
+.l .card{padding:8px 10px 8px 15px;}
+.l .nm{font-size:15px;}
+.l .col{padding:4px 0;}
+.l .rest{display:flex;align-items:center;gap:8px;border-radius:9px;background:#0e0805;border:1px solid #2a1810;padding:8px 10px;margin-bottom:7px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);font-weight:700;}
+.l .rest span{color:#6e5443;font-weight:400;letter-spacing:.02em;text-transform:none;font-size:11.5px;margin-left:auto;}
+</style>
+<h1>The week as an agenda, two densities</h1>
+<p class="lead">Same four-workout week. The day moves into a column on the left, the blackened plate sits to its right, today's column turns to embers. The frame around each sample is one phone screen; both fit the whole week and the Saved line inside it.</p>
+<div class="opts">
+
+<section class="opt k"><h2>K. Agenda</h2><p class="why">Every day keeps its own row. Days with a workout get the full plate; empty days shrink to a thin row with a slim slot, still a place to tap or drop. The week reads top to bottom like a calendar.</p>
+<div class="phone"><div class="wm">Forge</div><div class="lbl">Your week</div>
+<div class="day"><div class="col">SUN<b>13</b></div><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="col">MON<b>14</b></div><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="col">TUE<b>15</b></div><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day empty"><div class="col">WED<b>16</b></div><div class="slot">+</div></div>
+<div class="day"><div class="col">THU<b>17</b></div><div class="card"><div class="row"><div><div class="nm">Legs: Quad + Posterior</div><div class="meta">41 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day empty"><div class="col">FRI<b>18</b></div><div class="slot">+</div></div>
+<div class="day"><div class="col">SAT<b>19</b></div><div class="card"><div class="row"><div><div class="nm">Shoulders + Arms + Core</div><div class="meta">43 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="sv"><span style="border:0;padding:0;color:var(--txt2);font-weight:700;letter-spacing:.18em;font-size:12px">› Saved workouts</span><span>Forge me a week</span></div>
+</div></section>
+
+<section class="opt l"><h2>L. Agenda, tight</h2><p class="why">Same layout, a notch denser: shorter plates, smaller day column, and the empty days gathered into one quiet line at the foot of the week that names them. The most week on one screen; empty days lose their own row.</p>
+<div class="phone"><div class="wm">Forge</div><div class="lbl">Your week</div>
+<div class="day"><div class="col">SUN<b>13</b></div><div class="card"><div class="row"><div><div class="nm">Rest Day</div><div class="meta">Rest</div></div><span class="grip">≡</span></div></div></div>
+<div class="day today"><div class="col">MON<b>14</b></div><div class="card"><div class="row"><div><div class="nm">Chest + Triceps + Core</div><div class="meta">28 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="col">TUE<b>15</b></div><div class="card"><div class="row"><div><div class="nm">Back + Biceps + Core</div><div class="meta">36 sets</div></div><span style="display:flex;gap:8px;align-items:center"><span class="pill">Still open</span><span class="grip">≡</span></span></div></div></div>
+<div class="day"><div class="col">THU<b>17</b></div><div class="card"><div class="row"><div><div class="nm">Legs: Quad + Posterior</div><div class="meta">41 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="day"><div class="col">SAT<b>19</b></div><div class="card"><div class="row"><div><div class="nm">Shoulders + Arms + Core</div><div class="meta">43 sets</div></div><span class="grip">≡</span></div></div></div>
+<div class="rest">Wed · Fri <span>Free. Tap to add a workout</span></div>
+<div class="sv"><span style="border:0;padding:0;color:var(--txt2);font-weight:700;letter-spacing:.18em;font-size:12px">› Saved workouts</span><span>Forge me a week</span></div>
+</div></section>
+
+</div>
