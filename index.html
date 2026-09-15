@@ -2309,11 +2309,11 @@ body.forge .daybox.today .dayhead{background:#3a1d0c;border-color:#a0521c;box-sh
 body.forge .daybox.today .dayhead > span:first-child{background:transparent;border:0;box-shadow:none;color:#ffd9b5;}
 body.forge .daybox.today .dh-d{color:#fff;}
 body.forge .daybox.today .dayhead-add{color:#e0a874;}
-body.forge .daybox.empty{min-height:36px;}
+body.forge .daybox.empty{min-height:46px;}
 body.forge .daybox.empty .dayhead{background:#0f0906;border-color:#2a1810;}
-body.forge .daybox.empty .dayhead > span:first-child{flex-direction:row;gap:6px;padding:0;background:transparent;border:0;color:var(--txt3);}
-body.forge .daybox.empty .dh-d{font-size:11px;margin:0;color:var(--txt3);}
-body.forge .daybox.empty .dayempty.dayadd,body.forge .daybox.empty .dayempty.dayadd.quiet{padding:0;height:36px;margin:0;display:flex;align-items:center;justify-content:center;}
+body.forge .daybox.empty .dayhead > span:first-child{padding:4px 0;background:transparent;border:0;color:var(--txt3);}
+body.forge .daybox.empty .dh-d{color:var(--txt3);}
+body.forge .daybox.empty .dayempty.dayadd,body.forge .daybox.empty .dayempty.dayadd.quiet{padding:0;height:46px;margin:0;display:flex;align-items:center;justify-content:center;}
 body.forge .daybox.quenched .dayhead{background:#171716;border-color:#343433;}
 body.forge .daybox.quenched .dayhead > span:first-child{background:transparent;border:0;color:#84827f;}
 body.forge .daybox.quenched .dh-d{color:#84827f;}
@@ -9167,7 +9167,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.145';
+var APPV='v5.146';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
