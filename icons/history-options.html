@@ -1,0 +1,138 @@
+<title>Workouts Finished Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600;700&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--hot:#ffd08a;--white:#fff6e6;--violet:#a98ae6;--green:#7fe0a8;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:66ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:96px;}
+.phone{position:relative;overflow:hidden;border-radius:18px;min-height:640px;background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.3),transparent 70%),#070403;padding:14px 12px 22px;}
+.mono{font-family:"IBM Plex Mono",monospace;}
+.name{font-family:Marcellus,serif;}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.top b{font-family:Marcellus,serif;font-weight:400;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--white);}
+.seg{display:flex;border:1px solid #4a2c1c;border-radius:9px;overflow:hidden;background:#0e0806;}
+.seg span{padding:6px 10px;font:600 10px "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);}
+.seg span.on{background:#3a1d0c;color:#ffd9b5;}
+.nav{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;font:600 11px "IBM Plex Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2);}
+.nav i{width:28px;height:28px;border-radius:8px;border:1px solid #4a2c1c;display:flex;align-items:center;justify-content:center;font-style:normal;color:var(--txt3);}
+.plate{position:relative;overflow:hidden;border-radius:11px;padding:11px 12px 11px 17px;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 10px 22px -10px rgba(0,0,0,.95);margin-bottom:8px;}
+.plate::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.plate.rec::before{background:linear-gradient(180deg,#fff0c8,#ffd06a 40%,#e8a020);box-shadow:0 0 10px rgba(255,200,100,.6);}
+.plate .d{font:600 9.5px "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+.plate .n{font-family:Marcellus,serif;font-size:15.5px;color:var(--white);margin-top:2px;}
+.plate .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.chips{display:flex;gap:6px;margin-top:6px;}
+.chip{font:600 9.5px "IBM Plex Mono",monospace;letter-spacing:.06em;border-radius:6px;padding:3px 7px;border:1px solid #3a2214;color:var(--txt3);}
+.chip.g{color:var(--gold);border-color:#6a3f26;}
+.chip.v{color:var(--violet);border-color:#4a3a6a;}
+.chip.r{color:#1b0f06;background:var(--hot);border-color:var(--hot);}
+.chev{color:var(--txt3);font-size:16px;}
+.walk{border:1px dashed #3a2214;border-radius:10px;padding:9px;text-align:center;font:600 10.5px "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);margin-top:4px;}
+.foot{display:flex;gap:8px;margin-top:14px;}
+.foot span{flex:1;border-radius:11px;padding:11px;text-align:center;font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #5a3520;color:var(--txt2);}
+.foot span.go{background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 20px -6px rgba(255,150,50,.6);}
+
+/* AD: the ledger week — day columns like the board, iron tiles, plates */
+.ad .strip{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:10px;}
+.ad .dc{border-radius:8px;background:#1a100b;border:1px solid #4a2c1c;text-align:center;padding:5px 0 6px;font-weight:800;font-size:9.5px;letter-spacing:.12em;color:var(--txt3);}
+.ad .dc b{display:block;font:500 13px "IBM Plex Mono",monospace;color:var(--txt);margin-top:1px;}
+.ad .dc i{display:block;width:6px;height:6px;border-radius:50%;margin:4px auto 0;background:transparent;}
+.ad .dc.done i{background:var(--gold);box-shadow:0 0 8px rgba(255,138,31,.8);}
+.ad .dc.rec i{background:#fff0c8;box-shadow:0 0 10px rgba(255,220,150,1);}
+.ad .dc.today{border-color:#a0521c;background:#3a1d0c;color:#ffd9b5;}
+.ad .dc.today b{color:#fff;}
+.ad .dc.skip i{background:transparent;border:1px solid #6a3f26;width:5px;height:5px;}
+.ad .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.ad .tile{border-radius:10px;background:#0e0806;border:1px solid #3a2214;padding:9px 10px;}
+.ad .tile b{display:block;font:700 22px "IBM Plex Mono",monospace;color:var(--white);line-height:1;}
+.ad .tile b small{font-size:11px;color:var(--txt3);margin-left:2px;font-weight:500;}
+.ad .tile span{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-top:5px;}
+.ad .tile.gold{border-color:#a0521c;background:linear-gradient(180deg,#2a160a,#150d09);}
+.ad .tile.gold b{color:var(--gold);text-shadow:0 0 10px rgba(255,138,31,.6);}
+
+/* AE: the seal roll — sessions as mini seals, the week as a line of stamps */
+.ae .stamps{display:flex;gap:6px;justify-content:space-between;margin-bottom:12px;}
+.ae .st{flex:1;aspect-ratio:1;border-radius:50%;border:1.5px solid #3a2214;display:flex;flex-direction:column;align-items:center;justify-content:center;font:600 8.5px "IBM Plex Mono",monospace;letter-spacing:.1em;color:var(--txt3);background:#0e0806;}
+.ae .st b{font-size:12px;color:var(--txt2);font-weight:600;}
+.ae .st.done{border-color:var(--gold);color:var(--gold);background:radial-gradient(circle at 50% 40%,#3a1d0c,#150d09);box-shadow:0 0 12px -4px rgba(255,138,31,.7);transform:rotate(-8deg);}
+.ae .st.done b{color:#ffd9b5;}
+.ae .st.today{border-color:#a0521c;border-style:dashed;}
+.ae .line{font-size:12.5px;color:var(--txt2);text-align:center;margin:0 0 12px;}
+.ae .line b{color:var(--white);font-family:"IBM Plex Mono",monospace;}
+.ae .line em{font-style:normal;color:var(--gold);font-family:"IBM Plex Mono",monospace;}
+.ae .seal{position:relative;border-radius:14px;padding:14px 14px 12px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 14px 28px -14px rgba(0,0,0,.9);margin-bottom:10px;}
+.ae .seal .mk{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);box-shadow:0 0 12px -4px rgba(255,138,31,.7);}
+.ae .seal .mk svg{width:18px;height:18px;fill:var(--gold);}
+.ae .seal .d{font:600 9.5px "IBM Plex Mono",monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+.ae .seal .n{font-family:Marcellus,serif;font-size:17px;color:var(--white);margin:2px 60px 0 0;}
+.ae .seal .hero{display:flex;align-items:baseline;gap:8px;margin-top:10px;}
+.ae .seal .hero b{font:700 30px "IBM Plex Mono",monospace;color:var(--white);line-height:1;letter-spacing:-.02em;}
+.ae .seal .hero span{font:500 13px "IBM Plex Mono",monospace;color:var(--txt2);}
+.ae .seal .hero .r{margin-left:auto;font:700 12px "IBM Plex Mono",monospace;color:#1b0f06;background:var(--hot);border-radius:6px;padding:3px 8px;}
+
+/* AF: the calendar — a month grid of stops first, the list beneath for the tapped day */
+.af .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px;}
+.af .g{aspect-ratio:1;border-radius:8px;background:#0e0806;border:1px solid #241510;display:flex;flex-direction:column;align-items:center;justify-content:center;font:500 11px "IBM Plex Mono",monospace;color:var(--txt3);}
+.af .g.h{font-weight:800;font-family:"Bricolage Grotesque",sans-serif;font-size:9px;letter-spacing:.12em;color:var(--txt3);background:transparent;border:0;aspect-ratio:auto;padding:2px 0 4px;}
+.af .g.o{color:#4a3a30;}
+.af .g i{width:6px;height:6px;border-radius:50%;margin-top:3px;background:transparent;}
+.af .g.done{background:#1a100b;border-color:#4a2c1c;color:var(--txt);}
+.af .g.done i{background:var(--gold);box-shadow:0 0 8px rgba(255,138,31,.8);}
+.af .g.rec{border-color:#a0521c;}
+.af .g.rec i{background:#fff0c8;box-shadow:0 0 10px rgba(255,220,150,1);}
+.af .g.sel{background:#3a1d0c;border-color:#a0521c;color:#ffd9b5;}
+.af .g.today{outline:1px solid #6a3f26;outline-offset:-3px;}
+.af .sum{display:flex;justify-content:space-between;font:600 10.5px "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin:0 2px 12px;}
+.af .sum b{color:var(--white);}
+.af .sum em{font-style:normal;color:var(--gold);}
+</style>
+<h1>Workouts finished, three directions</h1>
+<p class="lead">The same fortnight in each: two sessions this week, one of them with a record, and the day views underneath. All three keep Week, Month and All, keep "Add a walk", and move Copy all and Save as a file behind a Share button so the list gets the room.</p>
+<div class="opts">
+
+<section class="opt ad"><h2>AD. The ledger week</h2><p class="why">The board's language, looking backward. The week is a row of day columns like the home screen, a gold stop on trained days, a brighter one where a record fell, a hollow one on a skipped day. Three iron tiles for done, sets and records. Each session is a plate with its gold and violet counts.</p>
+<div class="phone">
+<div class="top"><b>Workouts finished</b><div class="seg"><span class="on">Week</span><span>Month</span><span>All</span></div></div>
+<div class="nav"><i>‹</i>This week<i>›</i></div>
+<div class="strip"><div class="dc done">SUN<b>13</b><i></i></div><div class="dc">MON<b>14</b><i></i></div><div class="dc rec">TUE<b>15</b><i></i></div><div class="dc today">WED<b>16</b><i></i></div><div class="dc">THU<b>17</b><i></i></div><div class="dc">FRI<b>18</b><i></i></div><div class="dc">SAT<b>19</b><i></i></div></div>
+<div class="tiles"><div class="tile"><b>2<small>of 4</small></b><span>Workouts</span></div><div class="tile"><b>64</b><span>Sets</span></div><div class="tile gold"><b>1</b><span>Record</span></div></div>
+<div class="plate rec"><div class="row"><div><div class="d">Tue Sep 15</div><div class="n">Chest + Triceps + Core</div><div class="chips"><span class="chip">28 sets</span><span class="chip g">7 gold</span><span class="chip v">9 matched</span><span class="chip r">1 record</span></div></div><span class="chev">›</span></div></div>
+<div class="plate"><div class="row"><div><div class="d">Sun Sep 13</div><div class="n">Back + Biceps + Forearms + Core</div><div class="chips"><span class="chip">36 sets</span><span class="chip g">2 gold</span><span class="chip v">14 matched</span></div></div><span class="chev">›</span></div></div>
+<div class="walk">+ Add a walk</div>
+<div class="foot"><span>Share</span><span class="go">Done</span></div>
+</div></section>
+
+<section class="opt ae"><h2>AE. The seal roll</h2><p class="why">Every finished session is the seal from the finish screen, rolled up small: the workout, the date, the sets as the hero, a record chip when one fell. The week is a line of seven stamps, the trained days struck and turned. One line above says the week in words.</p>
+<div class="phone">
+<div class="top"><b>Workouts finished</b><div class="seg"><span class="on">Week</span><span>Month</span><span>All</span></div></div>
+<div class="nav"><i>‹</i>This week<i>›</i></div>
+<div class="stamps"><div class="st done">SUN<b>13</b></div><div class="st">MON<b>14</b></div><div class="st done">TUE<b>15</b></div><div class="st today">WED<b>16</b></div><div class="st">THU<b>17</b></div><div class="st">FRI<b>18</b></div><div class="st">SAT<b>19</b></div></div>
+<div class="line"><b>2</b> of 4 workouts · <b>64</b> sets · <em>1 record</em></div>
+<div class="seal"><div class="mk"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg></div><div class="d">Tue Sep 15</div><div class="n">Chest + Triceps + Core</div><div class="hero"><b>28</b><span>of 28 sets</span><span class="r">1 record</span></div></div>
+<div class="seal"><div class="mk"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg></div><div class="d">Sun Sep 13</div><div class="n">Back + Biceps + Forearms + Core</div><div class="hero"><b>36</b><span>of 36 sets</span></div></div>
+<div class="walk">+ Add a walk</div>
+<div class="foot"><span>Share</span><span class="go">Done</span></div>
+</div></section>
+
+<section class="opt af"><h2>AF. The calendar</h2><p class="why">A month of stops first, because "did I show up" is the question history answers. Trained days carry a gold stop, record days a bright one, today a ring. Tap a day and its plates list beneath. Week and All stay as the other two views. The most overview, the least per-session ceremony.</p>
+<div class="phone">
+<div class="top"><b>Workouts finished</b><div class="seg"><span>Week</span><span class="on">Month</span><span>All</span></div></div>
+<div class="nav"><i>‹</i>September<i>›</i></div>
+<div class="grid">
+<div class="g h">S</div><div class="g h">M</div><div class="g h">T</div><div class="g h">W</div><div class="g h">T</div><div class="g h">F</div><div class="g h">S</div>
+<div class="g o">30</div><div class="g o">31</div><div class="g">1<i></i></div><div class="g done">2<i></i></div><div class="g">3<i></i></div><div class="g done">4<i></i></div><div class="g">5<i></i></div>
+<div class="g done">6<i></i></div><div class="g">7<i></i></div><div class="g done rec">8<i></i></div><div class="g">9<i></i></div><div class="g done">10<i></i></div><div class="g">11<i></i></div><div class="g">12<i></i></div>
+<div class="g done">13<i></i></div><div class="g">14<i></i></div><div class="g done rec sel">15<i></i></div><div class="g today">16<i></i></div><div class="g">17<i></i></div><div class="g">18<i></i></div><div class="g">19<i></i></div>
+<div class="g">20<i></i></div><div class="g">21<i></i></div><div class="g">22<i></i></div><div class="g">23<i></i></div><div class="g">24<i></i></div><div class="g">25<i></i></div><div class="g">26<i></i></div>
+</div>
+<div class="sum"><span><b>7</b> workouts this month</span><span><em>2 records</em></span></div>
+<div class="plate rec"><div class="row"><div><div class="d">Tue Sep 15</div><div class="n">Chest + Triceps + Core</div><div class="chips"><span class="chip">28 sets</span><span class="chip g">7 gold</span><span class="chip r">1 record</span></div></div><span class="chev">›</span></div></div>
+<div class="walk">+ Add a walk</div>
+<div class="foot"><span>Share</span><span class="go">Done</span></div>
+</div></section>
+
+</div>
