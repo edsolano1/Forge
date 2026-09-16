@@ -3168,7 +3168,7 @@ body.wcon{overflow:hidden;}
     <!-- The quick timer lives in a session, not out here. A rest belongs to a set, and the week
          board is where you choose a day rather than where you time one. The same button is still
          in the session header, which is the only place it had anything to time. -->
-    <div class="iconbtn" onclick="openSettings()" title="Settings" style="margin-left:auto"><svg viewBox="0 0 20 20"><path d="M10 3.2l1.1 1.9 2.1-.5.6 2.1 2.1.6-.5 2.1 1.9 1.1-1.9 1.1.5 2.1-2.1.6-.6 2.1-2.1-.5L10 16.8l-1.1-1.9-2.1.5-.6-2.1-2.1-.6.5-2.1L2.7 9.5l1.9-1.1-.5-2.1 2.1-.6.6-2.1 2.1.5z"/><circle cx="10" cy="10" r="2.6"/></svg></div>
+    <div class="iconbtn" onclick="openSettings()" title="Settings" style="margin-left:auto"><svg viewBox="0 0 20 20"><path d="M16.38 8.30L18.29 8.66L18.29 11.34L16.38 11.70L15.71 13.31L16.81 14.92L14.92 16.81L13.31 15.71L11.70 16.38L11.34 18.29L8.66 18.29L8.30 16.38L6.69 15.71L5.08 16.81L3.19 14.92L4.29 13.31L3.62 11.70L1.71 11.34L1.71 8.66L3.62 8.30L4.29 6.69L3.19 5.08L5.08 3.19L6.69 4.29L8.30 3.62L8.66 1.71L11.34 1.71L11.70 3.62L13.31 4.29L14.92 3.19L16.81 5.08L15.71 6.69Z"/><circle cx="10" cy="10" r="2.6"/></svg></div>
   </div>
   <div class="storenote" id="storeNote"></div>
 
@@ -3198,7 +3198,7 @@ body.wcon{overflow:hidden;}
       <div class="s-sub" id="sSub"></div>
     </div>
     <div class="iconbtn" onclick="openTimerSheet()" title="Quick timer"><svg viewBox="0 0 20 20"><circle cx="10" cy="11" r="6.5"/><path d="M10 8v3.2l2.2 1.6M7 2.5h6"/></svg></div>
-    <div class="iconbtn" onclick="openSettings()" title="Settings"><svg viewBox="0 0 20 20"><path d="M10 3.2l1.1 1.9 2.1-.5.6 2.1 2.1.6-.5 2.1 1.9 1.1-1.9 1.1.5 2.1-2.1.6-.6 2.1-2.1-.5L10 16.8l-1.1-1.9-2.1.5-.6-2.1-2.1-.6.5-2.1L2.7 9.5l1.9-1.1-.5-2.1 2.1-.6.6-2.1 2.1.5z"/><circle cx="10" cy="10" r="2.6"/></svg></div>
+    <div class="iconbtn" onclick="openSettings()" title="Settings"><svg viewBox="0 0 20 20"><path d="M16.38 8.30L18.29 8.66L18.29 11.34L16.38 11.70L15.71 13.31L16.81 14.92L14.92 16.81L13.31 15.71L11.70 16.38L11.34 18.29L8.66 18.29L8.30 16.38L6.69 15.71L5.08 16.81L3.19 14.92L4.29 13.31L3.62 11.70L1.71 11.34L1.71 8.66L3.62 8.30L4.29 6.69L3.19 5.08L5.08 3.19L6.69 4.29L8.30 3.62L8.66 1.71L11.34 1.71L11.70 3.62L13.31 4.29L14.92 3.19L16.81 5.08L15.71 6.69Z"/><circle cx="10" cy="10" r="2.6"/></svg></div>
     <div class="ring" id="ring">
       <svg width="42" height="42"><circle class="trk" cx="21" cy="21" r="17" fill="none" stroke-width="3.5"/><circle class="bar" id="ringBar" cx="21" cy="21" r="17" fill="none" stroke-width="3.5" stroke-dasharray="106.8" stroke-dashoffset="106.8"/></svg>
       <div class="lbl" id="ringLbl">0/0</div>
@@ -9314,7 +9314,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.158';
+var APPV='v5.159';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
