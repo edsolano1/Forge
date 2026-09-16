@@ -3206,7 +3206,8 @@ body.wcon{overflow:hidden;}
     </div>
     <div class="fin-lvl" id="finLvl" hidden onclick="finRaise()"><span class="fin-arrow">&uarr;</span><div><b id="finLvlT"></b><small>Raise now, or later from the board</small></div><span class="fin-act">Raise</span></div>
     <p class="fin-note" id="sumNote" hidden></p>
-    <div class="fin-share"><span onclick="finShare()">Share as text</span></div>
+    <!-- Share as text left the finish screen (v5.152): a session is shared from Workouts finished. The
+         export textarea stays for copyExport and the tour; it is never shown here. -->
     <div id="finShareBox" hidden>
       <textarea id="exportTxt" readonly></textarea>
       <div class="sheet-btns"><div class="btn" onclick="copyExport()" id="copyBtn">COPY</div></div>
@@ -9263,7 +9264,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.151';
+var APPV='v5.152';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13648,7 +13649,7 @@ function renderSummary(s){
   var real=(DB.logs||[]).filter(function(l){return !l.marked;}).length;
   var t=document.getElementById('sumTitle'),note=document.getElementById('sumNote');
   if(t)t.textContent=real<=1?'Your first one is in the book':'Session logged';
-  if(note){note.hidden=real>1;if(real<=1)note.textContent='Every set you log turns gold when it beats your best and violet when it matches it. From now on the app remembers.';}
+  if(note)note.hidden=true;
   var box=document.getElementById('finShareBox');if(box)box.hidden=true;
 }
 function finRaise(){closeOvl('exportOvl');if(FINWK)openLevel(FINWK);}
