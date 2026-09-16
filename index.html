@@ -9320,7 +9320,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.163';
+var APPV='v5.164';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10597,7 +10597,7 @@ function planCard(id,i,nx,dk){
   if(live)pills+='<span class="pill pill-live">Resume '+loggedCount(id)+'/'+totalSets(id)+'</span>';
   else if(sealed)pills+='<span class="pill pill-done">'+LOCKI+TXT('done')+'</span>';
   else{
-    if(waiting)pills+='<span class="pill pill-wait" title="This day has passed. Open it any day this week">Still open</span>';
+    if(waiting)pills+='<span class="pill pill-wait" title="This day passed without it. Do it any day this week">Skipped</span>';
     if(rdy)pills+='<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\''+id+'\')">'+ARROW+'</span>';
   }
   // Compressed: the name sits on the top line, level with the grip, and the second line is just
@@ -10605,12 +10605,12 @@ function planCard(id,i,nx,dk){
   // because whose day it is has never been something you needed telling twice.
   // DB.restLabel first: what the rest day is FOR is the user's own, not the app's to state.
   var ts=totalSets(id),tsw=ts+(ts===1?' set':' sets');
-  var meta=v==='rest'?(DB.restLabel||(e&&e.label)||'Rest'):(v==='opt'?'Optional &middot; '+tsw:tsw);
+  var meta=v==='rest'?(DB.restLabel||(e&&e.label)||'Rest'):(v==='opt'?'Optional':'');
   return '<div class="card'+(v?' '+v:'')+(sealed?' sealed':'')+(up?' upnext':'')+(waiting?' waiting':'')+'" data-base="'+id+'" style="--c:'+dayC(id)+';--gd:-'+(i*0.77).toFixed(2)+'s" onclick="mkTap(\''+id+'\',\''+dk+'\')">'+
     (sealed?'<svg class="seal" viewBox="0 0 100 100">'+ouroboros('var(--gold)','var(--surface)',false)+'</svg>':'')+
     '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
       '<span class="card-r">'+pills+CARDGRIP+'</span></div>'+
-    '<div class="card-meta">'+meta+'</div></div>';
+    (meta?'<div class="card-meta">'+meta+'</div>':'')+'</div>';
 }
 // A day and whatever is in it. Empty is a legitimate state - that is a rest day - so it still
 // draws its header and a place to drop into rather than vanishing.
@@ -10661,7 +10661,7 @@ function xcard(id,i){
     // takes the top line, level with the grip, the same shape as a week card.
     '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
       '<span class="card-r">'+pills+CARDGRIP+'</span></div>'+
-    '<div class="card-meta">'+(function(n){return n+(n===1?' set':' sets');})(totalSets(id))+'</div></div>';
+    '</div>';
 }
 function extraIds(){return (DB.extra||[]).filter(function(id){return !!W[id];});}
 
