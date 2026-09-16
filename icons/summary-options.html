@@ -1,0 +1,122 @@
+<title>Session Summary Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600;700&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--hot:#ffd08a;--white:#fff6e6;--violet:#a98ae6;--green:#7fe0a8;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:66ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:96px;}
+.phone{position:relative;overflow:hidden;border-radius:18px;min-height:640px;background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.3),transparent 70%),#070403;padding:16px 12px 22px;}
+.mono{font-family:"IBM Plex Mono",monospace;}
+.name{font-family:Marcellus,serif;}
+.go{border-radius:12px;background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;text-align:center;font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:13px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.6);}
+.ghost{border-radius:12px;border:1px solid #5a3520;color:var(--txt2);text-align:center;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px;padding:12px;}
+.share{margin-top:12px;text-align:center;font-size:12px;color:var(--txt3);}
+.lvlcall{margin-top:12px;border-radius:12px;padding:12px 14px;background:linear-gradient(90deg,rgba(255,138,31,.22),rgba(255,138,31,.06));border:1px solid #a0521c;display:flex;align-items:center;gap:12px;}
+.lvlcall b{display:block;font-size:14px;color:var(--white);}
+.lvlcall small{display:block;font-size:11.5px;color:var(--txt2);}
+.lvlcall .act{margin-left:auto;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#1b0f06;background:var(--hot);border-radius:9px;padding:9px 11px;white-space:nowrap;box-shadow:0 0 12px rgba(255,208,138,.6);}
+.lvlcall .arrow{width:26px;height:26px;border-radius:8px;border:1px solid var(--gold);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+
+/* V. the seal: a stamped plate for the session, one hero number, records in gold */
+.v .plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
+.v .plate::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.v .eyebrow{font:600 10px "IBM Plex Mono",monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
+.v h3{font-family:Marcellus,serif;font-size:20px;font-weight:400;margin:4px 0 0;color:var(--white);}
+.v .date{font-size:12px;color:var(--txt3);margin-top:2px;}
+.v .hero{display:flex;align-items:baseline;gap:10px;margin:18px 0 4px;}
+.v .hero b{font:700 54px "IBM Plex Mono",monospace;color:var(--white);line-height:1;letter-spacing:-.03em;text-shadow:0 0 18px rgba(255,200,120,.5);}
+.v .hero span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);}
+.v .hero small{font:700 12px "IBM Plex Mono",monospace;color:var(--green);margin-left:auto;}
+.v .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.v .st{border-radius:10px;background:#0e0806;border:1px solid #3a2214;padding:9px 10px;}
+.v .st b{display:block;font:600 18px "IBM Plex Mono",monospace;color:var(--txt);}
+.v .st b small{font-size:10px;color:var(--txt3);margin-left:2px;}
+.v .st span{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-top:3px;}
+.v .rec{margin-top:12px;border-radius:10px;padding:10px 12px;background:linear-gradient(90deg,rgba(255,138,31,.25),rgba(255,138,31,.05));border:1px solid #a0521c;display:flex;align-items:center;gap:10px;}
+.v .rec b{font:700 22px "IBM Plex Mono",monospace;color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.7);}
+.v .rec span{font-size:12.5px;color:var(--white);}
+.v .rec small{margin-left:auto;font-size:11px;color:var(--txt2);}
+.v .seal{position:absolute;right:14px;top:14px;width:54px;height:54px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);box-shadow:0 0 16px -4px rgba(255,138,31,.7),inset 0 0 0 3px #120b08,inset 0 0 0 4px #6a3f26;}
+.v .seal svg{width:30px;height:30px;fill:var(--gold);}
+.v .btns{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px;}
+
+/* W. the tally: a ledger of the session, line by line, each with what changed against last time */
+.w h3{font-family:"Bricolage Grotesque",sans-serif;font-size:22px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;margin:6px 0 0;color:var(--white);}
+.w .sub{font-size:12.5px;color:var(--txt2);margin:2px 0 16px;}
+.w .li{display:grid;grid-template-columns:28px 1fr auto auto;gap:0 12px;align-items:center;padding:12px 4px;border-bottom:1px solid rgba(255,180,100,.14);}
+.w .ic{width:28px;height:28px;border-radius:8px;background:#1a100b;border:1px solid #4a2c1c;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:13px;}
+.w .lbl{font-size:13.5px;color:var(--txt);}
+.w .lbl small{display:block;font-size:11px;color:var(--txt3);}
+.w .val{font:700 20px "IBM Plex Mono",monospace;color:var(--white);}
+.w .val small{font-size:10px;color:var(--txt2);margin-left:2px;}
+.w .d{font:700 12px "IBM Plex Mono",monospace;color:var(--green);min-width:48px;text-align:right;}
+.w .d.flat{color:var(--txt3);}
+.w .li.gold .val{color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.6);}
+.w .li.gold .ic{background:#3a1d0c;border-color:#a0521c;}
+.w .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;}
+
+/* X. the results screen: session complete, a bar for the sets, medals for gold and violet */
+.x .top{text-align:center;padding:10px 0 6px;}
+.x .top small{display:block;font:600 10px "IBM Plex Mono",monospace;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);}
+.x .top b{display:block;font-size:28px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--white);text-shadow:0 0 18px rgba(255,180,100,.6);margin-top:4px;}
+.x .top i{display:block;font-style:normal;font-family:Marcellus,serif;font-size:14px;color:var(--txt2);margin-top:4px;}
+.x .bar{margin:16px 6px 6px;height:14px;border-radius:8px;background:#1a100b;border:1px solid #4a2c1c;position:relative;overflow:hidden;}
+.x .bar i{position:absolute;left:0;top:0;bottom:0;width:100%;border-radius:8px;background:linear-gradient(90deg,#8a3f10,#d97b2e 60%,#ffd08a);box-shadow:0 0 12px rgba(255,150,50,.6);}
+.x .barlbl{display:flex;justify-content:space-between;margin:0 6px;font:600 10.5px "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);}
+.x .medals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px;}
+.x .md{border-radius:12px;padding:12px 8px;text-align:center;background:#120b08;border:1px solid #3a2214;}
+.x .md b{display:block;font:700 26px "IBM Plex Mono",monospace;color:var(--txt);}
+.x .md span{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-top:4px;}
+.x .md.gold{border-color:#a0521c;background:linear-gradient(180deg,#2a160a,#150d09);}
+.x .md.gold b{color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.7);}
+.x .md.vio{border-color:#6a4fa8;background:linear-gradient(180deg,#22183a,#140f22);}
+.x .md.vio b{color:var(--violet);text-shadow:0 0 12px rgba(169,138,230,.7);}
+.x .stats{display:flex;justify-content:space-between;margin:14px 8px 0;font:600 11px "IBM Plex Mono",monospace;letter-spacing:.06em;color:var(--txt2);}
+.x .stats b{color:var(--white);font-size:14px;display:block;}
+.x .btns{display:grid;grid-template-columns:1fr;gap:10px;margin-top:18px;}
+</style>
+<h1>The finish screen, three directions</h1>
+<p class="lead">The same finished session in each: Chest, Triceps and Core, 24 sets, 14,350 lb moved, 52 minutes, two records, three lifts that earned a raise. All three put the level-up offer on the screen, and all three move the plain-text export behind a small Share line instead of showing a text box.</p>
+<div class="opts">
+
+<section class="opt v"><h2>V. The seal</h2><p class="why">The session is a stamped plate with the mark pressed into its corner. One hero number, the sets, with how it compares to last time. Three quiet stats under it, the records in a gold band, and the level-up as an ember call-out. Reads like a certificate.</p>
+<div class="phone">
+<div class="plate"><div class="seal"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg></div>
+<div class="eyebrow">Session logged</div><h3>Chest + Triceps + Core</h3><div class="date">Monday 15 September · 52 min</div>
+<div class="hero"><b>24</b><span>sets</span><small>+2 vs last</small></div>
+<div class="stats"><div class="st"><b>14,350<small>lb</small></b><span>Moved</span></div><div class="st"><b>186</b><span>Reps</span></div><div class="st"><b>1:30</b><span>Held</span></div></div>
+<div class="rec"><b>2</b><span>new records</span><small>Bench · Incline</small></div>
+</div>
+<div class="lvlcall"><span class="arrow">↑</span><div><b>3 lifts levelled up</b><small>Raise now, or later from the board</small></div><span class="act">Raise</span></div>
+<div class="btns"><div class="go">Done</div></div><div class="share">Share as text</div>
+</div></section>
+
+<section class="opt w"><h2>W. The tally</h2><p class="why">A ledger, line by line: sets, weight moved, reps, time held, minutes, records. Every line shows what changed against your last session of this workout in green, so the screen answers "did I do more than last time" at a glance. The level-up sits as its own line in gold.</p>
+<div class="phone">
+<small style="font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)">Session logged</small>
+<h3>Chest + Triceps + Core</h3><div class="sub">Monday 15 September</div>
+<div class="li"><span class="ic">≡</span><span class="lbl">Sets logged<small>of 24 planned</small></span><span class="val">24</span><span class="d">+2</span></div>
+<div class="li"><span class="ic">⚖</span><span class="lbl">Weight moved</span><span class="val">14,350<small>lb</small></span><span class="d">+610</span></div>
+<div class="li"><span class="ic">×</span><span class="lbl">Reps</span><span class="val">186</span><span class="d">+9</span></div>
+<div class="li"><span class="ic">◷</span><span class="lbl">Time held</span><span class="val">1:30</span><span class="d flat">same</span></div>
+<div class="li"><span class="ic">⏱</span><span class="lbl">In the gym</span><span class="val">52<small>min</small></span><span class="d flat">−4</span></div>
+<div class="li gold"><span class="ic">★</span><span class="lbl">New records<small>Bench · Incline</small></span><span class="val">2</span><span class="d"></span></div>
+<div class="lvlcall"><span class="arrow">↑</span><div><b>3 lifts levelled up</b><small>Raise now, or later from the board</small></div><span class="act">Raise</span></div>
+<div class="btns"><div class="ghost">Share</div><div class="go">Done</div></div>
+</div></section>
+
+<section class="opt x"><h2>X. The results screen</h2><p class="why">The end-of-round screen from a game. SESSION COMPLETE across the top, a bar that fills for the sets you planned versus logged, then three medals: gold sets, violet sets, records. Loud, quick to read, and it uses the colours the app already teaches. The level-up rides beneath as the reward.</p>
+<div class="phone">
+<div class="top"><small>Monday 15 September</small><b>Session complete</b><i>Chest + Triceps + Core</i></div>
+<div class="bar"><i></i></div><div class="barlbl"><span>24 of 24 sets</span><span>52 min</span></div>
+<div class="medals"><div class="md gold"><b>7</b><span>Gold sets</span></div><div class="md vio"><b>9</b><span>Matched</span></div><div class="md"><b>2</b><span>Records</span></div></div>
+<div class="stats"><span>Moved<b>14,350 lb</b></span><span>Reps<b>186</b></span><span>Held<b>1:30</b></span></div>
+<div class="lvlcall"><span class="arrow">↑</span><div><b>3 lifts levelled up</b><small>Raise now, or later from the board</small></div><span class="act">Raise</span></div>
+<div class="btns"><div class="go">Done</div></div><div class="share">Share as text</div>
+</div></section>
+
+</div>
