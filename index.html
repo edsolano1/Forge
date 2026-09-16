@@ -2252,7 +2252,11 @@ body.forge .card::before{display:block;width:6px;background:linear-gradient(180d
 body.forge .card:hover{background:#1a110c;border-color:#6a3f26;}
 body.forge .daybox.today .card{border-color:#a0521c;border-top-color:#c06a30;
   box-shadow:inset 0 1px 0 rgba(255,215,170,.18),0 0 24px -6px rgba(255,120,30,.55),0 10px 22px -10px rgba(0,0,0,.95);}
-body.forge .card .card-name{font-size:17px;}
+/* The name owns the width (v5.165): it wraps to a second line instead of cutting off mid-word,
+   and the pills beside it are compact. The set count is gone, so the second line is free. */
+body.forge .card .card-name{font-size:16px;white-space:normal;overflow:hidden;text-overflow:clip;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;}
+body.forge .card-r .pill{font-size:9px;letter-spacing:.04em;padding:3px 6px;}
+body.forge .card-r{gap:6px;}
 body.forge .card .card-meta{color:var(--txt2);}
 body.forge .dayempty.dayadd,body.forge .dayempty.dayadd.quiet{border:1px solid #2a1810;border-radius:10px;background:#0e0805;
   box-shadow:inset 0 2px 6px rgba(0,0,0,.9);color:#7a5a44;padding:10px 4px;}
@@ -9320,7 +9324,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.164';
+var APPV='v5.165';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
