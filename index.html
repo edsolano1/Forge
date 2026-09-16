@@ -9315,7 +9315,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.160';
+var APPV='v5.161';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -17392,7 +17392,7 @@ function wearPush(detailId){
     // one to know whether the overview it is looking at is the live one, the other to log.
     st={open:true,wk:CUR,week:wearWeek(),saved:wearSaved(),id:nx.id,ex:nx.name,setIdx:nx.i,setsTotal:nx.n,
         target:wearTargetText(t),restEnd:wearRestEnd(),restLen:wearRestLen(),
-        editable:(t.type==='wr'&&!nx.bw),redo:!!nx.redo,
+        editable:true,kind:(t.type==='wr'&&!nx.bw)?'wr':(t.unit==='sec'?'sec':'reps'),rstep:(t.unit==='sec'?5:1),runit:(t.unit==='sec'?'sec':'reps'),redo:!!nx.redo,
         w:dspW(wLb),r:(t.r||0),unit:wUnitName(),
         // The smallest honest jump IN THE DISPLAY UNIT. Differencing plateNext against the
         // current weight looked cleverer and produced 4 kg - a number no gym owns - because
