@@ -9314,7 +9314,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.157';
+var APPV='v5.158';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -18029,7 +18029,9 @@ function restHideSoon(){
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState!=='visible')return;
   if(restTick&&timerInt)restTick();      // still resting: re-read the clock, do not trust the label
-  else if(restEndedAt)restHideSoon();    // ended while away: the four seconds start now
+  // Ended while away: the phone already told you. GO is for the moment it happens, not a replay,
+  // so coming back more than a couple of seconds after the end hides the pill at once (v5.158).
+  else if(restEndedAt){if(Date.now()-restEndedAt>2500)hideRestPill();else restHideSoon();}
 });
 // The lift the running rest belongs to, for the line under the countdown in the shade.
 var restExName='';
