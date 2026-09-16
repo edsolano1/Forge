@@ -2331,7 +2331,8 @@ body.forge .ex-n{font-family:'Marcellus',serif;font-weight:400;font-size:16px;le
 body.forge .ex-links{order:0;margin:0;padding:8px 12px 2px;gap:6px;}
 body.forge .ex-links a{width:34px;height:34px;padding:0;justify-content:center;font-size:0;gap:0;border:1px solid #3a2214;background:#130c09;color:var(--txt3);border-radius:9px;}
 body.forge .ex-links a svg{width:16px;height:16px;}
-body.forge .ex-links a.unote-btn.has,body.forge .ex-links a:hover{color:var(--gold);border-color:#6a3f26;}
+body.forge .ex-links a.unote-btn.has,body.forge .ex-links a.on{color:var(--gold);border-color:#6a3f26;}
+@media (hover:hover){body.forge .ex-links a:hover{color:var(--gold);border-color:#6a3f26;}}
 body.forge .ex-note,body.forge .ex-unote{margin:6px 12px 0;font-size:12px;}
 body.forge .ex-stats{margin:6px 12px 8px;font-size:11.5px;}
 body.forge .sets{padding:0 8px 6px;}
@@ -9314,7 +9315,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.159';
+var APPV='v5.160';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14984,6 +14985,8 @@ function warmTick(id,i){
 function warmDraw(id){
   var el=document.getElementById('warm-'+id);
   if(el)el.innerHTML=warmHtml(id);
+  var ex=document.getElementById('exc-'+id),b=ex&&ex.querySelector('.warm-btn');
+  if(b)b.classList.toggle('on',!!WARMOPEN[id]);
 }
 function warmHtml(id){
   var m=WARMPLANS[id];
