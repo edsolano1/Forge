@@ -58,6 +58,14 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **Every user-typed string is `esc()`'d where it lands in HTML** (names, notes, custom links).
 - **Unlocking is per card** (v5.112). `unsealOne(id)` on the hold menu of a locked card; the footer UNLOCK THE WEEK button is gone and must not come back. `unsealAll`/`doUnseal` survive only for the end-of-week "go round again" dialog. A passed day still undone shows a Waiting pill; three or more collapse into one line (`waitingCount`).
 - **Sheets guard their edits** (v5.123). Back on a sheet with an unsaved change asks Keep the change? (SAVE or DISCARD) through `UNSAVED[id]` in `backCloses`; register a dirty test and a save there when adding a sheet with a SAVE or ADD. CANCEL buttons still cancel outright. Notes autosave (v5.122); the plate calculator SAVE writes the total into the next unlogged set (`plLand`, v5.121). Held weight: `held(x,c)` draws a dumbbell or, when `KBNOW` is on for that exercise (`DB.kb`, `KB_OK`), a kettlebell.
+- **The look is settled (v5.125 to v5.156).** Blackened steel plates on an agenda board over the
+  hearth ground; the wizard icons in WZ with per-icon idles; the banner level-up sheet; the seal
+  finish screen. New surfaces match these, not the old glass-and-glow. Mockup first, three
+  directions, then build: that is how every one of these was chosen and it is how the owner wants
+  to keep working. No bare text that goes somewhere: anything tappable looks like a button.
+  A finish screen shows what you did, not arithmetic: no reps total, no weight moved.
+- **Saved workouts is a fold** (SAVED_OPEN, savedApply). Pump day is a built-in card at its head,
+  not in DB.extra. The level-up offer at the finish is finLvl → finRaise → openLevel.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
   strength and underfills "move"; longer would only add rest.
 - The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated
@@ -139,6 +147,18 @@ rendered button — **click the real element, not the handler.**
 **5. `hidden` loses to any author `display` rule.** `[hidden]` is `display:none` in the UA sheet
 only. An element with `display:flex` in the stylesheet ignores it completely. Bit again in v5.115
 (the week flip pill); the fix is a `.class[hidden]{display:none}` line beside the class.
+
+**6. The `font:` shorthand with `var(--mono)` is silently dropped.** `font:500 10px var(--mono)`
+did not apply at all in v5.147: chips fell back to 16px and the numbers beside them to 13px, the
+exact inversion of the design. Write `font-family`, `font-weight` and `font-size` as longhands.
+
+**7. `#bg > *` sets `inset:0` at id strength.** A `body.forge .bg-light{top:auto;bottom:-34vh}` rule
+loses to it; positioning anything inside #bg needs the id in the selector (v5.141).
+
+**8. A hidden preview tab freezes animation clocks.** Every animation reports running with
+currentTime 0, and an entrance that starts at opacity 0 never becomes visible. Verify names and
+pivots there, never timing; and never write an entrance from opacity 0 (the level-up plates start
+at .3 for this reason).
 
 ---
 

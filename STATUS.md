@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.124** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.156** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -56,6 +56,42 @@ same fanfare as a lifetime best. The crossover side view stands its tower behind
 walks a superset in running order, sees both halves together, corrects a set on either half in
 one tap without losing its place, shows supersets lassoed on the overview, and wears the phone's
 palette. All verified on the SM-R960 except the live set screen, which waits for a real session.
+
+## The look (v5.125 to v5.156, 13 to 15 Sep 2026)
+
+The visual pass the owner asked for after the beginner round, done screen by screen with three
+mockups shown before each build (the mockup pages live in icons/*.html and as published artifacts).
+
+- **The wizard** wears the owner's generated icons, traced to flat paths (icons/wizard, WZ in
+  index.html, v5.126), with motion: cards rise in, each icon has an idle that fits what it is
+  (anvils glow in steps, books turn a page, ingots light one at a time, gears mesh, hourglasses
+  drain with real grains, the armour shines, boots rock, equipment stays still), the tapped icon
+  answers, and Low keeps the wizard moving because it is a one-time pass (v5.127 to v5.135). The
+  safety screen waits for CONTINUE and records the not-medical-advice and privacy acknowledgement
+  (v5.125).
+- **The board** is blackened steel on an agenda: a day column on the left, three letters over the
+  date, the plate to its right, today's column in embers, empty days one thin row. Opaque plates
+  with a hot ember rail; no trays, no dashes (v5.136 to v5.146, the owner picked G then K). The
+  ground is the hearth: near black, one light low behind the board, fourteen embers that stay near
+  it, no drifting bloom or anvil (v5.141). Day names brightened (v5.139). The second-workout plus
+  left the day column for the hold menu, ADD ANOTHER WORKOUT TO that day (v5.145).
+- **Saved workouts** folds into one line under the week, shut by default and remembered; plus and
+  Forge me a week (wearing the mark) sit on the line; Pump day is the first card inside and its bar
+  under the board is gone; anything moved into Saved opens the fold (v5.138, v5.144).
+- **Settings** reads in four panels with centred titles (Sound, Preferences, Walks, Learn); the
+  Settings button is a cog; the one week or two week switch moved here from the board (v5.117,
+  v5.118, v5.143).
+- **The level-up sheet** is the banner: a beam of light with LEVEL UP and the workout name, rays
+  behind, lifts landing one at a time with numbers counting up and the gain in green; tap a lift
+  to raise just that one, tap its number to change it, RAISE ALL then RAISE THE REST then DONE,
+  Not this time as a quiet button; approx is a chip, not a footnote (v5.147 to v5.149, after a
+  research pass on how games do it).
+- **The finish screen** is the seal: a stamped plate with the workout, date and minutes, the sets
+  as the one hero number (3 of 34 sets), records in a gold band that opens to new versus old, the
+  level-up as one full-width gold shining button inside the plate, DONE alone beneath. Reps, weight
+  moved, the colour explainer and Share as text are gone from it (v5.150 to v5.156).
+- Sheets guard their edits, notes autosave, the plate calculator SAVE lands in the next set, the
+  sumo holds a real dumbbell with a kettlebell choice (v5.120 to v5.124, see the section below).
 
 ## The Saturday after the gym (v5.115 to v5.124, 12 Sep 2026)
 
