@@ -9315,7 +9315,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.161';
+var APPV='v5.162';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16672,7 +16672,7 @@ function restBuzzTrain(n){
   restBuzz=setTimeout(function(){
     restBuzz=null;
     try{
-      pushNotif(TXT('restTtl'),TXT('restBody'),{
+      pushNotif(TXT('restTtl'),restNextLine()||TXT('restBody'),{
         tag:'arcanum-done',silent:false,renotify:true,requireInteraction:true,vibrate:REST_VIB
       });
     }catch(e){}
@@ -17786,7 +17786,7 @@ function nativeSchedule(secs){
     ln.schedule({notifications:[{
       id:NATIVE_REST_ID,
       title:TXT('restTtl'),
-      body:TXT('restBody'),
+      body:restNextLine()||TXT('restBody'),
       // Without this the alert arrives under Capacitor's stock information "i". The countdown
       // notice never had that problem because it names the drawable itself, so the two notices
       // from the same rest wore different icons. Same anvil for both now.
@@ -17863,7 +17863,7 @@ function startRestNotif(){
     var back=new Date(end).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
     pushNotif(
       TXT('restingTtl')+' \u00b7 '+fmtT(left),
-      bar(1-left/span)+'\n'+TXT('restingBody')+' '+back,
+      bar(1-left/span)+'\n'+(restNextLine()||(TXT('restingBody')+' '+back)),
       {actions:[
         {action:'plus30',title:'+30s'},
         {action:'skip',title:TXT('skipAct')}
@@ -17887,6 +17887,14 @@ try{
 }catch(e){}
 // loud is decided by restAlert: silent when the app is in front of you and playing its own
 // phrase, sounding when it is not and this is the only thing that can be heard.
+// What is coming up, for the rest notices (v5.162): the lift, the set, and the numbers.
+function restNextLine(){
+  try{
+    var nx=wearNext();if(!nx||!nx.t)return '';
+    var t=nx.t,num=t.type==='wr'?(fmtW(t.w)+' '+wUnitName()+' × '+t.r):(t.unit==='sec'?t.r+' sec':t.r+' reps');
+    return 'Up next: '+nx.name+' · set '+(nx.i+1)+' of '+nx.n+' · '+num;
+  }catch(e){return '';}
+}
 function restDoneNotif(loud){
   if(notifT){clearInterval(notifT);notifT=null;}
   // The countdown has been replacing itself under one tag once a second for the whole rest.
@@ -17895,7 +17903,7 @@ function restDoneNotif(loud){
   // arrived on time and in silence. It goes up as its own notification under its own tag, and
   // the countdown is taken down first so the two are never in the shade together.
   clearRestNotif();
-  pushNotif(TXT('restTtl'),TXT('restBody'),{
+  pushNotif(TXT('restTtl'),restNextLine()||TXT('restBody'),{
     tag:'arcanum-done',silent:!loud,renotify:true,
     requireInteraction:!!loud,          // stays put until dismissed, rather than vanishing unseen
     // The page's own navigator.vibrate is ignored while the page is hidden, which is every time
