@@ -2328,9 +2328,9 @@ body.forge .daybox.quenched .dh-d{color:#84827f;}
 body.forge .sheet .fin-name,.sheet .fin-name{text-transform:none;letter-spacing:.01em;font-size:20px;}   /* the theme uppercases sheet headings; the workout name reads as written */
 .fin-seal{position:absolute;right:14px;top:14px;width:50px;height:50px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);box-shadow:0 0 16px -4px rgba(255,138,31,.7),inset 0 0 0 3px #120b08,inset 0 0 0 4px #6a3f26;}
 .fin-seal svg{width:28px;height:28px;}
-.fin-hero{display:flex;align-items:baseline;gap:10px;margin:18px 0 2px;}
-.fin-hero b{font-family:var(--mono);font-weight:700;font-size:54px;color:#fff6e6;line-height:1;letter-spacing:-.03em;text-shadow:0 0 18px rgba(255,200,120,.5);}
-.fin-hero span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);}
+.fin-hero{display:flex;align-items:baseline;gap:8px;margin:16px 0 2px;}
+.fin-hero b{font-family:var(--mono);font-weight:700;font-size:46px;color:#fff6e6;line-height:1;letter-spacing:-.03em;text-shadow:0 0 18px rgba(255,200,120,.5);}
+.fin-hero span{font-family:var(--mono);font-weight:500;font-size:19px;letter-spacing:0;text-transform:none;color:var(--txt2);}
 .fin-rec{margin-top:14px;border-radius:10px;padding:10px 12px;background:linear-gradient(90deg,rgba(255,138,31,.25),rgba(255,138,31,.05));border:1px solid #a0521c;display:flex;align-items:center;gap:10px;}
 .fin-rec b{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.7);}
 .fin-rec span{font-size:12.5px;color:#fff6e6;}
@@ -2397,7 +2397,8 @@ html.mo-off .fin-act::after{animation:none;display:none;}
   background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;border-color:transparent;
   box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.7);}
 .lvl-hint{margin-top:10px;text-align:center;font-size:11.5px;color:var(--txt3);line-height:1.4;}
-.lvl-skip{margin-top:6px;text-align:center;font-size:12px;color:var(--txt2);letter-spacing:.04em;cursor:pointer;padding:6px;}
+.lvl-skip{margin-top:10px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--txt2);cursor:pointer;padding:11px;border:1px solid #5a3520;border-radius:12px;}
+.lvl-skip:hover{color:var(--txt);border-color:#7a4c30;}
 #lvlOvl.busy .lvl-foot,#lvlOvl.busy .lvl-row{pointer-events:none;}
 html.mo-off .lvl-rays,html.mo-off .lvl-beam,html.mo-off .lvl-row.lit .lvl-num{animation:none;}
 html.mo-off .lvl-row{opacity:1;transform:none;transition:none;}
@@ -9264,7 +9265,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.152';
+var APPV='v5.153';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
