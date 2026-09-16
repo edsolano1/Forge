@@ -1,0 +1,173 @@
+<title>Session Screen Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600;700&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--hot:#ffd08a;--white:#fff6e6;--violet:#a98ae6;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:66ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:96px;}
+.phone{position:relative;overflow:hidden;border-radius:18px;height:720px;background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.3),transparent 70%),#070403;padding:0 0 22px;}
+.mono{font-family:"IBM Plex Mono",monospace;}
+.name{font-family:Marcellus,serif;}
+.hd{display:flex;align-items:center;gap:10px;padding:12px 12px 10px;border-bottom:1px solid #2a1810;background:#0a0605;}
+.hd .back{width:34px;height:34px;border-radius:10px;border:1px solid #4a2c1c;background:#130c09;display:flex;align-items:center;justify-content:center;color:var(--txt2);}
+.hd .t{flex:1;min-width:0;}
+.hd .t b{display:block;font-family:Marcellus,serif;font-weight:400;font-size:16px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hd .t small{display:block;font-size:11px;color:var(--txt3);}
+.hd .t small em{font-style:normal;color:var(--gold);font-weight:700;}
+.ring{width:38px;height:38px;border-radius:50%;background:conic-gradient(var(--gold) 0 25%,#2a1810 25% 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ring i{width:30px;height:30px;border-radius:50%;background:#0a0605;display:flex;align-items:center;justify-content:center;font:600 10px "IBM Plex Mono",monospace;color:var(--txt);font-style:normal;}
+.bar{height:4px;background:#1a100b;}
+.bar i{display:block;height:100%;width:25%;background:linear-gradient(90deg,#8a3f10,#d97b2e,#ffd08a);box-shadow:0 0 8px rgba(255,150,50,.6);}
+.tools{display:flex;gap:6px;}
+.tool{width:30px;height:30px;border-radius:8px;border:1px solid #3a2214;background:#0e0806;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;}
+.tool.on{color:var(--gold);border-color:#6a3f26;}
+.anv{width:40px;height:34px;border-radius:9px;border:1px solid #4a2c1c;background:#130c09;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.anv svg{width:18px;height:18px;fill:#7a5a44;}
+.anv.done{background:linear-gradient(180deg,#ffb35c,#d97b2e);border-color:#ffd08a;box-shadow:0 0 12px rgba(255,150,50,.6);}
+.anv.done svg{fill:#1b0f06;}
+.finish{margin:14px 12px 0;border-radius:12px;background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;text-align:center;font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:13px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.6);}
+.timer{position:absolute;left:12px;right:12px;bottom:14px;border-radius:14px;background:#1a100b;border:1px solid #6a3f26;border-top-color:#8a5433;padding:10px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px -10px rgba(0,0,0,.9),0 0 18px -6px rgba(255,120,30,.4);}
+.timer b{font:700 24px "IBM Plex Mono",monospace;color:var(--white);}
+.timer small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);}
+.timer .tb{margin-left:auto;display:flex;gap:6px;}
+.timer .tb span{border:1px solid #4a2c1c;border-radius:8px;padding:6px 9px;font:600 11px "IBM Plex Mono",monospace;color:var(--txt2);}
+.timer .tb span.skip{color:var(--gold);border-color:#a0521c;}
+
+/* AA. plates on the bench */
+.aa .body{padding:12px 12px 90px;}
+.aa .ex{position:relative;overflow:hidden;border-radius:12px;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 10px 22px -10px rgba(0,0,0,.95);margin-bottom:12px;}
+.aa .ex::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);box-shadow:0 0 12px rgba(255,120,30,.5);}
+.aa .exh{display:flex;align-items:center;gap:10px;padding:12px 12px 8px 18px;}
+.aa .exh .n{flex:1;font-family:Marcellus,serif;font-size:17px;color:var(--white);}
+.aa .cue{padding:0 12px 10px 18px;font-size:12px;color:var(--txt2);}
+.aa .row{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:8px 12px 8px 18px;border-top:1px solid #241510;}
+.aa .row .no{font:600 11px "IBM Plex Mono",monospace;color:var(--txt3);width:22px;height:22px;border-radius:7px;background:#0e0806;border:1px solid #2a1810;display:flex;align-items:center;justify-content:center;}
+.aa .row .v{display:flex;align-items:baseline;gap:10px;font:600 20px "IBM Plex Mono",monospace;color:var(--txt);}
+.aa .row .v em{font-style:normal;color:var(--txt3);font-size:13px;}
+.aa .row.done{background:linear-gradient(90deg,rgba(255,138,31,.16),transparent 70%);}
+.aa .row.done .no{background:var(--gold);color:#1b0f06;border-color:var(--gold);}
+.aa .row.done .v{color:var(--gold);text-shadow:0 0 10px rgba(255,138,31,.5);}
+.aa .row.match .v{color:var(--violet);}
+.aa .row.match .no{background:var(--violet);color:#1b0f06;border-color:var(--violet);}
+.aa .rest{padding:8px 12px 10px 18px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
+.aa .ss{border:1px solid #6a4fa8;border-radius:14px;padding:8px;margin-bottom:12px;background:rgba(169,138,230,.05);}
+.aa .ss .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--violet);padding:2px 6px 8px;}
+.aa .ss .ex{margin-bottom:8px;}
+.aa .ss .ex:last-child{margin-bottom:0;}
+
+/* AB. the ledger: compact table per lift, cues behind the name */
+.ab .body{padding:10px 12px 90px;}
+.ab .ex{margin-bottom:10px;border-radius:10px;background:#0e0806;border:1px solid #3a2214;overflow:hidden;}
+.ab .exh{display:flex;align-items:center;gap:8px;padding:9px 10px 9px 12px;background:#150d09;border-bottom:1px solid #2a1810;}
+.ab .exh .n{flex:1;font-family:Marcellus,serif;font-size:15px;color:var(--white);}
+.ab .exh small{font:600 10px "IBM Plex Mono",monospace;letter-spacing:.08em;color:var(--txt3);text-transform:uppercase;}
+.ab .exh i{font-style:normal;color:var(--txt3);font-size:12px;}
+.ab .row{display:grid;grid-template-columns:20px 1fr 1fr auto;gap:8px;align-items:center;padding:6px 10px 6px 12px;border-bottom:1px solid #1e120c;}
+.ab .row:last-child{border-bottom:0;}
+.ab .row .no{font:600 10px "IBM Plex Mono",monospace;color:var(--txt3);}
+.ab .row .c{font:600 17px "IBM Plex Mono",monospace;color:var(--txt);text-align:center;padding:6px 0;border-radius:7px;background:#130c09;border:1px solid #241510;}
+.ab .row .c small{font-size:9px;color:var(--txt3);margin-left:3px;}
+.ab .row.done{background:rgba(255,138,31,.10);}
+.ab .row.done .c{color:var(--gold);border-color:#6a3f26;}
+.ab .row.match .c{color:var(--violet);}
+.ab .anv{width:36px;height:30px;}
+.ab .ss{border-left:3px solid var(--violet);padding-left:8px;margin-bottom:10px;}
+.ab .ss .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--violet);padding:0 0 6px;}
+
+/* AC. focus: the current lift large, the rest as a spine */
+.ac .body{padding:12px 12px 90px;}
+.ac .now{position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);padding:14px 14px 12px 20px;}
+.ac .now::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);box-shadow:0 0 12px rgba(255,120,30,.5);}
+.ac .eyebrow{font:600 10px "IBM Plex Mono",monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
+.ac .n{font-family:Marcellus,serif;font-size:21px;color:var(--white);margin-top:2px;}
+.ac .cue{font-size:12px;color:var(--txt2);margin-top:4px;}
+.ac .big{display:flex;align-items:center;gap:14px;margin:14px 0 6px;}
+.ac .big .v{font:700 44px "IBM Plex Mono",monospace;color:var(--white);line-height:1;letter-spacing:-.03em;}
+.ac .big .v small{font-size:13px;color:var(--txt3);margin:0 4px;}
+.ac .big .set{margin-left:auto;text-align:right;}
+.ac .big .set b{display:block;font:700 22px "IBM Plex Mono",monospace;color:var(--gold);}
+.ac .big .set span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);}
+.ac .strike{margin-top:10px;border-radius:12px;padding:14px;text-align:center;background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:13px;box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.6);}
+.ac .dots{display:flex;gap:6px;margin-top:10px;}
+.ac .dots i{flex:1;height:6px;border-radius:3px;background:#2a1810;}
+.ac .dots i.d{background:var(--gold);box-shadow:0 0 8px rgba(255,138,31,.6);}
+.ac .dots i.m{background:var(--violet);}
+.ac .queue{margin-top:14px;}
+.ac .q{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid #1e120c;color:var(--txt2);}
+.ac .q .dot{width:10px;height:10px;border-radius:50%;background:#2a1810;border:1px solid #4a2c1c;margin-left:6px;}
+.ac .q.done .dot{background:var(--gold);border-color:var(--gold);}
+.ac .q.done{color:var(--txt3);}
+.ac .q .nm{font-family:Marcellus,serif;font-size:14px;}
+.ac .q small{font:500 10px "IBM Plex Mono",monospace;color:var(--txt3);}
+.ac .q.ss .nm::before{content:"";display:inline-block;width:3px;height:12px;background:var(--violet);margin-right:8px;vertical-align:-1px;}
+</style>
+<h1>The session screen, three directions</h1>
+<p class="lead">Same workout in each: Chest, Triceps and Core, two sets of the bench logged, one gold, one violet, a superset further down, the rest timer running. All three keep the anvil to log a set and the finish button at the end. They differ in how much you see at once and where the eye lands.</p>
+<div class="opts">
+
+<section class="opt aa"><h2>AA. Plates on the bench</h2><p class="why">The board's language carried straight in: each lift is a blackened plate with the ember rail, its sets are slots inside it, a logged set lights gold or violet along its whole row. Tools are small icons on the plate's shoulder. Supersets are lassoed in violet. Closest to what you have, made of iron.</p>
+<div class="phone">
+<div class="hd"><span class="back">‹</span><div class="t"><b>Chest + Triceps + Core</b><small><em>2</em> of 28 sets</small></div><div class="tools"><span class="tool">◷</span><span class="tool">⚙</span></div><div class="ring"><i>2/28</i></div></div><div class="bar"><i></i></div>
+<div class="body">
+<div class="ex"><div class="exh"><span class="n">Barbell Bench Press</span><div class="tools"><span class="tool">i</span><span class="tool">✎</span><span class="tool on">⚖</span></div></div><div class="cue">Flat bench, hands a little wider than the shoulders, lower it slowly</div>
+<div class="row done"><span class="no">1</span><span class="v">65<em>lb</em>× 8</span><span class="anv done"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div>
+<div class="row done match"><span class="no">2</span><span class="v">65<em>lb</em>× 8</span><span class="anv done" style="background:linear-gradient(180deg,#c9b3f0,#8f6fbe);border-color:#d9c9f5;box-shadow:0 0 12px rgba(169,138,230,.6)"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div>
+<div class="row"><span class="no">3</span><span class="v">65<em>lb</em>× 8</span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div>
+<div class="row"><span class="no">4</span><span class="v">65<em>lb</em>× 8</span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div>
+<div class="rest">Rest 3 min</div></div>
+<div class="ss"><div class="lbl">Superset · rest after both</div>
+<div class="ex"><div class="exh"><span class="n">Incline Dumbbell Press</span><div class="tools"><span class="tool">i</span><span class="tool">✎</span></div></div>
+<div class="row"><span class="no">1</span><span class="v">25<em>lb</em>× 10</span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div></div>
+<div class="ex"><div class="exh"><span class="n">Cable Fly</span><div class="tools"><span class="tool">i</span></div></div>
+<div class="row"><span class="no">1</span><span class="v">30<em>lb</em>× 12</span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div></div></div>
+</div>
+<div class="timer"><div><b>2:41</b><br><small>Rest</small></div><div class="tb"><span>−15</span><span>+15</span><span class="skip">Skip</span></div></div>
+</div></section>
+
+<section class="opt ab"><h2>AB. The ledger</h2><p class="why">Denser. Each lift is a compact table: a header line with the name, the rest and the tools, then one tight row per set with the weight and reps as two tappable cells and the anvil at the end. Cues sit behind the name on tap. Most of a workout fits one screen, so you scroll less mid-set.</p>
+<div class="phone">
+<div class="hd"><span class="back">‹</span><div class="t"><b>Chest + Triceps + Core</b><small><em>2</em> of 28 sets</small></div><div class="tools"><span class="tool">◷</span><span class="tool">⚙</span></div><div class="ring"><i>2/28</i></div></div><div class="bar"><i></i></div>
+<div class="body">
+<div class="ex"><div class="exh"><span class="n">Barbell Bench Press</span><small>Rest 3:00</small><i>i · ✎ · ⚖</i></div>
+<div class="row done"><span class="no">1</span><span class="c">65<small>lb</small></span><span class="c">8<small>reps</small></span><span class="anv done"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div>
+<div class="row done match"><span class="no">2</span><span class="c">65<small>lb</small></span><span class="c">8<small>reps</small></span><span class="anv done" style="background:linear-gradient(180deg,#c9b3f0,#8f6fbe);border-color:#d9c9f5"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div>
+<div class="row"><span class="no">3</span><span class="c">65<small>lb</small></span><span class="c">8<small>reps</small></span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div>
+<div class="row"><span class="no">4</span><span class="c">65<small>lb</small></span><span class="c">8<small>reps</small></span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div></div>
+<div class="ss"><div class="lbl">Superset · rest after both</div>
+<div class="ex"><div class="exh"><span class="n">Incline Dumbbell Press</span><small>3 sets</small><i>i · ✎</i></div>
+<div class="row"><span class="no">1</span><span class="c">25<small>lb</small></span><span class="c">10<small>reps</small></span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div>
+<div class="row"><span class="no">2</span><span class="c">25<small>lb</small></span><span class="c">10<small>reps</small></span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div></div>
+<div class="ex"><div class="exh"><span class="n">Cable Fly</span><small>3 sets</small><i>i</i></div>
+<div class="row"><span class="no">1</span><span class="c">30<small>lb</small></span><span class="c">12<small>reps</small></span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div></div></div>
+<div class="ex"><div class="exh"><span class="n">Machine Bench Press</span><small>Rest 2:00</small><i>i · ✎ · ⚖</i></div>
+<div class="row"><span class="no">1</span><span class="c">60<small>lb</small></span><span class="c">10<small>reps</small></span><span class="anv"><svg viewBox="0 0 100 100"><path d="M10 32h87l-6 7-3.5 3H72c-3.5 3.5-6 8-7 11.4-.7 3.6.9 7 6 10.6l6.2 4.4v5.3H29v-5.3l6.2-4.4c5.2-3.5 6.8-7 6.1-10.6-.9-3.5-3.5-8-7-11.4H19l-4-3z"/></svg></span></div></div>
+</div>
+<div class="timer"><div><b>2:41</b><br><small>Rest</small></div><div class="tb"><span>−15</span><span>+15</span><span class="skip">Skip</span></div></div>
+</div></section>
+
+<section class="opt ac"><h2>AC. Focus</h2><p class="why">One lift at a time. The current lift is a big plate with the weight and reps large and one strike button; a row of pips shows the sets, gold and violet as they land. The rest of the workout is a spine underneath, done lifts dimmed with a gold stop, supersets marked. Most game-like, least scrolling, and the least like a spreadsheet.</p>
+<div class="phone">
+<div class="hd"><span class="back">‹</span><div class="t"><b>Chest + Triceps + Core</b><small><em>2</em> of 28 sets</small></div><div class="tools"><span class="tool">◷</span><span class="tool">⚙</span></div><div class="ring"><i>2/28</i></div></div><div class="bar"><i></i></div>
+<div class="body">
+<div class="now"><div class="eyebrow">Now · set 3 of 4</div><div class="n">Barbell Bench Press</div><div class="cue">Flat bench, hands a little wider than the shoulders, lower it slowly</div>
+<div class="big"><span class="v">65<small>lb</small>×<small></small>8</span><div class="set"><b>3:00</b><span>rest after</span></div></div>
+<div class="dots"><i class="d"></i><i class="m"></i><i></i><i></i></div>
+<div class="strike">Strike · log set 3</div>
+<div class="tools" style="margin-top:12px;justify-content:center"><span class="tool">i</span><span class="tool">✎</span><span class="tool on">⚖</span><span class="tool">⇄</span></div></div>
+<div class="queue">
+<div class="q done"><span class="dot"></span><span class="nm">Warm-up · Push-Up</span><small>done</small></div>
+<div class="q ss"><span class="dot"></span><span class="nm">Incline Dumbbell Press</span><small>3 × 10</small></div>
+<div class="q ss"><span class="dot"></span><span class="nm">Cable Fly</span><small>3 × 12</small></div>
+<div class="q"><span class="dot"></span><span class="nm">Machine Bench Press</span><small>3 × 10</small></div>
+<div class="q"><span class="dot"></span><span class="nm">Triceps Pushdown</span><small>3 × 12</small></div>
+<div class="q"><span class="dot"></span><span class="nm">Plank</span><small>2 × 40 sec</small></div>
+</div>
+</div>
+<div class="timer"><div><b>2:41</b><br><small>Rest</small></div><div class="tb"><span>−15</span><span>+15</span><span class="skip">Skip</span></div></div>
+</div></section>
+
+</div>
