@@ -1,0 +1,100 @@
+<title>The Seal, Three Cuts</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600;700&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--hot:#ffd08a;--white:#fff6e6;--violet:#a98ae6;--green:#7fe0a8;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:66ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:78px;}
+.phone{position:relative;overflow:hidden;border-radius:18px;min-height:600px;background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.3),transparent 70%),#070403;padding:16px 12px 22px;}
+.go{border-radius:12px;background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;text-align:center;font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:13px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.6);margin-top:16px;}
+.share{margin-top:12px;text-align:center;font-size:12px;color:var(--txt3);}
+.plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
+.plate::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.eyebrow{font:600 10px "IBM Plex Mono",monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
+h3{font-family:Marcellus,serif;font-size:20px;font-weight:400;margin:4px 66px 0 0;color:var(--white);line-height:1.2;}
+.date{font-size:12px;color:var(--txt3);margin-top:2px;}
+.seal{position:absolute;right:14px;top:14px;width:50px;height:50px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);box-shadow:0 0 16px -4px rgba(255,138,31,.7),inset 0 0 0 3px #120b08,inset 0 0 0 4px #6a3f26;}
+.seal svg{width:28px;height:28px;fill:var(--gold);}
+.hero{display:flex;align-items:baseline;gap:10px;margin:18px 0 4px;}
+.hero b{font:700 54px "IBM Plex Mono",monospace;color:var(--white);line-height:1;letter-spacing:-.03em;text-shadow:0 0 18px rgba(255,200,120,.5);}
+.hero span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);}
+.hero small{font:700 12px "IBM Plex Mono",monospace;color:var(--green);margin-left:auto;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.st{border-radius:10px;background:#0e0806;border:1px solid #3a2214;padding:9px 10px;}
+.st b{display:block;font:600 20px "IBM Plex Mono",monospace;color:var(--txt);}
+.st b small{font-size:10px;color:var(--txt3);margin-left:2px;}
+.st span{display:block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-top:3px;}
+.st.gold{border-color:#a0521c;background:linear-gradient(180deg,#2a160a,#150d09);}
+.st.gold b{color:var(--gold);text-shadow:0 0 10px rgba(255,138,31,.6);}
+.st.vio{border-color:#6a4fa8;background:linear-gradient(180deg,#22183a,#140f22);}
+.st.vio b{color:var(--violet);text-shadow:0 0 10px rgba(169,138,230,.6);}
+.rec{margin-top:12px;border-radius:10px;padding:10px 12px;background:linear-gradient(90deg,rgba(255,138,31,.25),rgba(255,138,31,.05));border:1px solid #a0521c;display:flex;align-items:center;gap:10px;}
+.rec b{font:700 22px "IBM Plex Mono",monospace;color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.7);}
+.rec span{font-size:12.5px;color:var(--white);}
+.rec small{margin-left:auto;font-size:11px;color:var(--txt2);text-align:right;}
+.lvlcall{margin-top:12px;border-radius:12px;padding:12px 14px;background:linear-gradient(90deg,rgba(255,138,31,.22),rgba(255,138,31,.06));border:1px solid #a0521c;display:flex;align-items:center;gap:12px;}
+.lvlcall b{display:block;font-size:14px;color:var(--white);}
+.lvlcall small{display:block;font-size:11.5px;color:var(--txt2);}
+.lvlcall .act{margin-left:auto;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#1b0f06;background:var(--hot);border-radius:9px;padding:9px 11px;white-space:nowrap;box-shadow:0 0 12px rgba(255,208,138,.6);}
+.lvlcall .arrow{width:26px;height:26px;border-radius:8px;border:1px solid var(--gold);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+/* Y2: two heroes */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 0;}
+.two .h{border-radius:12px;padding:12px 12px 10px;background:#0e0806;border:1px solid #3a2214;}
+.two .h b{display:block;font:700 40px "IBM Plex Mono",monospace;line-height:1;letter-spacing:-.03em;color:var(--white);}
+.two .h span{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);margin-top:6px;}
+.two .h small{display:block;font:700 11px "IBM Plex Mono",monospace;color:var(--green);margin-top:4px;}
+.two .h.gold{border-color:#a0521c;background:linear-gradient(180deg,#2a160a,#150d09);}
+.two .h.gold b{color:var(--gold);text-shadow:0 0 14px rgba(255,138,31,.7);}
+.two .h.gold small{color:var(--txt2);font-weight:500;}
+.rowchips{display:flex;gap:8px;margin-top:12px;}
+.chip{flex:1;text-align:center;border-radius:9px;padding:8px 6px;font:600 12px "IBM Plex Mono",monospace;border:1px solid #3a2214;color:var(--txt2);}
+.chip b{display:block;font-size:16px;color:var(--txt);}
+.chip.gold{border-color:#a0521c;}.chip.gold b{color:var(--gold);}
+.chip.vio{border-color:#6a4fa8;}.chip.vio b{color:var(--violet);}
+/* Y3: the quiet day */
+.quiet .hero small{color:var(--txt3);}
+.none{margin-top:12px;border-radius:10px;padding:10px 12px;border:1px dashed #3a2214;color:var(--txt3);font-size:12px;text-align:center;}
+</style>
+<h1>The seal, three cuts</h1>
+<p class="lead">V without reps and weight moved. Every number on the plate is something you did: sets finished, sets that went gold, sets that matched, minutes, records, and the raise you earned. The third sample shows an ordinary day with nothing special, since most days are that.</p>
+<div class="opts">
+
+<section class="opt"><h2>Y1. Sets lead</h2><p class="why">The hero number is the sets, with the comparison to last time beside it. Under it, gold sets, matched sets and minutes as three tiles in the app's colours. Records in a gold band. The level-up as the ember call-out.</p>
+<div class="phone">
+<div class="plate"><div class="seal"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg></div>
+<div class="eyebrow">Session logged</div><h3>Chest + Triceps + Core</h3><div class="date">Monday 15 September</div>
+<div class="hero"><b>24</b><span>of 24 sets</span><small>+2 vs last</small></div>
+<div class="stats"><div class="st gold"><b>7</b><span>Gold</span></div><div class="st vio"><b>9</b><span>Matched</span></div><div class="st"><b>52<small>min</small></b><span>In the gym</span></div></div>
+<div class="rec"><b>2</b><span>new records</span><small>Bench Press<br>Incline Press</small></div>
+</div>
+<div class="lvlcall"><span class="arrow">↑</span><div><b>3 lifts levelled up</b><small>Raise now, or later from the board</small></div><span class="act">Raise</span></div>
+<div class="go">Done</div><div class="share">Share as text</div>
+</div></section>
+
+<section class="opt"><h2>Y2. Two heroes</h2><p class="why">Sets and records share the top as two big numbers, records in gold. Gold and matched sets become a chip row with the minutes. Puts the win at the same weight as the work, which is what a good day feels like.</p>
+<div class="phone">
+<div class="plate"><div class="seal"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg></div>
+<div class="eyebrow">Session logged</div><h3>Chest + Triceps + Core</h3><div class="date">Monday 15 September · 52 min</div>
+<div class="two"><div class="h"><b>24</b><span>of 24 sets</span><small>+2 vs last</small></div><div class="h gold"><b>2</b><span>Records</span><small>Bench · Incline</small></div></div>
+<div class="rowchips"><span class="chip gold"><b>7</b>gold</span><span class="chip vio"><b>9</b>matched</span><span class="chip"><b>8</b>under</span></div>
+</div>
+<div class="lvlcall"><span class="arrow">↑</span><div><b>3 lifts levelled up</b><small>Raise now, or later from the board</small></div><span class="act">Raise</span></div>
+<div class="go">Done</div><div class="share">Share as text</div>
+</div></section>
+
+<section class="opt quiet"><h2>Y3. An ordinary day</h2><p class="why">Y1 on a day with no records and no raise: the plate still stands, the tiles still carry colour where a set earned it, and nothing on the screen apologises. This is what most finishes will look like, so it has to hold up.</p>
+<div class="phone">
+<div class="plate"><div class="seal"><svg viewBox="0 0 100 100"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg></div>
+<div class="eyebrow">Session logged</div><h3>Legs: Quad + Posterior + Core</h3><div class="date">Thursday 17 September</div>
+<div class="hero"><b>19</b><span>of 22 sets</span><small>same as last</small></div>
+<div class="stats"><div class="st gold"><b>0</b><span>Gold</span></div><div class="st vio"><b>12</b><span>Matched</span></div><div class="st"><b>47<small>min</small></b><span>In the gym</span></div></div>
+<div class="none">Held the line today. Every matched set is a set that stayed at your best.</div>
+</div>
+<div class="go">Done</div><div class="share">Share as text</div>
+</div></section>
+
+</div>
