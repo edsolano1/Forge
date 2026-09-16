@@ -2257,6 +2257,10 @@ body.forge .daybox.today .card{border-color:#a0521c;border-top-color:#c06a30;
 body.forge .card .card-name{font-size:16px;white-space:normal;overflow:hidden;text-overflow:clip;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;}
 body.forge .card-r .pill{font-size:9px;letter-spacing:.04em;padding:3px 6px;}
 body.forge .card-r{gap:6px;}
+body.forge .card-r .lvl{width:22px;height:22px;border-radius:7px;}
+body.forge .card-r .lvl svg{width:12px;height:12px;}
+body.forge .card .carddrag{padding:13px 2px 13px 8px;margin:-13px -2px -13px 4px;opacity:.55;}
+body.forge .card .carddrag svg{width:12px;height:12px;}
 body.forge .card .card-meta{color:var(--txt2);}
 body.forge .dayempty.dayadd,body.forge .dayempty.dayadd.quiet{border:1px solid #2a1810;border-radius:10px;background:#0e0805;
   box-shadow:inset 0 2px 6px rgba(0,0,0,.9);color:#7a5a44;padding:10px 4px;}
@@ -2313,7 +2317,7 @@ body.forge .daybox.today .dayhead{background:#3a1d0c;border-color:#a0521c;box-sh
 body.forge .daybox.today .dayhead > span:first-child{background:transparent;border:0;box-shadow:none;color:#ffd9b5;}
 body.forge .daybox.today .dh-d{color:#fff;}
 body.forge .daybox.today .dayhead-add{color:#e0a874;}
-body.forge .daybox.empty{min-height:46px;}
+body.forge .daybox.empty{min-height:46px;padding-bottom:0;}
 body.forge .daybox.empty .dayhead{background:#0f0906;border-color:#2a1810;}
 body.forge .daybox.empty .dayhead > span:first-child{padding:4px 0;background:transparent;border:0;color:var(--txt3);}
 body.forge .daybox.empty .dh-d{color:var(--txt3);}
@@ -9324,7 +9328,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.165';
+var APPV='v5.166';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
