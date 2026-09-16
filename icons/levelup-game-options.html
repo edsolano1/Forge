@@ -1,0 +1,116 @@
+<title>Level Up Game Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600;700&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--hot:#ffd08a;--white:#fff6e6;--violet:#a98ae6;color-scheme:dark;}
+body{background:#070403;color:var(--txt);font:14px/1.45 "Bricolage Grotesque",system-ui,sans-serif;margin:0;padding:22px 16px 60px;}
+h1{font-size:22px;font-weight:600;margin:0 0 4px;}
+p.lead{color:var(--txt2);max-width:66ch;margin:0 0 22px;}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start;}
+.opt{border:1px solid #2a1a12;border-radius:16px;padding:14px 14px 18px;background:rgba(255,255,255,.012);}
+.opt h2{font-size:15px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+.opt .why{font-size:12.5px;color:var(--txt2);margin:0 0 14px;min-height:96px;}
+.phone{position:relative;overflow:hidden;border-radius:18px;height:600px;background:#070403;isolation:isolate;}
+.phone>*{position:relative;z-index:2;}
+.name{font-family:Marcellus,serif;font-size:15px;color:var(--txt);}
+.mono{font-family:"IBM Plex Mono",monospace;}
+.mark{fill:var(--hot);}
+.go{border-radius:12px;background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;text-align:center;font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:13px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.7);}
+.skip{margin-top:10px;text-align:center;font-size:12px;color:var(--txt3);letter-spacing:.04em;}
+.rays{position:absolute;inset:-40% -40% auto -40%;height:120%;z-index:0;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg at 50% 38%,rgba(255,180,80,.16) 0deg 4deg,transparent 4deg 12deg);
+  -webkit-mask-image:radial-gradient(60% 45% at 50% 38%,#000 20%,transparent 70%);mask-image:radial-gradient(60% 45% at 50% 38%,#000 20%,transparent 70%);}
+.glow{position:absolute;inset:0;z-index:0;pointer-events:none;}
+
+/* S. the banner: a beam of light cuts the dark, everything else waits below */
+.s .glow{background:radial-gradient(70% 30% at 50% 26%,rgba(255,150,50,.45),transparent 70%),radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.3),transparent 70%);}
+.s .beam{margin:54px -20px 0;padding:14px 32px 16px;text-align:center;
+  background:linear-gradient(90deg,transparent,rgba(255,138,31,.85) 18%,rgba(255,208,138,.95) 50%,rgba(255,138,31,.85) 82%,transparent);
+  box-shadow:0 0 40px rgba(255,150,50,.55),0 0 90px rgba(255,120,30,.35);transform:skewY(-2deg);}
+.s .beam b{display:block;font-size:30px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#1b0f06;line-height:1;}
+.s .beam small{display:block;font:600 10.5px "IBM Plex Mono",monospace;letter-spacing:.24em;text-transform:uppercase;color:#3a1d0c;margin-top:6px;}
+.s .list{margin:34px 14px 0;}
+.s .li{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,180,100,.14);}
+.s .li .name{flex:1;}
+.s .num{font:700 24px "IBM Plex Mono",monospace;color:var(--white);text-shadow:0 0 14px rgba(255,200,120,.8);}
+.s .num small{font-size:10px;color:var(--txt2);margin-left:3px;}
+.s .d{font:700 12px "IBM Plex Mono",monospace;color:#7fe0a8;text-shadow:0 0 10px rgba(127,224,168,.6);}
+.s .foot{margin:30px 14px 0;}
+
+/* T. the burst: the anvil struck, rays and sparks, numbers counting up on gold plates */
+.t .glow{background:radial-gradient(45% 22% at 50% 20%,rgba(255,240,200,.35),rgba(255,150,50,.25) 40%,transparent 70%),radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.3),transparent 70%);}
+.t .hd{text-align:center;padding-top:26px;}
+.t .hd svg{width:64px;height:64px;filter:drop-shadow(0 0 18px rgba(255,200,120,.95)) drop-shadow(0 0 40px rgba(255,120,30,.6));}
+.t .hd b{display:block;font-size:26px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--white);text-shadow:0 0 20px rgba(255,180,100,.8);margin-top:6px;}
+.t .hd small{display:block;font-size:12px;color:var(--hot);letter-spacing:.14em;text-transform:uppercase;margin-top:4px;}
+.t .spark{position:absolute;border-radius:50%;background:var(--hot);box-shadow:0 0 8px var(--hot);}
+.t .plate{margin:0 12px 9px;padding:11px 12px 11px 14px;border-radius:11px;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#3a1d0c,#1e100a);border:1px solid #c06a30;border-top-color:#ffb35c;box-shadow:inset 0 1px 0 rgba(255,235,200,.35),0 0 22px -6px rgba(255,138,31,.6);}
+.t .plate.v{border-color:#6a4fa8;border-top-color:var(--violet);background:linear-gradient(180deg,#22183a,#140f22);box-shadow:inset 0 1px 0 rgba(220,200,255,.35),0 0 22px -6px rgba(169,138,230,.6);}
+.t .row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.t .cnt{font:700 26px "IBM Plex Mono",monospace;color:var(--white);text-shadow:0 0 12px rgba(255,200,120,.8);}
+.t .cnt small{font-size:11px;color:var(--hot);margin-left:3px;}
+.t .plate.v .cnt small{color:var(--violet);}
+.t .was{font:600 11px "IBM Plex Mono",monospace;color:var(--txt3);letter-spacing:.06em;}
+.t .chip{font:700 11px "IBM Plex Mono",monospace;color:#1b0f06;background:var(--hot);border-radius:6px;padding:3px 8px;box-shadow:0 0 10px rgba(255,208,138,.7);}
+.t .plate.v .chip{background:var(--violet);}
+.t .list{margin-top:18px;}
+.t .foot{margin:20px 12px 0;}
+
+/* U. the stat sheet: a Pokémon style box, rows tick up one after another, the current row lit */
+.u .glow{background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.3),transparent 70%);}
+.u .box{margin:40px 14px 0;border:2px solid var(--hot);border-radius:14px;background:#0e0806;box-shadow:0 0 0 4px #070403,0 0 0 5px #5a3520,0 0 30px rgba(255,150,50,.35);overflow:hidden;}
+.u .cap{background:linear-gradient(90deg,#3a1d0c,#1e100a);padding:11px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #5a3520;}
+.u .cap b{font-size:14px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--hot);}
+.u .cap small{font:600 10px "IBM Plex Mono",monospace;letter-spacing:.14em;color:var(--txt2);text-transform:uppercase;}
+.u .st{display:grid;grid-template-columns:1fr auto auto;gap:0 12px;align-items:center;padding:12px 14px;border-bottom:1px solid #2a1810;}
+.u .st.on{background:linear-gradient(90deg,rgba(255,138,31,.18),transparent);}
+.u .st .name{font-size:14.5px;}
+.u .st .val{font:700 20px "IBM Plex Mono",monospace;color:var(--white);}
+.u .st .val small{font-size:10px;color:var(--txt2);margin-left:2px;}
+.u .st.on .val{color:var(--hot);text-shadow:0 0 12px rgba(255,208,138,.8);}
+.u .st .d{font:700 13px "IBM Plex Mono",monospace;color:#7fe0a8;min-width:52px;text-align:right;}
+.u .st.wait .d{color:var(--txt3);}
+.u .st.wait .val{color:var(--txt3);}
+.u .foot{margin:22px 14px 0;}
+.u .tick{font:600 10px "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);text-align:center;margin-top:10px;}
+</style>
+<h1>Level up, the way games do it</h1>
+<p class="lead">What every good level-up screen shares: it takes over the screen for a moment, one bright thing sits in the middle, the numbers count up rather than appear, each gain lands in sequence with a sound, and the palette jumps to white-hot and gold with one contrasting colour. Three ways to bring that to Forge. Motion is described; these are stills.</p>
+<div class="opts">
+
+<section class="opt s"><h2>S. The banner</h2><p class="why">A beam of light cuts across the dark with LEVEL UP stamped on it, the way a banner slides in when a rank goes up. Below it the lifts land one at a time, each number counting up from the old to the new with a tick, the gain in bright green beside it. Cleanest read, biggest moment.</p>
+<div class="phone"><div class="glow"></div><div class="rays"></div>
+<div class="beam"><b>Level up</b><small>Chest · Triceps · Core</small></div>
+<div class="list">
+<div class="li"><span class="name">Bench Press</span><span class="num">140<small>lb</small></span><span class="d">+5</span></div>
+<div class="li"><span class="name">Incline Dumbbell Press</span><span class="num">55<small>lb</small></span><span class="d">+5</span></div>
+<div class="li"><span class="name">Plank</span><span class="num">45<small>sec</small></span><span class="d">+5</span></div>
+</div>
+<div class="foot"><div class="go">Raise all</div><div class="skip">Raise one at a time · Not this time</div></div>
+</div></section>
+
+<section class="opt t"><h2>T. The burst</h2><p class="why">The anvil is struck and light bursts from it, sparks flying. Each lift is a hot gold plate with the number counting up large; an approximate jump gets the app's violet instead of gold so the colour says it without a word. Most colour, most forge.</p>
+<div class="phone"><div class="glow"></div><div class="rays"></div>
+<i class="spark" style="left:22%;top:12%;width:4px;height:4px"></i><i class="spark" style="left:70%;top:9%;width:3px;height:3px"></i><i class="spark" style="left:60%;top:19%;width:5px;height:5px"></i><i class="spark" style="left:34%;top:21%;width:3px;height:3px"></i><i class="spark" style="left:78%;top:24%;width:4px;height:4px"></i>
+<div class="hd"><svg viewBox="0 0 100 100" class="mark"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L18 42L10 36z"/></svg><b>Level up</b><small>3 lifts forged heavier</small></div>
+<div class="list">
+<div class="plate"><div class="row"><span class="name">Bench Press</span><span class="chip">+5 lb</span></div><div class="row"><span class="was">WAS 135 × 8</span><span class="cnt">140<small>lb</small></span></div></div>
+<div class="plate v"><div class="row"><span class="name">Incline Dumbbell Press</span><span class="chip">+5 lb approx</span></div><div class="row"><span class="was">WAS 50 × 10</span><span class="cnt">55<small>lb</small></span></div></div>
+<div class="plate"><div class="row"><span class="name">Plank</span><span class="chip">+5 sec</span></div><div class="row"><span class="was">WAS 40 SEC</span><span class="cnt">45<small>sec</small></span></div></div>
+</div>
+<div class="foot"><div class="go">Raise all</div><div class="skip">Tap a plate to raise just that one · Not this time</div></div>
+</div></section>
+
+<section class="opt u"><h2>U. The stat sheet</h2><p class="why">The box you see when a creature levels up: a framed panel, each stat on its own row, and the rows tick up one after the other with a click, the current one lit. The gains stack in green down the right. Calm, legible, and very satisfying in motion.</p>
+<div class="phone"><div class="glow"></div>
+<div class="box">
+<div class="cap"><b>Level up</b><small>Chest · Triceps · Core</small></div>
+<div class="st"><span class="name">Bench Press</span><span class="val">140<small>lb</small></span><span class="d">+5 lb</span></div>
+<div class="st on"><span class="name">Incline Dumbbell Press</span><span class="val">53<small>lb</small></span><span class="d">+3…</span></div>
+<div class="st wait"><span class="name">Plank</span><span class="val">40<small>sec</small></span><span class="d">+5 sec</span></div>
+</div>
+<div class="tick">counting up · tap to skip ahead</div>
+<div class="foot"><div class="go">Raise all</div><div class="skip">Raise one at a time · Not this time</div></div>
+</div></section>
+
+</div>
