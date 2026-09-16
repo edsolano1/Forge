@@ -2340,8 +2340,13 @@ body.forge .srow{display:grid;grid-template-columns:18px 1fr 1fr 40px;gap:8px;al
 body.forge .srow:first-child{border-top:0;}
 body.forge .sno{width:18px;height:18px;border-radius:5px;font-size:10px;background:transparent;border:0;color:var(--txt3);}
 body.forge .inp{width:100%;box-sizing:border-box;text-align:center;font-size:17px;font-weight:600;padding:7px 0;border:1px solid #241510;border-radius:7px;background:#130c09;color:var(--txt);}
-body.forge .inp.wide{grid-column:2 / span 2;}
-body.forge .srow .unit{grid-column:2 / span 2;}
+/* A reps-only or timed set is one cell the size of a weight cell, with its unit beside it, not a bar
+   across the row (v5.163). A timed set keeps its hold button before the anvil. */
+body.forge .srow:has(.inp.wide){grid-template-columns:18px 1fr 1fr 40px;}
+body.forge .srow:has(.inp.wide):has(.hold){grid-template-columns:18px 1fr 1fr 40px 40px;}
+body.forge .inp.wide{grid-column:2;}
+body.forge .srow .unit{grid-column:3;justify-self:start;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);padding-left:4px;}
+body.forge .srow .hold{width:40px;height:34px;border-radius:9px;margin:0;}
 body.forge .mul{display:none;}
 body.forge .chk{width:40px;height:34px;border-radius:9px;margin:0;border:1px solid #4a2c1c;background:#130c09;}
 body.forge .srow.done{background:rgba(143,111,190,.08);}
@@ -9315,7 +9320,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.162';
+var APPV='v5.163';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11682,7 +11687,7 @@ function renderSession(){
       // The foot of the card: rest on the left, your record on the right. The record is
       // here to be seen, not to be measured against - nothing above this line mentions it.
       var restTxt=ssMid?'Straight to the next. Rest comes after the round'
-                       :(r.rest?'Rest '+r.rest+(sec.ss?' after the round':''):'');
+                       :(r.rest?'Rest '+r.rest+((sec.ss&&!/round/i.test(r.rest))?' after the round':''):'');   // a rest that already says round is not told twice
       var prTxt=bst?(bst.w?fmtW(bst.w)+'×'+bst.r:bst.r+(bst.unit?' '+bst.unit:'')):'';
       if(restTxt||prTxt){
         html+='<div class="ex-foot">'+
