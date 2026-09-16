@@ -2337,8 +2337,14 @@ body.forge .sheet .fin-name,.sheet .fin-name{text-transform:none;letter-spacing:
 .fin-rec small{margin-left:auto;font-size:11px;color:var(--txt2);text-align:right;line-height:1.3;}
 .fin-lvl{margin-top:12px;border-radius:12px;padding:12px 14px;background:linear-gradient(90deg,rgba(255,138,31,.22),rgba(255,138,31,.06));border:1px solid #a0521c;display:flex;align-items:center;gap:12px;cursor:pointer;}
 .fin-lvl b{display:block;font-size:14px;color:#fff6e6;}
+.fin-lvl .fin-x{display:inline;font-family:var(--mono);font-weight:700;color:var(--gold);text-shadow:0 0 10px rgba(255,138,31,.6);margin-left:2px;}
 .fin-lvl small{display:block;font-size:11.5px;color:var(--txt2);}
-.fin-act{margin-left:auto;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#1b0f06;background:#ffd08a;border-radius:9px;padding:9px 11px;white-space:nowrap;box-shadow:0 0 12px rgba(255,208,138,.6);}
+.fin-act{position:relative;overflow:hidden;margin-left:auto;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#2a1608;border-radius:9px;padding:10px 13px;white-space:nowrap;
+  background:linear-gradient(180deg,#fff0c8 0%,#ffd06a 28%,#e8a020 62%,#c27a10 100%);border:1px solid #fff2cf;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -2px 0 rgba(120,60,0,.35),0 0 16px rgba(255,190,60,.7),0 4px 10px -4px rgba(0,0,0,.6);}
+.fin-act::after{content:'';position:absolute;top:-30%;bottom:-30%;left:-40%;width:35%;transform:rotate(20deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:finShine 3.2s ease-in-out infinite;}
+@keyframes finShine{0%{left:-40%;}35%,100%{left:130%;}}
+html.mo-off .fin-act::after{animation:none;display:none;}
 .fin-arrow{width:26px;height:26px;border-radius:8px;border:1px solid var(--gold);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .fin-note{font-size:12.5px;color:var(--txt2);margin:12px 2px 0;}
 .fin-share{margin:14px 0 0;text-align:center;font-size:12px;color:var(--txt3);}
@@ -9257,7 +9263,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.150';
+var APPV='v5.151';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13637,7 +13643,7 @@ function renderSummary(s){
   var lv=document.getElementById('finLvl'),n=0;
   try{n=levelPlan(FINWK).length;}catch(e){}
   lv.hidden=!n;
-  if(n)document.getElementById('finLvlT').textContent=n===1?'1 lift levelled up':n+' lifts levelled up';
+  if(n)document.getElementById('finLvlT').innerHTML='Level up <b class="fin-x">× '+n+'</b>';
   // The first real session gets the one place the colours are explained (v5.99).
   var real=(DB.logs||[]).filter(function(l){return !l.marked;}).length;
   var t=document.getElementById('sumTitle'),note=document.getElementById('sumNote');
