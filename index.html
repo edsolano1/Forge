@@ -2318,56 +2318,54 @@ body.forge .daybox.quenched .dayhead{background:#171716;border-color:#343433;}
 body.forge .daybox.quenched .dayhead > span:first-child{background:transparent;border:0;color:#84827f;}
 body.forge .daybox.quenched .dh-d{color:#84827f;}
 
-/* ---- The level-up sheet, v5.147: the ledger of gains (owner picked M, then P for the per-lift RAISE). ---- */
-.lvl-hd{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
-.lvl-mark{width:34px;height:34px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,138,31,.45));}
-.lvl-hd h3{margin:0;font-size:19px;line-height:1.15;}
-#lvlOvl .sheet > p{color:var(--txt2);font-size:12.5px;margin:0 0 12px;}
-.lvl-list{gap:8px;max-height:calc(var(--usablevh) * .52);}
-.lvl-row{position:relative;overflow:hidden;border-radius:10px;padding:10px 12px 11px 16px;margin:0;
-  background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12);
-  animation:lvlIn .4s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*60ms);}
-@keyframes lvlIn{from{opacity:.3;transform:translateY(8px);}to{opacity:1;transform:none;}}   /* never from 0: a paused clock must not hide a plate */
-.lvl-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
-.lvl-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
-.lvl-n{font-family:'Marcellus',serif;font-size:15.5px;font-weight:400;color:var(--txt);margin:0;}
-.lvl-tags{display:flex;gap:6px;align-items:center;flex-shrink:0;}
-.lvl-chip{display:inline-flex;align-items:center;font-family:var(--mono);font-weight:500;font-size:9.5px;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:3px 7px;white-space:nowrap;}
-.lvl-chip.sets{color:var(--txt3);border:1px solid #3a2214;}
-.lvl-chip.est{color:#c9a06e;border:1px solid #5a3d24;background:#1d130c;}
-.lvl-chip.up{color:#1b0f06;background:var(--gold);font-weight:600;}
-.lvl-d{display:flex;flex-wrap:wrap;align-items:center;gap:8px 9px;font-size:13px;color:var(--txt3);white-space:nowrap;}
-.lvl-g{position:relative;display:inline-flex;align-items:baseline;gap:8px;}
-.lvl-gn{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--txt3);font-style:normal;}
-.lvl-from{font-family:var(--mono);font-weight:500;font-size:16px;color:var(--txt3);}
-.lvl-from b,.lvl-to b{font-weight:inherit;color:inherit;}
-.lvl-from small,.lvl-to small{font-size:10px;margin-left:2px;color:var(--txt2);letter-spacing:.03em;}
-.lvl-arrow{color:var(--go);font-style:normal;font-size:14px;align-self:center;}
-.lvl-to{font-family:var(--mono);font-weight:600;font-size:22px;color:var(--gold);text-shadow:0 0 12px rgba(255,138,31,.45);border-radius:7px;padding:0 3px;}
-.lvl-to.up{cursor:pointer;}
-.lvl-to.up:hover{background:rgba(255,138,31,.12);}
-.lvl-raise{margin-left:auto;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#1b0f06;
-  background:linear-gradient(180deg,#f0942f,#c9651c);border:0;border-radius:9px;padding:9px 12px;cursor:pointer;
-  box-shadow:inset 0 1px 0 rgba(255,235,200,.5),0 4px 12px -6px rgba(255,120,30,.7);}
-.lvl-raise:active{transform:scale(.97);}
-.lvl-row.done{border-color:#a0521c;background:linear-gradient(180deg,#1f130c,#150d09);}
-.lvl-row.done::before{background:linear-gradient(180deg,#ffd08a,#ffb35c);box-shadow:0 0 12px rgba(255,160,60,.6);}
-.lvl-row.done .lvl-from{text-decoration:line-through;opacity:.6;}
-.lvl-mark-done{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
-.lvl-mark-done i{width:16px;height:16px;border-radius:50%;background:var(--gold);color:#1b0f06;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-style:normal;box-shadow:0 0 10px rgba(255,138,31,.7);}
-.lvl-foot{margin-top:14px;}
-.lvl-go{width:100%;box-sizing:border-box;padding:14px;font-weight:800;letter-spacing:.14em;
-  background:linear-gradient(180deg,#f0942f,#c9651c);color:#1b0f06;border-color:transparent;
-  box-shadow:inset 0 1px 0 rgba(255,235,200,.5),0 8px 20px -8px rgba(255,120,30,.7);}
-.lvl-skip{margin-top:12px;text-align:center;font-size:12px;color:var(--txt3);letter-spacing:.04em;cursor:pointer;padding:6px;}
-.lvl-skip:hover{color:var(--txt2);}
-#lvlOvl.busy .lvl-foot,#lvlOvl.busy .lvl-raise{pointer-events:none;opacity:.5;}
-/* the strike, re-pointed at the new pieces */
-.lvl-row.xfer .lvl-from{animation:drain .5s ease-in forwards;animation-delay:var(--sd);}
-.lvl-row.xfer .lvl-to{animation:charge .62s cubic-bezier(.3,1.5,.4,1) forwards;animation-delay:calc(var(--sd) + .26s);display:inline-block;}
-.lvl-row.xfer .lvl-raise{opacity:0;transition:opacity .3s;}
-html.mo-off .lvl-row{animation:none;}
-@media (prefers-reduced-motion:reduce){.lvl-row{animation:none;}}
+/* ---- The level-up sheet, v5.149: the banner (owner picked S, 15 Sep). ----
+   A beam of light cuts the dark with LEVEL UP on it, rays behind. The lifts land one at a time
+   beneath it, numbers counting up, the gain in green. Tap a row to raise that lift, tap its number
+   to change it, RAISE ALL for the lot. */
+#lvlOvl .sheet.lvl-s{position:relative;overflow:hidden;background:#0a0605;border-color:#4a2718;padding-top:30px;}
+.lvl-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(70% 30% at 50% 16%,rgba(255,150,50,.45),transparent 70%),radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.28),transparent 70%);}
+.lvl-rays{position:absolute;left:-40%;right:-40%;top:-30%;height:90%;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg at 50% 40%,rgba(255,180,80,.16) 0deg 4deg,transparent 4deg 12deg);
+  -webkit-mask-image:radial-gradient(60% 45% at 50% 40%,#000 20%,transparent 70%);mask-image:radial-gradient(60% 45% at 50% 40%,#000 20%,transparent 70%);
+  animation:lvlRays 40s linear infinite;}
+@keyframes lvlRays{to{transform:rotate(360deg);}}
+.lvl-beam{position:relative;margin:0 -30px;padding:14px 32px 16px;text-align:center;transform:skewY(-2deg);
+  background:linear-gradient(90deg,transparent,rgba(255,138,31,.85) 18%,rgba(255,208,138,.95) 50%,rgba(255,138,31,.85) 82%,transparent);
+  box-shadow:0 0 40px rgba(255,150,50,.55),0 0 90px rgba(255,120,30,.35);animation:lvlBeam .6s cubic-bezier(.2,.8,.2,1) both;}
+@keyframes lvlBeam{from{transform:skewY(-2deg) scaleX(.2);opacity:0;}to{transform:skewY(-2deg) scaleX(1);opacity:1;}}
+.lvl-beam b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#1b0f06;line-height:1;}
+.lvl-beam small{display:block;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:#3a1d0c;margin-top:6px;}
+.lvl-list{position:relative;gap:0;margin:26px 2px 0;max-height:calc(var(--usablevh) * .46);}
+.lvl-row{display:flex;align-items:center;gap:10px;padding:12px 4px;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;
+  border-bottom:1px solid rgba(255,180,100,.14);cursor:pointer;opacity:.25;transform:translateY(8px);transition:opacity .35s,transform .35s,background .3s;}
+.lvl-row::before{display:none;}
+.lvl-row.landed{opacity:1;transform:none;}
+.lvl-row:hover{background:rgba(255,138,31,.06);}
+.lvl-n{flex:1;min-width:0;font-family:'Marcellus',serif;font-size:15px;font-weight:400;color:var(--txt);margin:0;white-space:normal;line-height:1.2;}
+.lvl-nums{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.lvl-num{display:inline-flex;align-items:baseline;gap:3px;font-family:var(--mono);font-weight:700;font-size:24px;color:#fff6e6;border-radius:7px;padding:0 4px;white-space:nowrap;}
+.lvl-num small{font-size:10px;font-weight:500;color:var(--txt2);letter-spacing:.03em;}
+.lvl-num.up:hover{background:rgba(255,138,31,.14);}
+.lvl-gn{font-size:11px;font-weight:500;color:var(--txt3);font-style:normal;margin-right:3px;}
+.lvl-row.lit .lvl-num{text-shadow:0 0 14px rgba(255,200,120,.85);animation:lvlPop .5s cubic-bezier(.3,1.6,.4,1) 1;}
+@keyframes lvlPop{0%{transform:scale(1);}40%{transform:scale(1.14);}100%{transform:scale(1);}}
+.lvl-gain{min-width:44px;text-align:right;font-family:var(--mono);font-weight:700;font-size:13px;color:#7fe0a8;text-shadow:0 0 10px rgba(127,224,168,.5);white-space:nowrap;}
+.lvl-gain small{display:block;font-size:8.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--match,#a98ae6);text-shadow:none;}
+.lvl-ok{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#1b0f06;font-size:12px;font-style:normal;box-shadow:0 0 12px rgba(255,138,31,.8);}
+.lvl-row.done{cursor:default;}
+.lvl-row.done .lvl-num{color:var(--gold);}
+.lvl-row.xfer{background:linear-gradient(90deg,rgba(255,138,31,.25),transparent);}
+.lvl-row.xfer .lvl-num{animation:lvlPop .5s cubic-bezier(.3,1.6,.4,1) 1;text-shadow:0 0 16px rgba(255,200,120,.95);}
+.lvl-foot{position:relative;margin-top:22px;}
+.lvl-go{width:100%;box-sizing:border-box;padding:14px;font-weight:800;letter-spacing:.16em;font-size:13px;
+  background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;border-color:transparent;
+  box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.7);}
+.lvl-hint{margin-top:10px;text-align:center;font-size:11.5px;color:var(--txt3);line-height:1.4;}
+.lvl-skip{margin-top:6px;text-align:center;font-size:12px;color:var(--txt2);letter-spacing:.04em;cursor:pointer;padding:6px;}
+#lvlOvl.busy .lvl-foot,#lvlOvl.busy .lvl-row{pointer-events:none;}
+html.mo-off .lvl-rays,html.mo-off .lvl-beam,html.mo-off .lvl-row.lit .lvl-num{animation:none;}
+html.mo-off .lvl-row{opacity:1;transform:none;transition:none;}
+@media (prefers-reduced-motion:reduce){.lvl-rays,.lvl-beam,.lvl-row.lit .lvl-num{animation:none;}.lvl-row{opacity:1;transform:none;transition:none;}}
 
 .pill-done{background:transparent;border:1px solid color-mix(in srgb,var(--gold) 42%,transparent);color:var(--gold);
   display:inline-flex;align-items:center;gap:4px;}
@@ -3377,14 +3375,18 @@ body.wcon{overflow:hidden;}
 </div>
 
 <div class="ovl" id="lvlOvl">
-  <div class="sheet" style="max-width:440px">
+  <div class="sheet lvl-s" style="max-width:440px">
     <!-- The ledger of gains (v5.147): the mark, the count, then a plate per lift with its own
          RAISE. The foot raises whatever is left. CANCEL is gone; back and tapping outside do that. -->
-    <div class="lvl-hd"><svg class="lvl-mark" id="lvlMark" viewBox="0 0 100 100"></svg><h3 id="lvlTitle">Level up</h3></div>
-    <p id="lvlSub"></p>
+    <!-- The banner (v5.149, owner picked S): a beam of light with LEVEL UP on it, rays behind, the lifts
+         landing one at a time beneath with their numbers counting up. One button. -->
+    <i class="lvl-glow"></i><i class="lvl-rays"></i>
+    <div class="lvl-beam"><b>Level up</b><small id="lvlTitle"></small></div>
+    <p id="lvlSub" hidden></p>
     <div id="lvlList" class="lvl-list"></div>
     <div class="lvl-foot">
       <div class="btn btn-go lvl-go" id="lvlGo" onclick="applyLevel()">RAISE ALL</div>
+      <div class="lvl-hint" id="lvlHint">Tap a lift to raise just that one. Tap its number to change it first.</div>
       <div class="lvl-skip" id="lvlSkipRow" onclick="skipLevel()">Not this time</div>
     </div>
   </div>
@@ -9217,7 +9219,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.148';
+var APPV='v5.149';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9936,17 +9938,16 @@ function openLevel(wk){
   LVLPLAN=levelPlan(wk);
   var plan=LVLPLAN,W1=W[wk];
   plan.forEach(function(p){p.done=false;});
-  var mk=document.getElementById('lvlMark');if(mk&&!mk.innerHTML)mk.innerHTML=anvilAt(59,'fill="var(--gold)"');
-  document.getElementById('lvlTitle').textContent=plan.length?(plan.length===1?'1 lift levelled up':plan.length+' lifts levelled up'):'Nothing to raise yet';
+  document.getElementById('lvlTitle').textContent=plan.length?(W1?W1.name.replace('Optional: ',''):''):'Nothing to raise yet';
   var go=document.getElementById('lvlGo');
-  document.getElementById('lvlSub').textContent=plan.length?
-    'You cleared every set'+(W1?' of '+W1.name.replace('Optional: ',''):'')+'. Raise them one by one, or all at once. Tap a new number to change it first.':
-    'Meet every target in a session and the lifts that earned a raise show up here.';
   go.style.display=plan.length?'':'none';
   document.getElementById('lvlSkipRow').style.display=plan.length?'':'none';
+  document.getElementById('lvlHint').style.display=plan.length?'':'none';
   lvlFoot();
+  LVLLANDED=false;
   lvlRender();
   document.getElementById('lvlOvl').classList.add('on');
+  lvlLand();
 }
 // three identical sets read as one line with a count, not the same numbers three times.
 // `at` is where the group's run of lines starts, so an edit can write back to the plan.
@@ -9959,57 +9960,75 @@ function lvlGroups(p){
   });
   return g;
 }
-// One plate per lift. Each group of identical sets is one line: the old number quiet, the new one
-// big and gold and tappable, the jump as an ember chip. A raised plate keeps its numbers and wears
-// the mark instead of the button.
+// One line per lift: the name, the new number large and white-hot, the gain in green. The row
+// itself raises that lift; the number edits it. A raised row keeps its number and wears the mark.
 function lvlDelta(f,t){
   var k=lvlKind(t),a=parseTarget(f),b=parseTarget(t);
-  if(k==='r'){var dr=(b.r||0)-(a.r||0);return dr?((dr>0?'+':'')+dr+' reps'):'';}
-  if(k==='s'){var ds=(b.r||0)-(a.r||0);return ds?((ds>0?'+':'')+ds+' sec'):'';}
+  if(k==='r'){var dr=(b.r||0)-(a.r||0);return dr?((dr>0?'+':'')+dr):'';}
+  if(k==='s'){var ds=(b.r||0)-(a.r||0);return ds?((ds>0?'+':'')+ds):'';}
   var dw=dspW(b.w||0)-dspW(a.w||0);dw=Math.round(dw*100)/100;
-  return dw?((dw>0?'+':'')+dw+' '+wUnitName()):'';
+  return dw?((dw>0?'+':'')+dw):'';
 }
-function lvlNum(t,full){
-  var k=lvlKind(t),p=parseTarget(t);
-  if(k==='r')return '<b>'+(p.r||0)+'</b><small>reps</small>';
-  if(k==='s')return '<b>'+(p.r||0)+'</b><small>sec</small>';
-  return '<b>'+fmtW(p.w||0)+'</b><small>'+wUnitName()+(full?' \u00d7 '+(p.r||0):'')+'</small>';
-}
+function lvlUnit(t){var k=lvlKind(t);return k==='r'?'reps':k==='s'?'sec':wUnitName();}
+function lvlVal(t){var k=lvlKind(t),p=parseTarget(t);return k==='w'?dspW(p.w||0):(p.r||0);}
+var LVLLANDED=false;
 function lvlRender(){
   var plan=LVLPLAN||[];
   document.getElementById('lvlList').innerHTML=plan.map(function(p,pi){
-    var gs=lvlGroups(p),sets=p.from.length,kind=lvlKind(p.to[0]||'');
-    var setsChip='<span class="lvl-chip sets">'+sets+(kind==='s'?(sets===1?' hold':' holds'):(sets===1?' set':' sets'))+'</span>';
-    var tags=(p.est?'<span class="lvl-chip est" title="Approximate: the app has not seen this lift\u2019s machine steps yet, so the jump is plate math. Tap the number if yours is different.">approx</span>':'')+
-             (p.done?'<span class="lvl-mark-done"><i>\u2713</i>Raised</span>':setsChip);
-    var lines=gs.map(function(x,gi){
+    var gs=lvlGroups(p);
+    var nums=gs.map(function(x,gi){
       if(LVLED&&LVLED.pi===pi&&LVLED.gi===gi){
         var k=lvlKind(x.t),t0=parseTarget(x.t);
         var v0=k==='w'?fmtW(t0.w):t0.r;
         var em=k==='w'?wUnitName():k==='r'?'reps':'sec';
-        return '<span class="mk-sr open"><input class="mk-num sm" type="number" inputmode="decimal" step="'+(k==='w'?'0.5':'1')+'" value="'+v0+'" oninput="lvlEditVal(this.value)"><em>'+em+'</em>'+
+        return '<span class="mk-sr open" onclick="event.stopPropagation()"><input class="mk-num sm" type="number" inputmode="decimal" step="'+(k==='w'?'0.5':'1')+'" value="'+v0+'" oninput="lvlEditVal(this.value)"><em>'+em+'</em>'+
                '<button class="mk-rest-ok" onclick="lvlEditOK()">OK</button></span>';
       }
-      return '<span class="lvl-g">'+(gs.length>1?'<em class="lvl-gn">'+x.n+'\u00d7</em>':'')+
-        '<span class="lvl-from">'+lvlNum(x.f,false)+'</span><i class="lvl-arrow">\u279c</i>'+
-        '<span class="lvl-to'+(p.done?'':' up')+'"'+(p.done?'':' onclick="lvlEdit('+pi+','+gi+')" title="Tap to set a different number"')+'>'+lvlNum(x.t,true)+'</span>'+
-        '<i class="lvl-spark"></i></span>';
+      var from=lvlVal(x.f),to=lvlVal(x.t);
+      return '<span class="lvl-num'+(p.done?'':' up')+'" data-from="'+from+'" data-to="'+to+'"'+(p.done?'':' onclick="event.stopPropagation();lvlEdit('+pi+','+gi+')" title="Tap to set a different number"')+'>'+
+        (gs.length>1?'<em class="lvl-gn">'+x.n+'\u00d7</em>':'')+'<b class="lvl-cnt">'+(LVLLANDED||p.done?to:from)+'</b><small>'+lvlUnit(x.t)+'</small></span>';
     }).join('');
     var d=lvlDelta(gs[0].f,gs[0].t);
-    return '<div class="lvl-row'+(p.done?' done':'')+'" style="--i:'+pi+'" data-pi="'+pi+'">'+
-      '<div class="lvl-top"><span class="lvl-n">'+esc(p.name)+'</span><span class="lvl-tags">'+tags+'</span></div>'+
-      '<div class="lvl-d">'+lines+(d?'<span class="lvl-chip up">'+d+'</span>':'')+
-        (p.done?'':'<button class="lvl-raise" onclick="raiseOne('+pi+')">Raise</button>')+'</div></div>';
+    return '<div class="lvl-row'+(p.done?' done':'')+(LVLLANDED?' landed':'')+'" style="--i:'+pi+'" data-pi="'+pi+'" onclick="raiseOne('+pi+')">'+
+      '<span class="lvl-n">'+esc(p.name)+'</span>'+
+      '<span class="lvl-nums">'+nums+'</span>'+
+      '<span class="lvl-gain'+(p.est?' approx':'')+'">'+(p.done?'<i class="lvl-ok">\u2713</i>':(d?d+(p.est?'<small>approx</small>':''):''))+'</span>'+
+      '</div>';
   }).join('');
   lvlFoot();
 }
+// The landing: rows arrive one after another, each number counting up from the old to the new
+// with a tick as it starts and a flash of light as it lands. Off motion: everything is simply there.
+var LVLTIMERS=[];
+function lvlLand(){
+  LVLTIMERS.forEach(clearTimeout);LVLTIMERS=[];
+  var rows=document.querySelectorAll('#lvlList .lvl-row');
+  if(MOTION==='off'||!rows.length){LVLLANDED=true;[].forEach.call(rows,function(r){r.classList.add('landed');[].forEach.call(r.querySelectorAll('.lvl-cnt'),function(b){b.textContent=b.parentNode.getAttribute('data-to');});});return;}
+  [].forEach.call(rows,function(r,i){
+    var t=setTimeout(function(){
+      r.classList.add('landed');
+      try{sfxTick&&sfxTick();}catch(e){}
+      [].forEach.call(r.querySelectorAll('.lvl-num'),function(n){
+        var b=n.querySelector('.lvl-cnt'),a=parseFloat(n.getAttribute('data-from'))||0,z=parseFloat(n.getAttribute('data-to'))||0;
+        var t0=performance.now(),dur=620;
+        var step=function(now){var k=Math.min(1,(now-t0)/dur);k=1-Math.pow(1-k,3);var v=a+(z-a)*k;
+          b.textContent=(Math.round(v*2)/2)%1?(Math.round(v*2)/2).toFixed(1):Math.round(v);
+          if(k<1)requestAnimationFrame(step);else{b.textContent=z%1?z:z;r.classList.add('lit');try{sfxLog&&sfxLog();}catch(e){}}};
+        requestAnimationFrame(step);
+      });
+      if(i===rows.length-1)LVLLANDED=true;
+    },520+i*420);
+    LVLTIMERS.push(t);
+  });
+}
 // The foot button says what is left to do.
 function lvlFoot(){
-  var plan=LVLPLAN||[],go=document.getElementById('lvlGo'),sk=document.getElementById('lvlSkipRow');
+  var plan=LVLPLAN||[],go=document.getElementById('lvlGo'),sk=document.getElementById('lvlSkipRow'),h=document.getElementById('lvlHint');
   if(!go)return;
   var left=plan.filter(function(p){return !p.done;}).length;
   go.textContent=left===0?'DONE':(left===plan.length?'RAISE ALL':'RAISE THE REST');
   if(sk)sk.style.display=(plan.length&&left)?'':'none';
+  if(h)h.style.display=(plan.length&&left)?'':'none';
 }
 function lvlEdit(pi,gi){
   if(LVLBUSY)return;
@@ -10085,7 +10104,7 @@ function lvlStrike(items,after){
     last=d;
   });
   sfxIgnite();
-  var wait=MOTION==='off'?0:(last+1.05)*1000;
+  var wait=MOTION==='off'?0:(last+0.7)*1000;
   LVLT=setTimeout(function(){
     LVLT=null;LVLBUSY=false;
     document.getElementById('lvlOvl').classList.remove('busy');
@@ -10112,6 +10131,7 @@ function applyLevel(){
 // fires after a cancel and raises the targets anyway.
 function lvlAbort(){
   if(LVLT){clearTimeout(LVLT);LVLT=null;}
+  LVLTIMERS.forEach(clearTimeout);LVLTIMERS=[];
   LVLBUSY=false;
   var o=document.getElementById('lvlOvl');
   if(o)o.classList.remove('busy');
