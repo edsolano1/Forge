@@ -2318,6 +2318,44 @@ body.forge .daybox.quenched .dayhead{background:#171716;border-color:#343433;}
 body.forge .daybox.quenched .dayhead > span:first-child{background:transparent;border:0;color:#84827f;}
 body.forge .daybox.quenched .dh-d{color:#84827f;}
 
+/* ---- The session screen, v5.157: the ledger (owner picked AB, with icon buttons top left). ----
+   Each lift is a compact blackened table: a header band with the name and the swap, a row of icon
+   buttons under the name (instructions, note, warm-up, plates), then one tight row per set with the
+   weight and the reps as two tappable cells and the anvil at the end. Gold and violet grading as before. */
+body.forge .exc{background:#0e0806;border:1px solid #3a2214;border-top-color:#4a2c1c;border-radius:12px;margin-bottom:10px;
+  box-shadow:0 10px 22px -12px rgba(0,0,0,.9);}
+body.forge .ex-h{padding:0;}
+body.forge .ex-body{display:flex;flex-direction:column;}
+body.forge .ex-nrow{padding:10px 8px 8px 12px;background:#150d09;border-bottom:1px solid #2a1810;align-items:center;}
+body.forge .ex-n{font-family:'Marcellus',serif;font-weight:400;font-size:16px;letter-spacing:.01em;color:#fff6e6;}
+body.forge .ex-links{order:0;margin:0;padding:8px 12px 2px;gap:6px;}
+body.forge .ex-links a{width:34px;height:34px;padding:0;justify-content:center;font-size:0;gap:0;border:1px solid #3a2214;background:#130c09;color:var(--txt3);border-radius:9px;}
+body.forge .ex-links a svg{width:16px;height:16px;}
+body.forge .ex-links a.unote-btn.has,body.forge .ex-links a:hover{color:var(--gold);border-color:#6a3f26;}
+body.forge .ex-note,body.forge .ex-unote{margin:6px 12px 0;font-size:12px;}
+body.forge .ex-stats{margin:6px 12px 8px;font-size:11.5px;}
+body.forge .sets{padding:0 8px 6px;}
+body.forge .srow{display:grid;grid-template-columns:18px 1fr 1fr 40px;gap:8px;align-items:center;padding:5px 4px;border-radius:0;border-top:1px solid #1e120c;}
+body.forge .srow:first-child{border-top:0;}
+body.forge .sno{width:18px;height:18px;border-radius:5px;font-size:10px;background:transparent;border:0;color:var(--txt3);}
+body.forge .inp{width:100%;box-sizing:border-box;text-align:center;font-size:17px;font-weight:600;padding:7px 0;border:1px solid #241510;border-radius:7px;background:#130c09;color:var(--txt);}
+body.forge .inp.wide{grid-column:2 / span 2;}
+body.forge .srow .unit{grid-column:2 / span 2;}
+body.forge .mul{display:none;}
+body.forge .chk{width:40px;height:34px;border-radius:9px;margin:0;border:1px solid #4a2c1c;background:#130c09;}
+body.forge .srow.done{background:rgba(143,111,190,.08);}
+body.forge .srow.done .inp{border-color:#4a3a6a;color:var(--match);}
+body.forge .srow.ispr{background:rgba(255,138,31,.10);}
+body.forge .srow.ispr .inp{border-color:#6a3f26;color:var(--gold);}
+body.forge .srow.done.isunder{background:transparent;}
+body.forge .srow.done.isunder .inp{border-color:#241510;color:var(--txt2);}
+body.forge .srow.done .sno,body.forge .srow.ispr .sno{background:transparent;}
+body.forge .ex-foot{padding:6px 12px 10px;}
+body.forge .ex-rest{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);}
+body.forge .ssgrp{border:0;border-left:3px solid var(--match);border-radius:0;padding:0 0 0 8px;margin-bottom:10px;background:transparent;}
+body.forge .ssgrp .exc{margin-bottom:8px;}
+body.forge .sect-t{color:var(--match);font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:0 0 6px;}
+
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2718;}
 .fin-plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
@@ -9276,7 +9314,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.156';
+var APPV='v5.157';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11672,6 +11710,13 @@ function renderSession(){
   // copy on the next sheet is an option, not an obligation the label implies.
   html+='<div class="finish-inline"><button class="finishbtn" onclick="finishSession()">Finish the day</button></div>';
   document.getElementById('sBody').innerHTML=html;
+  // The ledger (v5.157): the tool row sits under the name, top left, as icon buttons. The markup
+  // is built with the links after the stats; moving the node keeps every inline handler intact.
+  [].forEach.call(document.querySelectorAll('#sBody .exc'),function(ex){
+    var links=ex.querySelector('.ex-links'),nrow=ex.querySelector('.ex-nrow');
+    if(links&&nrow&&links.previousElementSibling!==nrow)nrow.parentNode.insertBefore(links,nrow.nextSibling);
+    [].forEach.call(links?links.querySelectorAll('a'):[],function(a){if(!a.getAttribute('title'))a.setAttribute('title',a.textContent.trim());});
+  });
   document.getElementById('sBody').style.setProperty('--c',dayC(wk));
   bindExHold();blkBind();
   var nb=document.getElementById('noteBox');
