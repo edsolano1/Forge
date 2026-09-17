@@ -2347,6 +2347,9 @@ body.forge .hwk-c.now.has{border-style:solid;}
 body.forge .hwk-c.sel{background:#3a1d0c;border-color:#ffb35c;transform:rotate(-8deg) scale(1.06);}
 body.forge .hwk-c.fut{opacity:.4;}
 .hline{text-align:center;font-size:12.5px;color:var(--txt2);margin:0 0 12px;}
+.hrow-min{font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--txt3);margin-left:8px;align-self:baseline;}
+.hdet-t{display:inline-flex;align-items:center;gap:7px;margin:-4px 0 12px;padding:0 12px;height:32px;border-radius:16px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);cursor:pointer;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;}
+.hdet-t svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
 .hline b{font-family:var(--mono);font-weight:700;color:var(--txt);}
 .hline em{font-style:normal;font-family:var(--mono);font-weight:700;color:var(--gold);}
 body.forge .hrow.hseal{position:relative;display:block;border-radius:14px;padding:13px 14px 12px;margin-bottom:10px;
@@ -4001,6 +4004,19 @@ body.wcon{overflow:hidden;}
 
 <!-- A weigh-in, entered from the Progress sheet. Stored to the day: a second entry for
      the same date replaces the first, and saving an empty weight removes that day's. -->
+<!-- How long a session took, in minutes, corrected by hand (v5.177). Stacks over Workouts finished. -->
+<div class="ovl" id="minsOvl" style="z-index:300">
+  <div class="sheet" style="max-width:360px">
+    <h3>Session length</h3>
+    <p>Minutes from the first set to the finish. Save it empty or as 0 to remove it.</p>
+    <input class="mk-in" id="minsIn" type="number" inputmode="numeric" min="0" max="600" placeholder="Minutes">
+    <div class="sheet-btns">
+      <div class="btn" onclick="closeOvl('minsOvl')">CANCEL</div>
+      <div class="btn btn-go" onclick="histMinsSave()">SAVE</div>
+    </div>
+  </div>
+</div>
+
 <div class="ovl" id="bwOvl" style="z-index:300">
   <div class="sheet" style="max-width:400px">
     <h3>Log a weigh-in</h3>
@@ -9521,7 +9537,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.176';
+var APPV='v5.177';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14001,7 +14017,9 @@ function finishNow(){
   var entries={};
   for(var k in A.entries){var arr=A.entries[k].filter(function(x){return x;});if(arr.length)entries[k]=arr;}
   // The name rides on the log so history can still say what it was after the workout is deleted.
-  DB.logs.push({day:wk,name:(W[wk]||{}).name||'',date:A.date,entries:entries,note:A.note||'',swaps:A.swaps||{},sealed:1,wk:A.wk||dayGuess(wk)});
+  // The minutes ride on the log too (v5.177): first set to finish, rounded, never under one.
+  var mins=A.start?Math.max(1,Math.round((Date.now()-A.start)/60000)):0;
+  DB.logs.push({day:wk,name:(W[wk]||{}).name||'',date:A.date,entries:entries,note:A.note||'',swaps:A.swaps||{},sealed:1,wk:A.wk||dayGuess(wk),mins:mins});
   delete DB.active[wk];
   saveDB();
   try{autoBk();}catch(e){}
@@ -15645,7 +15663,7 @@ function histRowHtml(it){
         '<div class="hrow-d">'+pretty(L.date)+'</div>'+
         '<div class="hrow-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
         (L.marked?'<div class="hrow-m">Marked done</div>':
-        '<div class="hrow-hero"><b>'+s.n+'</b><span>'+of+'</span>'+(s.pr?'<em class="hrow-rec">'+s.pr+' record'+(s.pr>1?'s':'')+'</em>':'')+'</div>')+
+        '<div class="hrow-hero"><b>'+s.n+'</b><span>'+of+'</span>'+(L.mins?'<i class="hrow-min">'+fmtMins(L.mins)+'</i>':'')+(s.pr?'<em class="hrow-rec">'+s.pr+' record'+(s.pr>1?'s':'')+'</em>':'')+'</div>')+
       '</div>'+
     '</div>';
 }
@@ -15696,17 +15714,17 @@ function histWeekHtml(){
     return h;
   }
   // what the week added up to
-  var sess=0,sets=0,recs=0,doneIds={};
+  var sess=0,sets=0,recs=0,mins=0,doneIds={};
   items.forEach(function(it){
     if(it.log===undefined)return;
     var L=DB.logs[it.log],s=histSetsOf(L);
     if(L.marked||!s.n)return;
-    sess++;sets+=s.n;recs+=s.pr;doneIds[L.day]=1;
+    sess++;sets+=s.n;recs+=s.pr;mins+=(L.mins||0);doneIds[L.day]=1;
   });
   var planned=0,done=0;
   DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){if(wkVar(id)||!W[id])return;planned++;if(doneIds[id])done++;});});
   var walks=items.filter(function(it){return it.walk;}).length;
-  h+='<div class="hline"><b>'+(planned?done+'</b> of '+planned+' workouts':sess+'</b> '+(sess===1?'workout':'workouts'))+' &middot; <b>'+sets+'</b> '+(sets===1?'set':'sets')+(recs?' &middot; <em>'+recs+' record'+(recs===1?'':'s')+'</em>':'')+'</div>';
+  h+='<div class="hline"><b>'+(planned?done+'</b> of '+planned+' workouts':sess+'</b> '+(sess===1?'workout':'workouts'))+' &middot; <b>'+sets+'</b> '+(sets===1?'set':'sets')+(recs?' &middot; <em>'+recs+' record'+(recs===1?'':'s')+'</em>':'')+(mins?' &middot; <b>'+fmtMins(mins)+'</b>':'')+'</div>';
   var sessions=items.filter(function(it){return it.log!==undefined;});
   h+='<div class="hscroll">'+(sessions.length?sessions.map(histRowHtml).join(''):'<div class="hnone">'+(off===0?'Nothing finished yet this week.':'Nothing finished this week.')+'</div>')+
     ((DB.walks||[]).length?'<div class="hrow hwalk hadd" onclick="histMode(\'walks\')">WALKS'+(walks?' &middot; '+walks+' this week':'')+' &rsaquo;</div>':
@@ -15758,6 +15776,23 @@ function deleteLog(i){
   },'Delete '+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'?','DELETE');
 }
 function histBack(){HIST.sel=null;HIST.ed=null;renderHist();}
+// Session length (v5.177). Kept on the log in whole minutes, shown on the seal row and added up
+// in the week line, and correctable from the session's page: a start-to-finish clock is wrong
+// whenever a session was left open, so the number has to be yours to fix.
+function fmtMins(m){m=Math.round(m||0);if(m<60)return m+' min';var h=Math.floor(m/60),r=m%60;return h+' h'+(r?' '+r+' min':'');}
+function histMinsEdit(){
+  var L=DB.logs[HIST.sel];if(!L)return;
+  var i=document.getElementById('minsIn');if(i)i.value=L.mins||'';
+  document.getElementById('minsOvl').classList.add('on');
+  setTimeout(function(){try{i.focus();i.select();}catch(e){}},60);
+}
+function histMinsSave(){
+  var L=DB.logs[HIST.sel];if(!L)return;
+  var v=parseInt(document.getElementById('minsIn').value,10);
+  if(isNaN(v)||v<0){closeOvl('minsOvl');return;}
+  if(v===0)delete L.mins;else L.mins=Math.min(600,v);
+  saveDB();closeOvl('minsOvl');renderHist();
+}
 function histMon(d){
   var m=HIST.mon||histLatestMon();
   var n=new Date(m.y,m.m+d,1);
@@ -15802,6 +15837,7 @@ function renderHist(){
     }
     body.innerHTML='<div class="hback" onclick="histBack()">&larr; All sessions</div>'+
       '<div class="hdet-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
+      (L.marked?'':'<button class="hdet-t" onclick="histMinsEdit()">'+MK_GLASS+'<span>'+(L.mins?fmtMins(L.mins):'Add the time')+'</span></button>')+
       '<div class="hscroll">'+rows+(L.note?'<div class="hnote">'+esc(L.note)+'</div>':'')+'</div>'+
       '<div class="hdel" onclick="deleteLog('+HIST.sel+')"><svg viewBox="0 0 20 20"><path d="M4 6h12M8.5 6V4.5h3V6M6 6l.8 10h6.4L14 6M8.4 8.6v4.8M11.6 8.6v4.8"/></svg>Delete this session</div>';
     return;
