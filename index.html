@@ -2468,6 +2468,71 @@ body.forge .mk-grp-h span:first-child{color:var(--match);}
 body.forge .mk-unlink{border-radius:999px;border-color:#4a3a6a;color:var(--violet);font-size:10px;letter-spacing:.12em;}
 body.forge .mk-add{border:1px dashed #4a2c1c;border-radius:18px;padding:11px;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);}
 
+/* ---- Every other sheet, v5.170: the seal, carried through. ----
+   The instructions sheet got the warm stamped plate in v5.168; this hands the same plate to every sheet
+   that still wore the old glass: the exercise picker, Add your own exercise, Settings, the workout settings
+   page, swap, the plate calculator, notes, the dialogs. One set of parts: the plate, dark rounded fields,
+   pill buttons in mono with the chosen or primary one in ember, rows as small dark plates. Sheets that
+   already have their own look (the finish seal, the level-up banner, Workouts finished) keep it. */
+body.forge .sheet{background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;border-radius:14px;
+  box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
+body.forge .sheet h3{color:#fff6e6;}
+body.forge .sheet p{color:var(--txt2);}
+body.forge .sheet .footnote{color:var(--txt3);}
+/* buttons: pills in mono. The primary one is the ember bar, a "go" one is outlined in ember. */
+body.forge .sheet-btns .btn,body.forge .mk-acts .btn{border-radius:20px;min-height:40px;padding:0 14px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);
+  font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
+body.forge .sheet-btns .btn-go,body.forge .mk-acts .btn-go{border-color:#a0521c;color:var(--gold);background:rgba(255,138,31,.06);}
+body.forge .sheet-btns .btn-prime,body.forge .mk-acts .btn-prime{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
+body.forge .sheet-btns .btn-bad,body.forge .mk-acts .btn-bad{border-color:#7a2e26;color:#f0645a;background:transparent;}
+/* fields */
+body.forge .mk-in{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:#fff6e6;}
+body.forge .mk-in:focus{outline:none;border-color:#a0521c;}
+body.forge .mk-in::placeholder{color:var(--txt3);}
+/* the two-way and three-way choices (Lifting or Cardio, On or Off, Pounds or Kilograms...) */
+body.forge .preset{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
+body.forge .preset.sm{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;}
+body.forge .preset.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
+body.forge .preset.mk-del{border-color:#7a2e26;color:#f0645a;background:transparent;}
+body.forge .mfilt .preset{min-height:38px;}
+/* rows: the picker, the swap list, the tour list */
+body.forge .swapitem{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:#fff6e6;}
+body.forge .swapitem.sel{border-color:var(--gold);background:rgba(255,138,31,.08);}
+body.forge .swaphead{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.18em;color:var(--gold);}
+/* the workout settings page and the builder's chrome */
+body.forge .mk-slot{background:#0e0806;border:1px solid #3a2214;border-radius:12px;}
+body.forge .mk-slot b{font-family:var(--mono);letter-spacing:.12em;}
+body.forge .mk-slot.sel{border-color:var(--gold);background:rgba(255,138,31,.08);}
+body.forge .mk-slot.sel b{color:var(--gold);}
+body.forge .dayact{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;}
+body.forge .dayact.on{border-color:#a0521c;color:var(--gold);background:rgba(255,138,31,.08);}
+body.forge .dayact.del{border-color:#7a2e26;color:#f0645a;background:transparent;}
+body.forge .mk-head-b{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);padding:7px 11px;}
+body.forge .mk-lbl{font-family:var(--mono);font-weight:600;letter-spacing:.16em;color:var(--txt3);}
+body.forge .finishbtn{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-radius:14px;font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.16em;
+  box-shadow:inset 0 1px 0 rgba(255,240,210,.5),0 0 28px -10px rgba(255,122,26,.8);}
+body.forge .mk-adv{color:var(--txt2);}
+/* Settings: the sections as dark plates, the headings in the sheet's own voice */
+body.forge .set-card{background:#0e0806;border:1px solid #3a2214;border-radius:12px;}
+body.forge .set-sec{font-family:'Marcellus',serif;font-weight:400;font-size:17px;letter-spacing:.02em;color:#fff6e6;border-bottom-color:#2a1810;}
+body.forge .sfx-lbl{font-family:var(--mono);font-weight:600;letter-spacing:.16em;color:var(--txt3);}
+body.forge .slider-row input[type=range]::-webkit-slider-runnable-track{background:#241510;}
+body.forge .slider-row input[type=range]::-webkit-slider-thumb{background:var(--gold);}
+/* the plate calculator */
+body.forge .pl-stick{background:#1d120c;}
+body.forge .pl-wrap{background:#0e0806;border:1px solid #3a2214;border-radius:12px;}
+body.forge .pl-total{font-family:var(--mono);font-weight:700;color:#fff6e6;}
+body.forge .pl-lbl{font-family:var(--mono);font-weight:600;letter-spacing:.16em;}
+body.forge .pl-chip{background:#0e0806;border:1px solid #3a2214;border-radius:12px;}
+body.forge .pl-chip.has{border-color:var(--gold);background:rgba(255,138,31,.06);}
+body.forge .pl-chip.has .pl-cnt{color:var(--gold);}
+body.forge .pl-chip .pl-n{font-family:var(--mono);font-weight:600;}
+body.forge .pl-pm,body.forge .pl-pm button:first-child{border-color:#2a1810;}
+body.forge .pl-act{border-radius:20px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;letter-spacing:.14em;}
+body.forge .pl-bar{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:var(--txt2);}
+body.forge .pl-bar.on{border-color:var(--gold);color:#fff6e6;background:rgba(255,138,31,.08);}
+body.forge .pl-bar small{color:var(--txt3);}
+
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2718;}
 .fin-plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
@@ -9433,7 +9498,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.169';
+var APPV='v5.170';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;

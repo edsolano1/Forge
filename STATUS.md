@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.169** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.170** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -69,6 +69,8 @@ palette. All verified on the SM-R960 except the live set screen, which waits for
 - **v5.168 (pushed 17 Sep)**: the instructions sheet and the builder cards wear the seal (owner picked C from icons/sheet-builder-options.html); the prone leg curl figure's pad ends short of the knees; the plate calculator gains a one-horn machine (nothing doubled) and carries the loaded total across when the bar or machine changes instead of clearing it.
 
 - **v5.169 (17 Sep)**: the welcome's two choices are the wizard's own cards, with their pictures: a blueprint week of seven empty boxes for I know what I'm building, the raised hammer over the anvil (the wizard's 6-months-to-2-years picture, reused on purpose) for Build one for me. WZ.wc holds the blueprint.
+
+- **v5.170 (17 Sep)**: the seal on every remaining sheet. One forge-scoped block ("Every other sheet, v5.170") gives the exercise picker, Add your own exercise, Settings, the workout settings page, swap, the plate calculator, notes and the dialogs the warm stamped plate, dark rounded fields, mono pill buttons (primary in ember), rows as dark plates. The finish seal, the level-up banner and Workouts finished keep their own looks.
 
 ### Still to do, in order (16 Sep 2026)
 1. **The watch's look**: mockup icons/watch-options.html (Plates, Ledger, Seal); owner picked **A, Plates** (16 Sep), C parked as a possible later direction. **Watch 1.7 (versionCode 207) is installed on the SM-R960 (16 Sep evening) as the Plates look; the owner will judge it in his next session**: Marcellus and IBM Plex Mono shipped as font files, every row a plate with the ember rail (gold rail and anvil when done, violet for matched, dark for under), the ember bar button, the hearth glow at the foot, no set counts on the week. Verified on the wrist: week, overview (superset rail fixed after the first install painted the frame solid violet), set preview. **Watch 1.8 (208)** the same evening: the ongoing chip and shade card wear the anvil icon and the ember, and say the coming set with its weight (Set 3 of 4 · 65 lb × 8; Rest 0:45 · set 3 on the face chip, Rest · up next set 3 of 4 · 65 lb × 8 in the shade). It also lets a set picked from the ladder mid-rest be corrected while the countdown runs underneath (before, the rest screen swallowed the tap). Built, waiting to be installed.
