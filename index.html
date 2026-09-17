@@ -3515,9 +3515,9 @@ body.wcon{overflow:hidden;}
     <div class="dayacts" style="margin-top:12px">
       <button class="dayact" id="exNoteInv" onclick="exNoteInvToggle()">
         <svg viewBox="0 0 20 20"><rect x="3.5" y="3.5" width="13" height="13" rx="3"/></svg>
-        Lower number is better</button>
+        Assisted machine</button>
+      <button class="dayact" title="What this means" aria-label="What assisted machine means" onclick="exInvInfo()"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v4.5M10 6.6v.3"/></svg>Info</button>
     </div>
-    <div class="footnote" style="margin:8px 2px 0">For assisted machines, where less weight means you did more of the work yourself. Grading, readiness and level-ups all follow it.</div>
     <div class="sheet-btns">
       <div class="btn btn-go" onclick="saveExNote()">DONE</div>
     </div>
@@ -3853,9 +3853,9 @@ body.wcon{overflow:hidden;}
     <div class="dayacts" style="margin-top:12px">
       <button class="dayact" id="mkCexInv" onclick="mkCexInvToggle()">
         <svg viewBox="0 0 20 20"><rect x="3.5" y="3.5" width="13" height="13" rx="3"/></svg>
-        Lower number is better</button>
+        Assisted machine</button>
+      <button class="dayact" title="What this means" aria-label="What assisted machine means" onclick="exInvInfo()"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v4.5M10 6.6v.3"/></svg>Info</button>
     </div>
-    <div class="footnote" style="margin:8px 2px 0">For assisted machines, where less weight means you did more of the work yourself.</div>
     <!-- Tagging is real but it is not the job. Naming a lift and adding it should stay three
          fields long, so the muscle and the equipment live behind a fold that most people will
          never open. Untagged is a legitimate answer: the filter lets those through rather than
@@ -9498,7 +9498,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.170';
+var APPV='v5.171';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9834,6 +9834,11 @@ EXINSTR.curl=EXINSTR.cbcurl;EXINSTR.pdown=EXINSTR.sapd;EXINSTR.lcurl=EXINSTR.sle
 // pad. This one has to be named outright rather than left to the strip.
 EXINSTR.p_dip=EXINSTR.bdip;
 // Pump-day rows are the same lifts under p_ ids; strip the prefix to share their words
+// The Assisted machine box, explained on demand (v5.171). It used to read Lower number is better,
+// which the owner found did not read well; the box now names the thing and the i says what it does.
+function exInvInfo(){
+  ask("On an assisted machine, like an assisted pull-up or dip, the number you write is how much help the machine gives you. A lower number means you did more of the work.\u000a\u000aTick Assisted machine and Forge grades it backwards: gold when the number drops, and level-ups that take help away instead of adding weight.",function(){},"Assisted machine","GOT IT",false);
+}
 function exInstrFor(id){
   return EXINSTR[id]||EXINSTR[String(id).replace(/^p_/,"")]||null;
 }
