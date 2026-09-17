@@ -1,0 +1,318 @@
+<title>Forge Style Fixes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@600;700;800&family=Marcellus&family=Share+Tech+Mono&family=Bricolage+Grotesque:wght@500;600&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--gold:#ff8a1f;--white:#fff6e6;--match:#8f6fbe;--violet:#a98ae6;--line:#4a2c1c;--lit:#6a3f26;--plate:#130c09;--deep:#0e0806;--mono:'Share Tech Mono',ui-monospace,monospace;color-scheme:dark;}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--txt);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:14px;line-height:1.5;margin:0;padding-block:20px 80px;padding-inline:16px;}
+.wrap{max-width:900px;margin:0 auto;}
+h1{font-size:23px;font-weight:600;margin:0 0 6px;color:var(--white);}
+p.lead{color:var(--txt2);max-width:64ch;margin:0 0 14px;}
+.index{border:1px solid #2a1a12;border-radius:12px;background:#0d0806;padding:12px 14px;margin:0 0 8px;}
+.index h2{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt3);margin:0 0 8px;border:0;padding:0;}
+.index ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:2px 14px;}
+.index li{font-size:12.5px;color:var(--txt2);}
+.index a{color:var(--txt2);text-decoration:none;}
+.index a:hover{color:var(--gold);}
+.index b{font-family:var(--mono);color:var(--gold);font-size:11px;letter-spacing:.06em;margin-right:6px;}
+section{border-top:1px solid #2a1a12;margin-top:26px;padding-top:16px;}
+section > h2{font-size:17px;font-weight:600;color:var(--gold);margin:0 0 2px;}
+section > p{color:var(--txt2);max-width:64ch;margin:0 0 6px;font-size:13.5px;}
+.item{margin:18px 0 0;scroll-margin-top:12px;}
+.head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:3px;}
+.code{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:#1b0f06;background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);border-radius:999px;padding:3px 10px;flex:none;}
+.code.soft{background:transparent;color:var(--txt3);border:1px solid #3a2214;}
+.head h3{font-size:14.5px;font-weight:600;color:var(--white);margin:0;}
+.why{color:var(--txt2);font-size:13px;margin:0 0 8px;max-width:66ch;}
+.ab{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ab > div{border:1px solid #2a1a12;border-radius:12px;padding:12px;background:radial-gradient(90% 60% at 50% 110%,rgba(255,120,30,.1),transparent 70%),#080504;min-width:0;}
+.cap{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt3);margin-bottom:10px;}
+.cap.new{color:var(--gold);}
+/* ---------- app parts, current values ---------- */
+.barlow{font-family:'Barlow',sans-serif;}
+.mono{font-family:var(--mono);}
+.marc{font-family:'Marcellus',serif;font-weight:400;}
+.bigsh{font-family:'Big Shoulders Display',sans-serif;font-weight:700;}
+.lbl-now{font-family:'Barlow',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
+.lbl-new{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
+.rowline{margin-top:8px;font-size:12.5px;color:var(--txt2);}
+.rowline b{color:var(--txt);font-weight:700;}
+.rowline em{font-style:normal;color:var(--gold);font-weight:700;}
+.pill{display:inline-flex;align-items:center;justify-content:center;height:34px;padding:0 13px;border-radius:999px;border:1px solid var(--line);background:var(--plate);color:var(--txt2);font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
+.pill.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;}
+.card-now{border:1px solid #4a2718;border-left:5px solid #ff7a1a;border-radius:10px;background:#170e09;padding:9px 12px;}
+.card-now .n{font-family:'Big Shoulders Display',sans-serif;font-weight:700;font-size:21px;letter-spacing:.012em;color:var(--txt);}
+.card-new{border:1px solid var(--line);border-top-color:var(--lit);border-radius:10px;background:var(--plate);padding:9px 12px 9px 16px;position:relative;overflow:hidden;}
+.card-new::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.card-new .n{font-family:'Marcellus',serif;font-weight:400;font-size:17px;color:var(--white);}
+.h3-now{font-family:'Big Shoulders Display',sans-serif;font-weight:700;font-size:21px;letter-spacing:.06em;text-transform:uppercase;color:var(--white);}
+.h3-new{font-family:'Marcellus',serif;font-weight:400;font-size:20px;letter-spacing:.01em;color:var(--white);}
+.fbtn-now{display:block;text-align:center;border:1px solid #57301d;border-radius:4px;background:linear-gradient(180deg,rgba(255,190,130,.055),transparent),#170e09;padding:13px 8px;font-family:'Big Shoulders Display',sans-serif;font-weight:700;font-size:14px;letter-spacing:.17em;text-transform:uppercase;color:var(--txt2);}
+.fbtn-new{display:block;text-align:center;border:1px solid var(--line);border-top-color:var(--lit);border-radius:12px;background:var(--plate);padding:13px 8px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt2);box-shadow:inset 0 1px 0 rgba(255,215,170,.1);}
+.tp{display:flex;align-items:center;gap:7px;padding:8px 10px;}
+.tp-now{border-radius:16px;background:linear-gradient(180deg,rgba(255,190,130,.06),transparent),#170e09;border:1px solid #4a2718;}
+.tp-now .t{font-family:var(--mono);font-size:20px;color:var(--txt);}
+.tp-now .b{font-family:'Barlow',sans-serif;font-size:13px;color:var(--txt2);border:1px solid #4a2718;border-radius:9px;padding:6px 9px;}
+.tp-new{border-radius:14px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid var(--lit);border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16);}
+.tp-new .t{font-family:var(--mono);font-size:22px;color:var(--white);text-shadow:0 0 14px rgba(255,200,120,.4);}
+.tp-new .b{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--txt2);border:1px solid var(--line);border-radius:999px;padding:7px 10px;}
+.tut-now{border:1px solid #4a2718;border-radius:13px;background:#170e09;padding:11px 12px;}
+.tut-now .e{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;}
+.tut-now h4{font-family:'Barlow',sans-serif;font-size:16px;font-weight:600;color:var(--txt);margin:4px 0 5px;}
+.tut-new{position:relative;overflow:hidden;border:1px solid var(--lit);border-top-color:#8a5433;border-radius:14px;background:linear-gradient(180deg,#1a100b,#100907);padding:11px 12px 11px 16px;}
+.tut-new::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.tut-new .e{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
+.tut-new h4{font-family:'Marcellus',serif;font-weight:400;font-size:17px;color:var(--white);margin:3px 0 5px;}
+.tut p{font-size:12.5px;color:var(--txt2);margin:0;}
+.ezc{display:flex;align-items:center;gap:13px;border-radius:14px;padding:12px 13px;}
+.ezc-now{background:#170e09;border:1px solid #4a2718;}
+.ezc-new{background:var(--plate);border:1px solid var(--line);border-top-color:var(--lit);position:relative;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,215,170,.1);padding-left:17px;}
+.ezc-new::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.ezc .art{flex:none;width:46px;height:46px;color:var(--gold);}
+.ezc b{display:block;font-size:15px;}
+.ezc small{display:block;font-size:11.5px;color:var(--txt3);margin-top:2px;}
+.ezc-now b{font-family:'Barlow',sans-serif;font-weight:600;color:var(--txt);}
+.ezc-new b{font-family:'Marcellus',serif;font-weight:400;color:var(--white);font-size:16px;}
+.ibtn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;}
+.ibtn-now{border:1px solid #4a2718;border-radius:10px;background:#170e09;color:var(--txt2);}
+.ibtn-new{border:1px solid var(--line);border-top-color:var(--lit);border-radius:12px;background:var(--plate);color:var(--txt2);box-shadow:inset 0 1px 0 rgba(255,215,170,.1);}
+.ibtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+.hrowx{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.chip-now{font-family:'Barlow',sans-serif;font-size:11px;border:1px solid #4a2718;border-radius:6px;background:#241510;padding:4px 7px;color:var(--txt2);}
+.chip-new{font-family:var(--mono);font-size:11px;border:1px solid #3a2214;border-radius:9px;background:var(--deep);padding:4px 8px;color:var(--txt2);}
+.chip-new.g{border-color:var(--lit);color:var(--gold);background:rgba(255,138,31,.08);}
+.chip-now.g{border-color:#a0521c;color:var(--gold);background:rgba(255,138,31,.06);}
+.srow{display:grid;grid-template-columns:16px 1fr 1fr 40px;gap:8px;align-items:center;}
+.srow i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--txt3);text-align:center;}
+.inp-now{height:34px;border-radius:7px;border:1px solid #241510;background:var(--plate);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:var(--white);}
+.inp-new{height:34px;border-radius:9px;border:1px solid #3a2214;background:var(--plate);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;color:var(--white);}
+.hold{height:34px;border-radius:9px;border:1px solid var(--line);background:var(--plate);display:flex;align-items:center;justify-content:center;color:var(--gold);}
+.hold svg{width:16px;height:9px;}
+.radii{display:flex;gap:10px;flex-wrap:wrap;}
+.radii span{display:inline-flex;align-items:center;justify-content:center;height:34px;padding:0 12px;border:1px solid var(--line);background:var(--plate);color:var(--txt2);font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;}
+.sq{height:92px;border-radius:12px;border:1px solid var(--line);border-top-color:var(--lit);background:var(--plate);position:relative;overflow:hidden;}
+.sq b{position:absolute;left:12px;bottom:10px;font-family:var(--mono);font-size:14px;color:var(--white);}
+.sq.grain::after{content:"";position:absolute;inset:0;opacity:.5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");mix-blend-mode:overlay;}
+.sq.hammer::after{content:"";position:absolute;inset:0;opacity:.55;background:radial-gradient(circle at 20% 30%,rgba(255,215,170,.09),transparent 22%),radial-gradient(circle at 62% 18%,rgba(255,215,170,.07),transparent 18%),radial-gradient(circle at 78% 62%,rgba(255,215,170,.08),transparent 20%),radial-gradient(circle at 35% 74%,rgba(255,215,170,.06),transparent 18%),radial-gradient(circle at 88% 30%,rgba(0,0,0,.25),transparent 20%);}
+.sq.heat::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60%;background:linear-gradient(0deg,rgba(255,122,26,.16),transparent);}
+.sq.scan::after{content:"";position:absolute;inset:0;opacity:.35;background:repeating-linear-gradient(180deg,rgba(255,215,170,.05) 0 1px,transparent 1px 4px);}
+.bin{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:1px solid transparent;}
+.bin svg{fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.bin-now{color:var(--txt3);border-color:#3d434a;}
+.bin-now svg{width:13px;height:13px;stroke-width:1.7;}
+.bin-new{color:#e0736b;border-color:rgba(224,115,107,.4);background:rgba(224,115,107,.12);}
+.bin-new svg{width:15px;height:15px;stroke-width:1.6;}
+.note{margin-top:26px;border:1px solid #2a1a12;border-radius:12px;padding:14px 16px;background:#0d0806;}
+.note h3{margin:0 0 6px;font-size:14px;color:var(--white);}
+.note p{color:var(--txt2);font-size:13.5px;margin:0;}
+@media(max-width:560px){.ab{grid-template-columns:1fr;}}
+</style>
+<div class="wrap">
+<h1>Style fixes, for approval</h1>
+<p class="lead">Every change I proposed, one per row, each with a code. Left is the app today, right is the change. Tell me the codes you want, for example "T1, S2, D1 to D4", and I build exactly those.</p>
+
+<div class="index">
+  <h2>The list</h2>
+  <ul>
+    <li><a href="#T1"><b>T1</b>Turn the mono font on</a></li>
+    <li><a href="#T2"><b>T2</b>Names on the board to Marcellus</a></li>
+    <li><a href="#T3"><b>T3</b>Sheet headings to Marcellus</a></li>
+    <li><a href="#T4"><b>T4</b>One tracking for labels</a></li>
+    <li><a href="#S1"><b>S1</b>The two buttons under your week</a></li>
+    <li><a href="#S2"><b>S2</b>The rest timer</a></li>
+    <li><a href="#S3"><b>S3</b>The tour card</a></li>
+    <li><a href="#S4"><b>S4</b>The wizard's cards</a></li>
+    <li><a href="#S5"><b>S5</b>Round icon buttons</a></li>
+    <li><a href="#S6"><b>S6</b>History chips and sub-rows</a></li>
+    <li><a href="#D1"><b>D1</b>One pill shape</a></li>
+    <li><a href="#D2"><b>D2</b>Set cells match their anvil</a></li>
+    <li><a href="#D3"><b>D3</b>One selected wash</a></li>
+    <li><a href="#D4"><b>D4</b>Near-miss colours to palette</a></li>
+    <li><a href="#D5"><b>D5</b>Drop the last two blurs</a></li>
+    <li><a href="#X1"><b>X1</b>Texture: fine grain</a></li>
+    <li><a href="#X2"><b>X2</b>Texture: hammered</a></li>
+    <li><a href="#X3"><b>X3</b>Texture: heat at the foot</a></li>
+    <li><a href="#X4"><b>X4</b>Texture: brushed</a></li>
+    <li><a href="#B1"><b>B1</b>The delete icon's red touch</a></li>
+    <li><a href="#B2"><b>B2</b>The pinned background glow</a></li>
+    <li><a href="#B3"><b>B3</b>The level-up leak</a></li>
+    <li><a href="#B4"><b>B4</b>Delete the old board design</a></li>
+    <li><a href="#B5"><b>B5</b>Sweep the dead styles</a></li>
+  </ul>
+</div>
+
+<section>
+<h2>Type</h2>
+<p>The four faces the theme already names, put in their right places.</p>
+
+<div class="item" id="T1"><div class="head"><span class="code">T1</span><h3>Turn the mono font on</h3></div>
+<p class="why">The theme never defines its mono, so 114 rules asking for it fall back to Barlow. One line switches every label, count and chip at once. This is the big one.</p>
+<div class="ab">
+  <div><div class="cap">Now</div>
+    <div class="lbl-now">Where it lives</div>
+    <div class="rowline barlow">2 of 4 workouts · <b>64</b> sets · <em>1 record</em> · <b>1 h 25 min</b></div>
+    <div style="margin-top:9px"><span class="pill barlow">Copy all</span> <span class="pill on barlow">Set each one</span></div>
+  </div>
+  <div><div class="cap new">Proposed</div>
+    <div class="lbl-new">Where it lives</div>
+    <div class="rowline mono">2 of 4 workouts · <b>64</b> sets · <em>1 record</em> · <b>1 h 25 min</b></div>
+    <div style="margin-top:9px"><span class="pill mono">Copy all</span> <span class="pill on mono">Set each one</span></div>
+  </div>
+</div></div>
+
+<div class="item" id="T2"><div class="head"><span class="code">T2</span><h3>Names on the board to Marcellus</h3></div>
+<p class="why">Your workout's name is Marcellus in the session, the builder, the history, the finish seal and the watch. Only the week board still uses the condensed signage face.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="card-now"><div class="n">Chest + Triceps + Core</div></div></div>
+  <div><div class="cap new">Proposed</div><div class="card-new"><div class="n">Chest + Triceps + Core</div></div></div>
+</div></div>
+
+<div class="item" id="T3"><div class="head"><span class="code">T3</span><h3>Sheet headings to Marcellus</h3></div>
+<p class="why">Every sheet's title is uppercase signage, while the section headings inside Settings and the instructions sheet are already Marcellus. Two headings, two faces, one sheet.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="h3-now">Workouts finished</div><div class="marc" style="font-size:17px;color:var(--white);margin-top:10px">Sound</div></div>
+  <div><div class="cap new">Proposed</div><div class="h3-new">Workouts finished</div><div class="marc" style="font-size:17px;color:var(--white);margin-top:10px">Sound</div></div>
+</div></div>
+
+<div class="item" id="T4"><div class="head"><span class="code">T4</span><h3>One tracking for labels</h3></div>
+<p class="why">The same uppercase label is spaced three ways across the app, sometimes on neighbouring buttons. One value for buttons, one for section labels.</p>
+<div class="ab">
+  <div><div class="cap">Now</div>
+    <div><span class="pill mono" style="letter-spacing:.12em">Copy all</span> <span class="pill mono" style="letter-spacing:.14em">Save</span> <span class="pill mono" style="letter-spacing:.16em">Share</span></div>
+    <div class="lbl-new" style="letter-spacing:.26em;margin-top:10px">Your week</div>
+  </div>
+  <div><div class="cap new">Proposed</div>
+    <div><span class="pill mono">Copy all</span> <span class="pill mono">Save</span> <span class="pill mono">Share</span></div>
+    <div class="lbl-new" style="margin-top:10px">Your week</div>
+  </div>
+</div></div>
+</section>
+
+<section>
+<h2>Surfaces</h2>
+<p>Screens the plate pass never reached.</p>
+
+<div class="item" id="S1"><div class="head"><span class="code">S1</span><h3>The two buttons under your week</h3></div>
+<p class="why">Square corners, a glass wash and the signage face: the oldest thing on the home screen, and always on it.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="fbtn-now">Workouts finished</div></div>
+  <div><div class="cap new">Proposed</div><div class="fbtn-new">Workouts finished</div></div>
+</div></div>
+
+<div class="item" id="S2"><div class="head"><span class="code">S2</span><h3>The rest timer</h3></div>
+<p class="why">The one thing you look at between sets. It still wears the old glass, and its buttons are plain text.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="tp tp-now"><span class="t">1:12</span><span class="b">&minus;15</span><span class="b">+15</span><span class="b">Skip</span></div></div>
+  <div><div class="cap new">Proposed</div><div class="tp tp-new"><span class="t">1:12</span><span class="b">&minus;15</span><span class="b">+15</span><span class="b">Skip</span></div></div>
+</div></div>
+
+<div class="item" id="S3"><div class="head"><span class="code">S3</span><h3>The tour card</h3></div>
+<p class="why">What a new user reads first, in a plain panel with a body-font heading.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="tut tut-now"><div class="e">Sample data · 1 / 7</div><h4>Your week</h4><p>Seven days, Sunday to Saturday. A day can hold a workout or stay empty.</p></div></div>
+  <div><div class="cap new">Proposed</div><div class="tut tut-new"><div class="e">Sample data · 1 / 7</div><h4>Your week</h4><p>Seven days, Sunday to Saturday. A day can hold a workout or stay empty.</p></div></div>
+</div></div>
+
+<div class="item" id="S4"><div class="head"><span class="code">S4</span><h3>The wizard's cards</h3></div>
+<p class="why">The drawings stay exactly as they are. Only the card behind them changes, to the plate with its rail.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="ezc ezc-now"><svg class="art" viewBox="0 0 100 100" fill="currentColor"><path d="M20 62h60l-5 6h-12c-3 3-5 7-5 10 0 3 2 6 6 8l4 3v4H32v-4l4-3c4-2 6-5 6-8 0-3-2-7-5-10H25z"/></svg><span><b>Three days</b><small>The classic: a rest day between every workout</small></span></div></div>
+  <div><div class="cap new">Proposed</div><div class="ezc ezc-new"><svg class="art" viewBox="0 0 100 100" fill="currentColor"><path d="M20 62h60l-5 6h-12c-3 3-5 7-5 10 0 3 2 6 6 8l4 3v4H32v-4l4-3c4-2 6-5 6-8 0-3-2-7-5-10H25z"/></svg><span><b>Three days</b><small>The classic: a rest day between every workout</small></span></div></div>
+</div></div>
+
+<div class="item" id="S5"><div class="head"><span class="code">S5</span><h3>Round icon buttons</h3></div>
+<p class="why">The back arrow, the gear and the timer button in the headers still use the old surface colour and radius.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><span class="ibtn ibtn-now"><svg viewBox="0 0 20 20"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></span> <span class="ibtn ibtn-now"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2"/></svg></span></div>
+  <div><div class="cap new">Proposed</div><span class="ibtn ibtn-new"><svg viewBox="0 0 20 20"><path d="M16 10H4M9 5l-5 5 5 5"/></svg></span> <span class="ibtn ibtn-new"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2"/></svg></span></div>
+</div></div>
+
+<div class="item" id="S6"><div class="head"><span class="code">S6</span><h3>History chips and sub-rows</h3></div>
+<p class="why">Inside a session, the set chips and the record badge kept the old surface colour and five different radii.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="hrowx"><span class="chip-now g">65×8</span><span class="chip-now">65×8</span><span class="chip-now">20s held</span><span class="chip-now g">1 record</span></div></div>
+  <div><div class="cap new">Proposed</div><div class="hrowx"><span class="chip-new g">65×8</span><span class="chip-new">65×8</span><span class="chip-new">20s held</span><span class="chip-new g">1 record</span></div></div>
+</div></div>
+</section>
+
+<section>
+<h2>Details</h2>
+<p>Each one invisible alone. Together they are why things feel slightly off.</p>
+
+<div class="item" id="D1"><div class="head"><span class="code">D1</span><h3>One pill shape</h3></div>
+<p class="why">Buttons of the same kind are rounded four different ways: fully round, 20, 19 and 18.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="radii"><span style="border-radius:999px" class="mono">Share</span><span style="border-radius:20px" class="mono">Save</span><span style="border-radius:19px" class="mono">Close</span><span style="border-radius:18px" class="mono">Done</span></div></div>
+  <div><div class="cap new">Proposed</div><div class="radii"><span style="border-radius:999px" class="mono">Share</span><span style="border-radius:999px" class="mono">Save</span><span style="border-radius:999px" class="mono">Close</span><span style="border-radius:999px" class="mono">Done</span></div></div>
+</div></div>
+
+<div class="item" id="D2"><div class="head"><span class="code">D2</span><h3>Set cells match their anvil</h3></div>
+<p class="why">On one row of the session screen, the two number cells are rounded 7 with a darker border, and the anvil beside them is rounded 9 with the lit one.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><div class="srow"><i>1</i><div class="inp-now">65</div><div class="inp-now">8</div><div class="hold"><svg viewBox="8 30 91 46" fill="currentColor"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L19.2 42L15.3 39.2Z"/></svg></div></div></div>
+  <div><div class="cap new">Proposed</div><div class="srow"><i>1</i><div class="inp-new">65</div><div class="inp-new">8</div><div class="hold"><svg viewBox="8 30 91 46" fill="currentColor"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L19.2 42L15.3 39.2Z"/></svg></div></div></div>
+</div></div>
+
+<div class="item" id="D3"><div class="head"><span class="code">D3</span><h3>One selected wash</h3></div>
+<p class="why">The chosen state is washed gold at six percent in some sheets and eight in others.</p>
+<div class="ab">
+  <div><div class="cap">Now</div><span class="pill mono" style="border-color:var(--lit);color:var(--gold);background:rgba(255,138,31,.06)">Chosen</span> <span class="pill mono" style="border-color:var(--lit);color:var(--gold);background:rgba(255,138,31,.08)">Chosen</span></div>
+  <div><div class="cap new">Proposed</div><span class="pill mono" style="border-color:var(--lit);color:var(--gold);background:rgba(255,138,31,.08)">Chosen</span> <span class="pill mono" style="border-color:var(--lit);color:var(--gold);background:rgba(255,138,31,.08)">Chosen</span></div>
+</div></div>
+
+<div class="item" id="D4"><div class="head"><span class="code">D4</span><h3>Near-miss colours to palette</h3></div>
+<p class="why">A dozen borders and fills sit one digit from the real palette colour, left over from the older look. Side by side they read as grubby; on their own you would never catch them.</p>
+<div class="ab">
+  <div><div class="cap">Now</div>
+    <div style="display:flex;gap:8px"><div style="flex:1;height:44px;border-radius:9px;background:#170e09;border:1px solid #4a2718"></div><div style="flex:1;height:44px;border-radius:9px;background:#241510;border:1px solid #57301d"></div><div style="flex:1;height:44px;border-radius:9px;background:#0f0906;border:1px solid #5a3520"></div></div>
+    <div class="lbl-new" style="margin-top:8px">4a2718 · 57301d · 5a3520</div>
+  </div>
+  <div><div class="cap new">Proposed</div>
+    <div style="display:flex;gap:8px"><div style="flex:1;height:44px;border-radius:9px;background:var(--plate);border:1px solid var(--line)"></div><div style="flex:1;height:44px;border-radius:9px;background:#1a100b;border:1px solid var(--line)"></div><div style="flex:1;height:44px;border-radius:9px;background:var(--deep);border:1px solid #3a2214"></div></div>
+    <div class="lbl-new" style="margin-top:8px">4a2c1c · 4a2c1c · 3a2214</div>
+  </div>
+</div></div>
+
+<div class="item" id="D5"><div class="head"><span class="code">D5</span><h3>Drop the last two blurs</h3></div>
+<p class="why">Sheet backgrounds and the session header still blur what is behind them, the last gesture of the glass era. Opaque is cheaper and matches the plates. Nothing visible changes except that the background stops smearing.</p>
+</div>
+</section>
+
+<section>
+<h2>Texture</h2>
+<p>Pick at most one. Each is static, costs nothing, and would go on sheets and big plates only, never on small chips.</p>
+<div class="ab" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+  <div id="X1"><div class="cap new">X1 · Fine grain <span style="color:var(--txt3)">my pick</span></div><div class="sq grain"><b>65 × 8</b></div></div>
+  <div id="X2"><div class="cap new">X2 · Hammered</div><div class="sq hammer"><b>65 × 8</b></div></div>
+  <div id="X3"><div class="cap new">X3 · Heat at the foot</div><div class="sq heat"><b>65 × 8</b></div></div>
+  <div id="X4"><div class="cap new">X4 · Brushed</div><div class="sq scan"><b>65 × 8</b></div></div>
+  <div><div class="cap">None · as today</div><div class="sq"><b>65 × 8</b></div></div>
+</div>
+</section>
+
+<section>
+<h2>Faults and housekeeping</h2>
+<p>These are repairs rather than taste. B4 and B5 change nothing you can see.</p>
+
+<div class="item" id="B1"><div class="head"><span class="code">B1</span><h3>The delete icon's red touch</h3></div>
+<p class="why">In the builder, the bin was meant to go red when you touch it and to be drawn a little larger. A later rule overrides both, so it has been small and grey.</p>
+<div class="ab">
+  <div><div class="cap">Now, touched</div><span class="bin bin-now"><svg viewBox="0 0 20 20" stroke="currentColor"><path d="M4 6h12M8 6V4.5h4V6M6.5 6l.7 10h5.6l.7-10M9 9v4M11 9v4"/></svg></span></div>
+  <div><div class="cap new">Proposed</div><span class="bin bin-new"><svg viewBox="0 0 20 20" stroke="currentColor"><path d="M4 6h12M8 6V4.5h4V6M6.5 6l.7 10h5.6l.7-10M9 9v4M11 9v4"/></svg></span></div>
+</div></div>
+
+<div class="item" id="B2"><div class="head"><span class="code soft">B2</span><h3>The pinned background glow</h3></div>
+<p class="why">An old rule with too much weight pins the ambient glow to the top left corner. Forge carries its own fix, so you have never seen it. Worth repairing before the other themes come back.</p></div>
+
+<div class="item" id="B3"><div class="head"><span class="code soft">B3</span><h3>The level-up leak</h3></div>
+<p class="why">The level-up sheet's row styling was written without naming its own sheet, so it also lands on another sheet's rows. Harmless today because that sheet is unreachable.</p></div>
+
+<div class="item" id="B4"><div class="head"><span class="code soft">B4</span><h3>Delete the old board design</h3></div>
+<p class="why">The timeline-with-dots board that came before the day column is still in the file, fully written and fully overridden. It is what keeps the old colours alive.</p></div>
+
+<div class="item" id="B5"><div class="head"><span class="code soft">B5</span><h3>Sweep the dead styles</h3></div>
+<p class="why">Fifty-two classes styled but never drawn, a sheet nobody can open, a hidden share box with no way in, and about two dozen functions nothing calls.</p></div>
+</section>
+
+<div class="note"><h3>How to answer</h3>
+<p>Name the codes. "Do T1 to T4 and S1, S2" is enough. If you want one built first so you can see it on your phone before the rest, say which.</p></div>
+</div>
