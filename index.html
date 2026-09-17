@@ -2326,6 +2326,46 @@ body.forge .daybox.quenched .dayhead{background:#171716;border-color:#343433;}
 body.forge .daybox.quenched .dayhead > span:first-child{background:transparent;border:0;color:#84827f;}
 body.forge .daybox.quenched .dh-d{color:#84827f;}
 
+/* ---- Workouts finished, v5.167: the seal roll (owner picked AE, 16 Sep). ----
+   The week is a line of seven stamps, trained days struck and turned; one line says the week in
+   words; each session is the finish screen's seal rolled small. No gold-versus-violet counts:
+   that story is per lift, one tap in. */
+#histOvl .sheet{background:#0a0605;border-color:#4a2718;}
+body.forge .hsegb.on{background:#3a1d0c;color:#ffd9b5;}
+body.forge .hwk{gap:5px;margin-bottom:10px;}
+body.forge .hwk-c{aspect-ratio:1;border-radius:50%;border:1.5px solid #3a2214;background:#0e0806;padding:0;justify-content:center;gap:0;transition:transform .2s;}
+body.forge .hwk-c i{font-size:8.5px;letter-spacing:.08em;color:var(--txt3);}
+body.forge .hwk-c b{font-size:12px;font-weight:600;color:var(--txt2);}
+body.forge .hwk-c::after{display:none;}
+body.forge .hwk-c.has{border-color:var(--gold);background:radial-gradient(circle at 50% 40%,#3a1d0c,#150d09);box-shadow:0 0 12px -4px rgba(255,138,31,.7);transform:rotate(-8deg);}
+body.forge .hwk-c.has i{color:var(--gold);}
+body.forge .hwk-c.has b{color:#ffd9b5;}
+body.forge .hwk-c.pr{border-color:#ffd08a;box-shadow:0 0 14px -3px rgba(255,208,138,.9);}
+body.forge .hwk-c.walk{border-style:dashed;border-color:#6a3f26;}
+body.forge .hwk-c.now{border-color:#a0521c;border-style:dashed;}
+body.forge .hwk-c.now.has{border-style:solid;}
+body.forge .hwk-c.sel{background:#3a1d0c;border-color:#ffb35c;transform:rotate(-8deg) scale(1.06);}
+body.forge .hwk-c.fut{opacity:.4;}
+.hline{text-align:center;font-size:12.5px;color:var(--txt2);margin:0 0 12px;}
+.hline b{font-family:var(--mono);font-weight:700;color:var(--txt);}
+.hline em{font-style:normal;font-family:var(--mono);font-weight:700;color:var(--gold);}
+body.forge .hrow.hseal{position:relative;display:block;border-radius:14px;padding:13px 14px 12px;margin-bottom:10px;
+  background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;
+  box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 14px 28px -14px rgba(0,0,0,.9);}
+body.forge .hrow.hseal:hover{background:linear-gradient(180deg,#24160e,#150d09);border-color:#8a5433;}
+body.forge .hrow-mk{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);box-shadow:0 0 12px -4px rgba(255,138,31,.7),inset 0 0 0 2px #120b08,inset 0 0 0 3px #6a3f26;}
+body.forge .hrow-mk svg{width:20px;height:20px;}
+body.forge .hseal .hrow-d{color:var(--gold);letter-spacing:.18em;font-size:9.5px;}
+body.forge .hseal .hrow-n{font-size:17px;margin:2px 60px 0 0;white-space:normal;line-height:1.2;}
+body.forge .hrow-hero{display:flex;align-items:baseline;gap:8px;margin-top:9px;}
+body.forge .hrow-hero b{font-family:var(--mono);font-weight:700;font-size:30px;color:#fff6e6;line-height:1;letter-spacing:-.02em;}
+body.forge .hrow-hero span{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--txt2);}
+body.forge .hrow-rec{margin-left:auto;font-style:normal;font-family:var(--mono);font-weight:700;font-size:11px;color:#1b0f06;background:#ffd08a;border-radius:6px;padding:3px 8px;box-shadow:0 0 10px rgba(255,208,138,.5);}
+body.forge .hseal .hrow-m{margin-top:8px;}
+body.forge .hrow.hwalk.hadd{border:1px dashed #3a2214;color:var(--txt3);border-radius:10px;}
+body.forge .hrow.hwalk.hadd:hover{color:var(--gold);border-color:#6a3f26;}
+.hshare[hidden]{display:none;}
+
 /* ---- The session screen, v5.157: the ledger (owner picked AB, with icon buttons top left). ----
    Each lift is a compact blackened table: a header band with the name and the swap, a row of icon
    buttons under the name (instructions, note, warm-up, plates), then one tight row per set with the
@@ -2561,6 +2601,7 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hex-s{display:flex;flex-wrap:wrap;gap:5px;}
 .hset{font-family:var(--mono);font-size:11px;color:var(--txt);background:var(--surface2);border:1px solid var(--line);border-radius:7px;padding:4px 8px;cursor:pointer;}
 .hset.pr{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 45%,transparent);}
+.hset.mt{color:var(--match);border-color:color-mix(in srgb,var(--match) 45%,transparent);}
 /* a chip mid-correction: the inputs take the chip's seat, sized like the builder's m/s pair */
 .hset.hed{display:inline-flex;align-items:center;gap:5px;padding:3px 6px;cursor:default;}
 .hset.hed i{font-style:normal;color:var(--txt3);font-size:11px;}
@@ -3834,10 +3875,13 @@ body.wcon{overflow:hidden;}
     </div>
     <div id="histBody"></div>
     <textarea id="histTxt" readonly style="position:fixed;left:-9999px;top:0;width:10px;height:10px;opacity:0"></textarea>
-    <div class="sheet-btns">
-      <div class="btn btn-go" onclick="copyHist()" id="copyHistBtn">COPY ALL</div>
+    <div class="sheet-btns hshare" id="histShareRow" hidden>
+      <div class="btn" onclick="copyHist()" id="copyHistBtn">COPY ALL</div>
       <div class="btn" onclick="exportDest('text')">SAVE AS A FILE</div>
-      <div class="btn" onclick="closeOvl('histOvl')">CLOSE</div>
+    </div>
+    <div class="sheet-btns">
+      <div class="btn" onclick="var r=document.getElementById('histShareRow');r.hidden=!r.hidden">SHARE</div>
+      <div class="btn btn-go" onclick="closeOvl('histOvl')">DONE</div>
     </div>
   </div>
 </div>
@@ -9328,7 +9372,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.166';
+var APPV='v5.167';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15382,12 +15426,16 @@ function histRowHtml(it){
     '</div>';
   }
   var i=it.log,L=DB.logs[i],w=W[L.day],s=histSetsOf(L);
-  return '<div class="hrow" style="--hc:'+dayC(L.day)+'" onclick="histOpen('+i+')">'+
+  var planned=0;try{planned=w?totalSets(L.day):0;}catch(e){}
+  var of=(planned&&planned>=s.n)?'of '+planned+' sets':(s.n===1?'set':'sets');
+  return '<div class="hrow hseal" style="--hc:'+dayC(L.day)+'" onclick="histOpen('+i+')">'+
+      '<div class="hrow-mk"><svg viewBox="0 0 100 100">'+anvilAt(59,'fill="var(--gold)"')+'</svg></div>'+
       '<div class="hrow-b">'+
         '<div class="hrow-d">'+pretty(L.date)+'</div>'+
         '<div class="hrow-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
-        '<div class="hrow-m">'+(L.marked?'Marked done':s.n+(s.n===1?' set':' sets'))+(s.pr?' &middot; <span class="pr">'+s.pr+' record'+(s.pr>1?'s':'')+'</span>':'')+'</div>'+
-      '</div><div class="hrow-a">&rsaquo;</div>'+
+        (L.marked?'<div class="hrow-m">Marked done</div>':
+        '<div class="hrow-hero"><b>'+s.n+'</b><span>'+of+'</span>'+(s.pr?'<em class="hrow-rec">'+s.pr+' record'+(s.pr>1?'s':'')+'</em>':'')+'</div>')+
+      '</div>'+
     '</div>';
 }
 // Sessions and walks together, newest first, optionally inside [t0,t1).
@@ -15447,11 +15495,7 @@ function histWeekHtml(){
   var planned=0,done=0;
   DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){if(wkVar(id)||!W[id])return;planned++;if(doneIds[id])done++;});});
   var walks=items.filter(function(it){return it.walk;}).length;
-  h+='<div class="hstat">'+
-    '<div><b>'+(planned?done+'<small>of '+planned+'</small>':sess)+'</b><span>'+(planned?'workouts done':(sess===1?'workout':'workouts'))+'</span></div>'+
-    '<div><b>'+sets+'</b><span>'+(sets===1?'set':'sets')+'</span></div>'+
-    '<div><b'+(recs?' class="gold"':'')+'>'+recs+'</b><span>'+(recs===1?'record':'records')+'</span></div>'+
-    '</div>';
+  h+='<div class="hline"><b>'+(planned?done+'</b> of '+planned+' workouts':sess+'</b> '+(sess===1?'workout':'workouts'))+' &middot; <b>'+sets+'</b> '+(sets===1?'set':'sets')+(recs?' &middot; <em>'+recs+' record'+(recs===1?'':'s')+'</em>':'')+'</div>';
   var sessions=items.filter(function(it){return it.log!==undefined;});
   h+='<div class="hscroll">'+(sessions.length?sessions.map(histRowHtml).join(''):'<div class="hnone">'+(off===0?'Nothing finished yet this week.':'Nothing finished this week.')+'</div>')+
     ((DB.walks||[]).length?'<div class="hrow hwalk hadd" onclick="histMode(\'walks\')">WALKS'+(walks?' &middot; '+walks+' this week':'')+' &rsaquo;</div>':
@@ -15542,7 +15586,7 @@ function renderHist(){
               '<button class="mk-rest-ok" onclick="histEditOK()">OK</button></span>';
           }
           var v=s.unit==='sec'?(s.r+'s held'):(s.w?fmtW(s.w)+'\u00d7'+s.r:s.r+' reps');
-          return '<span class="hset'+(s.pr?' pr':'')+'" onclick="histEditSet(\''+id+'\','+si+')" title="Tap to correct this set">'+v+'</span>';
+          return '<span class="hset'+((s.pr||isTop(s.g))?' pr':(s.g==='match'?' mt':''))+'" onclick="histEditSet(\''+id+'\','+si+')" title="Tap to correct this set">'+v+'</span>';
         }).join('')+'</div></div>';
     }
     body.innerHTML='<div class="hback" onclick="histBack()">&larr; All sessions</div>'+
