@@ -14736,7 +14736,10 @@ var PL_BARS=[
   {k:'sho', n:'Short Olympic', s:'2-inch, lighter and shorter', lb:35, kg:15},
   {k:'std', n:'Standard',      s:'1-inch bar, smaller plates', lb:15, kg:7,  std:1},
   {k:'ez',  n:'EZ curl',       s:'Olympic sleeves, wavy grip', lb:20, kg:9},
-  {k:'mac', n:'Machine',       s:'Loads onto horns',       lb:0,  kg:0},
+  {k:'mac', n:'Machine',       s:'Two horns, one each side', lb:0,  kg:0},
+  // One peg, all the plates on it: a seated calf raise, some leg presses and shrug machines.
+  // Nothing is doubled, so it shares the loose-plate arithmetic (owner caught the halving, 16 Sep).
+  {k:'mac1',n:'Machine, one horn', s:'All plates on one peg', lb:0,  kg:0, solo:1, horn:1},
   // No bar and no machine: the plates themselves, in your hands. A plate held on an
   // incline sit-up, one in each hand for shrugs or raises. Nothing is doubled here -
   // what you tap is what you are holding, which is the only honest sum for it.
@@ -14782,7 +14785,7 @@ function plLoadFor(total){
 // machine has no bar at all - just the horns the plates hang on.
 function plArt(){
   var W=320,H=150,cx=W/2,mid=64,lab=mid+52;
-  var b=plBarDef(PL.bar),thin=!!b.std,solo=!!b.solo,mach=PL.bar==='mac',none=mach||solo;
+  var b=plBarDef(PL.bar),thin=!!b.std,solo=!!b.solo,horn=!!b.horn,mach=PL.bar==='mac',none=mach||solo;
   var span=PL.bar==='sho'?128:(PL.bar==='ez'?120:150);   // half-length of the whole bar
   var shaftH=thin?4:6,sleeveH=thin?5:10;
   var gap=PL.bar==='ez'?46:40;                            // clear space in the middle
@@ -14799,7 +14802,16 @@ function plArt(){
     reach+=pw+2.5;
   });
   var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+(none?'the machine, loaded':'the bar, loaded both ends')+'">';
+  var soloX=cx-(reach-start)/2;   // centre the single stack instead of hanging it off nothing
   function bar(){
+    if(horn){
+      // One horn, drawn like one side of the machine: the mounting boss at the left root, the peg
+      // running right under the whole stack and a little past it.
+      var hr=soloX-12,ht=Math.max(soloX+60,soloX+(reach-start)+14);
+      svg+='<rect x="'+hr.toFixed(1)+'" y="'+(mid-4.5)+'" width="'+(ht-hr).toFixed(1)+'" height="9" rx="4.5" fill="#8a9099"/>';
+      svg+='<rect x="'+(hr-9).toFixed(1)+'" y="'+(mid-11)+'" width="9" height="22" rx="3" fill="#5f666f"/>';
+      return;
+    }
     if(solo){
       // Nothing to draw but the plates - no bar, no horn, no frame. They sit in one stack
       // because that is what you are holding, and nothing here is mirrored or doubled.
@@ -14844,7 +14856,6 @@ function plArt(){
   // Loose plates are ONE stack, centred - there is no second end for them to mirror onto.
   // A bar and a machine both load twice, so those draw both sides.
   var sides=solo?[1]:[-1,1];
-  var soloX=cx-(reach-start)/2;   // centre the single stack instead of hanging it off nothing
   sides.forEach(function(side){
     var x=solo?soloX:cx+side*start;
     order.forEach(function(p,i){
@@ -14876,7 +14887,7 @@ function plArt(){
   });
   if(drew&&!solo)svg+='<text x="'+(W-5)+'" y="15" text-anchor="end" fill="#8e959e" font-size="10" font-family="system-ui">+'+drew+' more each end</text>';
   svg+='<text x="'+cx+'" y="'+(H-6)+'" text-anchor="middle" fill="#6e747c" font-size="10" font-family="system-ui">'+
-       (solo?'just the plates &middot; nothing is doubled':
+       (horn?'one horn &middot; every plate counts once':solo?'just the plates &middot; nothing is doubled':
         mach?'both pegs shown &middot; load the same on each':
              'both ends shown &middot; this is the whole bar')+'</text>';
   return svg+'</svg>';
@@ -14885,9 +14896,9 @@ function plDraw(){
   var u=wUnitName(),bw=plBarW(PL.bar),per=plPerSide(),tot=plTotal();
   document.getElementById('plArt').innerHTML=plArt();
   document.getElementById('plTotal').innerHTML=plNum(tot)+'<small>'+u+'</small>';
-  var r,solo=plSolo();
+  var r,solo=plSolo(),horn=!!plBarDef(PL.bar).horn;
   if(!PL.on.length){
-    r=solo?'No plates yet. Tap what you are holding.'
+    r=horn?'Nothing on the horn yet. Tap a plate.':solo?'No plates yet. Tap what you are holding.'
       :bw?'Just the '+plNum(bw)+' '+u+' bar. Tap a plate to load it.'
          :'Nothing loaded yet. Tap a plate.';
   }else{
@@ -14906,13 +14917,13 @@ function plDraw(){
   // Own up when what is on hand cannot make the number that was typed.
   if(PL.want!=null&&Math.abs(PL.want-tot)>0.001){
     r+='<br><span class="pl-warn">'+(PL.want>tot?'Closest under ':'Nearest to ')+plNum(PL.want)+' '+u+
-       (solo?' these plates can make':' this bar can make')+
+       (horn?' this horn can make':solo?' these plates can make':' this bar can make')+
        (PL.want>tot?', '+plNum(PL.want-tot)+' '+u+' short':'')+'.</span>';
   }
   document.getElementById('plRead').innerHTML=r;
   document.getElementById('plTypeUnit').textContent=u;
   var tl=document.getElementById('plTapLbl');
-  if(tl)tl.textContent=solo?'OR SET WHAT YOU ARE HOLDING':'OR ADD AND TAKE OFF · ONE ON EACH END';
+  if(tl)tl.textContent=horn?'OR ADD AND TAKE OFF · ALL ON THE ONE HORN':solo?'OR SET WHAT YOU ARE HOLDING':'OR ADD AND TAKE OFF · ONE ON EACH END';
   // the plate buttons, each showing how many of it are already on
   var cnt={};PL.on.forEach(function(p){var k=plNum(p);cnt[k]=(cnt[k]||0)+1;});
   document.getElementById('plGrid').innerHTML=plPlates(PL.bar).map(function(p){
