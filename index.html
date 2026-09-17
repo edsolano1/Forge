@@ -14947,14 +14947,18 @@ function plBarBtns(){
       b.n+(bw?' · '+bw+wUnitName():'')+'<small>'+b.s+'</small></button>';
   }).join('');
 }
-// Changing the bar STRIPS it. Carrying the old total across looked like the new bar came
-// with plates already hanging on it - switch to the 35 and 5s had appeared by themselves.
-// Picking up a different bar means picking up a bare one; the plates go on after.
+// Changing the bar carries the WEIGHT across (owner, 16 Sep): the number you wanted is the
+// point, the medium is how you make it. So the same total is reloaded on the new bar, machine
+// or loose plates, and the typed box shows it; if the new bar cannot make it exactly, the
+// readout owns up the way it always does. It used to strip the bar instead, which threw away a
+// number you had just worked out.
 function plPickBar(k){
-  PL.bar=k;PL.want=null;
+  var tot=PL.on.length?plTotal():(PL.want||0);
+  PL.bar=k;
   // Chosen, not yet committed: SAVE writes it against the lift, CANCEL walks away and the
   // lift keeps whatever bar it had. Nothing on this sheet touches stored data before then.
-  PL.on=[];
+  if(tot>0){PL.want=tot;PL.on=plLoadFor(tot);var tb=document.getElementById('plType');if(tb)tb.value=plNum(tot);}
+  else{PL.want=null;PL.on=[];}
   plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
 // Name a weight, get a loaded bar. PL.want is remembered ONLY so the readout can own up
