@@ -64,6 +64,23 @@ main constraint on how to work in it. See **Traps** below before editing.
   directions, then build: that is how every one of these was chosen and it is how the owner wants
   to keep working. No bare text that goes somewhere: anything tappable looks like a button.
   A finish screen shows what you did, not arithmetic: no reps total, no weight moved.
+  **Mockup first has no exceptions** (owner, 17 Sep): carrying a chosen look to another screen still
+  gets a mockup and his pick before it ships.
+- **The look reached everything else (v5.157 to v5.172).** The session screen is the ledger (v5.157,
+  icon buttons under the name). Workouts finished is the seal roll (v5.167). The instructions sheet and
+  the builder cards wear the seal, the finish screen's warm stamped plate (v5.168, owner picked C), and so
+  does every other sheet through one forge-scoped block, "Every other sheet, v5.170": picker, custom
+  exercise, Settings, workout settings, swap, plate calculator, dialogs. The welcome's two choices are
+  wizard cards with pictures (WZ.wc, v5.169). The board says Skipped, carries no set counts, wraps names
+  (v5.164 to v5.166). Rest notices name the coming set (restNextLine, v5.162). Plate calculator: a
+  one-horn machine (bar key mac1, solo, nothing doubled) and changing the bar carries the total across
+  (v5.168). The assisted box reads Assisted machine with an Info button (exInvInfo, v5.171).
+  terms.html sits beside privacy.html, linked from the safety screen and Settings (v5.172).
+- **The watch wears the Plates look (1.7, 16 Sep)**: Marcellus and IBM Plex Mono as font files under
+  wear/src/main/res/font, plate drawables row_bg / row_bg_done / row_bg_cur / row_bg_match /
+  row_bg_under / plate_num, anvil_gold and anvil_match. 1.8 (built, install pending) restyles the
+  ongoing chip (ic_anvil, the coming set with its weight) and lets a set picked from the ladder mid-rest
+  be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
 - **Saved workouts is a fold** (SAVED_OPEN, savedApply). Pump day is a built-in card at its head,
   not in DB.extra. The level-up offer at the finish is finLvl → finRaise → openLevel.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
@@ -159,6 +176,9 @@ loses to it; positioning anything inside #bg needs the id in the selector (v5.14
 currentTime 0, and an entrance that starts at opacity 0 never becomes visible. Verify names and
 pivots there, never timing; and never write an entrance from opacity 0 (the level-up plates start
 at .3 for this reason).
+
+**9. On Wear, a layer-list item with a negative inset paints the whole frame.** The superset rail in
+watch 1.7 came out as a solid violet block; pin a 3dp item with android:gravity instead.
 
 ---
 
