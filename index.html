@@ -3039,6 +3039,8 @@ html.light .sp-mark .cut,body.light .sp-mark .cut{fill:#e9eef5;}
 .lx-anvil{transform-box:view-box;transform-origin:625px 1060px;animation:lxTake .5s ease-out .78s both;}
 .lx-rule{animation-delay:.82s;}
 .lx-word{animation-delay:.86s;}
+.lx-tag{margin-top:12px;font-size:12.5px;letter-spacing:.02em;color:var(--txt2);opacity:0;animation:lxIn .5s cubic-bezier(.2,.7,.3,1) 1.15s both;}
+:root.mo-off .lx-tag{animation:none;opacity:1;}
 .lx-flash{position:absolute;inset:0;pointer-events:none;opacity:0;
   background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--gold) 38%,transparent),transparent 40%);
   animation:lxFlash .5s ease-out .78s both;}
@@ -3322,6 +3324,7 @@ body.wcon{overflow:hidden;}
     <div class="lx-logo" id="lxLogo"></div>
     <div class="lx-rule"></div>
     <div class="lx-word">Forge</div>
+    <div class="lx-tag" id="lxTag"></div>
   </div>
   <div class="sp-board" hidden>
     <div class="sp-frame">
@@ -9519,7 +9522,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.173';
+var APPV='v5.174';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11086,7 +11089,7 @@ function markHomeReady(){
   if(homeReady)return;homeReady=true;
   try{initAudio();}catch(e){}
   if(!SPLASH_ON){dismissSplash();return;}    // straight into the week
-  setTimeout(dismissSplash,Math.max(0,1700-(Date.now()-bootT0)));
+  setTimeout(dismissSplash,Math.max(0,2300-(Date.now()-bootT0)));   // long enough to read the line under the word (v5.174)
 }
 // hard ceiling: storage can never trap the user behind the splash
 setTimeout(function(){dismissSplash();},3600);
@@ -11544,9 +11547,14 @@ var TAGS_MOON=[
   'No constellation is a single star',
   'Stars burn on the nights nobody looks'
 ];
+// One line per launch (v5.174): picked once, said on the splash after the blow, and kept at the top
+// of the home screen so the two agree. It used to re-roll on every render of the home.
+var TAGPICK=null;
 function renderTagline(){
   var t=MW()?TAGS_MOON:FG()?TAGS_FORGE:TAGS;
-  document.getElementById('tagline').innerHTML=t[Math.floor(Math.random()*t.length)];
+  if(TAGPICK==null||t.indexOf(TAGPICK)<0)TAGPICK=t[Math.floor(Math.random()*t.length)];
+  document.getElementById('tagline').innerHTML=TAGPICK;
+  var lx=document.getElementById('lxTag');if(lx&&!lx.innerHTML)lx.innerHTML=TAGPICK;
 }
 function renderHome(){
   renderMark();renderName();renderPumpIcon();renderTagline();renderBg();

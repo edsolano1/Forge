@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.173** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.174** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -77,6 +77,8 @@ palette. All verified on the SM-R960 except the live set screen, which waits for
 - **v5.172 (17 Sep)**: terms.html, a plain-English terms of use beside privacy.html; linked from the safety screen note and the Settings footer.
 
 - **v5.173 (17 Sep)**: the launch strikes (owner picked A from icons/splash-options.html). logoSvgParts names the anvil, hammer and sparks; the hammer arrives raised over the anvil (clockwise about the handle end), comes down once at .78s, the anvil takes it, the sparks burst and rise, the face flares (.lx-flash), and the rule and word land on the blow. Motion Off keeps the still launch.
+
+- **v5.174 (17 Sep)**: the launch says one of the six Forge lines under the word after the blow (.lx-tag, 1.15s), and the same line stays at the top of the home screen (TAGPICK, picked once per launch instead of re-rolling every render). The launch holds 2.3s so the line can be read.
 
 ### Still to do, in order (16 Sep 2026)
 1. **The watch's look**: mockup icons/watch-options.html (Plates, Ledger, Seal); owner picked **A, Plates** (16 Sep), C parked as a possible later direction. **Watch 1.7 (versionCode 207) is installed on the SM-R960 (16 Sep evening) as the Plates look; the owner will judge it in his next session**: Marcellus and IBM Plex Mono shipped as font files, every row a plate with the ember rail (gold rail and anvil when done, violet for matched, dark for under), the ember bar button, the hearth glow at the foot, no set counts on the week. Verified on the wrist: week, overview (superset rail fixed after the first install painted the frame solid violet), set preview. **Watch 1.8 (208)** the same evening: the ongoing chip and shade card wear the anvil icon and the ember, and say the coming set with its weight (Set 3 of 4 · 65 lb × 8; Rest 0:45 · set 3 on the face chip, Rest · up next set 3 of 4 · 65 lb × 8 in the shade). It also lets a set picked from the ladder mid-rest be corrected while the countdown runs underneath (before, the rest screen swallowed the tap). Built, waiting to be installed.
