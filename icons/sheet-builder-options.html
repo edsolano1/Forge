@@ -1,0 +1,177 @@
+<title>Instructions And Builder Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600&family=IBM+Plex+Mono:wght@500;600;700&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--white:#fff6e6;--match:#8f6fbe;--violet:#a98ae6;color-scheme:dark;}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--txt);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:14px;line-height:1.45;margin:0;padding-block:22px 60px;padding-inline:16px;}
+.wrap{max-width:900px;margin:0 auto;}
+h1{font-size:22px;font-weight:600;margin:0 0 6px;color:var(--white);text-wrap:balance;}
+p.lead{color:var(--txt2);max-width:62ch;margin:0 0 8px;}
+section{border-top:1px solid #2a1a12;margin-top:26px;padding-top:18px;}
+section h2{font-size:17px;font-weight:600;color:var(--gold);margin:0 0 4px;}
+section h2 small{color:var(--txt3);font-weight:500;font-size:13px;margin-left:6px;}
+section .why{color:var(--txt2);max-width:62ch;margin:0 0 14px;font-size:13.5px;}
+section.today h2{color:var(--txt2);}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-items:start;}
+figure{margin:0;}
+figcaption{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin:0 0 8px;}
+.phone{max-width:360px;border-radius:18px;background:radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.3),transparent 70%),#070403;padding:14px 12px 18px;border:1px solid #1d120c;}
+.mono{font-family:"IBM Plex Mono",monospace;}
+.name{font-family:Marcellus,serif;font-weight:400;color:var(--white);}
+.fig{display:flex;gap:8px;justify-content:center;}
+.fig div{flex:1;max-width:150px;aspect-ratio:1;border-radius:8px;background:#0e0806;border:1px solid #2a1810;position:relative;}
+.fig div::after{content:"";position:absolute;left:50%;top:22%;width:22%;height:56%;transform:translateX(-50%);border-radius:40%;background:radial-gradient(circle at 50% 12%,#f4e2cb 0 9%,transparent 10%),linear-gradient(#f4e2cb,#f4e2cb) 50% 45%/2px 60% no-repeat;opacity:.8;}
+.fig small{display:block;text-align:center;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.16em;color:var(--txt3);margin-top:3px;}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.btn{height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);}
+.btn.go{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
+/* today */
+.T .sheet{background:#1a110c;border:1px solid #3a2617;border-radius:16px;padding:16px 14px;}
+.T h3{margin:0 0 10px;font-family:"Big Shoulders Display","Bricolage Grotesque",sans-serif;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--white);font-weight:600;}
+.T .pre{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px;}
+.T .pre span{padding:10px;border-radius:12px;border:1px solid #3a2617;background:#231710;text-align:center;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--txt);}
+.T .pre span.on{border-color:var(--go);color:var(--go);}
+.T p{font-size:13px;color:var(--txt2);margin:0 0 10px;}
+.T ul{margin:0 0 12px;padding-left:18px;font-size:13px;}
+.T li{margin:5px 0;} .T li::marker{color:var(--go);}
+.T .mis{font-size:12px;padding:9px 11px;border:1px solid #3a2617;border-radius:9px;}
+.T .mis b{color:var(--go);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;}
+.T .card{background:#1a110c;border:1px solid #3a2617;border-left:3px solid #a85a2a;border-radius:12px;padding:14px;}
+.T .card .n{font-weight:600;font-size:15px;color:var(--white);margin-bottom:12px;}
+.T .lbl{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;color:var(--txt3);margin:8px 0;}
+.T .sel{display:inline-block;padding:7px 10px;border:1px solid #3a2617;border-radius:8px;font-size:12px;}
+.T .set{display:flex;align-items:center;gap:8px;margin:6px 0;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--txt3);}
+.T .set i{width:56px;height:30px;border-radius:8px;border:1px solid #3a2617;background:#231710;display:flex;align-items:center;justify-content:center;font-style:normal;color:var(--white);font-size:13px;}
+.T .set em{font-style:normal;padding:5px 8px;border:1px solid #3a2617;border-radius:8px;font-size:10px;}
+/* ---- A. Plates ---- */
+.A .sheet{position:relative;overflow:hidden;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;border-radius:14px;padding:16px 16px 16px 20px;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 16px 30px -16px rgba(0,0,0,.9);}
+.A .sheet::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.A h3{margin:2px 0 12px;font-size:20px;line-height:1.15;}
+.A .fig div{background:#0e0806;border-color:#3a2214;}
+.A .seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid #4a2c1c;border-radius:10px;overflow:hidden;background:#0e0806;margin:12px 0 14px;}
+.A .seg span{padding:10px;text-align:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);}
+.A .seg span.on{background:#3a1d0c;color:#ffd9b5;box-shadow:inset 0 0 0 1px #a0521c;}
+.A p{font-size:13.5px;color:var(--txt2);margin:0 0 10px;}
+.A ol{margin:0 0 12px;padding:0;list-style:none;}
+.A ol li{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:7px 0;border-top:1px solid #1e120c;font-size:13.5px;}
+.A ol li:first-child{border-top:0;}
+.A ol li b{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;color:var(--gold);}
+.A .mis{border-radius:10px;padding:10px 12px;background:linear-gradient(90deg,rgba(255,138,31,.18),rgba(255,138,31,.03));border:1px solid #6a3f26;font-size:13px;color:var(--txt2);}
+.A .mis b{display:block;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
+.A .card{position:relative;overflow:hidden;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;border-radius:12px;padding:12px 12px 12px 16px;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 10px 22px -10px rgba(0,0,0,.95);}
+.A .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.A .card .top{display:flex;align-items:center;gap:8px;}
+.A .card .top .n{flex:1;font-size:16px;}
+.A .ic{width:32px;height:32px;border-radius:8px;border:1px solid #3a2214;background:#0e0806;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;}
+.A .measure{display:inline-flex;align-items:center;gap:8px;margin:10px 0 8px;padding:7px 10px;border-radius:9px;border:1px solid #4a2c1c;background:#0e0806;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);}
+.A .measure i{font-style:normal;color:var(--txt3);}
+.A .set{display:grid;grid-template-columns:18px 1fr 12px 1fr 58px;gap:8px;align-items:center;padding:5px 0;border-top:1px solid #1e120c;}
+.A .set:first-of-type{border-top:0;}
+.A .set > i{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--txt3);text-align:center;}
+.A .cell{height:36px;border-radius:9px;border:1px solid #4a2c1c;background:#0e0806;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15px;color:var(--white);}
+.A .rest{height:36px;border-radius:9px;border:1px solid #3a2214;background:#130c09;display:flex;align-items:center;justify-content:center;gap:4px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;color:var(--txt3);}
+.A .foot{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.A .step{flex:1;display:flex;align-items:center;justify-content:center;gap:12px;height:36px;border-radius:9px;border:1px solid #3a2214;background:#0e0806;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--txt2);}
+.A .step u{text-decoration:none;width:28px;height:28px;border-radius:7px;border:1px solid #4a2c1c;display:flex;align-items:center;justify-content:center;color:var(--txt);}
+.A .ss{height:36px;padding:0 12px;border-radius:9px;border:1px solid #4a3a6a;background:rgba(143,111,190,.08);display:flex;align-items:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10px;letter-spacing:.14em;color:var(--violet);}
+/* ---- B. Ledger ---- */
+.B .sheet{background:#0e0806;border:1px solid #3a2214;border-top-color:#4a2c1c;border-radius:12px;overflow:hidden;box-shadow:0 10px 22px -12px rgba(0,0,0,.9);}
+.B .band{padding:12px 14px 10px;background:#150d09;border-bottom:1px solid #2a1810;}
+.B .band h3{margin:2px 0 0;font-size:18px;line-height:1.15;}
+.B .body{padding:12px 14px 14px;}
+.B .fig div{background:#130c09;border-color:#3a2214;}
+.B .cells{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 14px;}
+.B .cell{height:40px;border-radius:9px;border:1px solid #4a2c1c;background:#130c09;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);}
+.B .cell.on{border-color:var(--gold);color:var(--gold);background:rgba(255,138,31,.08);box-shadow:0 0 12px -4px rgba(255,138,31,.7);}
+.B .row{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:8px 0;border-top:1px solid #1e120c;font-size:13.5px;}
+.B .row:first-child{border-top:0;}
+.B .row b{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);padding-top:3px;}
+.B .row.mis b{color:var(--gold);}
+.B .row.mis{background:rgba(255,138,31,.06);margin:0 -14px;padding:10px 14px;border-top-color:#3a2214;}
+.B .row span{color:var(--txt2);}
+.B .row.c span{color:var(--txt);}
+.B .card{background:#0e0806;border:1px solid #3a2214;border-top-color:#4a2c1c;border-radius:12px;overflow:hidden;box-shadow:0 10px 22px -12px rgba(0,0,0,.9);}
+.B .card .band{display:flex;align-items:center;gap:8px;padding:10px 10px 8px 12px;}
+.B .card .band .n{flex:1;font-size:16px;}
+.B .ic{width:32px;height:32px;border-radius:8px;border:1px solid #3a2214;background:#130c09;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;}
+.B .tools{display:flex;gap:6px;padding:8px 12px 2px;}
+.B .tools span{height:30px;padding:0 10px;border-radius:8px;border:1px solid #3a2214;background:#130c09;display:flex;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
+.B .tools span.on{color:var(--gold);border-color:#6a3f26;}
+.B .sets{padding:6px 8px 8px;}
+.B .set{display:grid;grid-template-columns:18px 1fr 1fr 58px;gap:8px;align-items:center;padding:5px 4px;border-top:1px solid #1e120c;}
+.B .set:first-child{border-top:0;}
+.B .set > i{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--txt3);text-align:center;}
+.B .inp{height:36px;border-radius:9px;border:1px solid #4a2c1c;background:#130c09;display:flex;align-items:center;justify-content:center;gap:5px;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15px;color:var(--white);}
+.B .inp small{font-size:9px;letter-spacing:.1em;color:var(--txt3);font-weight:600;}
+.B .rest{height:36px;border-radius:9px;border:1px solid #3a2214;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;color:var(--txt3);}
+.B .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px 10px;border-top:1px solid #1e120c;}
+.B .foot span{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
+.B .foot u{text-decoration:none;display:inline-flex;gap:6px;}
+.B .foot u i{width:30px;height:30px;border-radius:8px;border:1px solid #4a2c1c;display:flex;align-items:center;justify-content:center;font-style:normal;color:var(--txt);}
+.B .ss{height:30px;padding:0 10px;border-radius:8px;border:1px solid #4a3a6a;display:flex;align-items:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10px;letter-spacing:.14em;color:var(--violet);}
+/* ---- C. Seal ---- */
+.C .sheet{position:relative;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;border-radius:14px;padding:16px;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
+.C .seal{position:absolute;right:14px;top:14px;width:44px;height:44px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);box-shadow:0 0 16px -4px rgba(255,138,31,.7),inset 0 0 0 3px #120b08,inset 0 0 0 4px #6a3f26;font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:9px;color:var(--gold);letter-spacing:.06em;}
+.C h3{margin:2px 60px 12px 0;font-size:20px;line-height:1.15;}
+.C .fig div{background:#0e0806;border-color:#3a2214;border-radius:12px;}
+.C .pills{display:flex;gap:8px;margin:12px 0 14px;}
+.C .pill{flex:1;height:38px;border-radius:19px;display:flex;align-items:center;justify-content:center;border:1px solid #4a2c1c;background:#130c09;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);}
+.C .pill.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:0 0 14px -4px rgba(255,122,26,.7);}
+.C p{font-size:13.5px;color:var(--txt2);margin:0 0 12px;}
+.C .cue{display:flex;gap:10px;align-items:flex-start;margin:0 0 9px;font-size:13.5px;}
+.C .cue i{flex:none;width:8px;height:8px;margin-top:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(255,138,31,.8);}
+.C .mis{margin-top:12px;border-radius:10px;padding:10px 12px;border:1px dashed #6a3f26;font-size:13px;color:var(--txt2);}
+.C .mis b{color:var(--gold);font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10px;letter-spacing:.18em;text-transform:uppercase;}
+.C .card{background:linear-gradient(180deg,#1a100b,#100907);border:1px solid #6a3f26;border-top-color:#8a5433;border-radius:14px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(255,215,170,.14),0 12px 24px -12px rgba(0,0,0,.95);}
+.C .card .top{display:flex;align-items:center;gap:8px;}
+.C .card .n{flex:1;font-size:16px;}
+.C .card .top .eyebrow{display:block;font-size:9px;}
+.C .ic{width:32px;height:32px;border-radius:50%;border:1px solid #4a2c1c;background:#130c09;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;}
+.C .setp{display:flex;align-items:center;gap:8px;margin-top:8px;padding:6px 8px 6px 12px;border-radius:999px;border:1px solid #3a2214;background:#0e0806;}
+.C .setp i{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;color:var(--txt3);width:40px;}
+.C .setp b{flex:1;text-align:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15px;color:var(--white);}
+.C .setp b small{font-size:10px;color:var(--txt3);margin:0 6px;}
+.C .setp em{font-style:normal;height:28px;padding:0 10px;border-radius:14px;border:1px solid #3a2214;display:flex;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--txt3);}
+.C .foot{display:flex;gap:8px;margin-top:10px;}
+.C .foot span{flex:1;height:36px;border-radius:18px;border:1px solid #4a2c1c;background:#130c09;display:flex;align-items:center;justify-content:center;gap:12px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--txt2);}
+.C .foot span u{text-decoration:none;color:var(--white);}
+.C .ss{height:36px;padding:0 14px;border-radius:18px;border:1px solid #4a3a6a;display:flex;align-items:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10px;letter-spacing:.14em;color:var(--violet);}
+.note{margin-top:28px;border:1px solid #2a1a12;border-radius:12px;padding:14px 16px;background:#0d0806;}
+.note h3{margin:0 0 6px;font-size:14px;color:var(--white);font-weight:600;}
+.note ul{margin:0;padding-left:18px;color:var(--txt2);font-size:13.5px;}
+</style>
+<div class="wrap">
+<h1>Instructions and the builder, three ways</h1>
+<p class="lead">The two screens that still wear the old glass: the instructions sheet you open from a lift, and each exercise card in the workout builder. Each direction draws both. Dumbbell or Kettlebell becomes a proper control in all three.</p>
+
+<section class="today"><h2>Today <small>v5.167</small></h2>
+<p class="why">For comparison. Warm glass, thin borders, the choice as two flat chips.</p>
+<div class="pair">
+<figure><figcaption>Instructions</figcaption><div class="phone T"><div class="sheet"><h3>Dumbbell Sumo Squat</h3><div class="fig"><div></div><div></div></div><div class="pre"><span class="on">Dumbbell</span><span>Kettlebell</span></div><p>Feet wide, toes out at 45 degrees, dumbbell hanging at the center.</p><ul><li>Knees track over the toes: out, not forward</li><li>Sit straight down, torso tall</li><li>Squeeze the inner thighs and glutes on the way up</li></ul><div class="mis"><b>The usual mistake:</b> Narrowing into a regular squat as you tire. The wide stance is the exercise.</div></div></div></figure>
+<figure><figcaption>Builder card</figcaption><div class="phone T"><div class="card"><div class="n">⠿ &nbsp;Barbell Bench Press</div><div class="lbl">COUNTED IN</div><span class="sel">Weight and reps ▾</span><div class="lbl">ONE FOR ALL &nbsp;/&nbsp; <span style="color:var(--go)">SET EACH ONE</span></div><div class="set">Set 1 <i>65</i> × <i>8</i> <em>⧗ 3 MIN</em></div><div class="set">Set 2 <i>65</i> × <i>8</i> <em>⧗ 3 MIN</em></div><div class="set">Set 3 <i>65</i> × <i>8</i> <em>⧗ 3 MIN</em></div><div class="set" style="margin-top:12px"><em>−</em> 3 sets <em>+</em> <em style="margin-left:auto">⛓ SUPERSET</em></div></div></div></figure>
+</div></section>
+
+<section><h2>A. Plates <small>the board's card, opened up</small></h2>
+<p class="why">The sheet and each builder card become blackened plates with the ember rail, exactly the cards on your week. Dumbbell or Kettlebell is a two-way switch like Week / Month / All. Cues are a numbered ledger. In the builder the sets are the session ledger's cells, and the superset link wears violet.</p>
+<div class="pair">
+<figure><figcaption>Instructions</figcaption><div class="phone A"><div class="sheet"><div class="eyebrow">How to</div><h3 class="name">Dumbbell Sumo Squat</h3><div class="fig"><div></div><div></div></div><div class="fig" style="margin-top:-2px"><small style="flex:1">Front</small><small style="flex:1">Side</small></div><div class="seg"><span class="on">Dumbbell</span><span>Kettlebell</span></div><p>Feet wide, toes out at 45 degrees, dumbbell hanging at the center.</p><ol><li><b>1</b><span>Knees track over the toes: out, not forward</span></li><li><b>2</b><span>Sit straight down, torso tall</span></li><li><b>3</b><span>Squeeze the inner thighs and glutes on the way up</span></li></ol><div class="mis"><b>The usual mistake</b>Narrowing into a regular squat as you tire. The wide stance is the exercise.</div><div class="btnrow" style="grid-template-columns:1fr"><div class="btn">Close</div></div></div></div></figure>
+<figure><figcaption>Builder card</figcaption><div class="phone A"><div class="card"><div class="top"><span class="ic">⠿</span><span class="n name">Barbell Bench Press</span><span class="ic">🗑</span></div><div class="measure"><i>Counted in</i> Weight and reps ▾</div><div class="set"><i>1</i><div class="cell">65</div><i>×</i><div class="cell">8</div><div class="rest">⧗ 3 min</div></div><div class="set"><i>2</i><div class="cell">65</div><i>×</i><div class="cell">8</div><div class="rest">⧗ 3 min</div></div><div class="set"><i>3</i><div class="cell">65</div><i>×</i><div class="cell">8</div><div class="rest">⧗ 3 min</div></div><div class="foot"><div class="step"><u>−</u>3 sets<u>+</u></div><div class="ss">Superset</div></div></div><div style="height:10px"></div><div class="card" style="border-left:0;padding-left:16px"><div class="top"><span class="ic">⠿</span><span class="n name">Incline Dumbbell Press</span><span class="ic">🗑</span></div><div class="measure"><i>Counted in</i> Weight and reps ▾</div><div class="set"><i>1</i><div class="cell">25</div><i>×</i><div class="cell">10</div><div class="rest">⧗ 2 min</div></div></div></div></figure>
+</div></section>
+
+<section><h2>B. Ledger <small>the session screen's table</small></h2>
+<p class="why">The sheet is a dark header band with the name and the pictures, then a ledger of labelled rows: Setup, Cue, Cue, Cue, Mistake. Dumbbell or Kettlebell are two cells, the chosen one lit gold like a cell mid-edit. The builder card is the session ledger with a tools row: measure, one for all or set each one, and the sets as weight and reps cells.</p>
+<div class="pair">
+<figure><figcaption>Instructions</figcaption><div class="phone B"><div class="sheet"><div class="band"><div class="eyebrow">How to</div><h3 class="name">Dumbbell Sumo Squat</h3><div class="fig" style="margin-top:10px"><div></div><div></div></div></div><div class="body"><div class="cells"><div class="cell on">Dumbbell</div><div class="cell">Kettlebell</div></div><div class="row"><b>Setup</b><span>Feet wide, toes out at 45 degrees, dumbbell hanging at the center.</span></div><div class="row c"><b>Cue 1</b><span>Knees track over the toes: out, not forward</span></div><div class="row c"><b>Cue 2</b><span>Sit straight down, torso tall</span></div><div class="row c"><b>Cue 3</b><span>Squeeze the inner thighs and glutes on the way up</span></div><div class="row mis"><b>Mistake</b><span>Narrowing into a regular squat as you tire. The wide stance is the exercise.</span></div><div class="btnrow" style="grid-template-columns:1fr"><div class="btn">Close</div></div></div></div></div></figure>
+<figure><figcaption>Builder card</figcaption><div class="phone B"><div class="card"><div class="band"><span class="ic">⠿</span><span class="n name">Barbell Bench Press</span><span class="ic">🗑</span></div><div class="tools"><span>Weight and reps ▾</span><span>One for all</span><span class="on">Set each one</span></div><div class="sets"><div class="set"><i>1</i><div class="inp">65<small>LB</small></div><div class="inp">8<small>REPS</small></div><div class="rest">⧗ 3 min</div></div><div class="set"><i>2</i><div class="inp">65<small>LB</small></div><div class="inp">8<small>REPS</small></div><div class="rest">⧗ 3 min</div></div><div class="set"><i>3</i><div class="inp">65<small>LB</small></div><div class="inp">8<small>REPS</small></div><div class="rest">⧗ 3 min</div></div></div><div class="foot"><span>3 sets</span><u><i>−</i><i>+</i></u><div class="ss">Superset</div></div></div><div style="height:10px"></div><div class="card"><div class="band"><span class="ic">⠿</span><span class="n name">Incline Dumbbell Press</span><span class="ic">🗑</span></div><div class="tools"><span>Weight and reps ▾</span><span class="on">One for all</span><span>Set each one</span></div><div class="sets"><div class="set"><i>1</i><div class="inp">25<small>LB</small></div><div class="inp">10<small>REPS</small></div><div class="rest">⧗ 2 min</div></div></div></div></div></figure>
+</div></section>
+
+<section><h2>C. Seal <small>the finish screen's plate</small></h2>
+<p class="why">Warmer and rounder: the finish screen's stamped plate. The sheet carries a small seal in its corner, the choice is two pills with the chosen one in ember, cues are marked with lit points instead of numbers. The builder card is the same warm plate with each set as one rounded row.</p>
+<div class="pair">
+<figure><figcaption>Instructions</figcaption><div class="phone C"><div class="sheet"><div class="seal">HOW</div><div class="eyebrow">How to</div><h3 class="name">Dumbbell Sumo Squat</h3><div class="fig"><div></div><div></div></div><div class="pills"><div class="pill on">Dumbbell</div><div class="pill">Kettlebell</div></div><p>Feet wide, toes out at 45 degrees, dumbbell hanging at the center.</p><div class="cue"><i></i><span>Knees track over the toes: out, not forward</span></div><div class="cue"><i></i><span>Sit straight down, torso tall</span></div><div class="cue"><i></i><span>Squeeze the inner thighs and glutes on the way up</span></div><div class="mis"><b>The usual mistake</b><br>Narrowing into a regular squat as you tire. The wide stance is the exercise.</div><div class="btnrow" style="grid-template-columns:1fr"><div class="btn" style="border-radius:20px">Close</div></div></div></div></figure>
+<figure><figcaption>Builder card</figcaption><div class="phone C"><div class="card"><div class="top"><span class="ic">⠿</span><span class="n name"><span class="eyebrow">Weight and reps</span>Barbell Bench Press</span><span class="ic">🗑</span></div><div class="setp"><i>Set 1</i><b>65<small>×</small>8</b><em>3 min</em></div><div class="setp"><i>Set 2</i><b>65<small>×</small>8</b><em>3 min</em></div><div class="setp"><i>Set 3</i><b>65<small>×</small>8</b><em>3 min</em></div><div class="foot"><span><u>−</u>3 sets<u>+</u></span><div class="ss">Superset</div></div></div><div style="height:10px"></div><div class="card"><div class="top"><span class="ic">⠿</span><span class="n name"><span class="eyebrow">Weight and reps</span>Incline Dumbbell Press</span><span class="ic">🗑</span></div><div class="setp"><i>Set 1</i><b>25<small>×</small>10</b><em>2 min</em></div></div></div></figure>
+</div></section>
+
+<div class="note"><h3>Either way</h3><ul><li>The figures, the words and every builder control keep doing what they do. Only the look changes.</li><li>The measure picker (Weight and reps, Reps, Seconds) and One for all / Set each one stay; they move into the card's tools row or line.</li><li>Mix if you like: the sheet from one, the card from another.</li></ul></div>
+</div>
