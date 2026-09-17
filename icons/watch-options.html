@@ -1,0 +1,353 @@
+<title>Forge Watch Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600&family=IBM+Plex+Mono:wght@500;600;700&family=Marcellus&display=swap">
+<style>
+:root{--bg:#070403;--txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--hot:#ffd08a;--white:#fff6e6;--match:#8f6fbe;--violet:#a98ae6;color-scheme:dark;}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--txt);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:14px;line-height:1.45;margin:0;padding-block:22px 60px;padding-inline:16px;}
+.wrap{max-width:900px;margin:0 auto;}
+h1{font-size:22px;font-weight:600;margin:0 0 6px;color:var(--white);text-wrap:balance;}
+p.lead{color:var(--txt2);max-width:62ch;margin:0 0 8px;}
+p.lead b{color:var(--txt);font-weight:600;}
+section{border-top:1px solid #2a1a12;margin-top:26px;padding-top:18px;}
+section h2{font-size:17px;font-weight:600;color:var(--gold);margin:0 0 4px;}
+section h2 small{color:var(--txt3);font-weight:500;font-size:13px;margin-left:6px;}
+section .why{color:var(--txt2);max-width:62ch;margin:0 0 14px;font-size:13.5px;}
+section.today h2{color:var(--txt2);}
+.faces{--s:.6;display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(260px * .6),1fr));gap:16px 12px;justify-items:center;}
+@media (min-width:760px){.faces{--s:.8;grid-template-columns:repeat(4,minmax(0,1fr));}}
+.face{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.face.big{grid-column:1/-1;--s:1.2;}
+@media (min-width:760px){.face.big{--s:1.5;}}
+.wslot{width:calc(260px * var(--s));height:calc(260px * var(--s));cursor:zoom-in;border-radius:50%;outline:none;}
+.face.big .wslot{cursor:zoom-out;}
+.wslot:focus-visible{box-shadow:0 0 0 2px var(--gold);}
+.wbox{width:260px;height:260px;padding:10px;transform:scale(var(--s));transform-origin:0 0;}
+.watch{position:relative;width:240px;height:240px;border-radius:50%;box-shadow:0 0 0 4px #0c0c0d,0 0 0 9px #2b2a2d,0 0 0 10px #444247,0 14px 30px 6px rgba(0,0,0,.8);}
+figcaption{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);text-align:center;}
+.note{margin-top:28px;border:1px solid #2a1a12;border-radius:12px;padding:14px 16px;background:#0d0806;}
+.note h3{margin:0 0 6px;font-size:14px;color:var(--white);font-weight:600;}
+.note ul{margin:0;padding-left:18px;color:var(--txt2);font-size:13.5px;}
+.note li{margin:3px 0;}
+
+/* ---- the screen ---- */
+.scr{position:absolute;inset:0;border-radius:50%;overflow:hidden;background:#070403;color:var(--txt);font-family:system-ui,"Roboto",sans-serif;}
+.scr .glow{position:absolute;inset:0;background:radial-gradient(85% 45% at 50% 110%,rgba(255,120,30,.34),transparent 72%);}
+.scr .col{position:relative;display:flex;flex-direction:column;align-items:center;padding:26px 26px 0;gap:6px;}
+.mono{font-family:"IBM Plex Mono",monospace;}
+.mk{display:inline-block;width:18px;height:10px;}
+.ttl{font-family:Marcellus,serif;font-weight:400;color:var(--white);text-align:center;line-height:1.15;}
+
+/* today, watch 1.6 */
+.T{background:#0a0605;}
+.T .glow{background:radial-gradient(70% 40% at 50% 14%,rgba(255,110,24,.24),transparent 72%);}
+.T .col{gap:4px;padding-top:30px;}
+.T .nm{font-size:15px;color:#f8e6d4;text-align:center;}
+.T .no{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#bd9678;}
+.T .tg{font-size:34px;color:#d97b2e;line-height:1.1;margin:2px 0;}
+.T .btn{width:100%;height:40px;border-radius:24px;background:#d97b2e;color:#1a0d03;font-size:13px;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;margin-top:4px;}
+.T .row{width:100%;border-radius:14px;background:#170e09;border:1px solid #2e1a0e;padding:8px 10px;font-size:13.5px;text-align:center;color:#f8e6d4;}
+.T .row.d{background:#110906;border-color:#1f120a;}
+.T .row .gd{color:#ff8a1f;}
+.T .row small{display:block;font-size:12px;color:#bd9678;}
+.T .now{width:100%;border-radius:24px;background:#d97b2e;color:#1a0d03;padding:8px 10px;text-align:center;font-size:13px;line-height:1.3;}
+
+/* ---- A. Plates ---- */
+.A .lbl{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+.A .sub{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
+.A .nm{font-size:15px;}
+.A .pl{position:relative;width:100%;overflow:hidden;border-radius:10px;padding:6px 26px 7px 13px;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;box-shadow:inset 0 1px 0 rgba(255,215,170,.12),0 8px 16px -10px rgba(0,0,0,.9);}
+.A .pl::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+.A .pl i{display:block;font-style:normal;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:8.5px;letter-spacing:.14em;color:var(--gold);}
+.A .pl b{display:block;font-family:Marcellus,serif;font-weight:400;font-size:13.5px;color:var(--white);line-height:1.2;}
+.A .pl .mk{position:absolute;right:8px;top:50%;transform:translateY(-50%);}
+.A .pl.done::before{background:linear-gradient(180deg,#fff0c8,#ffd06a 40%,#e8a020);}
+.A .pl.done b{color:var(--txt2);}
+.A .now{width:100%;border-radius:11px;padding:6px 10px 7px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;text-align:center;box-shadow:0 0 14px -2px rgba(255,122,26,.55);}
+.A .now b{display:block;font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:10px;letter-spacing:.12em;}
+.A .now span{display:block;font-family:Marcellus,serif;font-size:13px;}
+.A .big{display:flex;align-items:baseline;justify-content:center;gap:6px;padding:6px 10px 8px 14px;}
+.A .big b{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:40px;line-height:1;color:var(--white);letter-spacing:-.03em;text-shadow:0 0 16px rgba(255,200,120,.45);}
+.A .big span{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:15px;color:var(--txt2);}
+.A .go{width:100%;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:11.5px;letter-spacing:.14em;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
+.A .go.narrow{width:72%;}
+.A .ghost{width:62%;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10.5px;letter-spacing:.14em;}
+.A .lad{padding:5px 26px 6px 13px;}
+.A .lad b{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;}
+.A .lad b em{font-style:normal;color:var(--txt3);margin-right:8px;}
+.A .lad.g b{color:var(--gold);} .A .lad.g::before{background:linear-gradient(180deg,#fff0c8,#ffd06a 40%,#e8a020);}
+.A .lad.v b{color:var(--violet);} .A .lad.v::before{background:var(--match);}
+.A .step{display:flex;align-items:center;justify-content:space-between;padding:4px 5px 4px 9px;}
+.A .step u{text-decoration:none;width:34px;height:34px;border-radius:9px;border:1px solid #4a2c1c;border-top-color:#6a3f26;background:#1a100b;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:18px;color:var(--txt);}
+.A .step b{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:26px;line-height:1;}
+.A .step b small{font-size:11px;font-weight:500;color:var(--txt2);margin-left:3px;}
+.A .step.on{border-color:#a0521c;box-shadow:0 0 12px -3px rgba(255,138,31,.6);}
+.A .step.on b{color:var(--gold);}
+.A .hint{font-size:11px;color:var(--txt3);}
+.A .timer{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:54px;line-height:1;color:var(--white);letter-spacing:-.03em;text-shadow:0 0 18px rgba(255,200,120,.35);}
+.A .bar{width:150px;height:5px;border-radius:3px;background:#241510;overflow:hidden;}
+.A .bar i{display:block;height:100%;width:55%;background:linear-gradient(90deg,#8a3f10,#ff7a1a 60%,#ffb35c);}
+.A .next{text-align:center;padding:5px 12px 6px 14px;}
+.A .next b{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12.5px;}
+
+/* ---- B. Ledger ---- */
+.B .band{position:absolute;left:0;right:0;top:0;background:#150d09;border-bottom:1px solid #2a1810;}
+.B .band.w{height:54px;} .B .band.s{height:66px;}
+.B .col{gap:0;padding-top:24px;}
+.B .sub{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
+.B .sub.g{color:var(--gold);}
+.B .nm{font-size:14.5px;margin-top:2px;}
+.B .rows{width:100%;margin-top:14px;}
+.B .row{display:grid;grid-template-columns:32px 1fr 18px;gap:8px;align-items:center;padding:5px 2px;border-top:1px solid #1e120c;}
+.B .row:first-child{border-top:0;}
+.B .dh{border:1px solid #4a2c1c;border-radius:7px;background:#1a100b;text-align:center;padding:2px 0 3px;line-height:1.05;}
+.B .dh b{display:block;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:7.5px;letter-spacing:.1em;color:var(--gold);}
+.B .dh em{display:block;font-style:normal;font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:12px;color:var(--white);}
+.B .row .n{font-family:Marcellus,serif;font-size:13px;color:var(--white);line-height:1.15;}
+.B .row.done .n{color:var(--txt2);}
+.B .row.done .dh{border-color:#6a3f26;}
+.B .row.now{border:1px solid #a0521c;border-radius:9px;background:linear-gradient(90deg,rgba(255,138,31,.24),rgba(255,138,31,.05));padding:5px 4px;margin-bottom:4px;}
+.B .row.now .dh{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);border-color:#ff7a1a;}
+.B .row.now .dh b,.B .row.now .dh em{color:#1b0f06;}
+.B .row.now .n small{display:block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--txt2);}
+.B .row .ar{color:var(--gold);font-family:"IBM Plex Mono",monospace;font-size:14px;}
+.B .cells{display:grid;grid-template-columns:1fr 12px 1fr;align-items:center;width:100%;margin-top:10px;}
+.B .cells > i{font-style:normal;text-align:center;font-family:"IBM Plex Mono",monospace;color:var(--txt3);font-size:12px;}
+.B .cell{border:1px solid #4a2c1c;border-radius:9px;background:#0e0806;text-align:center;padding:4px 0 4px;}
+.B .cell b{display:block;font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:27px;line-height:1.05;color:var(--white);letter-spacing:-.02em;}
+.B .cell small{display:block;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:8px;letter-spacing:.14em;color:var(--txt3);}
+.B .cell.on{border-color:var(--gold);box-shadow:0 0 12px -3px rgba(255,138,31,.7);background:rgba(255,138,31,.08);}
+.B .cell.on b{color:var(--gold);}
+.B .pm{display:grid;grid-template-columns:1fr 12px 1fr;width:100%;margin-top:5px;}
+.B .pm div{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.B .pm u{text-decoration:none;height:26px;border-radius:7px;border:1px solid #3a2214;background:#130c09;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--txt);}
+.B .go{width:100%;height:32px;border-radius:9px;margin-top:9px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:11.5px;letter-spacing:.14em;}
+.B .go.narrow{width:74%;}
+.B .ghost{width:60%;height:28px;border-radius:8px;margin-top:8px;display:flex;align-items:center;justify-content:center;border:1px solid #3a2214;background:#130c09;color:var(--txt2);font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10px;letter-spacing:.14em;}
+.B .led{width:100%;margin-top:8px;}
+.B .lr{display:grid;grid-template-columns:14px 1fr 1fr 18px;gap:6px;align-items:center;padding:3px 3px;border-top:1px solid #1e120c;}
+.B .lr:first-child{border-top:0;}
+.B .lr > i{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--txt3);text-align:center;}
+.B .lr span{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12.5px;text-align:center;border:1px solid #241510;border-radius:6px;padding:1px 0;color:var(--txt2);}
+.B .lr.g{background:rgba(255,138,31,.10);} .B .lr.g span{border-color:#6a3f26;color:var(--gold);}
+.B .lr.v{background:rgba(143,111,190,.08);} .B .lr.v span{border-color:#4a3a6a;color:var(--violet);}
+.B .lr.up span{border-color:#4a2c1c;color:var(--white);}
+.B .lr .mk{width:16px;height:9px;}
+.B .hint{font-size:10.5px;color:var(--txt3);margin-top:6px;}
+.B .timer{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:50px;line-height:1;color:var(--white);letter-spacing:-.03em;margin-top:12px;}
+.B .bar{width:160px;height:5px;border-radius:3px;background:#241510;overflow:hidden;margin-top:9px;}
+.B .bar i{display:block;height:100%;width:55%;background:linear-gradient(90deg,#8a3f10,#ff7a1a 60%,#ffb35c);}
+.B .upl{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:8.5px;letter-spacing:.16em;color:var(--txt3);margin-top:10px;}
+
+/* ---- C. Seal ---- */
+.C .rim{position:absolute;inset:0;width:240px;height:240px;}
+.C .col{padding-top:30px;gap:5px;}
+.C .lbl{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+.C .nm{font-size:14.5px;max-width:170px;}
+.C .pill{display:flex;align-items:center;gap:8px;width:100%;border-radius:999px;border:1px solid #4a2c1c;border-top-color:#6a3f26;background:#130c09;padding:4px 14px 4px 4px;box-shadow:inset 0 1px 0 rgba(255,215,170,.1);}
+.C .pill .seal{flex:none;width:28px;height:28px;border-radius:50%;border:1.5px solid #3a2214;display:flex;align-items:center;justify-content:center;background:#0e0806;}
+.C .pill .seal .mk{width:15px;height:9px;}
+.C .pill.done .seal{border-color:var(--gold);transform:rotate(-12deg);box-shadow:0 0 10px -3px rgba(255,138,31,.8),inset 0 0 0 2px #0e0806,inset 0 0 0 3px #6a3f26;}
+.C .pill .t{line-height:1.1;min-width:0;}
+.C .pill .t i{display:block;font-style:normal;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:8px;letter-spacing:.14em;color:var(--gold);}
+.C .pill .t b{display:block;font-family:Marcellus,serif;font-weight:400;font-size:13px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.C .pill.done .t b{color:var(--txt2);}
+.C .pill.now{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);border-color:#ff7a1a;box-shadow:0 0 14px -2px rgba(255,122,26,.55);}
+.C .pill.now .seal{border-color:#1b0f06;background:transparent;}
+.C .pill.now .seal i{width:0;height:0;border-left:8px solid #1b0f06;border-top:5px solid transparent;border-bottom:5px solid transparent;margin-left:2px;}
+.C .pill.now .t i,.C .pill.now .t b{color:#1b0f06;}
+.C .big{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:52px;line-height:.95;color:var(--white);letter-spacing:-.03em;text-shadow:0 0 18px rgba(255,200,120,.5);margin-top:2px;}
+.C .unit{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:15px;color:var(--txt2);margin-top:-2px;}
+.C .go{width:124px;height:34px;border-radius:17px;margin-top:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:11.5px;letter-spacing:.14em;box-shadow:inset 0 1px 0 rgba(255,240,210,.5),0 0 16px -4px rgba(255,122,26,.7);}
+.C .ghost{width:112px;height:30px;border-radius:15px;margin-top:6px;display:flex;align-items:center;justify-content:center;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:10px;letter-spacing:.14em;}
+.C .rd{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;}
+.C .rd u{text-decoration:none;width:34px;height:34px;border-radius:50%;border:1px solid #4a2c1c;border-top-color:#6a3f26;background:#1a100b;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:18px;color:var(--txt);}
+.C .rd b{min-width:84px;text-align:center;font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:30px;line-height:1;color:var(--white);}
+.C .rd b small{font-size:11px;font-weight:500;color:var(--txt2);margin-left:3px;}
+.C .rd.on b{color:var(--gold);text-shadow:0 0 14px rgba(255,138,31,.6);}
+.C .rd.sm b{font-size:22px;}
+.C .rd.sm u{width:30px;height:30px;}
+.C .hint{font-size:10.5px;color:var(--txt3);}
+.C .timer{font-family:"IBM Plex Mono",monospace;font-weight:700;font-size:56px;line-height:1;color:var(--white);letter-spacing:-.03em;text-shadow:0 0 18px rgba(255,200,120,.35);margin-top:4px;}
+.C .upl{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:8.5px;letter-spacing:.16em;color:var(--txt3);margin-top:6px;}
+.C .upn{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12.5px;color:var(--txt);}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="anvil" viewBox="8 30 91 46"><path d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L19.2 42L15.3 39.2Z"/></symbol>
+</svg>
+
+<div class="wrap">
+<h1>The watch, three ways</h1>
+<p class="lead">Four screens from your wrist: <b>your week</b>, <b>the set</b>, <b>changing a number</b> and <b>the rest</b>. Each direction draws all four so you can compare them side by side. Tap any watch to see it bigger; the big one is close to the real size of the face.</p>
+<p class="lead">All three drop the set counts from the week, the same as the board. Nothing changes on the phone, and nothing ships until you pick.</p>
+
+<section class="today">
+  <h2>Today <small>watch 1.6</small></h2>
+  <p class="why">For comparison. Warm cards and ember text, but none of the phone's plates, cells or anvils.</p>
+  <div class="faces">
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge today's week"><div class="wbox"><div class="watch"><div class="scr T"><div class="glow"></div><div class="col">
+      <div class="nm">Your week</div>
+      <div class="now">NOW · Barbell Bench Press<br>set 3 of 4</div>
+      <div class="row d"><span style="color:#9d7c62;font-size:10.5px">SUN</span>&nbsp;&nbsp;<span style="color:#bd9678">Back + Biceps</span><small class="gd">✓ done</small></div>
+      <div class="row"><span style="color:#d97b2e;font-size:10.5px">THU</span>&nbsp;&nbsp;Chest + Triceps<small>28 sets</small></div>
+    </div></div></div></div></div><figcaption>Your week</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge today's set"><div class="wbox"><div class="watch"><div class="scr T"><div class="glow"></div><div class="col">
+      <div class="nm">Barbell Bench Press</div>
+      <div class="no">Set 3 of 4</div>
+      <div class="tg">65 lb x 8</div>
+      <div class="btn">LOG SET</div>
+      <div class="row d"><span class="gd">✓ 1&nbsp;&nbsp;65 lb x 8</span></div>
+    </div></div></div></div></div><figcaption>The set</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>A. Plates <small>the board on your wrist</small></h2>
+  <p class="why">Every row and number sits on a blackened steel plate with the ember rail, exactly like the cards on your week. A finished day turns its rail gold and stamps an anvil. The set you are on is one big plate; the sets below are small plates coloured by grade.</p>
+  <div class="faces">
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge plates week"><div class="wbox"><div class="watch"><div class="scr A"><div class="glow"></div><div class="col">
+      <div class="lbl">Your week</div>
+      <div class="now"><b>NOW · SET 3 OF 4</b><span>Barbell Bench Press</span></div>
+      <div class="pl done"><i>SUN</i><b>Back + Biceps</b><svg class="mk" style="fill:var(--gold)"><use href="#anvil"/></svg></div>
+      <div class="pl"><i>THU</i><b>Chest + Triceps</b></div>
+    </div></div></div></div></div><figcaption>Your week</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge plates set"><div class="wbox"><div class="watch"><div class="scr A"><div class="glow"></div><div class="col">
+      <div class="sub">Set 3 of 4</div>
+      <div class="ttl nm">Barbell Bench Press</div>
+      <div class="pl big"><b>65</b><span>lb × 8</span></div>
+      <div class="go">LOG SET</div>
+      <div class="pl lad g"><b><em>1</em>65 × 8</b><svg class="mk" style="fill:var(--gold)"><use href="#anvil"/></svg></div>
+      <div class="pl lad v"><b><em>2</em>65 × 8</b><svg class="mk" style="fill:var(--match)"><use href="#anvil"/></svg></div>
+    </div></div></div></div></div><figcaption>The set</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge plates change"><div class="wbox"><div class="watch"><div class="scr A"><div class="glow"></div><div class="col" style="padding-top:30px">
+      <div class="ttl nm">Barbell Bench Press</div>
+      <div class="pl step on"><u>−</u><b>70<small>lb</small></b><u>+</u></div>
+      <div class="pl step"><u>−</u><b>6<small>reps</small></b><u>+</u></div>
+      <div class="hint">Was 65 lb × 8</div>
+      <div class="go narrow">LOG SET</div>
+    </div></div></div></div></div><figcaption>Changing a number</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge plates rest"><div class="wbox"><div class="watch"><div class="scr A"><div class="glow"></div><div class="col" style="padding-top:34px;gap:8px">
+      <div class="lbl">Rest</div>
+      <div class="timer">1:24</div>
+      <div class="bar"><i></i></div>
+      <div class="pl next"><i>UP NEXT</i><b>Set 4 · 65 lb × 8</b></div>
+      <div class="ghost">SKIP REST</div>
+    </div></div></div></div></div><figcaption>The rest</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>B. Ledger <small>the session screen on your wrist</small></h2>
+  <p class="why">A dark header band across the top holds the name, like each lift on your phone's session screen. Weight and reps are two separate cells, and the one the bezel is turning lights gold. Your sets below are ledger rows tinted by grade. The week uses the same day column as your board.</p>
+  <div class="faces">
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge ledger week"><div class="wbox"><div class="watch"><div class="scr B"><div class="glow"></div><div class="band w"></div><div class="col">
+      <div class="ttl nm">Your week</div>
+      <div class="rows">
+        <div class="row now"><div class="dh"><b>NOW</b><em>3/4</em></div><div class="n">Bench Press<small>set 3 of 4</small></div><div class="ar">›</div></div>
+        <div class="row done"><div class="dh"><b>SUN</b><em>13</em></div><div class="n">Back + Biceps</div><svg class="mk" style="fill:var(--gold)"><use href="#anvil"/></svg></div>
+        <div class="row done"><div class="dh"><b>TUE</b><em>15</em></div><div class="n">Legs + Glutes</div><svg class="mk" style="fill:var(--gold)"><use href="#anvil"/></svg></div>
+        <div class="row"><div class="dh"><b>THU</b><em>17</em></div><div class="n">Chest + Triceps</div><div></div></div>
+      </div>
+    </div></div></div></div></div><figcaption>Your week</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge ledger set"><div class="wbox"><div class="watch"><div class="scr B"><div class="glow"></div><div class="band s"></div><div class="col">
+      <div class="sub">Set 3 of 4</div>
+      <div class="ttl nm">Barbell Bench Press</div>
+      <div class="cells"><div class="cell"><b>65</b><small>LB</small></div><i>×</i><div class="cell"><b>8</b><small>REPS</small></div></div>
+      <div class="go">LOG SET</div>
+      <div class="led">
+        <div class="lr g"><i>1</i><span>65</span><span>8</span><svg class="mk" style="fill:var(--gold)"><use href="#anvil"/></svg></div>
+        <div class="lr v"><i>2</i><span>65</span><span>8</span><svg class="mk" style="fill:var(--match)"><use href="#anvil"/></svg></div>
+      </div>
+    </div></div></div></div></div><figcaption>The set</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge ledger change"><div class="wbox"><div class="watch"><div class="scr B"><div class="glow"></div><div class="band s"></div><div class="col">
+      <div class="sub">Set 3 of 4</div>
+      <div class="ttl nm">Barbell Bench Press</div>
+      <div class="cells"><div class="cell on"><b>70</b><small>LB</small></div><i>×</i><div class="cell"><b>6</b><small>REPS</small></div></div>
+      <div class="pm"><div><u>−</u><u>+</u></div><span></span><div><u>−</u><u>+</u></div></div>
+      <div class="hint">Was 65 lb × 8</div>
+      <div class="go narrow">LOG SET</div>
+    </div></div></div></div></div><figcaption>Changing a number</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge ledger rest"><div class="wbox"><div class="watch"><div class="scr B"><div class="glow"></div><div class="band s"></div><div class="col">
+      <div class="sub g">Rest</div>
+      <div class="ttl nm">Barbell Bench Press</div>
+      <div class="timer">1:24</div>
+      <div class="bar"><i></i></div>
+      <div class="upl">UP NEXT</div>
+      <div class="led" style="margin-top:3px"><div class="lr up"><i>4</i><span>65</span><span>8</span><span style="border:0"></span></div></div>
+      <div class="ghost">SKIP REST</div>
+    </div></div></div></div></div><figcaption>The rest</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>C. Seal <small>made for a round face</small></h2>
+  <p class="why">Uses the circle instead of fighting it. The rim carries one arc per set of this lift, gold, violet, ember for the one you are on, steel for the rest, so a glance at the edge tells you where you are. Rows are round pills with a seal that stamps an anvil when a day is done, like your finish screen. The rest drains around the rim. One honest catch: watch 1.2 chose a straight bar for the rest because the edge of the glass is where a sleeve sits; this puts it back on the rim.</p>
+  <div class="faces">
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge seal week"><div class="wbox"><div class="watch"><div class="scr C"><div class="glow"></div><div class="col" style="padding-top:26px">
+      <div class="lbl">Your week</div>
+      <div class="pill now"><span class="seal"><i></i></span><span class="t"><i>NOW · SET 3 OF 4</i><b>Barbell Bench Press</b></span></div>
+      <div class="pill done"><span class="seal"><svg class="mk" style="fill:var(--gold)"><use href="#anvil"/></svg></span><span class="t"><i>SUN</i><b>Back + Biceps</b></span></div>
+            <div class="pill"><span class="seal"></span><span class="t"><i>THU</i><b>Chest + Triceps</b></span></div>
+    </div></div></div></div></div><figcaption>Your week</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge seal set"><div class="wbox"><div class="watch"><div class="scr C"><div class="glow"></div><svg class="rim" viewBox="0 0 240 240" data-sets="g v c o"></svg><div class="col" style="padding-top:34px">
+      <div class="lbl">Set 3 of 4</div>
+      <div class="ttl nm">Barbell Bench Press</div>
+      <div class="big">65</div>
+      <div class="unit">lb × 8</div>
+      <div class="go">LOG SET</div>
+    </div></div></div></div></div><figcaption>The set</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge seal change"><div class="wbox"><div class="watch"><div class="scr C"><div class="glow"></div><svg class="rim" viewBox="0 0 240 240" data-sets="g v c o" data-dim="1"></svg><div class="col" style="padding-top:34px;gap:6px">
+      <div class="lbl">Set 3 of 4</div>
+      <div class="rd on"><u>−</u><b>70<small>lb</small></b><u>+</u></div>
+      <div class="rd sm"><u>−</u><b>6<small>reps</small></b><u>+</u></div>
+      <div class="hint">Was 65 lb × 8</div>
+      <div class="go" style="margin-top:2px">LOG SET</div>
+    </div></div></div></div></div><figcaption>Changing a number</figcaption></figure>
+    <figure class="face"><div class="wslot" tabindex="0" role="button" aria-label="Enlarge seal rest"><div class="wbox"><div class="watch"><div class="scr C"><div class="glow"></div><svg class="rim" viewBox="0 0 240 240" data-rest=".55"></svg><div class="col" style="padding-top:44px;gap:2px">
+      <div class="lbl">Rest</div>
+      <div class="timer">1:24</div>
+      <div class="upl">UP NEXT</div>
+      <div class="upn">Set 4 · 65 lb × 8</div>
+      <div class="ghost" style="margin-top:12px">SKIP REST</div>
+    </div></div></div></div></div><figcaption>The rest</figcaption></figure>
+  </div>
+</section>
+
+<div class="note">
+  <h3>What building any of these involves</h3>
+  <ul>
+    <li>The watch gets the phone's two typefaces, Marcellus for names and the mono for numbers, in regular weight only.</li>
+    <li>The workout overview and the swap list follow the week's rows, and the plate calculator is not on the watch.</li>
+    <li>Only the look changes. What each screen does, and every button, stays where it is.</li>
+    <li>You can mix: say, the week from A with the set from B.</li>
+  </ul>
+</div>
+</div>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg',C=120,R=113;
+  function pt(a){var r=(a-90)*Math.PI/180;return [C+R*Math.cos(r),C+R*Math.sin(r)];}
+  function arc(a0,a1){var p=pt(a0),q=pt(a1);return 'M'+p[0].toFixed(2)+' '+p[1].toFixed(2)+' A'+R+' '+R+' 0 '+((a1-a0)>180?1:0)+' 1 '+q[0].toFixed(2)+' '+q[1].toFixed(2);}
+  function path(svg,d,stroke,w,glow){var e=document.createElementNS(NS,'path');e.setAttribute('d',d);e.setAttribute('fill','none');e.setAttribute('stroke',stroke);e.setAttribute('stroke-width',w);e.setAttribute('stroke-linecap','round');if(glow)e.setAttribute('style','filter:drop-shadow(0 0 4px '+glow+')');svg.appendChild(e);}
+  var COL={g:['#ff8a1f','rgba(255,138,31,.8)'],v:['#8f6fbe',null],c:['#ffd08a','rgba(255,160,60,.9)'],o:['#3a2214',null]};
+  document.querySelectorAll('svg.rim[data-sets]').forEach(function(svg){
+    var s=svg.getAttribute('data-sets').split(' '),n=s.length,gap=10,seg=360/n,dim=svg.hasAttribute('data-dim');
+    s.forEach(function(k,i){var a0=i*seg+gap/2+seg*-.5+seg/2,a1=a0+seg-gap;var c=COL[k];
+      path(svg,arc(a0,a1),c[0],k==='c'?6:4.5,dim?null:c[1]);});
+    if(dim)svg.style.opacity='.45';
+  });
+  document.querySelectorAll('svg.rim[data-rest]').forEach(function(svg){
+    var f=parseFloat(svg.getAttribute('data-rest'));
+    path(svg,arc(0.01,359.99),'#241510',5,null);
+    path(svg,arc(0,360*f),'#ff7a1a',5,'rgba(255,122,26,.8)');
+  });
+  function toggle(el){var f=el.closest('.face');var was=f.classList.contains('big');
+    document.querySelectorAll('.face.big').forEach(function(x){x.classList.remove('big');});
+    if(!was){f.classList.add('big');f.scrollIntoView({block:'nearest',behavior:'smooth'});}}
+  document.querySelectorAll('.wslot').forEach(function(el){
+    el.addEventListener('click',function(){toggle(el);});
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(el);}});
+  });
+})();
+</script>
