@@ -4025,12 +4025,11 @@ body.wcon{overflow:hidden;}
     </div>
     <div id="histBody"></div>
     <textarea id="histTxt" readonly style="position:fixed;left:-9999px;top:0;width:10px;height:10px;opacity:0"></textarea>
-    <div class="sheet-btns hshare" id="histShareRow" hidden>
-      <div class="btn" onclick="copyHist()" id="copyHistBtn">COPY ALL</div>
-      <div class="btn" onclick="exportDest('text')">SAVE AS A FILE</div>
-    </div>
+    <!-- SHARE does the sharing (v5.176): the open session, or the whole history, straight to the
+         phone's share sheet. It used to unfold two more buttons, which read as a button that did
+         nothing (owner, 17 Sep). Saving a file and copying live in Backup &amp; restore. -->
     <div class="sheet-btns">
-      <div class="btn" onclick="var r=document.getElementById('histShareRow');r.hidden=!r.hidden">SHARE</div>
+      <div class="btn" onclick="histShare()" id="histShareBtn">SHARE</div>
       <div class="btn btn-go" onclick="closeOvl('histOvl')">DONE</div>
     </div>
   </div>
@@ -9522,7 +9521,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.175';
+var APPV='v5.176';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14647,6 +14646,24 @@ function historyText(){
 }
 function copyExport(){copyEl('exportTxt','copyBtn');}
 function copyHist(){copyEl('histTxt','copyHistBtn');}
+// The history sheet's SHARE (v5.176). Inside a session it shares that day; on the week, month or
+// list it shares everything. On the phone that is Android's share sheet, so Messages, email, Drive,
+// Keep and the rest are all reachable; in a browser it is the browser's own share, or the clipboard.
+function histShare(){
+  if(!DB.logs.length){ask('Finish a session first.',null,'Nothing to share');return;}
+  var L=(HIST.sel!==null)?DB.logs[HIST.sel]:null;
+  var txt=L?buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{}}):historyText();
+  var name=APPNAME().toLowerCase()+(L?'-'+L.date:'-history-'+today())+'.txt';
+  var C=window.Capacitor,native=false;
+  try{native=!!(C&&C.isNativePlatform&&C.isNativePlatform());}catch(e){}
+  if(native){sendOut(txt,name,true);return;}
+  if(navigator.share){
+    try{navigator.share({title:name,text:txt}).catch(function(){});return;}catch(e){}
+  }
+  clipCopy(txt);
+  var b=document.getElementById('histShareBtn');
+  if(b){var o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);}
+}
 // copyEl works on a textarea, through select() and value. This one takes the text out of any
 // element, which the rest log needs because it is a <pre> and has neither.
 function copyText(id,btn){

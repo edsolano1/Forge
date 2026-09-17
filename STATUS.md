@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.175** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.176** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -81,6 +81,8 @@ palette. All verified on the SM-R960 except the live set screen, which waits for
 - **v5.174 (17 Sep)**: the launch says one of the six Forge lines under the word after the blow (.lx-tag, 1.15s), and the same line stays at the top of the home screen (TAGPICK, picked once per launch instead of re-rolling every render). The launch holds 2.3s so the line can be read.
 
 - **v5.175 (17 Sep)**: the nine launch lines (TAGS_FORGE), the owner's list.
+
+- **v5.176 (17 Sep)**: Workouts finished SHARE shares (histShare): the open session or the whole history to the phone's share sheet, browser share or clipboard elsewhere. The fold with COPY ALL and SAVE AS A FILE is gone; those live in Backup and restore.
 
 ### Still to do, in order (16 Sep 2026)
 1. **The watch's look**: mockup icons/watch-options.html (Plates, Ledger, Seal); owner picked **A, Plates** (16 Sep), C parked as a possible later direction. **Watch 1.7 (versionCode 207) is installed on the SM-R960 (16 Sep evening) as the Plates look; the owner will judge it in his next session**: Marcellus and IBM Plex Mono shipped as font files, every row a plate with the ember rail (gold rail and anvil when done, violet for matched, dark for under), the ember bar button, the hearth glow at the foot, no set counts on the week. Verified on the wrist: week, overview (superset rail fixed after the first install painted the frame solid violet), set preview. **Watch 1.8 (208)** the same evening: the ongoing chip and shade card wear the anvil icon and the ember, and say the coming set with its weight (Set 3 of 4 · 65 lb × 8; Rest 0:45 · set 3 on the face chip, Rest · up next set 3 of 4 · 65 lb × 8 in the shade). It also lets a set picked from the ladder mid-rest be corrected while the countdown runs underneath (before, the rest screen swallowed the tap). Built, waiting to be installed.
