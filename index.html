@@ -9522,7 +9522,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.174';
+var APPV='v5.175';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11518,13 +11518,17 @@ setTheme=function(t){_setTheme0(t);try{
 }catch(e){}};
 
 // New copy for a new theme - Arcanum's own lines are untouched. Edit these to taste.
+// The launch's lines (v5.175, owner's list): nine, one per launch. Two dropped as redundant.
 var TAGS_FORGE=[
   'Nothing is shaped cold',
   'Heat &middot; strike &middot; repeat',
-  'Every logged set counts',
   'Showing up beats the perfect plan',
-  'Small blows, held true, forever',
-  'You cannot forge an unlogged set'
+  'You cannot forge an unlogged set',
+  'Steel is made slowly',
+  'Each blow creates shape',
+  'Rest is part of tempering',
+  'The metal keeps what you give it',
+  'Heat first. Then the shape'
 ];
 var TAGS=[
   'Clear it clean &middot; then move up',
