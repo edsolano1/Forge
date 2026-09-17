@@ -3131,6 +3131,7 @@ body.wcon{overflow:hidden;}
   font-size:33px;line-height:1.15;letter-spacing:.13em;text-transform:uppercase;color:var(--txt);}
 .wc-s{margin-top:11px;font-size:13.5px;line-height:1.5;color:var(--txt2);}
 .wc-picks{display:flex;flex-direction:column;gap:11px;width:100%;margin-top:27px;}
+.wc-picks .ez-card{margin-bottom:0;}
 /* Two answers, weighted the same. Neither is the recommended one - somebody walking into a gym
    either has a plan or wants one handed to them, and the app has no business guessing which. */
 .wc-pick{display:block;width:100%;text-align:left;cursor:pointer;
@@ -9432,7 +9433,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.168';
+var APPV='v5.169';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20227,12 +20228,15 @@ function wcSafeGo(){
 }
 // the original welcome question, now the SECOND thing a first run sees
 function wcAsk(){
-  // The wizard's own pair, kept whole for v5: an empty week, or the forging ritual.
+  // The wizard's own pair, kept whole for v5: an empty week, or the forging ritual. Drawn as the
+  // wizard's own cards (v5.169): a picture at the left, the two the brief asked for, so the welcome
+  // and the ritual behind it read as one thing. The hammer over the anvil is the wizard's own
+  // 6-months-to-2-years picture, reused on purpose: it is the moment the forging starts.
   wcStage('Where do you want to start?',
-    '<button class="wc-pick" onclick="wcPick(0)"><b>I know what I\'m building</b>'+
-    '<small>Start with an empty week</small></button>'+
-    '<button class="wc-pick" onclick="wcPick(1)"><b>Build one for me</b>'+
-    '<small>Answer a few questions, get a week</small></button>');
+    '<button class="ez-card" style="--i:0" onclick="wcPick(0)"><span class="ez-art">'+WZ.wc[0]+'</span><span><b>I know what I\'m building</b>'+
+    '<small>Start with an empty week</small></span></button>'+
+    '<button class="ez-card" style="--i:1" onclick="wcPick(1)"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Build one for me</b>'+
+    '<small>Answer a few questions, get a week</small></span></button>');
 }
 // 0 = their own week, 1 = one laid out for them. Both land on the same screen afterwards, and
 // both hand over to the tour offer - whichever they picked, this is still a first launch.
@@ -20270,6 +20274,17 @@ var EZ_ART={
 // One per answer; the cold anvil carries its own muted colour. EZ_ART, ezScale and ezClock stay for
 // anything else that still draws with them.
 var WZ={
+  // The welcome's picture (v5.169): a blueprint of the week, seven boxes ruled out with nothing in
+  // them yet. Its partner, the raised hammer, is xp1[2] below.
+  wc:[
+    '<svg class="mo-still" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">'+
+      '<rect x="8" y="14" width="84" height="72" rx="5" opacity=".45"/>'+
+      '<path d="M8 32H92" opacity=".45"/>'+
+      '<g stroke-width="3.5"><rect x="15" y="39" width="16" height="16" rx="3"/><rect x="35" y="39" width="16" height="16" rx="3"/><rect x="55" y="39" width="16" height="16" rx="3"/><rect x="75" y="39" width="11" height="16" rx="3" opacity=".5"/>'+
+      '<rect x="15" y="61" width="16" height="16" rx="3"/><rect x="35" y="61" width="16" height="16" rx="3"/><rect x="55" y="61" width="16" height="16" rx="3"/><rect x="75" y="61" width="11" height="16" rx="3" opacity=".5"/></g>'+
+      '<path d="M16 23H30M36 23H44M50 23H58" stroke-width="3" opacity=".6"/>'+
+    '</svg>'
+  ],
   xp1:[
     '<svg class="mo-still" style="color:var(--txt3)" viewBox="0 0 100 100"><path fill="currentColor" fill-rule="evenodd" d="M31.6 29.3L92.0 29.3L92.0 30.4L86.8 36.2L70.1 43.1L68.4 44.2L68.4 46.5L65.0 47.1L60.9 50.0L59.8 52.3L59.8 57.5L64.4 62.7L71.3 65.5L71.3 70.7L59.2 70.7L55.8 66.7L52.3 65.5L45.4 66.1L42.5 67.8L40.8 70.7L28.1 70.7L28.1 65.5L34.5 63.2L39.1 59.2L40.2 56.9L39.6 52.3L36.8 49.4L31.6 48.3L30.4 46.0L26.4 46.0L16.6 42.5L12.0 39.1L8.0 32.2L31.6 32.2L31.6 29.3Z"/></svg>',
     '<svg class="mo-glow1" viewBox="0 0 100 100"><path fill="currentColor" fill-rule="evenodd" d="M31.6 29.0L92.0 29.0L92.0 30.2L86.8 36.5L81.6 37.6L70.1 43.4L69.0 46.3L65.5 46.8L60.9 50.3L59.8 52.6L59.8 56.6L64.4 62.4L71.3 65.2L71.3 71.0L59.2 71.0L57.5 68.1L52.3 65.8L45.4 66.4L40.2 71.0L28.1 71.0L28.1 65.2L35.0 62.4L38.5 58.9L39.6 56.6L39.1 52.0L36.8 49.7L31.0 48.0L31.0 46.3L29.9 45.7L23.5 45.1L15.5 41.7L10.3 37.1L8.0 32.5L31.0 32.5L31.6 29.0Z"/></svg>',
