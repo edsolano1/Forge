@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.156** (watch 1.4) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.167** (watch 1.6) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -56,6 +56,23 @@ same fanfare as a lifetime best. The crossover side view stands its tower behind
 walks a superset in running order, sees both halves together, corrects a set on either half in
 one tap without losing its place, shows supersets lassoed on the overview, and wears the phone's
 palette. All verified on the SM-R960 except the live set screen, which waits for a real session.
+
+## After the look (v5.157 to v5.167, 15 to 16 Sep 2026)
+
+- **The session screen is the ledger** (v5.157, owner picked AB): a header band per lift, icon buttons under the name top left (instructions, note, warm-up, plates), one tight row per set with weight and reps as two cells and the anvil at the end, supersets on a violet rail. Reps-only and timed sets are one cell with a unit label (v5.163). Hover styling on the tool buttons applies only where a pointer hovers; the Warm-up button lights only while its list is open (v5.160).
+- **Workouts finished is the seal roll** (v5.167, owner picked AE): seven stamps for the week, one line that says the week, each session a small seal with the sets as its hero and a record chip, Share folding the export away. Inside a session each set wears its grade, gold for beat or record, violet for matched. No aggregate gold-versus-violet counts anywhere: the owner's rule is that the per-lift story is the useful one.
+- **The board**: Skipped replaces Still open on a passed day; cards carry no set counts (the session header has the number); names wrap to two lines instead of cutting off; the level-up arrow is 22px and the grip narrower; empty slots line up with their day column (v5.164 to v5.166).
+- **Rest notices** name the next lift, set and weight (restNextLine, v5.162). A rest that ended while the app was away no longer replays GO on return (v5.158). The Settings gear is a real gear (v5.159).
+- **Watch 1.5 and 1.6**: the plan line and the weight never wrap (autosize, 47.5 lb x 10 fits); timed and rep-only sets are editable on the wrist with the phone sending kind, unit and step (v5.161); a workout overview that has not arrived says Waiting for the phone and asks again every three seconds instead of hanging on Loading. Installed on the SM-R960.
+- **GitHub Pages**: a deploy step can fail on GitHub's side with the build green; the fix is an empty commit to redeploy (16 Sep).
+
+### Still to do, in order (16 Sep 2026)
+1. **The watch's look**: carry the plate colours, the ledger's number cells and the gold and violet grading to the wrist. Three directions first.
+2. **Instructions sheet** and **workout builder**: the plate treatment for consistency; the Dumbbell or Kettlebell choice as proper buttons.
+3. **Welcome screen**: two pictures still missing (Build one for me, I know what I'm building); the two big choice buttons should match the wizard cards.
+4. **Terms of use page** beside the privacy policy before more people install.
+5. Owner will delete his eight old saved workouts himself. The two-week flip and Month view of history are untouched by the look pass and fine.
+6. Then a docs pass and stop adding.
 
 ## The look (v5.125 to v5.156, 13 to 15 Sep 2026)
 
