@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.167** (watch 1.7) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.167** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -67,7 +67,7 @@ palette. All verified on the SM-R960 except the live set screen, which waits for
 - **GitHub Pages**: a deploy step can fail on GitHub's side with the build green; the fix is an empty commit to redeploy (16 Sep).
 
 ### Still to do, in order (16 Sep 2026)
-1. **The watch's look**: mockup icons/watch-options.html (Plates, Ledger, Seal); owner picked **A, Plates** (16 Sep), C parked as a possible later direction. **Watch 1.7 (versionCode 207) is installed on the SM-R960 (16 Sep evening) as the Plates look; the owner will judge it in his next session**: Marcellus and IBM Plex Mono shipped as font files, every row a plate with the ember rail (gold rail and anvil when done, violet for matched, dark for under), the ember bar button, the hearth glow at the foot, no set counts on the week. Verified on the wrist: week, overview (superset rail fixed after the first install painted the frame solid violet), set preview.
+1. **The watch's look**: mockup icons/watch-options.html (Plates, Ledger, Seal); owner picked **A, Plates** (16 Sep), C parked as a possible later direction. **Watch 1.7 (versionCode 207) is installed on the SM-R960 (16 Sep evening) as the Plates look; the owner will judge it in his next session**: Marcellus and IBM Plex Mono shipped as font files, every row a plate with the ember rail (gold rail and anvil when done, violet for matched, dark for under), the ember bar button, the hearth glow at the foot, no set counts on the week. Verified on the wrist: week, overview (superset rail fixed after the first install painted the frame solid violet), set preview. **Watch 1.8 (208)** the same evening: the ongoing chip and shade card wear the anvil icon and the ember, and say the coming set with its weight (Set 3 of 4 · 65 lb × 8; Rest 0:45 · set 3 on the face chip, Rest · up next set 3 of 4 · 65 lb × 8 in the shade). Installed; not yet seen with a live session.
 2. **Instructions sheet** and **workout builder**: the plate treatment for consistency; the Dumbbell or Kettlebell choice as proper buttons.
 3. **Welcome screen**: two pictures still missing (Build one for me, I know what I'm building); the two big choice buttons should match the wizard cards.
 4. **Terms of use page** beside the privacy policy before more people install.
