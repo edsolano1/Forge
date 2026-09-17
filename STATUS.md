@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.171** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.172** (watch 1.8) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -74,11 +74,13 @@ palette. All verified on the SM-R960 except the live set screen, which waits for
 
 - **v5.171 (17 Sep)**: the Lower number is better box is now **Assisted machine** with an Info button beside it (exInvInfo) that says what it does; on both the custom exercise sheet and the per-exercise note sheet.
 
+- **v5.172 (17 Sep)**: terms.html, a plain-English terms of use beside privacy.html; linked from the safety screen note and the Settings footer.
+
 ### Still to do, in order (16 Sep 2026)
 1. **The watch's look**: mockup icons/watch-options.html (Plates, Ledger, Seal); owner picked **A, Plates** (16 Sep), C parked as a possible later direction. **Watch 1.7 (versionCode 207) is installed on the SM-R960 (16 Sep evening) as the Plates look; the owner will judge it in his next session**: Marcellus and IBM Plex Mono shipped as font files, every row a plate with the ember rail (gold rail and anvil when done, violet for matched, dark for under), the ember bar button, the hearth glow at the foot, no set counts on the week. Verified on the wrist: week, overview (superset rail fixed after the first install painted the frame solid violet), set preview. **Watch 1.8 (208)** the same evening: the ongoing chip and shade card wear the anvil icon and the ember, and say the coming set with its weight (Set 3 of 4 · 65 lb × 8; Rest 0:45 · set 3 on the face chip, Rest · up next set 3 of 4 · 65 lb × 8 in the shade). It also lets a set picked from the ladder mid-rest be corrected while the countdown runs underneath (before, the rest screen swallowed the tap). Built, waiting to be installed.
 2. ~~Instructions sheet and workout builder~~ done in v5.168 (C, the seal).
 3. ~~Welcome screen~~ done in v5.169.
-4. **Terms of use page** beside the privacy policy before more people install.
+4. ~~Terms of use page~~ done in v5.172.
 5. Owner will delete his eight old saved workouts himself. The two-week flip and Month view of history are untouched by the look pass and fine.
 6. Then a docs pass and stop adding.
 

@@ -3793,7 +3793,7 @@ body.wcon{overflow:hidden;}
       <button class="preset sm" onclick="sbStart()">REPLAY THE FIRST RUN &middot; nothing is saved</button>
     </div>
     </div>
-    <div class="footnote" style="margin:16px 2px 0;text-align:center"><span id="setVer"></span> &middot; <a href="privacy.html" style="color:inherit">Privacy</a></div>
+    <div class="footnote" style="margin:16px 2px 0;text-align:center"><span id="setVer"></span> &middot; <a href="terms.html" style="color:inherit">Terms</a> &middot; <a href="privacy.html" style="color:inherit">Privacy</a></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('settingsOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -9498,7 +9498,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.171';
+var APPV='v5.172';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20264,7 +20264,7 @@ function wcSafetyDraw(){
   wcStage('Glad you are here. Two quick questions first',
     '<div class="wc-q">Any injury, pain, or medical condition that currently limits how you move or exercise?'+pair('q1')+'</div>'+
     '<div class="wc-q">Has a doctor ever told you to avoid or limit exercise?'+pair('q2')+'</div>'+
-    '<div class="wc-note">Forge gives general fitness guidance, not medical advice. Exercise is your own decision and your own risk. By continuing you accept that, and the <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit">privacy policy</a>.</div>'+
+    '<div class="wc-note">Forge gives general fitness guidance, not medical advice. Exercise is your own decision and your own risk. By continuing you accept that, the <a href="terms.html" target="_blank" rel="noopener" style="color:inherit">terms of use</a> and the <a href="privacy.html" target="_blank" rel="noopener" style="color:inherit">privacy policy</a>.</div>'+
     '<button class="wc-pick wc-go" id="wcGo" onclick="wcSafeGo()" disabled><b>Continue</b><small>Answer both to go on</small></button>');
 }
 // Light the chosen answer in place. This used to redraw the whole stage, which replays the
