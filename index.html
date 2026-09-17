@@ -2410,6 +2410,64 @@ body.forge .ssgrp{border:0;border-left:3px solid var(--match);border-radius:0;pa
 body.forge .ssgrp .exc{margin-bottom:8px;}
 body.forge .sect-t{color:var(--match);font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:0 0 6px;}
 
+/* ---- The instructions sheet and the builder cards, v5.168: the seal (owner picked C). ----
+   Both wear the finish screen's warm stamped plate. The sheet: a How to eyebrow, the name in Marcellus,
+   a small anvil seal in the corner, the pictures on dark rounded plates, Dumbbell or Kettlebell as two
+   pills with the chosen one in ember, cues marked with lit points, the usual mistake in a dashed box,
+   CLOSE as a pill. The builder: each exercise the same warm plate, the name in Marcellus, every set one
+   rounded row with the numbers in mono, the stepper and the superset link as pills, violet for the link. */
+body.forge #instrOvl .sheet.ins{position:relative;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;border-radius:14px;padding:18px 16px 16px;
+  box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
+body.forge .ins-eye{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);}
+body.forge #instrOvl .sheet.ins h3{font-family:'Marcellus',serif;font-weight:400;font-size:20px;line-height:1.15;letter-spacing:.01em;text-transform:none;color:#fff6e6;margin:2px 60px 12px 0;}
+body.forge .ins-seal{position:absolute;right:14px;top:14px;width:44px;height:44px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);
+  box-shadow:0 0 16px -4px rgba(255,138,31,.7),inset 0 0 0 3px #120b08,inset 0 0 0 4px #6a3f26;}
+body.forge .ins-seal svg{width:24px;height:24px;}
+body.forge #insAnim canvas{border-radius:12px;background:#0e0806;border:1px solid #3a2214;}
+body.forge #insAnim figcaption{font-family:var(--mono);font-weight:600;font-size:9.5px;letter-spacing:.16em;color:var(--txt3);}
+body.forge #insKb{display:flex;gap:8px;margin:12px 0 14px;}
+body.forge #insKb[style*="display: none"],body.forge #insKb[style*="display:none"]{display:none;}
+body.forge #insKb .preset.sm{flex:1;height:38px;padding:0;border-radius:19px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);
+  font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
+body.forge #insKb .preset.sm.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:0 0 14px -4px rgba(255,122,26,.7),inset 0 1px 0 rgba(255,240,210,.5);}
+body.forge .ins-s{font-size:13.5px;color:var(--txt2);margin:0 0 12px;}
+body.forge .ins-c{list-style:none;margin:0 0 12px;padding:0;}
+body.forge .ins-c li{position:relative;padding-left:18px;margin:0 0 9px;font-size:13.5px;line-height:1.45;}
+body.forge .ins-c li::before{content:'';position:absolute;left:0;top:.48em;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(255,138,31,.8);}
+body.forge .ins-m{border:1px dashed #6a3f26;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--txt2);margin-bottom:12px;}
+body.forge .ins-m span{display:block;font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
+body.forge #instrOvl .sheet-btns .btn{border-radius:20px;height:40px;padding:0;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
+/* the builder cards */
+body.forge .mk-row{background:linear-gradient(180deg,#1a100b,#100907);border:1px solid #6a3f26;border-top-color:#8a5433;border-left:1px solid #6a3f26;border-radius:14px;padding:12px 14px 12px;gap:10px;
+  box-shadow:inset 0 1px 0 rgba(255,215,170,.14),0 12px 24px -12px rgba(0,0,0,.95);}
+body.forge .mk-row.ing{border-left-color:#4a3a6a;}
+body.forge .mk-rn{font-family:'Marcellus',serif;font-weight:400;font-size:16px;color:#fff6e6;white-space:normal;line-height:1.2;}
+body.forge .mk-row .mk-grip,body.forge .mk-row .mk-ic{width:32px;height:32px;border-radius:50%;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);}
+body.forge .mk-row .mk-grip svg{width:12px;height:12px;}
+body.forge .mk-meas{display:flex;align-items:center;gap:8px;}
+body.forge .mk-meas > span:first-child{font-family:var(--mono);font-weight:600;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
+body.forge .mk-row .mk-sel{border-radius:999px;background:#0e0806;border:1px solid #3a2214;color:var(--txt2);font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;}
+body.forge .mk-ps-h{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.12em;border-radius:999px;padding:5px 10px;border:1px solid #3a2214;background:#0e0806;color:var(--txt3);}
+body.forge .mk-ps-h.on{color:var(--gold);border-color:#6a3f26;background:rgba(255,138,31,.08);}
+body.forge .mk-ps-list{gap:6px;align-items:stretch;}
+body.forge .mk-ps-row{flex-wrap:nowrap;border:1px solid #3a2214;border-radius:999px;background:#0e0806;padding:4px 5px 4px 12px;gap:4px;}
+body.forge .mk-ps-n{font-family:var(--mono);font-weight:600;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);min-width:44px;}
+body.forge .mk-ps-row .mk-num{width:54px;flex:0 0 54px;background:transparent;border:0;border-radius:8px;padding:7px 2px;font-family:var(--mono);font-weight:600;font-size:15px;color:#fff6e6;}
+body.forge .mk-ps-row .mk-num:focus{background:#1a100b;box-shadow:0 0 0 1px #a0521c;}
+body.forge .mk-grp .mk-ps-row .mk-num{width:50px;flex:0 0 50px;}
+body.forge .mk-ps-row .mk-num.sm{width:38px;flex:0 0 38px;}
+body.forge .mk-ps-x,body.forge .mk-ps-u{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--txt3);}
+body.forge .mk-ps-row .mk-sr{margin-left:auto;height:28px;padding:0 10px;border-radius:14px;border:1px solid #3a2214;background:transparent;color:var(--txt3);font-size:10px;}
+body.forge .mk-ps-row .mk-sr.open{padding:0 6px;}
+body.forge .mk-setadj{border:1px solid #4a2c1c;border-radius:18px;background:#130c09;height:36px;padding:0 6px;}
+body.forge .mk-setadj > span{color:var(--txt2);font-size:11px;}
+body.forge .mk-adj{width:28px;height:28px;border-radius:50%;border-color:#4a2c1c;color:#fff6e6;}
+body.forge .mk-foot .mk-link{height:36px;padding:0 14px;border-radius:18px;border:1px solid #4a3a6a;color:var(--match);font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:rgba(143,111,190,.06);}
+body.forge .mk-grp{border:0;border-left:3px solid var(--match);border-radius:0;background:transparent;padding:0 0 0 8px;}
+body.forge .mk-grp-h span:first-child{color:var(--match);}
+body.forge .mk-unlink{border-radius:999px;border-color:#4a3a6a;color:var(--violet);font-size:10px;letter-spacing:.12em;}
+body.forge .mk-add{border:1px dashed #4a2c1c;border-radius:18px;padding:11px;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);}
+
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2718;}
 .fin-plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
@@ -3754,11 +3812,13 @@ body.wcon{overflow:hidden;}
 </div>
 
 <div class="ovl" id="instrOvl">
-  <div class="sheet" style="max-width:430px">
+  <div class="sheet ins" style="max-width:430px">
+    <div class="ins-eye">How to</div>
     <h3 id="insName">Exercise</h3>
+    <div class="ins-seal"><svg viewBox="8 30 91 46"><path fill="var(--gold)" d="M10 32.4L97 32.4L90.9 39.2L87.4 42L72.4 42C68.9 45.5 66.3 49.9 65.4 53.4C64.7 57 66.3 60.5 71.5 64L77.7 68.4L77.7 73.7L28.9 73.7L28.9 68.4L35.1 64C40.3 60.5 41.9 57 41.2 53.4C40.3 49.9 37.7 45.5 34.2 42L19.2 42L15.3 39.2Z"/></svg></div>
     <div id="insAnim" style="display:none;gap:8px;justify-content:center;margin:4px 0 10px">
-      <figure style="flex:1;max-width:172px;margin:0"><canvas id="insCvF" width="480" height="480" style="width:100%;height:auto;border-radius:8px"></canvas><figcaption id="insCapF" style="font-size:10px;letter-spacing:.16em;color:#8d8378;text-align:center;margin-top:2px">FRONT</figcaption></figure>
-      <figure style="flex:1;max-width:172px;margin:0"><canvas id="insCvS" width="480" height="480" style="width:100%;height:auto;border-radius:8px"></canvas><figcaption style="font-size:10px;letter-spacing:.16em;color:#8d8378;text-align:center;margin-top:2px">SIDE</figcaption></figure>
+      <figure style="flex:1;max-width:172px;margin:0"><canvas id="insCvF" width="480" height="480" style="width:100%;height:auto"></canvas><figcaption id="insCapF" style="font-size:10px;letter-spacing:.16em;color:#8d8378;text-align:center;margin-top:2px">FRONT</figcaption></figure>
+      <figure style="flex:1;max-width:172px;margin:0"><canvas id="insCvS" width="480" height="480" style="width:100%;height:auto"></canvas><figcaption style="font-size:10px;letter-spacing:.16em;color:#8d8378;text-align:center;margin-top:2px">SIDE</figcaption></figure>
     </div>
     <div class="presets" id="insKb" style="display:none;grid-template-columns:1fr 1fr;margin:0 0 12px"></div>
     <div class="ins-s" id="insSetup"></div>
@@ -7470,8 +7530,8 @@ var ANIM=(function(){
   function drawProneCurlS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    seg(x,[130,340],[318,340],8,LINE);             // the bench pad
-    seg(x,[150,340],[150,430],7,LINE);seg(x,[298,340],[298,430],7,LINE);
+    seg(x,[130,340],[290,340],8,LINE);             // the bench pad, ending short of the knees
+    seg(x,[150,340],[150,430],7,LINE);seg(x,[276,340],[276,430],7,LINE);
     dot(x,[122,316],19);                           // the head, chin up off the pad
     var sho=[160,328], hip=[258,332], knee=[304,336];
     seg(x,sho,hip,11);seg(x,hip,knee,10);
@@ -7481,8 +7541,8 @@ var ANIM=(function(){
     seg(x,knee,f,10);
     seg(x,f,P(f,ang+80,14),8);                     // the foot past the roller
     var roller=P(knee,ang,70);
-    seg(x,[316,352],roller,5,LINE);                // the lever from the pivot at the bench end
-    dot(x,[316,352],5,LINE);
+    seg(x,[304,352],roller,5,LINE);                // the lever from the pivot, lined up with the knee
+    dot(x,[304,352],5,LINE);
     dot(x,roller,8,GO);                            // the roller pad on the heels
   }
   function drawProneCurlF(x,t){
@@ -7490,7 +7550,7 @@ var ANIM=(function(){
     var k=reduce?1:cycle(t,2800,0.12);
     var cx=240;
     x.strokeStyle=LINE;x.lineWidth=7;
-    x.strokeRect(192,50,96,330);                   // the bench pad, seen from ABOVE
+    x.strokeRect(192,50,96,262);                   // the bench pad, seen from ABOVE, ending short of the knees
     dot(x,[cx,90],19);                             // the head, chin up
     seg(x,[cx-24,118],[cx+24,118],10);             // the shoulders
     seg(x,[cx-28,120],[cx-42,94],8);seg(x,[cx-42,94],[cx-34,76],8);   // the arms UP, hands on the grips beside the head
@@ -9372,7 +9432,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.167';
+var APPV='v5.168';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
