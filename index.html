@@ -421,8 +421,6 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .exdrag:hover{color:var(--txt2);background:var(--surface2);}
 .exdrag:active{cursor:grabbing;}
 .exdrag svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;fill:none;}
-#blkMark{position:fixed;height:2px;background:var(--go);z-index:61;pointer-events:none;display:none;border-radius:2px;
-  box-shadow:0 0 12px color-mix(in srgb,var(--go) 65%,transparent);}
 
 /* ---------- EXERCISE EDIT ---------- */
 .exed-n{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center;}
@@ -985,7 +983,7 @@ body.tut .bg-rules,body.tut .bg-rules > i,body.tut .bg-wm svg{animation-play-sta
    so #askOvl lost on DOM order - which is what hid the blocked-notifications message
    behind the timer sheet, leaving only a dimmed window. */
 #askOvl{z-index:320;}   /* above the 300-level sheets, so Keep the change? lands on top of them */
-.sheet{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:22px;}
+.sheet{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;}
 .sheet h3{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.02em;color:var(--txt);margin-bottom:5px;}
 .sheet p{font-size:13px;color:var(--txt3);margin-bottom:16px;line-height:1.55;}
 .sheet textarea{width:100%;min-height:230px;background:var(--bg);border:1px solid var(--line);border-radius:11px;color:var(--txt2);font-family:var(--mono);font-size:12px;padding:13px;line-height:1.65;resize:vertical;}
@@ -2584,7 +2582,7 @@ body.forge .s-head{backdrop-filter:none;background:rgba(12,7,5,.96);}
 /* X1 (v5.179, owner's pick): a fine grain on the sheets and the big plates. Static, one tiny SVG noise
    tile at low opacity, blended over the fill; small chips and cells stay smooth so numbers stay crisp. */
 body.forge .sheet,body.forge .exc,body.forge .card,body.forge .mk-row,body.forge .fin-plate,body.forge .hrow.hseal,
-body.forge .ez-card,body.forge .fbtn,body.forge .timer-pill,body.forge .set-card{position:relative;}
+body.forge .ez-card,body.forge .fbtn,body.forge .set-card{position:relative;}   /* not .timer-pill: it is fixed, and fixed already anchors the grain */
 body.forge .sheet::after,body.forge .exc::after,body.forge .card::after,body.forge .mk-row::after,body.forge .fin-plate::after,
 body.forge .hrow.hseal::after,body.forge .ez-card::after,body.forge .fbtn::after,body.forge .timer-pill::after,body.forge .set-card::after{
   content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.45;mix-blend-mode:overlay;
@@ -2643,12 +2641,8 @@ body.forge .sheet .fin-name,.sheet .fin-name{text-transform:none;letter-spacing:
 @keyframes finShine{0%{left:-30%;}40%,100%{left:130%;}}
 html.mo-off .fin-lvl::after{animation:none;display:none;}
 .fin-note{font-size:12.5px;color:var(--txt2);margin:12px 2px 0;}
-.fin-share{margin:14px 0 0;text-align:center;font-size:12px;color:var(--txt3);}
-.fin-share span{cursor:pointer;padding:6px;}
-.fin-share span:hover{color:var(--txt2);}
-#finShareBox textarea{margin-top:8px;}
 .fin-done{padding:14px;font-weight:800;letter-spacing:.16em;font-size:13px;background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.6);}
-#finRec[hidden],#finLvl[hidden],#sumNote[hidden],#finShareBox[hidden]{display:none;}
+#finRec[hidden],#finLvl[hidden],#sumNote[hidden]{display:none;}
 
 /* ---- The level-up sheet, v5.149: the banner (owner picked S, 15 Sep). ----
    A beam of light cuts the dark with LEVEL UP on it, rays behind. The lifts land one at a time
@@ -3531,12 +3525,6 @@ body.wcon{overflow:hidden;}
       <div class="fin-lvl" id="finLvl" hidden onclick="finRaise()"><div><b id="finLvlT"></b><small>Tap to raise now, or later from the board</small></div><span class="fin-go">&rsaquo;</span></div>
     </div>
     <p class="fin-note" id="sumNote" hidden></p>
-    <!-- Share as text left the finish screen (v5.152): a session is shared from Workouts finished. The
-         export textarea stays for copyExport and the tour; it is never shown here. -->
-    <div id="finShareBox" hidden>
-      <textarea id="exportTxt" readonly></textarea>
-      <div class="sheet-btns"><div class="btn" onclick="copyExport()" id="copyBtn">COPY</div></div>
-    </div>
     <div class="sheet-btns"><div class="btn btn-go fin-done" onclick="closeOvl('exportOvl');offerReopen()">DONE</div></div>
   </div>
 </div>
@@ -3687,7 +3675,6 @@ body.wcon{overflow:hidden;}
   </div>
 </div>
 
-<div id="blkMark"></div>
 <div id="tutHole"><i></i><i></i><i></i><i></i></div>
 <div id="tutPing"></div>
 <div id="tutCard">
@@ -3913,14 +3900,6 @@ body.wcon{overflow:hidden;}
   </div>
 </div>
 
-<div class="ovl" id="mkSlotOvl">
-  <div class="sheet" style="max-width:420px">
-    <h3 id="mkSlotTtl">Which day does it go on?</h3>
-    <p>The week keeps its seven slots. Your day replaces what is on the one you pick, and the original can be put back any time.</p>
-    <div class="lvl-list" id="mkSlotBody"></div>
-    <div class="sheet-btns"><div class="btn" onclick="closeOvl('mkSlotOvl')">CANCEL</div></div>
-  </div>
-</div>
 
 <div class="ovl" id="mkPickOvl">
   <div class="sheet">
@@ -4110,7 +4089,6 @@ body.wcon{overflow:hidden;}
       </div>
     </div>
     <div id="histBody"></div>
-    <textarea id="histTxt" readonly style="position:fixed;left:-9999px;top:0;width:10px;height:10px;opacity:0"></textarea>
     <!-- SHARE does the sharing (v5.176): the open session, or the whole history, straight to the
          phone's share sheet. It used to unfold two more buttons, which read as a button that did
          nothing (owner, 17 Sep). Saving a file and copying live in Backup &amp; restore. -->
@@ -9607,7 +9585,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.180';
+var APPV='v5.181';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13968,7 +13946,14 @@ function mkCommit(stay){
 
 // ---------- finish + export ----------
 function buildExport(wk,A){
-  var w=W[wk],out=APPNAME()+' \u00b7 '+w.name.replace('Optional: ','')+'\n'+pretty(A.date)+(UNIT_KG?'  \u00b7  weights in kg':'')+'\n\n';
+  var w=W[wk];
+  if(!w){   // the workout was deleted after it was logged: write the sets the log still holds (v5.181)
+    var o=APPNAME()+' \u00b7 '+(A.name||'A deleted workout')+'\n'+pretty(A.date)+(UNIT_KG?'  \u00b7  weights in kg':'')+'\n\n';
+    for(var k in (A.entries||{})){var en=(A.entries[k]||[]).filter(function(x){return x;});if(en.length)o+=((EX[exOfKey(A,k)]||{}).name||k)+': '+fmtSets(en,true)+'\n';}
+    if(A.note&&String(A.note).trim())o+='\nNote: '+String(A.note).trim();
+    return o;
+  }
+  var out=APPNAME()+' \u00b7 '+w.name.replace('Optional: ','')+'\n'+pretty(A.date)+(UNIT_KG?'  \u00b7  weights in kg':'')+'\n\n';
   w.sections.forEach(function(sec){
     sec.rows.forEach(function(row){
       var rf=rowFor(A.swaps,row),id=rf.id,ent=(A.entries[id]||[]).filter(function(x){return x;});
@@ -14037,11 +14022,9 @@ function renderSummary(s){
   var t=document.getElementById('sumTitle'),note=document.getElementById('sumNote');
   if(t)t.textContent=real<=1?'Your first one is in the book':'Session logged';
   if(note)note.hidden=true;
-  var box=document.getElementById('finShareBox');if(box)box.hidden=true;
 }
 function finRecs(){var l=document.getElementById('finRecList'),b=document.getElementById('finRec');if(!l)return;l.hidden=!l.hidden;b.classList.toggle('open',!l.hidden);}
 function finRaise(){closeOvl('exportOvl');if(FINWK)openLevel(FINWK);}
-function finShare(){var b=document.getElementById('finShareBox');if(!b)return;b.hidden=!b.hidden;}
 function finishSession(){
   var wk=CUR;
   if(loggedCount(wk)===0){
@@ -14083,7 +14066,6 @@ function finishGate(){
 function finishNow(){
   var wk=CUR,A=DB.active[wk];
   var sum=summarize(wk,A);
-  var txt=buildExport(wk,A);
   var entries={};
   for(var k in A.entries){var arr=A.entries[k].filter(function(x){return x;});if(arr.length)entries[k]=arr;}
   // The name rides on the log so history can still say what it was after the workout is deleted.
@@ -14094,7 +14076,6 @@ function finishNow(){
   saveDB();
   try{autoBk();}catch(e){}
   syncPumpBtn();
-  document.getElementById('exportTxt').value=txt;
   renderSummary(sum);
   document.getElementById('session').classList.remove('on');
   stopTimer();renderHome();
@@ -14729,18 +14710,16 @@ function weekAdd(d){
 function historyText(){
   return APPNAME()+' \u00b7 full history\n'+DB.logs.length+' session'+(DB.logs.length===1?'':'s')+'\n\n'+
     DB.logs.slice().reverse().map(function(L){
-      return buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{}});
+      return buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{},name:L.name});
     }).join('\n\n------------------------\n\n');
 }
-function copyExport(){copyEl('exportTxt','copyBtn');}
-function copyHist(){copyEl('histTxt','copyHistBtn');}
 // The history sheet's SHARE (v5.176). Inside a session it shares that day; on the week, month or
 // list it shares everything. On the phone that is Android's share sheet, so Messages, email, Drive,
 // Keep and the rest are all reachable; in a browser it is the browser's own share, or the clipboard.
 function histShare(){
   if(!DB.logs.length){ask('Finish a session first.',null,'Nothing to share');return;}
   var L=(HIST.sel!==null)?DB.logs[HIST.sel]:null;
-  var txt=L?buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{}}):historyText();
+  var txt=L?buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{},name:L.name}):historyText();
   var name=APPNAME().toLowerCase()+(L?'-'+L.date:'-history-'+today())+'.txt';
   var C=window.Capacitor,native=false;
   try{native=!!(C&&C.isNativePlatform&&C.isNativePlatform());}catch(e){}
@@ -14751,27 +14730,6 @@ function histShare(){
   clipCopy(txt);
   var b=document.getElementById('histShareBtn');
   if(b){var o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);}
-}
-// copyEl works on a textarea, through select() and value. This one takes the text out of any
-// element, which the rest log needs because it is a <pre> and has neither.
-function copyText(id,btn){
-  var t=document.getElementById(id);if(!t)return;
-  var s=t.textContent||'';
-  try{if(navigator.clipboard)navigator.clipboard.writeText(s);}catch(e){}
-  try{
-    var ta=document.createElement('textarea');
-    ta.value=s;ta.style.cssText='position:fixed;left:-9999px;top:0';
-    document.body.appendChild(ta);ta.select();
-    document.execCommand('copy');document.body.removeChild(ta);
-  }catch(e){}
-  var b=document.getElementById(btn);
-  if(b){var o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);}
-}
-function copyEl(id,btn){
-  var t=document.getElementById(id);t.select();
-  try{document.execCommand('copy');}catch(e){}
-  if(navigator.clipboard){try{navigator.clipboard.writeText(t.value);}catch(e){}}
-  var b=document.getElementById(btn),o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);
 }
 function openBackup(){
   bkView(false);
@@ -15691,10 +15649,6 @@ function showProgress(){
 }
 function showHistory(){
   if(!DB.logs.length){ask('Finish a session and it will show up here.',null,'No history yet');return;}
-  var out=DB.logs.slice().reverse().map(function(L){
-    return buildExport(L.day,{date:L.date,entries:L.entries,note:L.note,swaps:L.swaps||{}});
-  }).join('\n\n------------------------\n\n');
-  document.getElementById('histTxt').value=out;
   HIST.sel=null;HIST.mon=null;HIST.wk0=null;HIST.day=null;
   if(HIST.mode==='walks')HIST.mode='week';
   try{hcSyncProbe();}catch(e){}
@@ -15836,10 +15790,6 @@ function deleteLog(i){
   ask('This erases '+s.n+' set'+(s.n===1?'':'s')+' from '+pretty(L.date)+' and cannot be undone.',function(){
     DB.logs.splice(i,1);
     saveDB();
-    var el=document.getElementById('histTxt');
-    if(el)el.value=DB.logs.slice().reverse().map(function(x){
-      return buildExport(x.day,{date:x.date,entries:x.entries,note:x.note,swaps:x.swaps||{}});
-    }).join('\n\n------------------------\n\n');
     HIST.sel=null;
     if(!DB.logs.length){closeOvl('histOvl');renderHome();return;}
     renderHist();renderHome();
@@ -20132,7 +20082,7 @@ function tutAdvance(){
 // A tap where a hold was meant used to open a sheet the step knew nothing about, and the
 // fence then locked every button on it. Anything the step did not ask for is closed.
 var TUT_STRAY=['editOvl','exEditOvl','exNoteOvl','exAddOvl','exJoinOvl','swapOvl','settingsOvl','themeOvl','timerOvl',
-  'pumpOvl','lvlOvl','mkActOvl','mkSlotOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl','bwOvl','plateOvl'];
+  'pumpOvl','lvlOvl','mkActOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl','bwOvl','plateOvl'];
 function tutStray(i){
   var keep=TUT_STEPS[i==null?TUTI:i].ovl||'';
   TUT_STRAY.forEach(function(id){
