@@ -985,7 +985,7 @@ body.tut .bg-rules,body.tut .bg-rules > i,body.tut .bg-wm svg{animation-play-sta
    so #askOvl lost on DOM order - which is what hid the blocked-notifications message
    behind the timer sheet, leaving only a dimmed window. */
 #askOvl{z-index:320;}   /* above the 300-level sheets, so Keep the change? lands on top of them */
-.sheet{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;}
+.sheet{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:22px;}
 .sheet h3{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.02em;color:var(--txt);margin-bottom:5px;}
 .sheet p{font-size:13px;color:var(--txt3);margin-bottom:16px;line-height:1.55;}
 .sheet textarea{width:100%;min-height:230px;background:var(--bg);border:1px solid var(--line);border-radius:11px;color:var(--txt2);font-family:var(--mono);font-size:12px;padding:13px;line-height:1.65;resize:vertical;}
@@ -2160,7 +2160,7 @@ body.light .srow.done .chk,body.light .srow.ispr .chk,body.light .finishbtn{box-
 .mark{flex-shrink:0;}
 /* logging a set lights it */
 .chk.flare{animation:chkpop .44s cubic-bezier(.34,1.45,.6,1);}
-.chk.flare::before{content:'';position:absolute;inset:-9px;border-radius:18px;pointer-events:none;
+.chk.flare::before{content:'';position:absolute;inset:-9px;border-radius:999px;pointer-events:none;
   background:radial-gradient(closest-side,rgba(255,196,110,.9),rgba(255,124,44,.42) 44%,transparent 72%);
   animation:emberout .66s ease-out forwards;}
 .chk.flare.pr::before{background:radial-gradient(closest-side,rgba(255,232,160,.95),rgba(240,201,107,.5) 44%,transparent 72%);}
@@ -2439,7 +2439,7 @@ body.forge #insAnim canvas{border-radius:12px;background:#0e0806;border:1px soli
 body.forge #insAnim figcaption{font-family:var(--mono);font-weight:600;font-size:9.5px;letter-spacing:.16em;color:var(--txt3);}
 body.forge #insKb{display:flex;gap:8px;margin:12px 0 14px;}
 body.forge #insKb[style*="display: none"],body.forge #insKb[style*="display:none"]{display:none;}
-body.forge #insKb .preset.sm{flex:1;height:38px;padding:0;border-radius:19px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);
+body.forge #insKb .preset.sm{flex:1;height:38px;padding:0;border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);
   font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
 body.forge #insKb .preset.sm.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:0 0 14px -4px rgba(255,122,26,.7),inset 0 1px 0 rgba(255,240,210,.5);}
 body.forge .ins-s{font-size:13.5px;color:var(--txt2);margin:0 0 12px;}
@@ -2448,7 +2448,7 @@ body.forge .ins-c li{position:relative;padding-left:18px;margin:0 0 9px;font-siz
 body.forge .ins-c li::before{content:'';position:absolute;left:0;top:.48em;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(255,138,31,.8);}
 body.forge .ins-m{border:1px dashed #6a3f26;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--txt2);margin-bottom:12px;}
 body.forge .ins-m span{display:block;font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
-body.forge #instrOvl .sheet-btns .btn{border-radius:20px;height:40px;padding:0;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
+body.forge #instrOvl .sheet-btns .btn{border-radius:999px;height:40px;padding:0;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
 /* the builder cards */
 body.forge .mk-row{background:linear-gradient(180deg,#1a100b,#100907);border:1px solid #6a3f26;border-top-color:#8a5433;border-left:1px solid #6a3f26;border-radius:14px;padding:12px 14px 12px;gap:10px;
   box-shadow:inset 0 1px 0 rgba(255,215,170,.14),0 12px 24px -12px rgba(0,0,0,.95);}
@@ -2471,14 +2471,14 @@ body.forge .mk-ps-row .mk-num.sm{width:38px;flex:0 0 38px;}
 body.forge .mk-ps-x,body.forge .mk-ps-u{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--txt3);}
 body.forge .mk-ps-row .mk-sr{margin-left:auto;height:28px;padding:0 10px;border-radius:14px;border:1px solid #3a2214;background:transparent;color:var(--txt3);font-size:10px;}
 body.forge .mk-ps-row .mk-sr.open{padding:0 6px;}
-body.forge .mk-setadj{border:1px solid #4a2c1c;border-radius:18px;background:#130c09;height:36px;padding:0 6px;}
+body.forge .mk-setadj{border:1px solid #4a2c1c;border-radius:999px;background:#130c09;height:36px;padding:0 6px;}
 body.forge .mk-setadj > span{color:var(--txt2);font-size:11px;}
 body.forge .mk-adj{width:28px;height:28px;border-radius:50%;border-color:#4a2c1c;color:#fff6e6;}
-body.forge .mk-foot .mk-link{height:36px;padding:0 14px;border-radius:18px;border:1px solid #4a3a6a;color:var(--match);font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:rgba(143,111,190,.06);}
+body.forge .mk-foot .mk-link{height:36px;padding:0 14px;border-radius:999px;border:1px solid #4a3a6a;color:var(--match);font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:rgba(143,111,190,.06);}
 body.forge .mk-grp{border:0;border-left:3px solid var(--match);border-radius:0;background:transparent;padding:0 0 0 8px;}
 body.forge .mk-grp-h span:first-child{color:var(--match);}
 body.forge .mk-unlink{border-radius:999px;border-color:#4a3a6a;color:var(--violet);font-size:10px;letter-spacing:.12em;}
-body.forge .mk-add{border:1px dashed #4a2c1c;border-radius:18px;padding:11px;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);}
+body.forge .mk-add{border:1px dashed #4a2c1c;border-radius:999px;padding:11px;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);}
 
 /* ---- Every other sheet, v5.170: the seal, carried through. ----
    The instructions sheet got the warm stamped plate in v5.168; this hands the same plate to every sheet
@@ -2492,7 +2492,7 @@ body.forge .sheet h3{color:#fff6e6;}
 body.forge .sheet p{color:var(--txt2);}
 body.forge .sheet .footnote{color:var(--txt3);}
 /* buttons: pills in mono. The primary one is the ember bar, a "go" one is outlined in ember. */
-body.forge .sheet-btns .btn,body.forge .mk-acts .btn{border-radius:20px;min-height:40px;padding:0 14px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);
+body.forge .sheet-btns .btn,body.forge .mk-acts .btn{border-radius:999px;min-height:40px;padding:0 14px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);
   font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
 body.forge .sheet-btns .btn-go,body.forge .mk-acts .btn-go{border-color:#a0521c;color:var(--gold);background:rgba(255,138,31,.08);}
 body.forge .sheet-btns .btn-prime,body.forge .mk-acts .btn-prime{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
@@ -2540,7 +2540,7 @@ body.forge .pl-chip.has{border-color:var(--gold);background:rgba(255,138,31,.08)
 body.forge .pl-chip.has .pl-cnt{color:var(--gold);}
 body.forge .pl-chip .pl-n{font-family:var(--mono);font-weight:600;}
 body.forge .pl-pm,body.forge .pl-pm button:first-child{border-color:#2a1810;}
-body.forge .pl-act{border-radius:20px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;letter-spacing:.14em;}
+body.forge .pl-act{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;letter-spacing:.14em;}
 body.forge .pl-bar{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:var(--txt2);}
 body.forge .pl-bar.on{border-color:var(--gold);color:#fff6e6;background:rgba(255,138,31,.08);}
 body.forge .pl-bar small{color:var(--txt3);}
@@ -2573,10 +2573,23 @@ body.forge .hrow-rec{border-radius:9px;}
 body.forge .hex-n{font-family:'Marcellus',serif;font-weight:400;font-size:14px;color:#fff6e6;}
 body.forge .hnote,body.forge .hsub{border-radius:10px;}
 /* D2: the set cells match the anvil beside them. */
-body.forge .srow .inp{border-radius:9px;border-color:#3a2214;}
+body.forge .srow .inp{border-radius:999px;border-color:#3a2214;}   /* D1 round: the cells follow the pills */
+body.forge .srow .hold,body.forge .srow .chk{border-radius:999px;}
+body.forge .timer-pill{border-radius:999px;}
+body.forge .finishbtn{border-radius:999px;}
 /* D5: the last two blurs. The plates are opaque; a smeared ground behind them is the old era. */
 body.forge .ovl{backdrop-filter:none;background:rgba(10,6,4,.86);}
 body.forge .s-head{backdrop-filter:none;background:rgba(12,7,5,.96);}
+
+/* X1 (v5.179, owner's pick): a fine grain on the sheets and the big plates. Static, one tiny SVG noise
+   tile at low opacity, blended over the fill; small chips and cells stay smooth so numbers stay crisp. */
+body.forge .sheet,body.forge .exc,body.forge .card,body.forge .mk-row,body.forge .fin-plate,body.forge .hrow.hseal,
+body.forge .ez-card,body.forge .fbtn,body.forge .timer-pill,body.forge .set-card{position:relative;}
+body.forge .sheet::after,body.forge .exc::after,body.forge .card::after,body.forge .mk-row::after,body.forge .fin-plate::after,
+body.forge .hrow.hseal::after,body.forge .ez-card::after,body.forge .fbtn::after,body.forge .timer-pill::after,body.forge .set-card::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.45;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");}
+html.mo-off body.forge .sheet::after{display:none;}
 
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2c1c;}
@@ -2801,12 +2814,13 @@ body.light .fbtn:hover{box-shadow:0 4px 14px -6px rgba(16,20,24,.18);}
    almost square, the sheen turns from cold blue-white to firelight, and the top edge
    catches a hot line the way stock does lying near the coals. */
 body.forge .footbar{gap:5px;}
-body.forge .fbtn{border-radius:4px;padding:16px 6px 14px;
-  background:linear-gradient(180deg,rgba(255,190,130,.055),rgba(255,150,70,.008)),var(--surface);
-  border-color:#4a2c1c;
-  box-shadow:inset 0 1px 0 rgba(255,183,120,.13),inset 0 -1px 0 rgba(0,0,0,.4);
-  font-family:'Big Shoulders Display','Barlow Condensed',sans-serif;
-  font-size:14px;font-weight:700;letter-spacing:.17em;}
+/* v5.179 (S1a, owner's pick): the same plate as a workout on the week, rail and all. */
+body.forge .fbtn{position:relative;overflow:hidden;border-radius:12px;padding:14px 8px 13px 12px;
+  background:#130c09;border-color:#4a2c1c;border-top-color:#6a3f26;
+  box-shadow:inset 0 1px 0 rgba(255,215,170,.1),0 10px 22px -12px rgba(0,0,0,.95);
+  font-family:var(--mono);font-size:10.5px;font-weight:400;letter-spacing:.16em;line-height:1.35;}
+body.forge .fbtn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
+body.forge .fbtn svg{stroke:var(--gold);}
 body.forge .fbtn svg{stroke-width:1.6;}
 body.forge .fbtn:hover{border-color:color-mix(in srgb,var(--gold) 55%,#4a2c1c);
   background:linear-gradient(180deg,rgba(255,190,130,.1),rgba(255,150,70,.02)),var(--surface2);
@@ -9579,7 +9593,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.178';
+var APPV='v5.179';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
