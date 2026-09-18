@@ -3555,7 +3555,7 @@ body.wcon{overflow:hidden;}
       <!-- Native app only (a browser cannot quietly write a file, and quietly is the point);
            autoBkDraw shows it when the Filesystem bridge is really there. -->
       <div class="btn" id="bkAuto" onclick="autoBkToggle()" style="display:none">AUTOMATIC SAFETY COPY: OFF</div>
-      <div class="footnote" id="bkAutoNote" style="display:none;margin:6px 2px 12px">A backup file that refreshes itself after every finished workout, in Documents under a Forge folder. It survives even deleting the app.</div>
+      <div class="footnote" id="bkAutoNote" style="display:none;margin:6px 2px 12px">A backup file that refreshes itself after every finished workout, in Documents under a Forge folder. It survives even deleting the app.<span id="bkAutoState"></span></div>
       <!-- A week is not a backup and the two must not be reachable by the same button:
            one replaces everything the other person owns, the other adds to it. -->
       <div class="btn" onclick="bkView('week')" style="margin-bottom:12px">SHARE A WEEK</div>
@@ -9585,7 +9585,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.181';
+var APPV='v5.182';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9628,6 +9628,13 @@ function saveDB(){persistNow();}
 // is taken. Never mid-anything: a reload during a session, a sheet or the tour throws away what
 // is on screen for a cosmetic gain, so it waits for the board to be idle and takes it then.
 var VERCHK=0;
+// v5.182: busy means something is really in the way right now, not that a day was ever opened.
+function verBusy(){
+  if(TUTON||SANDBOX||sessionOpen()||document.querySelector('.ovl.on'))return true;
+  if(typeof timerInt!=='undefined'&&timerInt)return true;      // a rest is counting on the week
+  if(typeof SESSEDIT!=='undefined'&&SESSEDIT)return true;      // a just-today edit lives only in memory
+  return ['make','ez','welcome'].some(function(id){var e=document.getElementById(id);return !!(e&&e.classList.contains('on'));});
+}
 function checkVersion(){
   // The check costs a fetch of the whole page - there is no smaller thing on the site that
   // states the version, and inventing one would be a third place to remember to bump. A minute
@@ -9635,13 +9642,13 @@ function checkVersion(){
   // opened a handful of times a day, not continuously.
   if(Date.now()-VERCHK<60000)return;
   VERCHK=Date.now();
-  if(TUTON||SANDBOX||CUR||document.querySelector('.ovl.on'))return;
+  if(verBusy())return;
   fetch('./index.html?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():null;})
     .then(function(t){
       if(!t)return;
       var m=t.match(/var APPV=.([^']+)./);
       if(!m||m[1]===APPV)return;
-      if(TUTON||SANDBOX||CUR||document.querySelector('.ovl.on'))return;   // re-checked: the fetch took time
+      if(verBusy())return;   // re-checked: the fetch took time
       persistNow();location.reload();
     }).catch(function(){});
 }
@@ -11915,7 +11922,7 @@ function renderSession(){
       // made a one-off heavy day look like the standard you were meant to hold every set
       // to. It moved to the foot of the card, beside the rest - present, not prescriptive.
       html+='<div class="ex-stats">'+
-            '<span class="ex-stat st-tgt">Target <b>'+r.sets.split('\n').map(fmtLine).join(', ')+'</b>'+
+            '<span class="ex-stat st-tgt">Target <b>'+esc(r.sets.split('\n').map(fmtLine).join(', '))+'</b>'+
               // The unit, once, so nobody has to guess whether 35 is pounds or kilograms (v5.100).
               (/^[1-9][\d.]*x/.test(String(r.sets))?' '+wUnitName():'')+'</span>'+
             (L?'<span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span>':'')+
@@ -11954,8 +11961,9 @@ function renderSession(){
       html+='</div><div class="sets">';
       tg.forEach(function(t,i){
         var e=ent[i];
-        var vw=e?e.w:(t.type==='wr'?t.w:0);
-        var vr=e?e.r:t.r;
+        var dr=draftOf(A,id,i);   // what you set but have not logged yet (v5.182)
+        var vw=e?e.w:(dr&&dr.w!=null?dr.w:(t.type==='wr'?t.w:0));
+        var vr=e?e.r:(dr&&dr.r!=null?dr.r:t.r);
         html+='<div class="srow'+(e?' done':'')+gradeClass(e)+'" id="sr-'+id+'-'+i+'"><span class="sno num">'+(i+1)+'</span>';
         // bw marks a lift that has no weight to give - a crunch, a plank, a hanging raise. The
         // sets still parse as weight-by-reps because they are written 0x20, so without the flag
@@ -11985,7 +11993,7 @@ function renderSession(){
       var prTxt=bst?(bst.w?fmtW(bst.w)+'×'+bst.r:bst.r+(bst.unit?' '+bst.unit:'')):'';
       if(restTxt||prTxt){
         html+='<div class="ex-foot">'+
-              '<span class="ex-rest">'+restTxt+'</span>'+
+              '<span class="ex-rest">'+esc(restTxt)+'</span>'+
               (prTxt?'<span class="ex-pr" title="Your best set ever on this lift">Best <b>'+prTxt+'</b></span>':'')+
               '</div>';
       }
@@ -12084,6 +12092,13 @@ document.addEventListener('keydown',function(e){
   document.getElementById('edBig').blur();
   saveEdit();
 });
+// v5.182: an unlogged set's edited numbers, kept on the open session so a redraw keeps them.
+function draftSet(id,i,k,v){
+  var A=DB.active[CUR];if(!A)return;
+  if(A.entries&&A.entries[id]&&A.entries[id][i])return;   // a logged set carries its own numbers
+  A.draft=A.draft||{};var d=A.draft[id]=A.draft[id]||{};d[i]=d[i]||{};d[i][k]=v;
+}
+function draftOf(A,id,i){return (A&&A.draft&&A.draft[id]&&A.draft[id][i])||null;}
 function saveEdit(){
   if(!edCtx)return;
   edCtx.val=edRead();
@@ -12118,6 +12133,9 @@ function saveEdit(){
         if(gr&&gr!=='under')srow.classList.add(isTop(gr)?'ispr':'ismatch');}
     }catch(e){}
     saveDB();
+  }else if(A){
+    if(edCtx.which==='w')draftSet(edCtx.id,edCtx.i,'w',parseFloat(el.dataset.lb)||0);
+    else draftSet(edCtx.id,edCtx.i,'r',parseFloat(el.value)||0);
   }
   // You load the bar once, not once per set. A weight change carries down the rest of the lift so
   // 45 to 42.5 is one edit rather than three. Reps are left alone - those genuinely do differ set
@@ -12130,8 +12148,10 @@ function saveEdit(){
       if(A&&A.entries[edCtx.id]&&A.entries[edCtx.id][j])continue;
       nx.value=el.value;
       if(el.dataset.lb!==undefined)nx.dataset.lb=el.dataset.lb;
+      draftSet(edCtx.id,j,'w',parseFloat(el.dataset.lb)||0);
     }
   }
+  try{saveDB();}catch(e){}
   closeOvl('editOvl');edCtx=null;
 }
 function toggleSet(id,i,rest,unit){
@@ -12179,6 +12199,7 @@ function toggleSet(id,i,rest,unit){
     var e={w:w,r:r,unit:unit||''};
     if(holdBreak[key]>0)e.br=holdBreak[key];
     if(!A.start)A.start=Date.now();
+    A.last=Date.now();   // v5.182: the session's length runs to its last logged set
     var cb=row.querySelector('.chk'),gr=setGrade(exId,e);
     e.g=gr;
     if(gr==='pr')e.pr=1;
@@ -12246,7 +12267,7 @@ var swapTarget=null;
 // its swap sheet printed the raw key as a heading. 'traps' is new, for the shrug.
 var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly','back-vertical':'Pull-down and pull-up','back-horizontal':'Rowing','biceps':'Biceps','triceps':'Triceps','quad':'Squats and leg presses','glute':'Backside and hips','hamstring':'Back of the thigh','posterior':'Back of the body','calf':'Calves','delt-side':'Side of the shoulder','delt-rear':'Back of the shoulder','delt-press':'Overhead press','traps':'Upper back and neck','core':'Core','forearm':'Forearm','cardio':'Cardio','mobility':'Mobility','other':'Other'};
 function swapItem(k){
-  return '<div class="swapitem" onclick="doSwap(\''+k+'\')">'+esc(EX[k].name)+'<small>'+EX[k].sets.split('\n').map(fmtLine).join(', ')+'</small></div>';
+  return '<div class="swapitem" onclick="doSwap(\''+k+'\')">'+esc(EX[k].name)+'<small>'+esc(EX[k].sets.split('\n').map(fmtLine).join(', '))+'</small></div>';
 }
 function openSwap(id){
   swapTarget=id;
@@ -13987,7 +14008,7 @@ function summarize(wk,A){
       if(e.w>0&&e.r>0)vol+=e.w*e.r;
     });
   }
-  var mins=A.start?Math.max(1,Math.round((Date.now()-A.start)/60000)):0;
+  var mins=sessMins(A);
   return {sets:sets,vol:Math.round(vol),prs:prs,reps:reps,held:held,mins:mins,prNames:prNames,prList:prList,planned:totalSets(wk),name:(W[wk]||{}).name||'',date:A.date,wk:wk};
 }
 function fmtHeld(s){
@@ -14002,7 +14023,7 @@ function renderSummary(s){
   var nm=String(s.name||'').replace('Optional: ','');
   document.getElementById('finName').textContent=nm;
   var dt='';try{dt=pretty(s.date);}catch(e){}
-  document.getElementById('finDate').textContent=(dt?dt:'')+(s.mins?(dt?' \u00b7 ':'')+s.mins+' min':'');
+  document.getElementById('finDate').textContent=(dt?dt:'')+(s.mins?(dt?' \u00b7 ':'')+fmtMins(s.mins):'');
   document.getElementById('finSets').textContent=s.sets;
   document.getElementById('finOf').textContent=(s.planned&&s.planned>=s.sets?'of '+s.planned+' ':'')+(s.sets===1&&!s.planned?'set':'sets');
   var rec=document.getElementById('finRec');
@@ -14070,7 +14091,7 @@ function finishNow(){
   for(var k in A.entries){var arr=A.entries[k].filter(function(x){return x;});if(arr.length)entries[k]=arr;}
   // The name rides on the log so history can still say what it was after the workout is deleted.
   // The minutes ride on the log too (v5.177): first set to finish, rounded, never under one.
-  var mins=A.start?Math.max(1,Math.round((Date.now()-A.start)/60000)):0;
+  var mins=sessMins(A);
   DB.logs.push({day:wk,name:(W[wk]||{}).name||'',date:A.date,entries:entries,note:A.note||'',swaps:A.swaps||{},sealed:1,wk:A.wk||dayGuess(wk),mins:mins});
   delete DB.active[wk];
   saveDB();
@@ -14680,6 +14701,30 @@ function doWeekImport(input){
   };
   rd.readAsText(f);
 }
+// v5.182: a week file from someone else is data, never markup. Everything is copied field by field:
+// strings only, sets and rest only in the shapes the builder itself writes, links only http(s),
+// and colours are the app's own. A crafted file used to be able to run code inside the app.
+function wkStr(v,max){return typeof v==='string'?v.slice(0,max||120):'';}
+function wkSets(v,dflt){var t=wkStr(v,400);return /^[0-9a-zA-Z .:,\n-]*$/.test(t)&&t?t:dflt;}
+function wkClean(src,xmap){
+  var o={name:wkStr(src.name,80)||'Shared workout',sections:[]};
+  if(src.kind==='lift'||src.kind==='cardio')o.kind=src.kind;
+  if(src.time)o.time=wkStr(src.time,20);
+  o.color=MK_COLS[Math.floor(Math.random()*MK_COLS.length)];
+  (Array.isArray(src.sections)?src.sections:[]).forEach(function(sec){
+    if(!sec||typeof sec!=='object')return;
+    var rows=[];
+    (Array.isArray(sec.rows)?sec.rows:[]).forEach(function(r){
+      if(!Array.isArray(r)||typeof r[0]!=='string')return;
+      var id=xmap[r[0]]||r[0];
+      if(!/^[A-Za-z0-9_~-]+$/.test(id)||!(EX[id]||EX[slotBase(id)]||(DB.cex&&DB.cex[id])))return;
+      var c=(r[1]&&typeof r[1]==='object')?r[1]:{};
+      rows.push([id,{sets:wkSets(c.sets,'0x10\n0x10\n0x10'),rest:wkSets(c.rest,'60 sec')}]);
+    });
+    if(rows.length)o.sections.push({title:wkStr(sec.title,60),ss:!!sec.ss,rows:rows});
+  });
+  return o;
+}
 function weekAdd(d){
   DB.cex=DB.cex||{};DB.custom=DB.custom||{};DB.extra=DB.extra||[];
   var xmap={};
@@ -14687,15 +14732,19 @@ function weekAdd(d){
   for(var xk in (d.cex||{})){
     var nx='cx'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);
     while(DB.cex[nx])nx+='b';
-    DB.cex[nx]=JSON.parse(JSON.stringify(d.cex[xk]));
+    var cx=d.cex[xk]||{},link=wkStr(cx.link,300);
+    DB.cex[nx]={name:wkStr(cx.name,80)||'Shared exercise',note:wkStr(cx.note,300),custom:1,
+      link:/^https?:\/\//i.test(link)?link:'',
+      sets:cx.cardio?'20 min':'0x10\n0x10\n0x10',rest:cx.cardio?'':'60 sec'};
+    if(cx.cardio)DB.cex[nx].cardio=1;
+    if(cx.inv)DB.cex[nx].inv=1;
+    if(cx.grp)DB.cex[nx].grp=wkStr(cx.grp,30);
     xmap[xk]=nx;
   }
   var added=0;
   for(var wk in d.workouts){
-    var src=JSON.parse(JSON.stringify(d.workouts[wk]));
-    (src.sections||[]).forEach(function(s){
-      (s.rows||[]).forEach(function(r){ if(xmap[r[0]])r[0]=xmap[r[0]]; });
-    });
+    var src=wkClean(d.workouts[wk]||{},xmap);
+    if(!src.sections.length)continue;
     var nid;
     do{nid='cus'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);}
     while(DB.custom[nid]||W[nid]);
@@ -14752,6 +14801,13 @@ function autoBkDraw(){
   b.style.display=ok?'':'none';if(n)n.style.display=ok?'':'none';
   b.textContent='AUTOMATIC SAFETY COPY: '+(autoBkOn()?'ON':'OFF');
   b.classList.toggle('btn-go',autoBkOn());
+  // v5.182: say how it is actually doing, not just that the switch is on.
+  var st=document.getElementById('bkAutoState');
+  if(st){
+    var okT=0,failT=0;try{okT=+localStorage.getItem('arc_autobk_ok')||0;failT=+localStorage.getItem('arc_autobk_fail')||0;}catch(e){}
+    st.textContent=!autoBkOn()?'':(failT>okT?' It could not be written last time. Make a backup and send it off the phone.':(okT?' Last saved '+pretty(new Date(okT).toISOString().slice(0,10))+'.':''));
+    st.style.color=(autoBkOn()&&failT>okT)?'#f0645a':'';
+  }
 }
 function autoBkToggle(){
   var on=!autoBkOn();
@@ -14764,15 +14820,28 @@ function autoBk(first){
   if(!autoBkOn()||!autoBkAvail())return;
   var slot='a';
   try{slot=localStorage.getItem('arc_autobk_slot')==='a'?'b':'a';localStorage.setItem('arc_autobk_slot',slot);}catch(e){}
+  // v5.182: after a reinstall Android no longer lets the app overwrite the old pair of files, and the
+  // write failed in silence while the switch still read ON. A failed write now retries once under a
+  // name of this install's own, and if that fails too it is recorded and said, once.
+  var tag='';try{tag=localStorage.getItem('arc_autobk_tag')||'';}catch(e){}
+  var data=backupBlob();
+  function nameFor(t){return 'Forge/forge-backup-auto-'+(t?t+'-':'')+slot+'.json';}
+  function write(t){return window.Capacitor.Plugins.Filesystem.writeFile({path:nameFor(t),data:data,directory:'DOCUMENTS',encoding:'utf8',recursive:true});}
+  function ok(){
+    try{localStorage.setItem('arc_lastbk',String(Date.now()));localStorage.setItem('arc_autobk_ok',String(Date.now()));localStorage.removeItem('arc_autobk_warned');}catch(e){}
+    if(first)mkNote('A safety copy now refreshes itself after every finished workout. It lives in My Files, under Documents, in the Forge folder.','Safety copy on');
+  }
+  function fail(){
+    var warned=false;try{localStorage.setItem('arc_autobk_fail',String(Date.now()));warned=!!localStorage.getItem('arc_autobk_warned');localStorage.setItem('arc_autobk_warned','1');}catch(e){}
+    if(!warned)mkNote('The automatic safety copy could not be written to Documents this time. Open Backup and restore, tap BACKUP, and send the file off the phone to be safe.','Safety copy not saved');
+  }
   try{
-    window.Capacitor.Plugins.Filesystem.writeFile({
-      path:'Forge/forge-backup-auto-'+slot+'.json',data:backupBlob(),
-      directory:'DOCUMENTS',encoding:'utf8',recursive:true
-    }).then(function(){
-      try{localStorage.setItem('arc_lastbk',String(Date.now()));}catch(e){}
-      if(first)mkNote('A safety copy now refreshes itself after every finished workout. It lives in My Files, under Documents, in the Forge folder.','Safety copy on');
-    }).catch(function(){});
-  }catch(e){}
+    write(tag).then(ok).catch(function(){
+      if(tag){fail();return;}
+      var nt='i'+Date.now().toString(36);
+      write(nt).then(function(){try{localStorage.setItem('arc_autobk_tag',nt);}catch(e){}ok();}).catch(fail);
+    });
+  }catch(e){fail();}
 }
 // One nudge, once ever: real history, no backup of any kind, and this phone the only place
 // it exists. Whatever is answered, it never comes back - Settings holds the door open.
@@ -15185,6 +15254,7 @@ function plLand(){
     if(!sr||!w)return;
     if(sr.classList.contains('done')||w.type==='hidden')continue;
     w.dataset.lb=lb;w.value=fmtW(lb);
+    try{var pa=DB.active[CUR];if(pa){var pk=CUR;draftSet(PL.row,i,'w',lb);saveDB();}}catch(e){}
     w.classList.add('pl-landed');setTimeout(function(){w.classList.remove('pl-landed');},900);
     return;
   }
@@ -15799,6 +15869,13 @@ function histBack(){HIST.sel=null;HIST.ed=null;renderHist();}
 // Session length (v5.177). Kept on the log in whole minutes, shown on the seal row and added up
 // in the week line, and correctable from the session's page: a start-to-finish clock is wrong
 // whenever a session was left open, so the number has to be yours to fix.
+// First set to last set. A span over ten hours is a session left open, not a session, so it is left
+// blank for the owner to fill in rather than filed as 1080 minutes (v5.182).
+function sessMins(A){
+  if(!A||!A.start)return 0;
+  var m=Math.max(1,Math.round(((A.last||Date.now())-A.start)/60000));
+  return m>600?0:m;
+}
 function fmtMins(m){m=Math.round(m||0);if(m<60)return m+' min';var h=Math.floor(m/60),r=m%60;return h+' h'+(r?' '+r+' min':'');}
 function histMinsEdit(){
   var L=DB.logs[HIST.sel];if(!L)return;
@@ -16037,7 +16114,16 @@ function onBackButton(){
   if(ez&&ez.classList.contains('on')){ezBack();backGuard();return;}
   var wc=document.getElementById('welcome');
   // On the safety questions back does nothing: skipping them silently wrote no answer (v5.101).
-  if(wc&&wc.classList.contains('on')){if(wc.querySelector('.wc-pick'))wcPick(0);backGuard();return;}
+  // v5.182: decide by the stage on screen. The safety questions ignore back (their CONTINUE also
+  // carries .wc-pick, which is how back used to skip them for good); the note after them goes on
+  // to the start question; the start question takes back as the empty week, as before.
+  if(wc&&wc.classList.contains('on')){
+    if(document.getElementById('wcGo')){}
+    else if(wc.querySelector('.ez-card'))wcPick(0);
+    else if(wc.querySelector('.wc-pick[onclick^="wcAsk"]'))wcAsk();
+    else if(wc.querySelector('.wc-pick'))wcPick(0);
+    backGuard();return;
+  }
   var ov=topOvl();
   if(ov){                                  // an open sheet closes first
     if(ov.id==='histOvl'&&HIST.sel!==null){histBack();backGuard();return;}
@@ -17529,7 +17615,8 @@ function wearRows(){
 function wearNext(){
   if(!CUR||!DB.active[CUR])return null;
   var blocks=wearRows(),out=null,aimed=null;
-  function cand(m,i){return {id:m.id,exId:m.rf.exId,name:m.rf.data.name||'',i:i,n:m.tg.length,t:m.tg[i],bw:!!m.rf.data.bw};}
+  function cand(m,i){var t0=m.tg[i],dr=draftOf(DB.active[CUR],m.id,i),t=(dr&&t0)?{type:t0.type,w:dr.w!=null?dr.w:t0.w,r:dr.r!=null?dr.r:t0.r,unit:t0.unit}:t0;
+    return {id:m.id,exId:m.rf.exId,name:m.rf.data.name||'',i:i,n:m.tg.length,t:t,bw:!!m.rf.data.bw};}
   // A correction in progress comes first. The numbers shown are what was written down, and
   // saving overwrites that entry the same way the phone's own edit pad does.
   if(WEARREDO){
@@ -17777,6 +17864,7 @@ function wearSkipRest(){
 }
 function wearRestEnd(){
   try{
+    if(typeof timerInt==='undefined'||!timerInt)return 0;   // no rest running, whatever timerEnd still says
     if(typeof timerEnd!=='number'||!timerEnd)return 0;
     return timerEnd>Date.now()?timerEnd:0;
   }catch(e){return 0;}
@@ -18689,7 +18777,7 @@ function startTimer(secs,exName){
       lbl.textContent='GO';
       pill.classList.add('ring2');
       flFrac=1;flFlare=1;
-      if(skipQuiet)clearRestNotif();
+      if(skipQuiet){clearRestNotif();nativeCancel();nativeSoundCancel();nativeTimerHide();}   // v5.182: a skip from the watch or the shade takes back the phone's alarm too
       else restAlert();   // posts the notice itself, so it can decide which of the two sounds
       skipQuiet=false;
       restEndedAt=Date.now();
@@ -18717,6 +18805,7 @@ function adjustTimer(d){
   if(SFX_ON&&!alertMuted())nativeSound(left);
   nativeTimer(left);
   sfxTick(d>0);
+  try{wearPush();}catch(e){}   // v5.182: the watch's countdown follows -15 and +15
 }
 function stopTimer(){
   if(timerInt){clearInterval(timerInt);timerInt=null;}
@@ -18729,8 +18818,10 @@ function stopTimer(){
   clearRestNotif();
   stopFlame();
   restTick=null;restEndedAt=0;clearTimeout(restHideT);restHideT=null;
+  timerEnd=0;   // v5.182: a stopped rest is over, so no later watch push can bring it back
   var p=document.getElementById('timerPill');
   p.classList.remove('on');p.classList.remove('ring');p.classList.remove('ring2');
+  try{wearPush();}catch(e){}
 }
 // ---------- walks ----------
 // A walk is not a set: it has minutes and distance, not weight and reps, and it happens on
@@ -19073,7 +19164,7 @@ function exAddList(){
   out.sort(function(a,b){return EX[a].name<EX[b].name?-1:1;});
   document.getElementById('exAddList').innerHTML=out.length?out.slice(0,60).map(function(k){
     return '<div class="swapitem" onclick="exAddPick(\''+k+'\')">'+esc(EX[k].name)+
-      '<small>'+EX[k].sets.split('\n').map(fmtLine).join(', ')+'</small></div>';
+      '<small>'+esc(EX[k].sets.split('\n').map(fmtLine).join(', '))+'</small></div>';
   }).join(''):'<div class="exed-sub">Nothing matches that.</div>';
 }
 function exAddPick(id){
