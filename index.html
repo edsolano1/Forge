@@ -2591,6 +2591,19 @@ body.forge .hrow.hseal::after,body.forge .ez-card::after,body.forge .fbtn::after
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");}
 html.mo-off body.forge .sheet::after{display:none;}
 
+/* S3b (v5.180, owner's pick): the tour card is the finish screen's warm stamped plate, the step count as a
+   seal in the corner, the heading in Marcellus, NEXT as the ember pill. */
+body.forge #tutCard{background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;border-radius:14px;padding:16px 17px 14px;
+  box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 22px 50px -14px rgba(0,0,0,.85);}
+body.forge .tut-seal{position:absolute;right:46px;top:12px;width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);
+  font-family:var(--mono);font-size:11px;color:var(--gold);box-shadow:0 0 14px -4px rgba(255,138,31,.7),inset 0 0 0 2px #120b08,inset 0 0 0 3px #6a3f26;}
+body.forge .tut-step{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--gold);}
+body.forge .tut-t{font-family:'Marcellus',serif;font-weight:400;font-size:18px;color:#fff6e6;margin-right:92px;}
+body.forge .tut-b{color:var(--txt2);opacity:1;}
+body.forge .tut-btns .btn{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;}
+body.forge .tut-btns .btn-go{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;font-weight:400;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
+body.forge .tut-x{color:var(--txt3);}
+
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2c1c;}
 .fin-plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
@@ -3682,6 +3695,7 @@ body.wcon{overflow:hidden;}
        the first frame. It asks before it acts (tutAskEnd) - one accidental tap must not
        throw the tour away. -->
   <div class="tut-x" id="tutX" onclick="tutAskEnd()" title="End the tour"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></div>
+  <div class="tut-seal" id="tutSeal" aria-hidden="true"></div>
   <div class="tut-step" id="tutStep"></div>
   <div class="tut-t" id="tutT"></div>
   <div class="tut-b" id="tutB"></div>
@@ -9593,7 +9607,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.179';
+var APPV='v5.180';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -19936,7 +19950,9 @@ function tutGo(i){
   // its scene cannot un-satisfy it. Every other scene rebuilds to a screen where the thing
   // has yet to be done, which is why they replay properly instead of being frozen out.
   TUTARM=!(st.when&&st.when());
-  document.getElementById('tutStep').textContent='SAMPLE DATA \u00b7 '+(i+1)+' / '+TUT_STEPS.length;
+  // The step count is stamped in the corner as a seal (v5.180, owner picked S3b); the eyebrow keeps the words.
+  document.getElementById('tutStep').textContent='SAMPLE DATA';
+  var tsl=document.getElementById('tutSeal');if(tsl)tsl.textContent=(i+1)+'/'+TUT_STEPS.length;
   document.getElementById('tutT').textContent=c.t;
   document.getElementById('tutB').innerHTML=c.b;
   document.getElementById('tutNudge').classList.remove('on');

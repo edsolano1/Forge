@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.179** (watch 1.8, installed 17 Sep) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.180** (watch 1.8, installed 17 Sep) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 
@@ -88,7 +88,7 @@ palette. All verified on the SM-R960 except the live set screen, which waits for
 
 - **v5.178 (17 Sep), the consistency pass.** Reviewed in icons/style-review.html, approved by code from icons/style-fixes.html. Done: **T1** the forge theme finally defines --mono (Share Tech Mono), so 114 var(--mono) rules stop falling back to Barlow; **T2** names (board cards, session header) are Marcellus; **T3** sheet headings are Marcellus, sentence case; **T4** one tracking, .16em section labels and .14em buttons; **S2** the rest timer is a plate; **S4** wizard cards are plates with the rail and the question reads as written; **S5** icon buttons; **S6** history chips and sub-rows; **D2** set cells match the anvil; **D3** one selected wash (.08); **D4** near-miss hexes and the forge tokens onto the plate palette (--surface #130c09, --surface2 #1a100b, --line #4a2c1c); **D5** the last two backdrop blurs gone. Held for the owner to pick from three: **S1** week footer buttons, **S3** tour card, **D1** one pill shape, **X** texture in context. **B1 to B5** (faults and housekeeping) agreed but ship separately.
 
-- **v5.179 (17 Sep)**: owner picked **S1a** (week footer buttons are plates with rails), **D1 round** (every pill fully round, the set cells and anvil follow), **X1** (fine grain overlay on sheets and big plates, ::after with an SVG noise tile at .45 overlay; never on chips). **S3** (tour card) still awaits his pick of a, b or c.
+- **v5.179 (17 Sep)**: owner picked **S1a** (week footer buttons are plates with rails), **D1 round** (every pill fully round, the set cells and anvil follow), **X1** (fine grain overlay on sheets and big plates, ::after with an SVG noise tile at .45 overlay; never on chips). **S3b** shipped in v5.180: the tour card is the stamped plate with the step count as a seal (tutSeal) and a Marcellus heading.
 
 ### Still to do, in order (16 Sep 2026)
 1. **The watch's look**: mockup icons/watch-options.html (Plates, Ledger, Seal); owner picked **A, Plates** (16 Sep), C parked as a possible later direction. **Watch 1.7 (versionCode 207) is installed on the SM-R960 (16 Sep evening) as the Plates look; the owner will judge it in his next session**: Marcellus and IBM Plex Mono shipped as font files, every row a plate with the ember rail (gold rail and anvil when done, violet for matched, dark for under), the ember bar button, the hearth glow at the foot, no set counts on the week. Verified on the wrist: week, overview (superset rail fixed after the first install painted the frame solid violet), set preview. **Watch 1.8 (208)** the same evening: the ongoing chip and shade card wear the anvil icon and the ember, and say the coming set with its weight (Set 3 of 4 · 65 lb × 8; Rest 0:45 · set 3 on the face chip, Rest · up next set 3 of 4 · 65 lb × 8 in the shade). It also lets a set picked from the ladder mid-rest be corrected while the countdown runs underneath (before, the rest screen swallowed the tap). Built, waiting to be installed.
