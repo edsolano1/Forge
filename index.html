@@ -9585,7 +9585,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.183';
+var APPV='v5.184';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16081,9 +16081,28 @@ function capApp(){
   return null;
 }
 function backGuard(){if(capApp())return;try{history.pushState({arc:'guard'},'');}catch(e){}}
+// The sheet on top is the one opened LAST, not the one written last in the file (v5.184). Picking
+// by file order meant Back on a sheet opened over an earlier one closed the one underneath: Backup
+// over Settings closed Settings, the minutes editor over Workouts finished stepped the list back,
+// a question over Settings or the picker closed the sheet behind it and left the question up.
+var OVLSEQ=0;
+function ovlWatch(){
+  try{
+    var mo=new MutationObserver(function(ms){ms.forEach(function(m){
+      var el=m.target,on=el.classList.contains('on');
+      if(on&&!el._wasOn)el._openSeq=++OVLSEQ;
+      el._wasOn=on;
+    });});
+    document.querySelectorAll('.ovl').forEach(function(el){
+      el._wasOn=el.classList.contains('on');if(el._wasOn)el._openSeq=++OVLSEQ;
+      mo.observe(el,{attributes:true,attributeFilter:['class']});
+    });
+  }catch(e){}
+}
 function topOvl(){
-  var o=document.querySelectorAll('.ovl.on');
-  return o.length?o[o.length-1]:null;
+  var o=document.querySelectorAll('.ovl.on'),best=null;
+  for(var i=0;i<o.length;i++)if(!best||(o[i]._openSeq||0)>=(best._openSeq||0))best=o[i];
+  return best;
 }
 function sessionOpen(){
   var s=document.getElementById('session');
@@ -16128,6 +16147,12 @@ function onBackButton(){
     backGuard();return;
   }
   var ov=topOvl();
+  // The tour builds each card's screen itself, so back closing a sheet out from under it stranded
+  // the spotlight. Back steps the tour back a card; on the first card it offers to leave (v5.184).
+  if(TUTON&&!(ov&&ov.id==='askOvl')){
+    if(TUTI>0)tutBack();else tutAskEnd();
+    backGuard();return;
+  }
   if(ov){                                  // an open sheet closes first
     if(ov.id==='histOvl'&&HIST.sel!==null){histBack();backGuard();return;}
     // Through closeOvl rather than stripping the class here: it is what aborts a level-up
@@ -16152,6 +16177,7 @@ function onBackButton(){
 function initBack(){
   try{
     history.replaceState({arc:'home'},'');
+    ovlWatch();
     backGuard();
     window.addEventListener('popstate',onBackButton);
   }catch(e){}
