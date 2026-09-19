@@ -3103,21 +3103,28 @@ html.light .sp-mark .cut,body.light .sp-mark .cut{fill:#e9eef5;}
    rests as the still mark. Clockwise about the handle's end lifts the head; the first draft turned
    it the other way and the hammer came up from under the anvil (owner, 17 Sep). */
 .lx-mark{overflow:visible;}
-.lx-hammer{transform-box:fill-box;transform-origin:96% 6%;animation:lxSwing 1.1s cubic-bezier(.6,0,.2,1) .2s both;}
-.lx-sparks path{transform-box:view-box;transform-origin:560px 560px;opacity:0;animation:lxSpark .55s cubic-bezier(.1,.8,.3,1) .78s both;}
-.lx-anvil{transform-box:view-box;transform-origin:625px 1060px;animation:lxTake .5s ease-out .78s both;}
-.lx-rule{animation-delay:.82s;}
-.lx-word{animation-delay:.86s;}
-.lx-tag{margin-top:12px;font-size:12.5px;letter-spacing:.02em;color:var(--txt2);opacity:0;animation:lxIn .5s cubic-bezier(.2,.7,.3,1) 1.15s both;}
+/* v5.186 (owner picked A, the overhead swing): the first strike read as a careful low tap. The
+   hammer now hauls back over the top from a pivot past the handle's end (the arm, not the wrist),
+   hangs, and slams down; the anvil sinks further, the sparks fly higher and the mark shakes. */
+.lx-mark{animation:lxShake .4s linear 1.05s both;}
+.lx-hammer{transform-box:fill-box;transform-origin:112% -4%;animation:lxSwing 1.5s .1s both;}
+.lx-sparks path{transform-box:view-box;transform-origin:560px 560px;opacity:0;animation:lxSpark .8s cubic-bezier(.1,.8,.3,1) 1.05s both;}
+.lx-anvil{transform-box:view-box;transform-origin:625px 1060px;animation:lxTake .55s ease-out 1.05s both;}
+.lx-rule{animation-delay:1.09s;}
+.lx-word{animation-delay:1.13s;}
+.lx-tag{margin-top:12px;font-size:12.5px;letter-spacing:.02em;color:var(--txt2);opacity:0;animation:lxIn .5s cubic-bezier(.2,.7,.3,1) 1.42s both;}
 :root.mo-off .lx-tag{animation:none;opacity:1;}
 .lx-flash{position:absolute;inset:0;pointer-events:none;opacity:0;
   background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--gold) 38%,transparent),transparent 40%);
-  animation:lxFlash .5s ease-out .78s both;}
-@keyframes lxSwing{0%{transform:rotate(38deg);}55%{transform:rotate(40deg);}68%{transform:rotate(-3deg);}78%{transform:rotate(4deg);}100%{transform:rotate(0);}}
-@keyframes lxSpark{0%{opacity:0;transform:scale(.2);}25%{opacity:1;}100%{opacity:0;transform:scale(1.35) translateY(-40px);}}
-@keyframes lxTake{0%{transform:translateY(0);}30%{transform:translateY(14px) scaleY(.97);}100%{transform:none;}}
+  animation:lxFlash .5s ease-out 1.05s both;}
+@keyframes lxSwing{0%{transform:rotate(40deg);animation-timing-function:cubic-bezier(.2,.7,.4,1);}
+  48%{transform:rotate(104deg);}56%{transform:rotate(106deg);animation-timing-function:cubic-bezier(.8,0,1,.7);}
+  64%{transform:rotate(-6deg);animation-timing-function:ease-out;}72%{transform:rotate(6deg);}84%{transform:rotate(-1deg);}100%{transform:rotate(0);}}
+@keyframes lxSpark{0%{opacity:0;transform:scale(.2);}18%{opacity:1;}100%{opacity:0;transform:scale(1.9) translateY(-80px);}}
+@keyframes lxTake{0%{transform:translateY(0);}25%{transform:translateY(26px) scaleY(.93);}100%{transform:none;}}
+@keyframes lxShake{0%,100%{transform:none;}15%{transform:translate(4px,5px);}35%{transform:translate(-4px,-2px);}55%{transform:translate(3px,2px);}75%{transform:translate(-1px,-1px);}}
 @keyframes lxFlash{0%{opacity:0;}15%{opacity:1;}100%{opacity:0;}}
-:root.mo-off .lx-hammer,:root.mo-off .lx-anvil,:root.mo-off .lx-flash{animation:none;}
+:root.mo-off .lx-hammer,:root.mo-off .lx-anvil,:root.mo-off .lx-flash,:root.mo-off .lx-mark{animation:none;}
 :root.mo-off .lx-sparks path{animation:none;opacity:1;}
 /* Motion Off still gets the launch, it just gets it already arrived. */
 :root.mo-off .lx-logo,:root.mo-off .lx-word{animation:none;opacity:1;}
@@ -9588,7 +9595,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.185';
+var APPV='v5.186';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11165,7 +11172,7 @@ function markHomeReady(){
   if(homeReady)return;homeReady=true;
   try{initAudio();}catch(e){}
   if(!SPLASH_ON){dismissSplash();return;}    // straight into the week
-  setTimeout(dismissSplash,Math.max(0,2300-(Date.now()-bootT0)));   // long enough to read the line under the word (v5.174)
+  setTimeout(dismissSplash,Math.max(0,2600-(Date.now()-bootT0)));   // long enough to read the line under the word (v5.174; 2.6s since the bigger swing, v5.186)
 }
 // hard ceiling: storage can never trap the user behind the splash
 setTimeout(function(){dismissSplash();},3600);
