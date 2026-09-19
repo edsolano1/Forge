@@ -9585,7 +9585,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.182';
+var APPV='v5.183';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10411,13 +10411,16 @@ function lvlFoot(){
 function lvlEdit(pi,gi){
   if(LVLBUSY)return;
   var p=LVLPLAN&&LVLPLAN[pi];if(!p)return;
-  LVLED={pi:pi,gi:gi};
-  LVLEDV=parseTarget(lvlGroups(p)[gi].t).w;
+  LVLED={pi:pi,gi:gi,typed:false};
+  // v5.182: start from the number the box shows (kg, reps or seconds), never the raw pounds. It used
+  // to seed with the target's weight, so OK without typing wrote 1 rep, 1 sec, or a kg weight x2.2.
+  LVLEDV=lvlVal(lvlGroups(p)[gi].t);
   lvlRender();
 }
-function lvlEditVal(v){LVLEDV=parseFloat(v)||0;}
+function lvlEditVal(v){LVLEDV=parseFloat(v)||0;if(LVLED)LVLED.typed=true;}
 function lvlEditOK(){
   var p=LVLPLAN&&LVLED?LVLPLAN[LVLED.pi]:null;
+  if(p&&!LVLED.typed)p=null;   // opened and closed without typing: nothing changes, not even by rounding
   if(p){
     var g=lvlGroups(p)[LVLED.gi],kind=lvlKind(g.t);
     var v=Math.max(0,LVLEDV);
