@@ -2351,7 +2351,10 @@ body.forge .hwk-c.pr{border-color:#ffd08a;box-shadow:0 0 14px -3px rgba(255,208,
 body.forge .hwk-c.walk{border-style:dashed;border-color:#6a3f26;}
 body.forge .hwk-c.now{border-color:#a0521c;border-style:dashed;}
 body.forge .hwk-c.now.has{border-style:solid;}
-body.forge .hwk-c.sel{background:#3a1d0c;border-color:#ffb35c;transform:rotate(-8deg) scale(1.06);}
+/* v5.185 (owner picked B): the selected day read the same as any finished day, so it wears a second
+   bright ring, sits straight and a touch larger. */
+body.forge .hwk-c.sel{transform:scale(1.12);box-shadow:0 0 0 3px var(--surface),0 0 0 5px #ffd9b5;}
+body.forge .hwk-c.sel b{color:#fff;}
 body.forge .hwk-c.fut{opacity:.4;}
 .hline{text-align:center;font-size:12.5px;color:var(--txt2);margin:0 0 12px;}
 .hrow-min{font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--txt3);margin-left:8px;align-self:baseline;}
@@ -9585,7 +9588,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.184';
+var APPV='v5.185';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
