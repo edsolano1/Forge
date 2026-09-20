@@ -9420,7 +9420,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.189';
+var APPV='v5.190';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10591,7 +10591,9 @@ function twoSync(){
 function twoFlip(){
   if(!twoOn())return;
   var el=document.getElementById('weekCards');
-  var go=function(){twoSwapBoards();DB.two.view=1-DB.two.view;saveDB();renderHome();window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-90),behavior:'instant'});};
+  // v5.190: it used to scroll the board up under the header, so a flip jumped the page as well as
+  // turning it over. A flip turns the week over and nothing else: the page stays where it was.
+  var go=function(){var y=window.scrollY;twoSwapBoards();DB.two.view=1-DB.two.view;saveDB();renderHome();window.scrollTo({top:y,behavior:'instant'});};
   if(!el||MOTION==='off'){go();return;}
   el.classList.remove('flip-in');el.classList.add('flip-out');
   setTimeout(function(){
