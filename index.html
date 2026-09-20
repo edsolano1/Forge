@@ -9599,7 +9599,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.187';
+var APPV='v5.188';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20813,7 +20813,10 @@ var EZ_W={bench:65,ohp:45,bsquat:75,deadlift:95,incdb:25,mbench:60,lpress:120,la
 // out shorter because a floor-only week IS shorter, not because the generator gave up.
 var EZ_POOL={
   squat:  {beg:['lpress','goblet','bwsquat'], int:['bsquat','goblet','bwsquat'], adv:['bsquat','frontsq','goblet','bwsquat']},
-  hinge:  {beg:['hthrust','glutebr'],      int:['deadlift','rdl','glutebr'], adv:['deadlift','rdl','glutebr']},
+  // v5.188: below a barbell the hinge fell straight to the glute bridge, so somebody with a pair
+  // of dumbbells got a 0 lb bridge as the main lift of the day. The single-leg Romanian deadlift
+  // is the honest dumbbell hinge and sits ahead of it; the bridge still catches a bare floor.
+  hinge:  {beg:['hthrust','sldl','glutebr'], int:['deadlift','rdl','sldl','glutebr'], adv:['deadlift','rdl','sldl','glutebr']},
   hpress: {beg:['mbench','dbbench','pushup'], int:['bench','dbbench','pushup'], adv:['bench','dbbench','pushup']},
   // The beginner press used to be the dumbbell LATERAL RAISE - an isolation, left over from
   // before the machine shoulder press existed (v5.75). It led every beginner "Press Day" at
@@ -20859,6 +20862,10 @@ function ezCan(id,own){
 // 'used' is the day's running list. Two roles CAN land on the same answer once the equipment
 // runs thin - push and incline both become the push-up on a bare floor - and a day that names the
 // same lift twice reads as broken. The second role walks on down its list, or drops.
+// A role that drops can hand the slot to another role (v5.188). Only the vertical pull does:
+// with nothing to hang from, Full Body B and Upper Body came out with no pulling AT ALL, which is
+// not an honest shorter week, it is a hole. A row stands in for the pull-up there.
+var EZ_FALL={vpull:'hpull'};
 function ezPickLift(role,level,own,used){
   var list=(EZ_POOL[role]||{})[level];
   if(!list)return null;
@@ -20869,6 +20876,8 @@ function ezPickLift(role,level,own,used){
     if(used&&used.indexOf(id)>=0)continue;
     return id;
   }
+  var fb=EZ_FALL[role];
+  if(fb)return ezPickLift(fb,level,own,used);
   return null;                                          // nothing fits: the slot drops
 }
 // Each day is roles with a ROLE CLASS: main / sec / acc / iso / core. Pairs in [] are
