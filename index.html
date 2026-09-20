@@ -4119,7 +4119,7 @@ var EX = {
   bench:    {name:"Barbell Bench Press",wraps:1,note:"Flat bench, hands a little wider than the shoulders, lower it slowly",sets:"65x8\n65x8\n65x8\n65x8",rest:"3 min"},
   incdb:    {name:"Incline Dumbbell Press",wraps:1,note:"Bench at 30 to 45 degrees, lower for 3 seconds",sets:"25x10\n25x10\n25x10",rest:"2 min"},
   mbench:   {name:"Machine Bench Press",wraps:1,note:"Seat set so the handles sit level with mid chest, arms straight at the top, elbows in",sets:"60x10\n60x10\n60x10",rest:"90 sec"},
-  xover:    {name:"Cable Crossover",note:"Handles at shoulder height, one foot a step ahead, squeeze at the middle rather than swinging",sets:"10x12\n10x12\n10x12",rest:""},
+  xover:    {name:"Cable Crossover",note:"Pulleys set high, one foot a step ahead, squeeze at the middle rather than swinging",sets:"10x12\n10x12\n10x12",rest:""},
   vbar:     {name:"V-Bar Cable Pushdown",note:"V-shaped handle. Elbows held to your sides, no swinging",sets:"30x12\n30x12\n30x12",rest:"60 sec"},
   rope:     {name:"Rope Pushdown",note:"Pulley high. Elbows at your sides, pull the rope ends apart low",sets:"25x12\n25x12\n25x12",rest:""},
   // The note said the pulley stays HIGH while the instructions and both drawings had it on the
@@ -4136,7 +4136,7 @@ var EX = {
   sdbcurl:  {name:"Seated Dumbbell Curl",note:"Two dumbbells, seated. Squeeze at the top",sets:"20x10\n20x10\n20x10",rest:"60 sec"},
   hammer:   {name:"Hammer Curl",note:"Palms facing each other throughout, no rotation",sets:"15x12\n15x12\n15x12",rest:""},
   cbcurl:   {name:"Cable Bicep Curl",note:"Straight bar attachment on lowest pulley",sets:"20x12\n20x12\n20x12",rest:"60 sec"},
-  legraise: {bw:1,name:"Leg Raise",note:"Flat bench, hands under the lower back, legs straight, lower slowly",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
+  legraise: {bw:1,name:"Leg Raise",note:"On your back on the floor, hands under the hips, legs straight, lower slowly",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
   wcurl:    {name:"Wrist Curl",note:"Seated, forearms on thighs, palms up",sets:"10x15\n10x15\n10x15",rest:"30 sec"},
   rwcurl:   {name:"Reverse Wrist Curl",note:"Palms down. Curl the wrist up against gravity",sets:"10x15\n10x15\n10x15",rest:"30 sec"},
   hang:     {name:"Dead Hang",note:"Full grip on the pull-up bar, body relaxed",sets:"30 sec\n30 sec\n30 sec",rest:"45 sec"},
@@ -4162,7 +4162,7 @@ var EX = {
   walk:     {cardio:1,name:"Power Walk",note:"30 minutes minimum. Outdoors if you can, hills if you have them. Brisk, but you can still talk",sets:"30+ min",rest:""},
   hipflex:  {name:"Hip Flexor Stretch (kneeling)",note:"One knee on the floor, other foot forward. Sink the hips forward and down",sets:"90 sec each",rest:""},
   chestdr:  {name:"Chest Doorway Stretch",note:"Arms at 90 degrees against doorframe, lean forward gently",sets:"2 min",rest:""},
-  pigeon:   {name:"Pigeon Pose",note:"Front shin across the floor in front, lean forward over it",sets:"90 sec each",rest:""},
+  pigeon:   {name:"Pigeon Pose",note:"Front shin laid across the floor, back leg long behind, hips facing forward. Fold over the front shin",sets:"90 sec each",rest:""},
   hamstr:   {name:"Hamstring Floor Stretch",note:"Seated, one leg extended. Reach toward the foot, back flat",sets:"90 sec each",rest:""},
   stairs:   {cardio:1,name:"Stairmaster",note:"Steady climbing pace, whole foot on each step",sets:"200 cal",rest:""},
   // ---------- cardio ----------
@@ -4189,13 +4189,17 @@ var EX = {
 // Movement pattern groups - drives "comparable" swaps
 var GRP={
   bench:'chest-press',incdb:'chest-press',mbench:'chest-press',
-  xover:'chest-fly',mfly:'chest-fly',lowchest:'chest-fly',pullover:'chest-fly',
-  pullup:'back-vertical',latpd:'back-vertical',sapd:'back-vertical',
+  xover:'chest-fly',mfly:'chest-fly',lowchest:'chest-fly',
+  // v5.187: the straight-arm pulldown was offered as a comparable swap for a pull-up, which it is
+  // not: the arms never bend and the body never moves. It sits with the pullover, the other
+  // straight-arm back move, so a pull-up now only offers lifts that actually pull you up.
+  sapd:'back-straight',pullover:'back-straight',
+  pullup:'back-vertical',latpd:'back-vertical',
   row:'back-horizontal',
   preacher:'biceps',sdbcurl:'biceps',hammer:'biceps',cbcurl:'biceps',
   vbar:'triceps',rope:'triceps',ohext:'triceps',skull:'triceps',
   hack:'quad',lpress:'quad',lext:'quad',lunge:'quad',
-  hthrust:'glute',sumo:'glute',
+  hthrust:'glute',sumo:'quad',   // v5.187: a sumo squat is a squat; it was filed under the glutes
   slegcurl:'hamstring',plegcurl:'hamstring',
   dcalfr:'calf',scalfr:'calf',
   dblat:'delt-side',clat:'delt-side',revfly:'delt-rear',
@@ -4227,7 +4231,7 @@ var ALT={
   dip:      {inv:1,name:"Assisted Dip (tricep focus)",note:"Body upright, elbows close. Leaning forward moves the work to the chest",sets:"70x8\n70x8\n70x8",rest:"90 sec"},
   bdip:     {name:"Bench Dip",note:"Hands on a bench behind you, feet out. No machine needed",sets:"0x15\n0x15\n0x15",rest:"60 sec"},
   machlat:  {name:"Machine Lateral Raise",note:"The machine guides the arms on a set path, easier on the shoulder than dumbbells",sets:"30x12\n30x12\n30x12",rest:"60 sec"},
-  facepull: {name:"Cable Rope Face Pull",note:"Rope at face height, pull to the forehead, elbows high. Back of the shoulders",sets:"25x15\n25x15\n25x15",rest:"60 sec"},
+  facepull: {name:"Cable Rope Face Pull",note:"Rope at upper chest height, pull to the bridge of the nose, elbows high. Back of the shoulders",sets:"25x15\n25x15\n25x15",rest:"60 sec"},
   goblet:   {name:"Goblet Squat",note:"One dumbbell at the chest, body upright. Easy on the knees",sets:"25x10\n25x10\n25x10",rest:"90 sec"},
   smsquat:  {name:"Smith Machine Squat",note:"The bar runs on rails. Stands in for the hack squat when it is taken",sets:"70x10\n70x10\n70x10",rest:"2 min"},
   bbthrust: {name:"Barbell Hip Thrust",note:"Upper back on a bench, bar across the hips with a pad. Same move as the machine",sets:"65x10\n65x10\n65x10",rest:"90 sec"},
@@ -9595,7 +9599,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.186';
+var APPV='v5.187';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12278,7 +12282,7 @@ document.getElementById('sBack').onclick=function(){
 var swapTarget=null;
 // 'delt-press' has been a group since the overhead press was added and has never had a label, so
 // its swap sheet printed the raw key as a heading. 'traps' is new, for the shrug.
-var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly','back-vertical':'Pull-down and pull-up','back-horizontal':'Rowing','biceps':'Biceps','triceps':'Triceps','quad':'Squats and leg presses','glute':'Backside and hips','hamstring':'Back of the thigh','posterior':'Back of the body','calf':'Calves','delt-side':'Side of the shoulder','delt-rear':'Back of the shoulder','delt-press':'Overhead press','traps':'Upper back and neck','core':'Core','forearm':'Forearm','cardio':'Cardio','mobility':'Mobility','other':'Other'};
+var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly','back-vertical':'Pull-down and pull-up','back-horizontal':'Rowing','back-straight':'Straight arm, over the head','biceps':'Biceps','triceps':'Triceps','quad':'Squats and leg presses','glute':'Backside and hips','hamstring':'Back of the thigh','posterior':'Back of the body','calf':'Calves','delt-side':'Side of the shoulder','delt-rear':'Back of the shoulder','delt-press':'Overhead press','traps':'Upper back and neck','core':'Core','forearm':'Forearm','cardio':'Cardio','mobility':'Mobility','other':'Other'};
 function swapItem(k){
   return '<div class="swapitem" onclick="doSwap(\''+k+'\')">'+esc(EX[k].name)+'<small>'+esc(EX[k].sets.split('\n').map(fmtLine).join(', '))+'</small></div>';
 }
@@ -13678,8 +13682,10 @@ function mkJoinDone(){
 // movement map, and the only place the two vocabularies meet. Legs stays one bucket on purpose:
 // people say leg day, not quad day, and it still cuts 106 down to about twenty.
 var MUSCLE=[
-  {k:'chest', n:'Chest',     g:['chest-press','chest-fly']},
-  {k:'back',  n:'Back',      g:['back-vertical','back-horizontal']},
+  // back-straight (the pullover and the straight-arm pulldown, v5.187) is under both: the pullover
+  // has always shown under Chest, and the pulldown is back work.
+  {k:'chest', n:'Chest',     g:['chest-press','chest-fly','back-straight']},
+  {k:'back',  n:'Back',      g:['back-vertical','back-horizontal','back-straight']},
   {k:'delt',  n:'Shoulders', g:['delt-side','delt-rear','delt-press','traps']},
   {k:'arms',  n:'Arms',      g:['biceps','triceps','forearm']},
   {k:'legs',  n:'Legs',      g:['quad','glute','hamstring','calf','posterior']},
