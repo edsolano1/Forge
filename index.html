@@ -2470,6 +2470,22 @@ body.forge .tut-btns .btn{border-radius:999px;border:1px solid #4a2c1c;backgroun
 body.forge .tut-btns .btn-go{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;font-weight:400;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
 body.forge .tut-x{color:var(--txt3);}
 
+/* ---- Cold iron, v5.191 (owner picked A). Two weeks that look identical are two weeks you cannot
+   tell apart, so the week that is NOT this one is drawn cold: the forge is banked. One hue turn on
+   the board and on the ambient ground does it, which keeps every card, pill and rail in step
+   including the day colours that arrive inline as --c. Sheets are outside both and stay warm.
+   The flip button is deliberately left out of the turn and painted by hand: it always wears the
+   colour of the week it takes you to, so it reads as the way over rather than part of the board. */
+body.forge.wkother #weekCards{filter:hue-rotate(168deg) saturate(.62) brightness(1.04);}
+body.forge.wkother #bg{filter:hue-rotate(168deg) saturate(.5);}
+/* the hearth glow is not in #bg: it is painted by body::before and #home::before (v5.141) */
+body.forge.wkother::before,body.forge.wkother #home::before{filter:hue-rotate(168deg) saturate(.5);}
+body.forge.wkother #weekLabel{color:#d8e4ee;}
+body.forge .wk-flip{color:#9fc0d6;border-color:#4d6f89;background:#17293a;}
+body.forge .wk-flip:hover{color:#cfe2f0;border-color:#6d92ad;}
+body.forge.wkother .wk-flip{color:#ffd9b5;border-color:#8a4a20;background:#2f1a0c;}
+body.forge.wkother .wk-flip:hover{color:#ffe7cd;border-color:#b3672d;}
+
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2c1c;}
 .fin-plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
@@ -9420,7 +9436,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.190';
+var APPV='v5.191';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11449,6 +11465,10 @@ function renderHome(){
   // to the other one or switches the program on and off (v5.110).
   var wl=document.getElementById('weekLabel');
   if(wl)wl.textContent=twoOn()?('Week '+(DB.two.view+1)+(twoOff()?', next week':', this week')):'Your Week';
+  // Cold iron (v5.191, owner picked A): the other week's board and ground go cool, so you can see
+  // which week you are on without reading the label. The flip button is the exception: it wears
+  // the colour of the week it takes you to, which makes it a signpost as well as a button.
+  document.body.classList.toggle('wkother',twoOn()&&twoOff());
   // The flip sits beside the week label (v5.115); the one button under Saturday switches the
   // program on or off and reads the same either way.
   var wf=document.getElementById('weekFlip');
