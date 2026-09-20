@@ -157,9 +157,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .card.today::before{width:5px;}
 .card.today .card-day{text-shadow:0 0 11px color-mix(in srgb,var(--c) 60%,transparent);}
 .pill{font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:7px;letter-spacing:.04em;white-space:nowrap;}
-.pill-today{background:var(--c);color:#0b0c0e;}
 .pill-live{background:var(--go);color:#0b0c0e;}
-.pill-ready{background:color-mix(in srgb,var(--go) 15%,transparent);color:var(--go);}
 /* a passed day still undone: quiet, outlined, not a scolding */
 .pill-wait{background:transparent;border:1px solid color-mix(in srgb,var(--txt3) 55%,transparent);color:var(--txt3);}
 .card.waiting .card-name{color:var(--txt2);}
@@ -194,13 +192,6 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .mk-new:hover{background:color-mix(in srgb,var(--go) 9%,transparent);border-color:color-mix(in srgb,var(--go) 65%,var(--line));}
 .mk-new:active{transform:scale(.995);}
 .mk-new svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;}
-.slotrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 13px;
-  border:1px solid var(--line);border-radius:11px;background:var(--surface2);cursor:pointer;}
-.slotrow:hover{border-color:color-mix(in srgb,var(--go) 45%,var(--line));}
-.slotrow.off{opacity:.42;cursor:default;}
-.slotrow .sd{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--txt3);width:34px;flex-shrink:0;}
-.slotrow .sn{font-size:13.5px;color:var(--txt);min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.slotrow .sm{font-size:11px;color:var(--txt3);flex-shrink:0;}
 .lvl-list{max-height:calc(var(--usablevh) * .46);overflow-y:auto;overflow-x:hidden;margin:8px 0 4px;display:flex;flex-direction:column;gap:9px;}
 .lvl-row{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--surface2);}
 .lvl-n{font-size:13.5px;font-weight:600;color:var(--txt);margin-bottom:6px;}
@@ -334,8 +325,6 @@ body.light .daybox.today > .dayglow::before{
   background:conic-gradient(from 0turn,transparent 0 .1turn,rgba(255,255,255,.95) .15turn,transparent .2turn 1turn);
   animation-duration:4.8s;}
 body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
-
-.daycount{font-size:11px;letter-spacing:.1em;color:var(--txt3);}
 .dayempty{font-size:12.5px;color:var(--txt3);padding:6px 4px 4px;}
 /* An empty day is a way in, not a caption. Same dashed language as the New day button so the two
    read as the same offer in two places. */
@@ -374,16 +363,6 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .sv-forge{color:var(--go);border-color:color-mix(in srgb,var(--go) 34%,var(--line));}
 #svForgeIco{width:19px;height:19px;fill:currentColor;stroke:none;}
 #extraCards[hidden],#extraHint[hidden]{display:none;}
-.bank-add{display:flex;align-items:center;justify-content:center;padding:9px;margin:2px 0 6px;
-  border:1px dashed color-mix(in srgb,var(--go) 34%,var(--line));border-radius:11px;color:var(--go);
-  cursor:pointer;transition:background .15s;}
-.bank-add:hover{background:color-mix(in srgb,var(--go) 8%,transparent);}
-.bank-add svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;}
-.bank-forge{gap:7px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;}
-.bank-forge svg{width:17px;height:17px;stroke-width:1.6;}
-/* the two week program control under Saturday, and the flip itself */
-.two-ctl{gap:8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-top:10px;}
-.two-ctl svg{width:17px;height:17px;stroke-width:1.6;}
 .sec-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 12px;}
 .sec-row .sec-label{margin:0;}
 .wk-flip{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt2);border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 10px;cursor:pointer;white-space:nowrap;transition:.15s;}
@@ -521,15 +500,6 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .tut-b li{display:flex;gap:9px;align-items:flex-start;}
 .tut-b li::before{content:'';flex:0 0 4px;width:4px;height:4px;border-radius:50%;background:var(--go);margin-top:8px;}
 .tut-b p{margin:9px 0 0;}
-/* the three grades named by their own colours rather than described in a paragraph */
-/* The grade key, at the top of a day. It was a tutorial step, which is the one place it is no
-   use: three colours explained once are three colours forgotten by the tenth session. It sits
-   above the first exercise instead, small enough to read past and there whenever it is wanted. */
-.gradekey{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
-  margin:0 0 14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;
-  background:color-mix(in srgb,var(--surface) 60%,transparent);}
-.gradekey span{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.04em;color:var(--txt3);}
-.gradekey i{width:9px;height:9px;border-radius:3px;flex:0 0 9px;}
 .tut-g{display:flex;flex-direction:column;gap:7px;margin:3px 0 10px;}
 .tut-g div{display:flex;gap:10px;align-items:center;}
 .tut-g i{flex:0 0 13px;width:13px;height:13px;border-radius:4px;}
@@ -682,7 +652,6 @@ body.tut #askOvl{z-index:402;}
 .ex-stat b{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:-.01em;}
 .st-tgt b{color:var(--txt2);}
 .st-last b{color:var(--txt2);}
-.st-best b{color:var(--gold);}
 .ex-links{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;}
 .ex-links a{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;color:var(--txt3);text-decoration:none;padding:8px 11px;border:1px solid var(--line);border-radius:8px;transition:.15s;}
 .ex-links a:hover{color:var(--txt);border-color:#33373d;}
@@ -711,8 +680,6 @@ body.tut #askOvl{z-index:402;}
 .ins-m{font-size:13px;line-height:1.5;padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:12px;}
 .ins-m span{color:var(--go);font-weight:600;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;}
 .ins-m em{font-style:normal;color:var(--txt2);}
-.ins-ref{display:inline-block;font-size:12px;color:var(--txt3);text-decoration:none;margin-bottom:4px;}
-.ins-ref:hover{color:var(--txt);}
 /* Your own note reads as a margin annotation, not as more of the app's voice: indented behind a
    rule, in the accent colour, so it is clearly the thing you wrote. */
 .ex-unote{font-size:12.5px;line-height:1.5;margin-top:6px;padding:5px 0 5px 9px;white-space:pre-wrap;
@@ -771,22 +738,16 @@ body.tut #askOvl{z-index:402;}
 .finishbtn:hover{filter:brightness(1.08);}
 .btn{font-size:12.5px;font-weight:500;cursor:pointer;padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--txt2);flex-shrink:0;transition:.15s;}
 .btn:hover{color:var(--txt);border-color:#33373d;}
-.btn-c{border-color:color-mix(in srgb,var(--c) 45%,var(--line));color:var(--c);}
 .btn-go{border-color:var(--go);color:var(--go);}
 .btn-prime{background:var(--go);border-color:var(--go);color:#0b0c0e;font-weight:700;letter-spacing:.07em;}
 .btn-prime:hover{color:#0b0c0e;border-color:var(--go);filter:brightness(1.08);}
-.btn-bad{--bad:#e0736b;color:var(--bad);border-color:color-mix(in srgb,var(--bad) 42%,var(--line));}
-.btn-bad:hover{color:var(--bad);background:color-mix(in srgb,var(--bad) 11%,var(--surface));
-  border-color:color-mix(in srgb,var(--bad) 72%,var(--line));}
 /* A touch screen has no pointer to hover with, but it applies :hover to whatever you last
    touched and keeps it. After a long press the sheet opens under your finger and its first
    button comes up already lit. */
 @media(hover:none){
   .btn:hover{color:var(--txt2);border-color:var(--line);}
   .btn-go:hover{color:var(--go);border-color:var(--go);}
-  .btn-c:hover{color:var(--c);}
-  .btn-bad:hover{background:var(--surface);border-color:color-mix(in srgb,var(--bad) 42%,var(--line));}
-  .slotrow:hover,.thcard:hover{border-color:var(--line);}
+  .thcard:hover{border-color:var(--line);}
   .thcard.sel:hover{border-color:var(--gold);}
   .mk-new:hover{background:color-mix(in srgb,var(--go) 4%,transparent);
     border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
@@ -854,27 +815,6 @@ body.arriving .foot{animation-delay:.72s;}
 .th-b b{display:block;font-size:14.5px;font-weight:600;color:var(--txt);letter-spacing:.01em;}
 .th-b small{display:block;font-size:11.5px;color:var(--txt3);line-height:1.5;margin-top:3px;text-wrap:pretty;}
 .th-cur{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--gold);}
-.wk-clock{font-family:var(--mono);font-size:52px;font-weight:500;letter-spacing:-.03em;color:var(--txt);
-  text-align:center;line-height:1;margin:6px 0 4px;font-variant-numeric:tabular-nums;}
-.wk-clock.going{color:var(--go);}
-.wk-hint{text-align:center;font-size:11.5px;color:var(--txt3);margin-bottom:16px;}
-.wk-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);
-  border-radius:12px;overflow:hidden;margin-bottom:16px;}
-.wk-s{background:var(--surface2);padding:12px 13px;}
-.wk-s b{display:block;font-family:var(--mono);font-size:21px;font-weight:500;color:var(--txt);line-height:1.1;}
-.wk-s b small{font-size:11px;color:var(--txt3);margin-left:3px;}
-.wk-s span{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--txt3);margin-top:5px;}
-.wk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
-.wk-f{display:flex;flex-direction:column;gap:5px;}
-.wk-f span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);}
-.wk-in{width:100%;box-sizing:border-box;padding:11px 8px;text-align:center;border-radius:9px;border:1px solid var(--line);
-  background:var(--surface2);color:var(--txt);font-family:var(--mono);font-size:16px;}
-.wk-in:focus{outline:none;border-color:var(--go);}
-.wk-feel{display:flex;gap:7px;margin:12px 0 4px;}
-.wk-feel div{flex:1;text-align:center;padding:10px 4px;border-radius:9px;border:1px solid var(--line);
-  background:var(--surface2);color:var(--txt3);font-size:12px;cursor:pointer;transition:.15s;}
-.wk-feel div.sel{border-color:var(--go);color:var(--go);background:color-mix(in srgb,var(--go) 10%,var(--surface2));}
-.wk-pace{text-align:center;font-size:11.5px;color:var(--txt3);font-family:var(--mono);margin-top:12px;min-height:15px;}
 
 /* timer */
 /* Sat under the navigation bar in the app build - the timer was there, just unreadable. */
@@ -918,12 +858,6 @@ body.light #turn .tspine{background:linear-gradient(90deg,rgba(16,20,24,.3),tran
 
 /* ---------- session summary ---------- */
 .sum{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px;}
-.sum-c{background:var(--surface2);padding:14px 15px;}
-.sum-n{font-family:var(--mono);font-size:25px;font-weight:500;letter-spacing:-.03em;color:var(--txt);line-height:1.1;}
-.sum-n small{font-size:12px;color:var(--txt3);letter-spacing:0;margin-left:3px;}
-.sum-l{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--txt3);margin-top:6px;}
-.sum-c.pr .sum-n{color:var(--gold);}
-.sum-c.pr .sum-l{color:var(--gold);opacity:.75;}
 
 /* sheets */
 /* The padding was a flat 26px top and bottom, which was right in a browser tab and wrong in the
@@ -1043,12 +977,6 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-slot small{display:block;font-size:11px;color:var(--txt3);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mk-slot.sel{border-color:var(--mkc);background:color-mix(in srgb,var(--mkc) 13%,var(--surface2));}
 .mk-slot.sel b{color:var(--mkc);}
-.mk-cols{display:flex;gap:9px;flex-wrap:wrap;}
-.mk-col{width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.14);cursor:pointer;transition:.15s;}
-.mk-col.sel{outline:2px solid var(--txt);outline-offset:2px;}
-.mk-blk{border:1px solid var(--line);border-radius:13px;background:var(--surface);padding:12px 12px 4px;margin-bottom:11px;}
-.mk-bh{display:flex;gap:8px;align-items:center;}
-.mk-bt{flex:1;min-width:0;padding:9px 11px;font-size:13px;border-radius:9px;}
 /* What the block is, stated rather than asked for - it took the name box's place in the row */
 /* A run of exercises, drawn as one bracketed group rather than as a box you had to make first.
    The rows keep their own shape inside it - it is a relationship, not a container. */
@@ -1084,37 +1012,8 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-ps-n{font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--txt3);
   width:auto;min-width:44px;flex-shrink:0;text-align:left;}
 .mk-ps-row{flex-wrap:wrap;}
-/* Two answers, side by side, weighted the same - the app has no opinion about which kind of work
-   a day is, and asking it as a pair of tiles rather than a dropdown means both are readable at a
-   glance instead of one being hidden behind the other. */
-.mk-kinds{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.mk-kind{padding:12px 11px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);
-  cursor:pointer;transition:.15s;}
-.mk-kind b{display:block;font-size:14px;font-weight:600;color:var(--txt);}
-.mk-kind small{display:block;margin-top:3px;font-size:10.5px;line-height:1.4;color:var(--txt3);}
-.mk-kind.sel{border-color:var(--mkc);background:color-mix(in srgb,var(--mkc) 13%,var(--surface2));}
-.mk-kind.sel b{color:var(--mkc);}
 .mk-perset{margin-top:8px;}
 .mk-ps-head{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
-.mk-ps-lbl{flex:1;font-family:var(--mono);font-size:10px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--txt3);}
-/* A two-state control has to look like one in BOTH states. Shut, this was a bare grey outline
-   next to an open state that carried the accent - so it read as "nothing here" rather than as
-   the other half of a switch. Both states are now filled and lit; which one you are in is the
-   colour, not the presence of colour. */
-.mk-ps-t{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.1em;
-  cursor:pointer;padding:4px 9px;border-radius:6px;transition:.14s;
-  color:var(--txt2);border:1px solid var(--line);
-  background:color-mix(in srgb,var(--txt3) 12%,transparent);}
-.mk-ps-t:hover{color:var(--txt);border-color:var(--txt3);}
-.mk-perset.open .mk-ps-t{
-  color:var(--go);border-color:color-mix(in srgb,var(--go) 55%,var(--line));
-  background:color-mix(in srgb,var(--go) 15%,transparent);}
-.mk-perset.open .mk-ps-t:hover{border-color:var(--go);}
-/* the custom rest entry, inline where the dropdown was */
-.mk-rest-c{display:flex;align-items:center;gap:5px;}
-.mk-rest-c .mk-num{width:44px;min-width:0;}
-.mk-rest-c em{font-family:var(--mono);font-size:10px;font-style:normal;color:var(--txt3);}
 .mk-rest-ok{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--go);
   background:transparent;border:1px solid color-mix(in srgb,var(--go) 45%,var(--line));
   border-radius:6px;padding:5px 8px;cursor:pointer;}
@@ -1257,27 +1156,6 @@ body.light .dayact.del{--bad:#b1332c;}
 .dayhead-add:hover{color:var(--go);background:color-mix(in srgb,var(--go) 10%,transparent);}
 .dayhead-add svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;}
 body.tut .dayhead-add{display:none;}
-.mk-mv{display:inline-flex;gap:3px;flex-shrink:0;}
-.mk-mvb{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
-  padding:0;border-radius:7px;border:1px solid var(--line);background:transparent;
-  color:var(--txt3);cursor:pointer;transition:.14s;}
-.mk-mvb svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.9;
-  stroke-linecap:round;stroke-linejoin:round;}
-.mk-mvb:hover:not(.off){color:var(--go);border-color:var(--go);}
-.mk-mvb.off{opacity:.28;cursor:default;}
-.mk-bn{flex:1;min-width:0;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-/* A choice that is not available yet still shows, so the block reads the same before and after
-   the second exercise arrives - it just says so when tapped rather than going quiet */
-.mk-off{opacity:.4;}
-/* .mk-row/.mk-rt/.mk-rn used to be declared here as a bare hairline-separated list row. The
-   item card above supersedes all three - and being declared LATER, this version was quietly
-   winning, which is why the card kept its 11px-and-no-sides padding however much air the new
-   rule asked for. Removed rather than reordered: two declarations of the same thing is how it
-   happened once already. */
-.mk-rf{display:flex;gap:7px;align-items:flex-end;margin-top:9px;flex-wrap:wrap;}
-.mk-f{display:flex;flex-direction:column;gap:4px;}
-.mk-f span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);}
 .mk-num{width:56px;padding:9px 4px;text-align:center;border-radius:9px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-family:var(--mono);font-size:13px;}
 .mk-num:focus{outline:none;border-color:var(--go);}
 .mk-sel{padding:9px 8px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);color:var(--txt2);font-family:inherit;font-size:12px;}
@@ -1330,9 +1208,6 @@ body.tut .dayhead-add{display:none;}
 .pl-acts{display:flex;gap:8px;margin-top:9px;}
 .pl-act{flex:1;height:40px;border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:10px;font-size:11px;letter-spacing:.08em;cursor:pointer;}
 .pl-act:active{background:rgba(255,255,255,.06);}
-.pl-barnow{margin-top:14px;font-size:12.5px;color:var(--txt3);display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.pl-barnow b{color:var(--txt2);font-weight:600;}
-.pl-barnow button{border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:8px;padding:7px 12px;font-size:11px;letter-spacing:.06em;cursor:pointer;}
 .pl-bars{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
 .pl-bar{font-size:12px;padding:9px 11px;border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:8px;cursor:pointer;text-align:left;}
 .pl-bar.on{border-color:var(--go);color:var(--txt);}
@@ -1357,8 +1232,6 @@ body.tut .dayhead-add{display:none;}
 .pg-d{font-family:var(--mono);font-size:11px;font-weight:600;white-space:nowrap;min-width:52px;text-align:right;}
 .up{color:var(--go);} .dn{color:#ff5d6c;} .fl{color:var(--txt3);}
 .pg-empty{font-size:12px;color:var(--txt3);padding:18px 4px;text-align:center;}
-.ed-input{width:100%;margin-top:10px;padding:13px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--txt);font-family:var(--mono);font-size:15px;text-align:center;}
-.ed-input:focus{outline:none;border-color:#3d434a;}
 .ed-hint{font-size:12px;color:var(--txt3);margin-top:11px;}
 .presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .preset{padding:17px 6px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-family:var(--mono);font-size:14px;cursor:pointer;transition:.15s;}
@@ -1381,8 +1254,6 @@ body.tut .dayhead-add{display:none;}
    the real WebView on the phone said the first cut of this row came out at 32. */
 .mfilt .preset{flex:0 0 auto;padding:0 15px;min-height:44px;display:inline-flex;align-items:center;
   border-radius:10px;font-size:13px;}
-.preset.mk-del{border-color:color-mix(in srgb,#c2554a 55%,var(--line));color:#c2554a;}
-.preset.mk-del:hover{border-color:#c2554a;color:#c2554a;}
 .sfx-lbl{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);margin:20px 0 9px;}
 /* The sound rows carry a sublabel in a <small> that had no rule at all, so it rendered inline
    and read as one run-on line: "REST ALERTWHEN A REST RUNS OUT". Its own line, a step quieter. */
@@ -1423,7 +1294,6 @@ body.light .card{box-shadow:0 1px 2px rgba(16,20,24,.05);}
 body.light .card:hover{box-shadow:0 4px 14px -4px rgba(16,20,24,.14);}
 body.light .srow.done .chk svg,body.light .srow.ispr .chk svg{stroke:#fff;}
 body.light .finishbtn{color:#fff;}
-body.light .pill-today{color:#fff;}
 body.light .pill-live{color:#fff;}
 body.light .timer-pill{box-shadow:0 10px 30px rgba(16,20,24,.16);}
 body.light .timer-pill.ring2{color:#fff;}
@@ -1558,7 +1428,7 @@ body.forge{font-family:'Barlow',system-ui,sans-serif;}
 /* v5.178: the signage face keeps the wordmark and the launch; NAMES (a workout, a lift, a sheet)
    are Marcellus everywhere, the way the session, the history, the seal and the watch already say
    them (T2, T3). Uppercase labels are mono, not condensed signage (T4). */
-body.forge .wordmark,body.forge .sp-word,body.forge .unsealbtn{
+body.forge .wordmark,body.forge .sp-word{
   font-family:'Big Shoulders Display','Barlow Condensed',sans-serif;font-weight:700;}
 body.forge .card-name,body.forge .s-title,body.forge .ex-n,body.forge .sheet h3,
 body.forge .ed-ex,body.forge .tut-t{font-family:'Marcellus',serif;font-weight:400;}
@@ -1662,7 +1532,7 @@ body.moon .ex-rest{font-weight:600;font-size:13px;}
 body.moon .notebox textarea{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-weight:500;}
 body.moon .wordmark,body.moon .sec-label,body.moon .card-name,body.moon .s-title,
 body.moon .ex-n,body.moon .sect-t,body.moon .sheet h3,body.moon .finishbtn,body.moon .tut-t,
-body.moon .ed-ex,body.moon .swaphead,body.moon .sp-word,body.moon .unsealbtn{
+body.moon .ed-ex,body.moon .swaphead,body.moon .sp-word{
   font-family:'Marcellus',Georgia,serif;font-weight:400;}
 body.moon .num,body.moon .ttime,body.moon .inp,body.moon .sp-tag,
 body.moon .pill,body.moon .sfx-tog,body.moon .card-day{
@@ -2141,9 +2011,8 @@ body.light .markglow,body.booting .markglow{animation:none;opacity:0;}
 .srow.ispr .inp{text-shadow:0 0 18px color-mix(in srgb,var(--gold) 48%,transparent);}
 .srow.done .chk{box-shadow:0 0 16px -3px color-mix(in srgb,var(--match) 70%,transparent);}
 .srow.ispr .chk{box-shadow:0 0 18px -3px color-mix(in srgb,var(--gold) 75%,transparent);}
-.st-best b{text-shadow:0 0 14px color-mix(in srgb,var(--gold) 40%,transparent);}
 .finishbtn{box-shadow:0 0 34px -10px color-mix(in srgb,var(--go) 80%,transparent);}
-body.light .card-day,body.light .srow.done .inp,body.light .srow.ispr .inp,body.light .st-best b{text-shadow:none;}
+body.light .card-day,body.light .srow.done .inp,body.light .srow.ispr .inp{text-shadow:none;}
 body.light .srow.done .chk,body.light .srow.ispr .chk,body.light .finishbtn{box-shadow:none;}
 .card::before{display:none;}
 .card{border-radius:13px;}
@@ -2273,7 +2142,6 @@ body.forge .dayempty.dayadd,body.forge .dayempty.dayadd.quiet{border:1px solid #
   box-shadow:inset 0 2px 6px rgba(0,0,0,.9);color:#9d7c62;padding:10px 4px;}
 body.forge .dayempty.dayadd:hover{background:#130b07;border-color:#3a2214;}
 body.forge .daybox.dropok .dayempty.dayadd,body.forge .daybox.dropok{background:color-mix(in srgb,var(--go) 12%,#0e0806);}
-body.forge .two-ctl{border-style:solid;border-color:#4a2c1c;background:#130c09;color:var(--txt2);}
 
 /* ---- The ground, v5.141: the hearth (owner picked H, 14 Sep). ----
    Near black. One hearth sits low behind the board and its light rises to catch the plates'
@@ -2377,7 +2245,6 @@ body.forge .hrow-rec{margin-left:auto;font-style:normal;font-family:var(--mono);
 body.forge .hseal .hrow-m{margin-top:8px;}
 body.forge .hrow.hwalk.hadd{border:1px dashed #3a2214;color:var(--txt3);border-radius:10px;}
 body.forge .hrow.hwalk.hadd:hover{color:var(--gold);border-color:#6a3f26;}
-.hshare[hidden]{display:none;}
 
 /* ---- The session screen, v5.157: the ledger (owner picked AB, with icon buttons top left). ----
    Each lift is a compact blackened table: a header band with the name and the swap, a row of icon
@@ -2497,7 +2364,6 @@ body.forge .sheet-btns .btn,body.forge .mk-acts .btn{border-radius:999px;min-hei
   font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
 body.forge .sheet-btns .btn-go,body.forge .mk-acts .btn-go{border-color:#a0521c;color:var(--gold);background:rgba(255,138,31,.08);}
 body.forge .sheet-btns .btn-prime,body.forge .mk-acts .btn-prime{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
-body.forge .sheet-btns .btn-bad,body.forge .mk-acts .btn-bad{border-color:#7a2e26;color:#f0645a;background:transparent;}
 /* fields */
 body.forge .mk-in{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:#fff6e6;}
 body.forge .mk-in:focus{outline:none;border-color:#a0521c;}
@@ -2506,7 +2372,6 @@ body.forge .mk-in::placeholder{color:var(--txt3);}
 body.forge .preset{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
 body.forge .preset.sm{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;}
 body.forge .preset.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
-body.forge .preset.mk-del{border-color:#7a2e26;color:#f0645a;background:transparent;}
 body.forge .mfilt .preset{min-height:38px;}
 /* rows: the picker, the swap list, the tour list */
 body.forge .swapitem{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:#fff6e6;}
@@ -2705,18 +2570,6 @@ body.light .card.sealed::after{opacity:.35;background:repeating-linear-gradient(
 body.light .card.sealed .card-name,body.light .card.sealed .card-day{color:var(--txt2);}
 body.light .pill-done{color:color-mix(in srgb,var(--gold) 66%,#0b1018);border-color:color-mix(in srgb,var(--gold) 55%,transparent);}
 
-/* ---------- unseal: blue flame wipe ---------- */
-.unsealbtn{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:8px;padding:15px 12px;border-radius:12px;cursor:pointer;transition:.16s;
-  border:1px solid color-mix(in srgb,var(--go) 34%,var(--line));
-  background:linear-gradient(180deg,color-mix(in srgb,var(--go) 9%,transparent),transparent),var(--surface);
-  font-family:'Marcellus',serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--go);}
-.unsealbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
-.unsealbtn:hover{box-shadow:0 0 26px -10px color-mix(in srgb,var(--go) 85%,transparent);border-color:color-mix(in srgb,var(--go) 60%,transparent);}
-.unsealbtn:active{transform:scale(.99);}
-body.light .unsealbtn:hover{box-shadow:0 4px 14px -6px rgba(16,20,24,.2);}
-.unsealbtn.idle{opacity:.42;}
-.unsealbtn.idle:hover{opacity:.72;}
-
 #wipe{display:none;position:fixed;inset:0;z-index:400;pointer-events:none;overflow:hidden;}
 #wipe.on{display:block;}
 #wcover{position:absolute;left:0;right:0;top:0;height:101%;transform:translateY(100%);
@@ -2739,7 +2592,6 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hrow-n{font-family:'Marcellus',serif;font-size:14.5px;color:var(--txt);margin-top:3px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .hrow-m{font-family:var(--mono);font-size:10.5px;color:var(--txt3);margin-top:4px;}
 .hrow-m .pr{color:var(--gold);}
-.hrow-a{color:var(--txt3);font-size:15px;flex-shrink:0;}
 /* A walk in the history list: the same card as a session, told apart quietly - gold date
    line, a dashed edge, and no chevron because there is no deeper page behind it. */
 .hrow.hwalk{--hc:var(--gold);border-style:dashed;}
@@ -2768,13 +2620,6 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hnav.off{opacity:.25;pointer-events:none;}
 .hsub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);margin:2px 0 10px;}
 .hnone{color:var(--txt3);font-size:13.5px;padding:14px 4px 18px;text-align:center;}
-/* the three numbers the week adds up to */
-.hstat{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px;}
-.hstat>div{background:var(--surface2);padding:12px 10px 11px;text-align:center;}
-.hstat b{display:block;font-family:var(--mono);font-weight:500;font-size:24px;letter-spacing:-.03em;color:var(--txt);line-height:1.1;}
-.hstat b small{font-size:11px;color:var(--txt3);letter-spacing:0;margin-left:4px;font-weight:400;}
-.hstat b.gold{color:var(--gold);}
-.hstat span{display:block;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--txt3);margin-top:5px;}
 .hdow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--txt3);text-align:center;padding:2px 0 4px;}
 .hcell{position:relative;aspect-ratio:1;border-radius:9px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:11px;color:var(--txt3);}
@@ -2836,14 +2681,6 @@ body.forge .fbtn:hover{border-color:color-mix(in srgb,var(--gold) 55%,#4a2c1c);
   background:linear-gradient(180deg,rgba(255,190,130,.1),rgba(255,150,70,.02)),var(--surface2);
   box-shadow:inset 0 1px 0 rgba(255,196,140,.22),0 0 20px -10px rgba(255,138,31,.9);}
 body.forge .fbtn:hover svg{stroke:var(--gold);}
-/* the unseal sits in the same panel as the plates and has to be cut from the same stock */
-body.forge .unsealbtn{border-radius:4px;font-size:14px;letter-spacing:.17em;
-  border-color:color-mix(in srgb,var(--gold) 30%,#4a2c1c);
-  background:linear-gradient(180deg,rgba(255,150,60,.09),rgba(255,150,70,.01)),var(--surface);
-  box-shadow:inset 0 1px 0 rgba(255,183,120,.13),inset 0 -1px 0 rgba(0,0,0,.4);
-  color:var(--gold);}
-body.forge .unsealbtn:hover{border-color:color-mix(in srgb,var(--gold) 60%,#4a2c1c);
-  box-shadow:inset 0 1px 0 rgba(255,196,140,.22),0 0 24px -10px rgba(255,138,31,.9);}
 body.forge .footnote{font-family:'Barlow',system-ui,sans-serif;}
 body.forge .storenote{font-family:'Barlow',system-ui,sans-serif;}
 /* the side doors are struck plates too, not pebbles */
@@ -2974,16 +2811,10 @@ body.light{--sans:'Libre Franklin',system-ui,sans-serif;--mono:'Courier Prime',u
 body.light .sp-word,body.light .sheet h3,body.light .ed-ex,body.light .hrow-n,body.light .hdet-n{font-family:'Libre Franklin',system-ui,sans-serif;font-weight:600;}
 /* Courier Prime is wide and light - figures need a shade more weight and less tracking to
    hold their own against the mono the other themes use */
-body.light .num,body.light .inp,body.light .ttime,body.light .sum-n,body.light .ed-big{font-weight:700;letter-spacing:-.02em;}
+body.light .num,body.light .inp,body.light .ttime,body.light .ed-big{font-weight:700;letter-spacing:-.02em;}
 body.light .card-day,body.light .pill,body.light .hsegb,body.light .hrow-d{font-weight:700;}
 /* frost mode: day accents are tuned for obsidian, so darken them onto the pale ground */
 body.light .card-day,body.light .s-sub b,body.light .sect-t .ss{color:color-mix(in srgb,var(--c) 50%,#0b1018);}
-body.light .btn-c{color:color-mix(in srgb,var(--c) 50%,#0b1018);border-color:color-mix(in srgb,var(--c) 45%,var(--line));}
-/* the warm red washes out on a pale ground and reads orange in the forge - both get a shade
-   that sits against their own background */
-body.light .btn-bad{--bad:#b1332c;}
-body.forge .btn-bad{--bad:#f0645a;}
-body.light .pill-today{background:color-mix(in srgb,var(--c) 50%,#0b1018);color:#fff;}
 /* a glow does nothing on a pale ground, so Frost marks today by weight of tint instead */
 body.light .card.today{background:color-mix(in srgb,var(--c) 15%,var(--surface));
   border-color:color-mix(in srgb,var(--c) 45%,var(--line));box-shadow:none;}
@@ -3239,7 +3070,6 @@ html.mo-off .ez-art .arm-sheen{animation:none;opacity:0;}
 @keyframes ig5_4{0%,54.5%{opacity:.32;}68.2%,89.4%{opacity:1;}100%{opacity:.32;}}
 html.mo-off .ez-art .bk-leaf,html.mo-off .ez-art .ig{animation:none;opacity:1;}
 @media (prefers-reduced-motion:reduce){.ez-art .bk-leaf,.ez-art .ig{animation:none;}.ez-art .ig{opacity:1;}}
-.ez-art svg.mo-glow{animation:ezGlow 3.8s ease-in-out infinite;}
 /* the anvil screen's glow grows with the answer: faint, warm, bright. Never a neon sign. */
 .ez-art svg.mo-glow1{animation:ezGlow1 3.8s ease-in-out infinite;}
 @keyframes ezGlow1{0%,100%{filter:drop-shadow(0 0 0 rgba(217,123,46,0));}50%{filter:drop-shadow(0 0 3px rgba(217,123,46,.45));}}
@@ -3247,9 +3077,6 @@ html.mo-off .ez-art .bk-leaf,html.mo-off .ez-art .ig{animation:none;opacity:1;}
 @keyframes ezGlow2{0%,100%{filter:drop-shadow(0 0 1px rgba(217,123,46,.2));}50%{filter:drop-shadow(0 0 5px rgba(217,123,46,.6));}}
 .ez-art svg.mo-glow3{animation:ezGlow3 3.8s ease-in-out infinite;}
 @keyframes ezGlow3{0%,100%{filter:drop-shadow(0 0 2px rgba(232,184,109,.3));}50%{filter:drop-shadow(0 0 7px rgba(232,184,109,.7));}}
-@keyframes ezGlow{0%,100%{filter:drop-shadow(0 0 0 rgba(217,123,46,0));}50%{filter:drop-shadow(0 0 6px rgba(217,123,46,.85));}}
-.ez-art svg.mo-flicker{animation:ezFlicker 2.6s steps(1,end) infinite;}
-@keyframes ezFlicker{0%,100%{filter:drop-shadow(0 0 3px rgba(232,184,109,.5));}18%{filter:drop-shadow(0 0 8px rgba(232,184,109,.95));}31%{filter:drop-shadow(0 0 2px rgba(232,184,109,.4));}47%{filter:drop-shadow(0 0 7px rgba(232,184,109,.9));}62%{filter:drop-shadow(0 0 4px rgba(232,184,109,.6));}80%{filter:drop-shadow(0 0 9px rgba(232,184,109,1));}}
 .ez-art svg.mo-rock{animation:ezRock 3.8s ease-in-out infinite;}
 @keyframes ezRock{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
 .ez-art svg.mo-sway{transform-origin:50% 12%;animation:ezSway 3.8s ease-in-out infinite;}
@@ -3260,8 +3087,6 @@ html.mo-off .ez-art .bk-leaf,html.mo-off .ez-art .ig{animation:none;opacity:1;}
 @keyframes ezSpin{to{transform:rotate(360deg);}}
 .ez-art svg.mo-shine{animation:ezShine 3.8s ease-in-out infinite;}
 @keyframes ezShine{0%,100%{transform:rotate(-3deg);filter:drop-shadow(0 0 0 rgba(232,184,109,0));}50%{transform:rotate(3deg);filter:drop-shadow(0 0 6px rgba(232,184,109,.9));}}
-.ez-art svg.mo-step{animation:ezStep 1.9s ease-in-out infinite;}
-@keyframes ezStep{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-2.5px) rotate(2deg);}}
 .ez-card.picked .ez-art svg{filter:none;}
 /* Low keeps the wizard moving (v5.135): it is a one-time pass and the owner wants it seen. Off still stops it. */
 html.mo-off .ez-card,html.mo-off .ez-art svg,html.mo-off .ez-card.picked .ez-art svg{animation:none;}
@@ -3272,7 +3097,6 @@ html.mo-off .ez-card,html.mo-off .ez-art svg,html.mo-off .ez-card.picked .ez-art
 .ez-art{width:58px;height:58px;flex-shrink:0;color:var(--go);}
 .ez-art svg{width:100%;height:100%;}
 .ez-art .au{stroke:var(--gold);}
-.ez-forge{margin-top:8px;}
 #welcome{display:none;position:fixed;inset:0;z-index:210;background:var(--bg);
   padding:calc(28px + env(safe-area-inset-top,0px)) 22px calc(28px + env(safe-area-inset-bottom,0px));
   overflow-y:auto;-webkit-overflow-scrolling:touch;}
@@ -4858,9 +4682,6 @@ function setTheme(t){
     if(p&&p.then)p.then(done,done);else done();
   }catch(e){done();}
 }
-// The header button used to cycle. With four worlds a cycle means up to three wrong ones
-// on the way to the one you wanted, so it opens the picker instead.
-function toggleTheme(){openThemePick();}
 function openThemePick(){drawThemeSheet();document.getElementById('themeOvl').classList.add('on');}
 function themeIcon(t){
   return (THEME_IC[t]||THEME_IC.dark).replace('<svg ','<svg style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" ');
@@ -9599,7 +9420,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.188';
+var APPV='v5.189';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10036,11 +9857,6 @@ function bestEver(exId,excludeIdx){
   }
   return best;
 }
-// The best single set of the LAST session you did this lift, as a score. This is what a
-// normal week is actually measured against - your own last time, not the best day you ever
-// had. bestEver still exists and still owns the PR line at the foot of the card; it just
-// stopped being the bar every ordinary set was held up to.
-function lastScore(exId){var b=lastBest(exId);return b?b.score:null;}
 // The best single set of the last session, WITH the set itself - the weight rule below needs
 // to know what was on the bar, not only what it scored.
 function lastBest(exId){
@@ -10066,7 +9882,6 @@ function holdsWeight(exId,set,against){
   if(!a&&!b)return true;
   return invEx(exId)?(a<=b):(a>=b);
 }
-function isPR(exId,set){return setGrade(exId,set)==='pr';}
 // How this set stands against your best ever for the lift:
 // 'pr' beat it, 'match' equalled it, 'under' came in below it,
 // 'first' is the opening entry on a lift - a baseline to beat, so it reads grey.
@@ -10132,15 +9947,6 @@ function isReady(exId,tgts,slot){
     else{if(s.r<t.r)return false;}
   }
   return true;
-}
-function readyCount(wk){
-  var w=W[wk],n=0;
-  w.sections.forEach(function(sec){sec.rows.forEach(function(row){
-    var id=typeof row==='string'?row:row[0];
-    var slot=(typeof row==='string'?null:((row[1]||{}).slot))||id;
-    if(isReady(id,targetsOf(row),slot))n++;
-  });});
-  return n;
 }
 var ARROW='<svg viewBox="0 0 20 20"><path d="M10 15.5V5M10 5l-4.6 4.6M10 5l4.6 4.6"/></svg>';
 // The closed padlock a locked-in day wears, so LOCKED IN and UNLOCK teach each other by
@@ -10312,12 +10118,6 @@ function skipSig(exId,lines){
   return (L&&L.date||'')+'|'+lines.join(',');
 }
 var LVLWK=null;
-function lvlFmt(s){
-  s=String(s);
-  var m=s.match(/^0x(\d+)$/);
-  if(m)return m[1]+' reps';   // a zero-weight line is a rep count, not "0 × 22"
-  return fmtLine(s).replace('×','&thinsp;&times;&thinsp;');
-}
 // What the chip's inline editor is actually editing, read off the target's shape:
 // a zero-weight line edits reps, a timed line edits seconds, anything else the weight.
 function lvlKind(t){return /^0x\d+$/.test(t)?'r':/sec$/.test(t)?'s':'w';}
@@ -10565,10 +10365,6 @@ var WEEK=[
   {wk:"d3",  day:"Friday",js:5},
   {wk:"d4",  day:"Saturday",js:6}
 ];
-function roman(n){
-  var R=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
-  return R[n]||String(n);
-}
 // ---------- the week, as containers ----------
 // Three shapes have been tried here. Seven slots that OWNED a workout produced every
 // overwrite/restore bug. A flat ordered list fixed those, but then position decided the weekday -
@@ -10861,13 +10657,6 @@ function wkVar(id){
   var e=wkDefault(id);
   return e?(e.v||null):null;
 }
-function setWkVar(id,v){
-  DB.vOvr=DB.vOvr||{};
-  var e=wkDefault(id),def=e?(e.v||''):'';
-  if((v||'')===def)delete DB.vOvr[id];else DB.vOvr[id]=v||'';
-  saveDB();closeOvl('mkActOvl');renderHome();
-  try{sfxLog();}catch(err){}
-}
 // The weekday has moved OFF the card and onto the container above it, so a card no longer claims
 // a day it does not own - which is what made position feel like it was choosing for you. What is
 // left on the card is the workout: its state, its name, its size.
@@ -10996,17 +10785,6 @@ function dayGuess(wk){
     if(free===null&&!lwOn(lw,wk,d.k))free=d.k;
   });
   return free||first;
-}
-// break every seal for the week - the logs stay exactly where they are
-function unsealAll(){
-  // Nothing locked means nothing to do: the tap is simply inert (Aug 23). The button
-  // already wears its idle face, and playing the wipe over an unchanged week implied
-  // something had happened.
-  if(!Object.keys(loggedThisWeek()).length)return;
-  ask(TXT('unsealMsg'),function(){
-    sfxUnseal();
-    runWipe(doUnseal);
-  },TXT('unsealTtl'),TXT('unsealYes'));
 }
 function doUnseal(){
   DB.logs.forEach(function(l){l.unsealed=1;});
@@ -12370,16 +12148,6 @@ function mkNextColor(){
 // the timer has to pick one and the user never said which. Replaced with a real 3 min, and past
 // that a custom entry rather than a longer guess-list: anything over three minutes is somebody
 // doing something specific, and a list cannot anticipate it.
-var MK_REST=['','30 sec','45 sec','60 sec','90 sec','2 min','3 min'];
-// Stored in seconds because that is what parseRest reads; shown as m:ss because that is what a
-// clock looks like. 150 sec and 2:30 are the same rest, and only one of them is readable.
-// True when this value is a length none of the presets already covers.
-function mkRestExtra(v){
-  if(MK_REST.indexOf(v)>=0)return false;
-  var s=parseRest(v);
-  for(var i=0;i<MK_REST.length;i++)if(parseRest(MK_REST[i])===s)return false;
-  return true;
-}
 function mkRestLabel(v){
   if(!v)return 'NONE';
   var s=parseRest(v);
@@ -12404,7 +12172,6 @@ function MKTXT(){
   return {t:'Inscribe a workout',save:'INSCRIBE THIS WORKOUT',hint:'Hold a workout to inscribe your own',act:'Inscribe this workout again',mk:'INSCRIBE A NEW WORKOUT',xl:'Kept days',xa:'Keep it off the plan',xc:'KEPT'};
 }
 function effWk(wk){return (DB.slots&&DB.slots[wk])||wk;}
-function baseOf(wk){for(var s in (DB.slots||{}))if(DB.slots[s]===wk)return s;return wk;}
 function mergeCustom(){
   if(!DB.custom)DB.custom={};
   if(!DB.slots)DB.slots={};
@@ -12677,25 +12444,6 @@ function planDrop(id){
 }
 // A day with a session open cannot move: the workout is anchored to the day it was started on.
 var MOVE_BUSY='This workout has a session open, so it cannot move. Finish it first.';
-// The hold menu is gone. It had six entries and every one of them had somewhere better to be:
-// taking a day off the week is a drag now, building from scratch is the + NEW DAY button, and
-// delete and optional belong with the rest of the day's settings rather than behind a long press
-// on the home screen. What was left was a menu whose only real entry was "edit" - so holding a
-// day opens the editor, and the menu with it.
-// Copy Monday to Thursday and change two lifts is one of the most ordinary things anybody does
-// with a builder, and it was a full rebuild. The copy is deep - JSON round trip - because the
-// sections and their rows are nested arrays, and a shallow copy would hand the new day the SAME
-// row objects as the old one, so editing either would edit both.
-// It opens on the copy rather than saving it quietly. A duplicate you cannot see is a duplicate
-// you make twice, and the first thing anybody does with one is rename it.
-// Custom rest, entered where it is used rather than behind a dialog. Minutes and seconds because
-// that is how anybody says it, written as one number of seconds because that is what parseRest
-// and the timer read.
-function mkRestPick(i,v){
-  var r=MK.rows[i];if(!r)return;
-  if(v==='__c'){r.restEdit=1;if(!parseRest(r.rest))r.rest='2 min';mkRender();return;}
-  mkSet(i,'rest',v);mkTouch();
-}
 function mkRestPart(i,part,v){
   var r=MK.rows[i];if(!r)return;
   var t=parseRest(r.rest),m=Math.floor(t/60),s=t%60;
@@ -13241,23 +12989,9 @@ function mkKindOf(rows){
   }
   return 'cardio';
 }
-function mkSetKind(k){
-  if(MK.kind===k)return;
-  MK.kind=k;
-  // Kind is the workout's FLAVOR now, not a law over its rows. It used to convert every row
-  // onto the new kind's units, which with mixed days allowed would rewrite a finisher's
-  // minutes into sets of ten. Each row keeps its own measure; kind decides which half of the
-  // library the picker leads with and what a brand-new custom exercise defaults to.
-  mkRender();
-}
 function mkUnitOf(r){
   if(r.unit)return r.unit;
   return r.hold?'sec':'wr';        // rows built before this existed carried a hold flag
-}
-function mkUnitLabel(u){
-  var M=MK_MEASURE_SETS.lift.concat(MK_MEASURE_SETS.cardio);
-  for(var k=0;k<M.length;k++)if(M[k][0]===u)return M[k][1];
-  return M[0][1];
 }
 function mkMeasureUI(r,i){
   var u=mkUnitOf(r),opts=mkMeasures(r).slice();
@@ -13297,31 +13031,6 @@ function mkSetUnit(i,v,quiet){
 }
 function mkLinesUniform(r){
   var L=[],k;for(k=0;k<(r.n||1);k++)L.push(mkLine(r));return L;
-}
-// The per-set face of a row. Drawn under the summary rather than instead of it, so the two are
-// never on screen disagreeing about which is in charge - open it and the summary greys, because
-// from that moment the lines are what gets saved.
-// The numbers live HERE now, under the per-set control, and nowhere else. They used to be
-// duplicated as Weight and Reps fields up in the summary row as well, which meant two places on
-// screen claiming to say what a set was - and when they disagreed, nothing said which won.
-// Shut, this is one row labelled "All sets". Open, it is one row per set. Same shape either way,
-// so opening it does not rearrange the screen, it just gives you more of the same thing.
-// Rest, as an hourglass and a time. The word "Rest" plus a dropdown of seven guesses was two
-// controls' worth of space for one number, and the dropdown could not say the one thing people
-// actually want - their own rest. Tapping the glass opens the entry directly; there is nothing
-// to pick from because typing 1:30 is faster than finding it in a list.
-function mkRestUI(r,i){
-  var GLASS='<svg viewBox="0 0 20 20"><path d="M6 3h8M6 17h8M6.5 3c0 3.5 3.5 4.5 3.5 7s-3.5 3.5-3.5 7M13.5 3c0 3.5-3.5 4.5-3.5 7s3.5 3.5 3.5 7"/></svg>';
-  if(r.restEdit){
-    return '<div class="mk-rest open">'+GLASS+
-      '<input class="mk-num" type="number" inputmode="numeric" min="0" max="30" value="'+Math.floor(parseRest(r.rest)/60)+'" oninput="mkRestPart('+i+',&#39;m&#39;,this.value)">'+
-      '<em>m</em>'+
-      '<input class="mk-num" type="number" inputmode="numeric" min="0" max="59" value="'+(parseRest(r.rest)%60)+'" oninput="mkRestPart('+i+',&#39;s&#39;,this.value)">'+
-      '<em>s</em>'+
-      '<button class="mk-rest-ok" onclick="mkRestDone('+i+')">OK</button></div>';
-  }
-  return '<button class="mk-rest" onclick="mkRestOpen('+i+')" title="Rest between sets">'+GLASS+
-    '<span>'+(parseRest(r.rest)?mkRestLabel(r.rest):'No rest')+'</span></button>';
 }
 function mkRestOpen(i){
   var r=MK.rows[i];if(!r)return;
@@ -13463,18 +13172,6 @@ function mkSetExp(i,on){
   else r.exp=true;
   mkTouch();mkRender();
 }
-function mkExpand(i){
-  var r=MK.rows[i];if(!r)return;
-  r.lines=mkLinesFor(r);
-  // Asked of the LINES, not of the flag. A row that came in varying renders open with exp still
-  // false, so keying off exp made the button say MATCH ALL and then do the opposite - it toggled
-  // a flag that was not what put the panel on screen. If it varies, it is open and the only thing
-  // the button can mean is flatten it.
-  if(mkVaries(r)){                 // MATCH ALL - deliberate, and it says so on the button
-    r.custom=0;r.lines=mkLinesUniform(r);r.exp=false;
-  }else r.exp=!r.exp;
-  mkRender();
-}
 function mkSetLine(i,k,f,v){
   var r=MK.rows[i];if(!r)return;
   r.lines=mkLinesFor(r);
@@ -13563,44 +13260,6 @@ function mkDragEnd(ev,el){
   MK.rows.forEach(function(r){if(out.indexOf(r)<0)out.push(r);});
   MK.rows=out;
   mkTouch();mkRender();
-}
-function mkBlocks(){
-  var out=[],i=0;
-  while(i<MK.rows.length){
-    var g=MK.rows[i].g,j=i+1;
-    if(g){while(j<MK.rows.length&&MK.rows[j].g===g)j++;}
-    out.push({s:i,e:j-1,g:g});
-    i=j;
-  }
-  return out;
-}
-function mkMove(i,dir){
-  var r=MK.rows[i];if(!r)return;
-  var B=mkBlocks(),bi=-1,k;
-  for(k=0;k<B.length;k++)if(i>=B[k].s&&i<=B[k].e){bi=k;break;}
-  if(bi<0)return;
-  var b=B[bi];
-  // Inside a run, the neighbour in that direction is a member: swap the two, which is reordering
-  // the run rather than moving it. Only when there is no member that way does the run itself go.
-  if(b.g&&i+dir>=b.s&&i+dir<=b.e){
-    var t=MK.rows[i];MK.rows[i]=MK.rows[i+dir];MK.rows[i+dir]=t;
-    mkTouch();mkRender();return;
-  }
-  var nb=B[bi+dir];
-  if(!nb)return;
-  var mine=MK.rows.slice(b.s,b.e+1),theirs=MK.rows.slice(nb.s,nb.e+1);
-  var lo=Math.min(b.s,nb.s),hi=Math.max(b.e,nb.e);
-  MK.rows.splice.apply(MK.rows,[lo,hi-lo+1].concat(dir<0?mine.concat(theirs):theirs.concat(mine)));
-  mkTouch();mkRender();
-}
-// Ends are shown but dead, so the control does not appear and disappear as things move past it.
-function mkCanMove(i,dir){
-  var B=mkBlocks(),bi=-1,k;
-  for(k=0;k<B.length;k++)if(i>=B[k].s&&i<=B[k].e){bi=k;break;}
-  if(bi<0)return false;
-  var b=B[bi];
-  if(b.g&&i+dir>=b.s&&i+dir<=b.e)return true;
-  return !!B[bi+dir];
 }
 function mkTidyGroups(){
   var seen={};
@@ -14029,11 +13688,6 @@ function summarize(wk,A){
   }
   var mins=sessMins(A);
   return {sets:sets,vol:Math.round(vol),prs:prs,reps:reps,held:held,mins:mins,prNames:prNames,prList:prList,planned:totalSets(wk),name:(W[wk]||{}).name||'',date:A.date,wk:wk};
-}
-function fmtHeld(s){
-  if(s<60)return {n:s,u:' sec'};
-  var m=Math.floor(s/60),r=s%60;
-  return {n:m+(r?':'+String(r).padStart(2,'0'):''),u:' min'};
 }
 var FINWK=null;
 function renderSummary(s){
@@ -15485,11 +15139,6 @@ function ntDraw(){
 function ntFix(){
   var ra=RA();
   if(ra&&ra.openNotifSettings)try{ra.openNotifSettings().catch(function(){});}catch(e){}
-}
-function ntWatch(){
-  ask('On the watch it is a separate switch, and only you can reach it:\u000a\u000a1. Galaxy Wearable opens\u000a2. Watch settings \u2192 Notifications\u000a3. App notifications \u2192 switch Forge on\u000a\u000aThe alert buzzes your wrist from then on.',
-    function(){var ra=RA();if(ra&&ra.openWatchApp)try{ra.openWatchApp().catch(function(){});}catch(e){}},
-    'Alerts on your watch','OPEN GALAXY WEARABLE');
 }
 // Asked once, and only at the moment it matters: a rest is running that will not be heard.
 function ntNudge(){
@@ -17467,39 +17116,6 @@ function notifBlocked(){
   if(isNative())return false;      // Android's own settings own this; nothing to report here
   return typeof Notification!=='undefined'&&Notification.permission==='denied';
 }
-function toggleNotif(){
-  // Native asks Android through the plugin; the answer arrives asynchronously and the switch
-  // follows it rather than guessing.
-  if(isNative()){
-    var ln=LN();
-    if(!NOTIF_ON){
-      try{
-        var p=ln.requestPermissions();
-        if(p&&p.then){p.then(function(r){notifSet(!r||r.display!=='denied');},function(){notifSet(true);});return;}
-      }catch(e){}
-    }
-    notifSet(!NOTIF_ON);
-    return;
-  }
-  // Ask whenever Android has never been asked, whatever the stored preference says. This used
-  // to be gated behind the switch being OFF - and since it defaults to ON, the ask never
-  // happened: the switch read ON, permission stayed ungranted, and every notice was dropped
-  // without a sound or a sign. The prompt only works inside a tap, so here is the only place.
-  if(typeof Notification!=='undefined'&&Notification.permission==='default'){
-    try{
-      var r=Notification.requestPermission(function(p){notifSet(p==='granted');});
-      if(r&&r.then)r.then(function(p){notifSet(p==='granted');});
-    }catch(e){notifSet(false);}
-    return;
-  }
-  notifSet(!notifLive());
-}
-function notifSet(on){
-  NOTIF_ON=on?1:0;
-  try{localStorage.setItem('arc_notif',NOTIF_ON);}catch(e){}
-  if(!NOTIF_ON)clearRestNotif();
-  drawNotifTog();
-}
 // Shows the state that actually decides whether a notice fires, not the stored wish. A switch
 // reading ON while Android has granted nothing is exactly what wasted a test.
 function drawNotifTog(){
@@ -18369,16 +17985,6 @@ function restDoneNotif(loud){
     vibrate:loud?REST_VIB:[]
   });
   setTimeout(function(){clearNotifTag('arcanum-done');},14000);
-}
-function toggleSfx(){
-  SFX_ON=SFX_ON?0:1;
-  try{localStorage.setItem('arc_sfx',SFX_ON);}catch(e){}
-  drawSfxTog();
-  if(SFX_ON)sfxLog();
-}
-function drawSfxTog(){
-  var e=document.getElementById('sfxTog');
-  if(e)e.textContent=SFX_ON?'SOUND ON':'MUTED';
 }
 var holdInt=null,holdStart=0,holdKey=null,holdAcc={},holdBreak={},pauseAt={},holdLead=false;
 function curHold(k){return (holdAcc[k]||0)+(holdLead?0:Math.round((Date.now()-holdStart)/1000));}
@@ -20354,18 +19960,6 @@ function tutShift(ov,px){
 // hidden probe wears the insets as padding and JS reads them back off it. The card was placed with
 // flat pixel numbers - 14 from the top, 12 from the bottom - which is right in a browser tab and
 // wrong in the app, where the WebView draws behind the status bar and the gesture bar.
-var SAFEPROBE=null;
-function safeIns(){
-  if(!SAFEPROBE){
-    SAFEPROBE=document.createElement('div');
-    SAFEPROBE.style.cssText='position:fixed;top:0;left:0;width:0;height:0;visibility:hidden;'+
-      'pointer-events:none;padding-top:env(safe-area-inset-top,0px);'+
-      'padding-bottom:env(safe-area-inset-bottom,0px);';
-    document.body.appendChild(SAFEPROBE);
-  }
-  var cs=getComputedStyle(SAFEPROBE);
-  return {t:parseFloat(cs.paddingTop)||0,b:parseFloat(cs.paddingBottom)||0};
-}
 // The card is CSS-anchored to the foot of the screen and this function never touches its
 // position - see the #tutCard comment. All that is placed here is the LIGHT: the hole,
 // the ping, and the one deliberate get-out-of-the-way fade for steps that hide.
