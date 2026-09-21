@@ -9495,7 +9495,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.199';
+var APPV='v5.200';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11579,8 +11579,14 @@ function renderHome(){
   // Pump day sits at the head of Saved as a built-in card (v5.144): it is a workout without a day,
   // which is exactly what Saved holds. The old bar under the board is gone.
   var po=loggedCount('pump');
+  // Pump Day is the one card in the app that was hand built rather than drawn by planCard or
+  // xcard, and so it was the one card that never showed the level-up arrow: the only way to learn
+  // it was ready was to finish a session and be offered the raise afterwards (owner, 20 Sep). Same
+  // arrow, same rule, same sheet as everywhere else (v5.200).
+  var pumpRdy=!po&&levelPlan('pump').length;
   var pumpCard='<div class="card pumpcard" style="--c:'+dayC('pump')+'" onclick="openPump()"><div class="card-top"><span class="card-name">'+esc(W.pump.name)+'</span>'+
-    '<span class="card-r">'+(po?'<span class="pill pill-live">Resume '+po+'/'+totalSets('pump')+'</span>':'')+'</span></div>'+
+    '<span class="card-r">'+(po?'<span class="pill pill-live">Resume '+po+'/'+totalSets('pump')+'</span>':
+      (pumpRdy?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\'pump\')">'+ARROW+'</span>':''))+'</span></div>'+
     '<div class="card-meta">'+(po?'Still open. Pick up where you left off':'Bonus, 35 to 45 minutes. Any day')+'</div></div>';
   var fi=document.getElementById('svForgeIco');if(fi&&!fi.innerHTML)fi.innerHTML=anvilAt(59,'fill="currentColor"');
   document.getElementById('extraCards').innerHTML=pumpCard+(xs.length?xs.map(xcard).join('')
