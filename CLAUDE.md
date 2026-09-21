@@ -287,7 +287,7 @@ writes through — `mkTouch()`, debounced 500ms. There is no "unsaved" state in 
 5. **First-run wizard unpinned in v5.0** (Aug 26). `EZ_ON=true`: a first run gets the
    welcome question ("I know what I'm building" / "Build one for me") and the forging
    ritual (level, days, goal → a generated week), then the tour offer. The v5.0 rollout
-   marks the start of the v5 cycle — the user's brothers are the first outside users, so
+   marks the start of the v5 cycle — people other than the owner now install it, so
    the fresh-install path is now a real surface, not a parked one. The sandbox replays it.
    Also retired from the home screen the same day: the "Log a walk" side button (cardio
    lives in workouts now; the walk sheet only resurfaces while a walk's clock is running,
