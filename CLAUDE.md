@@ -85,6 +85,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   arrow, no finish-screen raise, no alarms, pushes or prompts while TUTON. The seed data currently trips
   isReady, which is why a level-up shows in the tour today; fix it with the tutorial rewrite, and check any
   new live feature against TUTON before it ships.
+- **Forge a day** (v5.202). The plus on an EMPTY day asks I'll build it / Forge it for me (dfAsk). The forge fills
+  the least covered of push, pull and legs across the board, or a full body day when the board is empty or
+  balanced; it never asks which muscles. The wizard's answers are kept in DB.ez (level, goal, len, kit) and
+  forgeDay reads them; anything new that needs equipment reads DB.ez too.
 - **Saved workouts is a fold** (SAVED_OPEN, savedApply). Pump day is a built-in card at its head,
   not in DB.extra. The level-up offer at the finish is finLvl → finRaise → openLevel.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills

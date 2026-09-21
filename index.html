@@ -3987,6 +3987,17 @@ body.wcon{overflow:hidden;}
     </div>
   </div>
 </div>
+<!-- Forge a day (v5.202, owner picked B): the plus on an empty day asks first, with the same two
+     cards the welcome uses to ask the same question about a whole week. -->
+<div class="ovl" id="dfOvl">
+  <div class="sheet" style="max-width:420px">
+    <h3 id="dfTtl">This day</h3>
+    <p>What goes on it?</p>
+    <div id="dfPicks" style="display:grid;gap:10px;margin-top:6px"></div>
+    <div class="sheet-btns"><div class="btn" onclick="closeOvl('dfOvl')">CANCEL</div></div>
+  </div>
+</div>
+
 <div class="ovl" id="histOvl">
   <div class="sheet">
     <div class="hh">
@@ -9495,7 +9506,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.201';
+var APPV='v5.202';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12514,7 +12525,84 @@ var PLUS='<svg viewBox="0 0 20 20"><path d="M10 4.5v11M4.5 10h11"/></svg>';
 // takes. Same model as holding a card - this just makes it findable.
 // Straight into the editor. There is no weekday left to pick on the way in, and the editor
 // already carries the only choice that remains: on the plan, or in the bank.
+// The plus on an EMPTY day asks first: build it yourself, or have the day your week is missing
+// forged for you (v5.202). A day that already holds something goes straight to the builder, and
+// so does the tour, which is a sealed space that must not grow new questions.
+var DFDAY=null;
 function openNewDay(k){
+  if(k&&!TUTON&&!SANDBOX&&!(DB.days[k]||[]).length){dfAsk(k);return;}
+  openNewDayNow(k);
+}
+function dfAsk(k){
+  DFDAY=k;
+  var d=null;DAYS.forEach(function(x){if(x.k===k)d=x;});
+  document.getElementById('dfTtl').textContent=d?d.n:'This day';
+  document.getElementById('dfPicks').innerHTML=
+    '<button class="ez-card" style="--i:0" onclick="dfBuild()"><span class="ez-art">'+WZ.fd[0]+'</span><span><b>I\'ll build it</b>'+
+    '<small>Pick the exercises yourself</small></span></button>'+
+    '<button class="ez-card" style="--i:1" onclick="dfForge()"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Forge it for me</b>'+
+    '<small>The day your week is missing</small></span></button>';
+  document.getElementById('dfOvl').classList.add('on');
+}
+function dfBuild(){closeOvl('dfOvl');openNewDayNow(DFDAY);}
+function dfForge(){closeOvl('dfOvl');forgeDay(DFDAY);}
+// What the week is missing: every exercise already on the board counts toward pushing, pulling or
+// legs, and the day forged is the one with the least. An empty board gets a full body day. This is
+// the app's opinion of balance, the same as Forge me a week: it never asks which muscles you want.
+function forgeFocus(){
+  var B={push:0,pull:0,legs:0},M={'chest-press':'push','chest-fly':'push','delt-press':'push','delt-side':'push','triceps':'push',
+    'back-vertical':'pull','back-horizontal':'pull','back-straight':'pull','biceps':'pull','delt-rear':'pull','traps':'pull',
+    'quad':'legs','glute':'legs','hamstring':'legs','calf':'legs','posterior':'legs'};
+  var any=0;
+  DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){
+    var w=W[id];if(!w||id==='rest')return;
+    (w.sections||[]).forEach(function(sec){(sec.rows||[]).forEach(function(r){
+      var ex=Array.isArray(r)?r[0]:r,b=M[grpOf(ex)];if(b){B[b]++;any++;}
+    });});
+  });});
+  if(!any)return 'full';
+  // A week already balanced within an exercise gets a full body day rather than a second helping
+  // of whichever area happened to win the tie.
+  var lo=Math.min(B.push,B.pull,B.legs),hi=Math.max(B.push,B.pull,B.legs);
+  if(hi-lo<=1)return 'full';
+  var best='legs';['legs','pull','push'].forEach(function(k){if(B[k]<B[best])best=k;});
+  return best;
+}
+function forgeDay(k){
+  if(!k)return;
+  var f=forgeFocus();
+  var tpl=f==='legs'?EZ_DAYS.legs:f==='push'?EZ_DAYS.push:f==='pull'?EZ_DAYS.pull:EZ_DAYS.fullA;
+  // The answers from the last time the forge asked its questions (DB.ez, v5.202). Somebody who
+  // built their week by hand never answered them: a gym, a steady goal, the gentle level.
+  var P=DB.ez||{},keep=EZ;
+  EZ={step:0,level:P.level||'beg',days:null,goal:P.goal||'muscle',kit:P.kit||null,len:P.len||60,into:'day',done:true};
+  var level=EZ.level,goal=EZ.goal,mult=level==='beg'?0.6:level==='adv'?1.4:1;
+  var sections=[],straight=[],used=[];
+  try{
+    ezTrim(tpl.r,EZ.len,goal).forEach(function(slot){
+      if(Array.isArray(slot[0])){
+        var a=ezRow(slot[0][0],slot[0][1],level,mult,goal,used),b=ezRow(slot[1][0],slot[1][1],level,mult,goal,used);
+        if(goal==='lean'&&a&&b){
+          if(straight.length){sections.push({title:'Straight sets',ss:false,rows:straight});straight=[];}
+          sections.push({title:'Superset',ss:true,rows:[a,b]});
+        }else{if(a)straight.push(a);if(b)straight.push(b);}
+        return;
+      }
+      var row=ezRow(slot[0],slot[1],level,mult,goal,used);
+      if(row)straight.push(row);
+    });
+  }finally{EZ=keep;}
+  if(straight.length)sections.push({title:'Straight sets',ss:false,rows:straight});
+  if(!sections.length){mkNote('Nothing could be forged with the equipment on record. Build this one yourself.','Nothing to forge');return;}
+  var NM={legs:'Legs',push:'Push',pull:'Pull',full:'Full body'};
+  var id='cus'+Date.now().toString(36)+'f';
+  DB.custom[id]={name:NM[f],custom:1,made:Date.now(),kind:'lift',tag:'Yours',time:'~9:00 PM',
+    color:MK_COLS[Object.keys(DB.custom).length%MK_COLS.length],sections:sections};
+  DB.days[k]=DB.days[k]||[];if(DB.days[k].indexOf(id)<0)DB.days[k].push(id);
+  mergeCustom();saveDB();renderHome();
+  try{sfxIgnite();}catch(e){}
+}
+function openNewDayNow(k){
   if(k&&dayFull(k)){mkNote('That day is full. Move something off it first.');return;}
   openMake(null,null,false,k);
   // A day's own + fixes the destination; the wide bar passes no day and keeps the chooser.
@@ -20245,6 +20333,18 @@ var WZ={
       '<path d="M16 23H30M36 23H44M50 23H58" stroke-width="3" opacity=".6"/>'+
     '</svg>'
   ],
+  // Forge a day (v5.202, owner picked pair 1): the welcome's blueprint of a week, drawn for a single
+  // day in the same hand, a ruled plate with empty rows. Its partner is the raised hammer, xp1[2].
+  fd:[
+    '<svg class="mo-still" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">'+
+      '<rect x="18" y="10" width="64" height="80" rx="6" stroke-width="4" opacity=".45"/>'+
+      '<path d="M18 27H82" stroke-width="4" opacity=".45"/><path d="M28 19H48" stroke-width="3" opacity=".7"/>'+
+      '<g stroke-width="3.5"><rect x="27" y="35" width="11" height="9" rx="2.5"/><path d="M45 39.5H72"/>'+
+      '<rect x="27" y="50" width="11" height="9" rx="2.5"/><path d="M45 54.5H66"/>'+
+      '<rect x="27" y="65" width="11" height="9" rx="2.5"/><path d="M45 69.5H70"/></g>'+
+      '<path d="M45 82H60" stroke-width="3.5" stroke-dasharray="1 7" opacity=".6"/>'+
+    '</svg>'
+  ],
   xp1:[
     '<svg class="mo-still" style="color:var(--txt3)" viewBox="0 0 100 100"><path fill="currentColor" fill-rule="evenodd" d="M31.6 29.3L92.0 29.3L92.0 30.4L86.8 36.2L70.1 43.1L68.4 44.2L68.4 46.5L65.0 47.1L60.9 50.0L59.8 52.3L59.8 57.5L64.4 62.7L71.3 65.5L71.3 70.7L59.2 70.7L55.8 66.7L52.3 65.5L45.4 66.1L42.5 67.8L40.8 70.7L28.1 70.7L28.1 65.5L34.5 63.2L39.1 59.2L40.2 56.9L39.6 52.3L36.8 49.4L31.6 48.3L30.4 46.0L26.4 46.0L16.6 42.5L12.0 39.1L8.0 32.2L31.6 32.2L31.6 29.3Z"/></svg>',
     '<svg class="mo-glow1" viewBox="0 0 100 100"><path fill="currentColor" fill-rule="evenodd" d="M31.6 29.0L92.0 29.0L92.0 30.2L86.8 36.5L81.6 37.6L70.1 43.4L69.0 46.3L65.5 46.8L60.9 50.3L59.8 52.6L59.8 56.6L64.4 62.4L71.3 65.2L71.3 71.0L59.2 71.0L57.5 68.1L52.3 65.8L45.4 66.4L40.2 71.0L28.1 71.0L28.1 65.2L35.0 62.4L38.5 58.9L39.6 56.6L39.1 52.0L36.8 49.7L31.0 48.0L31.0 46.3L29.9 45.7L23.5 45.1L15.5 41.7L10.3 37.1L8.0 32.5L31.0 32.5L31.6 29.0Z"/></svg>',
@@ -20638,6 +20738,9 @@ function ezForge(){
   }
   var mult=EZ.level==='beg'?0.6:EZ.level==='adv'?1.4:1;
   var goal=EZ.goal,level=EZ.level;
+  // Kept (v5.202). The questions used to be answered, used once and thrown away, so nothing after
+  // the first week knew what you own or how long you train. Forge a day reads these.
+  DB.ez={level:level,goal:goal,len:EZ.len||null,kit:EZ.kit||null,at:Date.now()};
   var plan=ezSplit(level,EZ.days,goal),slots=EZ_SLOTS[EZ.days]||EZ_SLOTS[3];
   dayMap();
   // One workout per unique day-shape, REUSED where the split repeats it - Full Body A on
