@@ -81,6 +81,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   row_bg_under / plate_num, anvil_gold and anvil_match. 1.9 (versionCode 209, installed 20 Sep) adds the wrist hold timer and stops the ongoing chip counting past zero; 1.8 restyled the
   ongoing chip (ic_anvil, the coming set with its weight) and lets a set picked from the ladder mid-rest
   be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
+- **The tour is a sealed space** (owner, 20 Sep). Nothing from the live app reaches into it: no level-up
+  arrow, no finish-screen raise, no alarms, pushes or prompts while TUTON. The seed data currently trips
+  isReady, which is why a level-up shows in the tour today; fix it with the tutorial rewrite, and check any
+  new live feature against TUTON before it ships.
 - **Saved workouts is a fold** (SAVED_OPEN, savedApply). Pump day is a built-in card at its head,
   not in DB.extra. The level-up offer at the finish is finLvl → finRaise → openLevel.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
