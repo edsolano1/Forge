@@ -2158,7 +2158,10 @@ body.forge #bg > .bg-light{top:auto;bottom:-34vh;left:50%;width:120vw;height:70v
   background:radial-gradient(closest-side,rgba(255,120,30,.22),transparent 70%);
   animation:hearthbreath 5.2s ease-in-out infinite;transform:translateX(-50%);}
 @keyframes hearthbreath{0%,100%{opacity:.5;}50%{opacity:.9;}}
-body.forge .bg-wm svg{opacity:0;}
+/* T3 (v5.193): the anvil in the floor. It was always in the ground layer and the Forge theme
+   turned it off; it comes back at about a twentieth, low enough to read as depth rather than as
+   a picture. One anvil in the app, not a second one drawn on the board. */
+body.forge .bg-wm svg{opacity:.045;}
 body.forge .bg-motes i:nth-child(n+15){display:none;}
 body.forge .bg-motes i{animation-name:emberlow;}
 @keyframes emberlow{
@@ -2500,6 +2503,25 @@ body.forge .wk-flip{color:#9fc0d6;border-color:#4d6f89;background:#17293a;}
 body.forge .wk-flip:hover{color:#cfe2f0;border-color:#6d92ad;}
 body.forge.wkother .wk-flip{color:#ffd9b5;border-color:#8a4a20;background:#2f1a0c;}
 body.forge.wkother .wk-flip:hover{color:#ffe7cd;border-color:#b3672d;}
+
+/* ---- Texture, v5.193 (owner picked T1, T2 and T3). ----
+   T1: light sits on a forged face as a lit line along the top edge and a dark one under the
+   bottom. Every plate on the board and the footer plate get it, which is the difference between
+   an object and a rectangle. Today keeps its glow and adds the same line rather than losing it.
+   T2: today is the one thing on the board still hot, so its tag breathes and nothing else does.
+   Motion Off stops it, like everything else that moves. ---- */
+body.forge .daybox > .card,body.forge .dayhead,body.forge .dayempty.dayadd,body.forge .dayempty.dayadd.quiet,body.forge .fbtn{
+  box-shadow:inset 0 1px 0 rgba(255,190,130,.14),inset 0 -1px 0 rgba(0,0,0,.5);}
+body.forge .daybox.today .dayhead{animation:dayHot 4.6s ease-in-out infinite;}
+@keyframes dayHot{
+  0%,100%{box-shadow:0 0 13px -5px rgba(255,120,30,.5),inset 0 1px 0 rgba(255,190,130,.18);}
+  50%{box-shadow:0 0 22px -3px rgba(255,120,30,.9),inset 0 1px 0 rgba(255,190,130,.32);}}
+:root.mo-off body.forge .daybox.today .dayhead{animation:none;
+  box-shadow:0 0 14px -4px rgba(255,120,30,.6),inset 0 1px 0 rgba(255,190,130,.22);}
+/* the week in minutes, under the board (F2) */
+.wk-mins{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:var(--txt3);margin:3px 2px 0;text-align:right;}
+.wk-mins b{color:var(--txt2);font-weight:500;}
+.wk-mins[hidden]{display:none;}
 
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2c1c;}
@@ -3310,6 +3332,9 @@ body.wcon{overflow:hidden;}
   <div class="sec-row"><div class="sec-label" id="weekLabel">Your Week</div><div class="wk-flip" id="weekFlip" onclick="twoFlip()" hidden></div></div>
   <div class="mk-hint" id="weekHint"></div>
   <div id="weekCards"></div>
+  <!-- Sessions have carried their length since v5.177 and nothing added them up (v5.193, F2).
+       One line, this week against last, and only once there is something to say. -->
+  <div class="wk-mins" id="wkMins" hidden></div>
   <!-- label, hint and cards are one thing to look at, so the tour can light them as one -->
   <div id="extraWrap">
     <!-- Saved is folded by default (v5.138): one line under the week, the shelf one tap away and still
@@ -9464,7 +9489,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.192';
+var APPV='v5.193';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10780,6 +10805,26 @@ function dayBox(d,nx,n0){
 // A rest day you chose reads differently from a day you have not filled in: it says Rest instead
 // of asking. The built-in rest day is the card that says so, and it is exempt from the one day per
 // workout rule, so it can stand on as many days as you rest (v5.192, F1).
+// Time under the hammer. A session with no stored length still counts as a session but adds no
+// minutes, so an old log never reads as a week that got shorter (v5.193, F2).
+function weekMins(t0,t1){
+  var m=0,c=0;
+  (DB.logs||[]).forEach(function(L){
+    var t=new Date(L.date+"T12:00:00").getTime();
+    if(t<t0||t>=t1||L.marked)return;
+    c++;m+=(L.mins||0);
+  });
+  return {m:m,n:c};
+}
+function renderMins(){
+  var el=document.getElementById("wkMins");if(!el)return;
+  var wk=7*86400000,ws=weekStartTs();
+  var now=weekMins(ws,ws+wk),prev=weekMins(ws-wk,ws);
+  if(!now.n&&!prev.n){el.hidden=true;return;}
+  var out=now.n?("<b>"+fmtMins(now.m)+"</b> across "+now.n+(now.n===1?" session":" sessions")):"Nothing logged yet this week";
+  if(prev.m)out+=" &middot; last week "+fmtMins(prev.m);
+  el.innerHTML=out;el.hidden=false;
+}
 function markRest(k){
   if(!k||(DB.days[k]||[]).length)return;
   DB.days[k]=['rest'];saveDB();renderHome();
@@ -11484,6 +11529,7 @@ function renderTagline(){
 }
 function renderHome(){
   renderMark();renderName();renderPumpIcon();renderTagline();renderBg();
+  try{renderMins();}catch(e){}
   // A live pump day is not part of the fixed week, so without a card of its own there is
   // nothing on this screen to carry you back into it.
   var pumpOpen=loggedCount('pump')>0?
