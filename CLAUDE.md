@@ -78,7 +78,7 @@ main constraint on how to work in it. See **Traps** below before editing.
   terms.html sits beside privacy.html, linked from the safety screen and Settings (v5.172).
 - **The watch wears the Plates look (1.7, 16 Sep)**: Marcellus and IBM Plex Mono as font files under
   wear/src/main/res/font, plate drawables row_bg / row_bg_done / row_bg_cur / row_bg_match /
-  row_bg_under / plate_num, anvil_gold and anvil_match. 1.8 (versionCode 208, confirmed installed on the watch 20 Sep) restyles the
+  row_bg_under / plate_num, anvil_gold and anvil_match. 1.9 (versionCode 209, installed 20 Sep) adds the wrist hold timer and stops the ongoing chip counting past zero; 1.8 restyled the
   ongoing chip (ic_anvil, the coming set with its weight) and lets a set picked from the ladder mid-rest
   be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
 - **Saved workouts is a fold** (SAVED_OPEN, savedApply). Pump day is a built-in card at its head,
