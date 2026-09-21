@@ -2196,12 +2196,15 @@ body.forge .daybox.today .dayhead-add{color:#e0a874;}
 /* An empty day used to stand as tall as a day with a workout on it, so a week with three workouts
    spent most of its height on plus signs. The day still keeps its place and its plate; it just
    lies down, and the tag turns on its side to fit (v5.192, R1). */
-body.forge .daybox.empty{min-height:28px;padding-bottom:0;margin-bottom:6px;}
+body.forge .daybox.empty{min-height:34px;padding-bottom:0;margin-bottom:6px;}
 body.forge .daybox.empty .dayhead{background:#0e0806;border-color:#2a1810;}
+/* The tag stays stacked, the way it is on a day with a workout on it: turning it on its side to
+   save height squeezed SUN and 20 into 46px and read as cramped (owner, 20 Sep). It is simply
+   quieter and smaller here, and the row grew a little to give it room. */
 body.forge .daybox.empty .dayhead > span:first-child{padding:0;background:transparent;border:0;color:var(--txt3);
-  flex-direction:row;align-items:baseline;justify-content:center;gap:5px;font-size:8.5px;letter-spacing:.12em;}
-body.forge .daybox.empty .dh-d{color:var(--txt3);font-size:11px;margin-top:0;}
-body.forge .daybox.empty .dayempty.dayadd,body.forge .daybox.empty .dayempty.dayadd.quiet{padding:0 8px 0 0;height:28px;margin:0;display:flex;align-items:center;justify-content:center;}
+  flex-direction:column;align-items:center;justify-content:center;gap:0;font-size:8px;letter-spacing:.1em;line-height:1.1;}
+body.forge .daybox.empty .dh-d{color:var(--txt3);font-size:11px;margin-top:0;line-height:1.1;}
+body.forge .daybox.empty .dayempty.dayadd,body.forge .daybox.empty .dayempty.dayadd.quiet{padding:0 8px 0 0;height:34px;margin:0;display:flex;align-items:center;justify-content:center;}
 /* The way to say a day is rest rather than unfilled (v5.192, F1). It sits on the empty row itself,
    because the moment you know a day is a rest day is the moment you are looking at it empty. */
 body.forge .dayrest{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;
@@ -2210,7 +2213,7 @@ body.forge .dayrest:hover{color:var(--txt2);}
 body.forge .daybox.empty .dayempty.dayadd{position:relative;}
 /* A rest day is a decision, not a session, so it lies down like the empty rows rather than standing
    up like a workout. Only the days you train are tall (v5.192, F1). */
-body.forge .daybox > .card.rest{min-height:28px;padding:5px 10px 5px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+body.forge .daybox > .card.rest{min-height:34px;padding:5px 10px 5px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
 body.forge .card.rest .card-top{flex:1;min-width:0;}
 body.forge .card.rest .card-name{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#8a6a52;}
 body.forge .card.rest .card-meta{margin:0;font-size:10px;color:#6b533f;max-width:100%;}
@@ -9489,7 +9492,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.193';
+var APPV='v5.194';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
