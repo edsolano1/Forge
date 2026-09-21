@@ -9495,7 +9495,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.200';
+var APPV='v5.201';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20373,6 +20373,11 @@ function ezOpen(into){
 function ezClose(){document.getElementById('ez').classList.remove('on');}
 function ezBack(){
   if(EZ.step>0){EZ.step--;ezRender();return;}
+  // Forge me a week, opened from Saved, has no welcome behind it: backing out of its first
+  // question used to open the first-run welcome anyway, which asked "welcome to Forge" of
+  // somebody with a week already built and had no way back to it (owner, 21 Sep). It just
+  // closes now and leaves you on the week you came from (v5.201).
+  if(EZ.into==='saved'){ezClose();renderHome();return;}
   // step zero backs out to the welcome question itself
   ezClose();
   var w=document.getElementById('welcome');
