@@ -125,8 +125,6 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 @media(max-width:400px){.wordmark{font-size:23px;}}
 .wordmark{font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.035em;color:var(--txt);line-height:1;}
 /* Temporary build tag. Small, quiet, and never inheriting the theme's display face. */
-.vtag{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.06em;color:var(--txt3);
-  vertical-align:super;margin-left:7px;opacity:.7;}
 .tagline{font-size:12px;color:var(--txt3);margin-top:5px;letter-spacing:-.005em;}
 .storenote{font-size:11px;color:var(--txt3);margin:16px 0 0;}
 .sec-label{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--txt2);margin:26px 0 12px;}
@@ -2192,11 +2190,28 @@ body.forge .daybox.today .dayhead{background:#3a1d0c;border-color:#a0521c;box-sh
 body.forge .daybox.today .dayhead > span:first-child{background:transparent;border:0;box-shadow:none;color:#ffd9b5;}
 body.forge .daybox.today .dh-d{color:#fff;}
 body.forge .daybox.today .dayhead-add{color:#e0a874;}
-body.forge .daybox.empty{min-height:46px;padding-bottom:0;}
+/* An empty day used to stand as tall as a day with a workout on it, so a week with three workouts
+   spent most of its height on plus signs. The day still keeps its place and its plate; it just
+   lies down, and the tag turns on its side to fit (v5.192, R1). */
+body.forge .daybox.empty{min-height:28px;padding-bottom:0;margin-bottom:6px;}
 body.forge .daybox.empty .dayhead{background:#0e0806;border-color:#2a1810;}
-body.forge .daybox.empty .dayhead > span:first-child{padding:4px 0;background:transparent;border:0;color:var(--txt3);}
-body.forge .daybox.empty .dh-d{color:var(--txt3);}
-body.forge .daybox.empty .dayempty.dayadd,body.forge .daybox.empty .dayempty.dayadd.quiet{padding:0;height:46px;margin:0;display:flex;align-items:center;justify-content:center;}
+body.forge .daybox.empty .dayhead > span:first-child{padding:0;background:transparent;border:0;color:var(--txt3);
+  flex-direction:row;align-items:baseline;justify-content:center;gap:5px;font-size:8.5px;letter-spacing:.12em;}
+body.forge .daybox.empty .dh-d{color:var(--txt3);font-size:11px;margin-top:0;}
+body.forge .daybox.empty .dayempty.dayadd,body.forge .daybox.empty .dayempty.dayadd.quiet{padding:0 8px 0 0;height:28px;margin:0;display:flex;align-items:center;justify-content:center;}
+/* The way to say a day is rest rather than unfilled (v5.192, F1). It sits on the empty row itself,
+   because the moment you know a day is a rest day is the moment you are looking at it empty. */
+body.forge .dayrest{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;
+  color:#6b533f;font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;padding:6px 8px;cursor:pointer;line-height:1;}
+body.forge .dayrest:hover{color:var(--txt2);}
+body.forge .daybox.empty .dayempty.dayadd{position:relative;}
+/* A rest day is a decision, not a session, so it lies down like the empty rows rather than standing
+   up like a workout. Only the days you train are tall (v5.192, F1). */
+body.forge .daybox > .card.rest{min-height:28px;padding:5px 10px 5px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+body.forge .card.rest .card-top{flex:1;min-width:0;}
+body.forge .card.rest .card-name{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#8a6a52;}
+body.forge .card.rest .card-meta{margin:0;font-size:10px;color:#6b533f;max-width:100%;}
+body.forge .card.rest::before{background:#3a2214;}
 body.forge .daybox.quenched .dayhead{background:#171716;border-color:#343433;}
 body.forge .daybox.quenched .dayhead > span:first-child{background:transparent;border:0;color:#84827f;}
 body.forge .daybox.quenched .dh-d{color:#84827f;}
@@ -2667,7 +2682,8 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hdel:active{transform:scale(.99);}
 
 /* ---------- footer: a real panel, not fine print ---------- */
-.footbar{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
+/* one button wide since Backup moved into Settings, where anyone would look for it (v5.192, R3) */
+.footbar{display:grid;grid-template-columns:1fr;gap:7px;}
 .fbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
   padding:15px 6px 13px;border-radius:12px;border:1px solid var(--line);cursor:pointer;transition:.16s;
   background:linear-gradient(180deg,rgba(190,214,255,.05),rgba(190,214,255,.008)),var(--surface);
@@ -3300,8 +3316,12 @@ body.wcon{overflow:hidden;}
          on the same page so drag and hold keep working. The plus and Forge me a week sit on the line. -->
     <div class="sv-head" id="extraLabel">
       <button class="sv-tog" onclick="savedToggle()" aria-expanded="false"><svg class="sv-chev" viewBox="0 0 20 20"><path d="M6 8l4 4 4-4"/></svg><span class="sec-label" id="extraLabelTxt">Saved workouts</span></button>
-      <span class="sv-acts"><button class="sv-btn sv-forge" onclick="ezOpen('saved')" title="Forge me a week"><svg viewBox="0 0 100 100" id="svForgeIco"></svg><span>Forge me a week</span></button><button class="sv-btn" onclick="openNewSaved()" title="New saved workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></span>
+      <span class="sv-acts"><button class="sv-btn" onclick="openNewSaved()" title="New saved workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></span>
     </div>
+    <!-- Forge me a week moved off that line and into the fold (v5.192, R4): a forged week lands in
+         Saved, so the button belongs where its result does, and the line under the board is two
+         controls instead of three. -->
+    <div id="extraForge" hidden><button class="sv-btn sv-forge" onclick="ezOpen('saved')" title="Forge me a week"><svg viewBox="0 0 100 100" id="svForgeIco"></svg><span>Forge me a week</span></button></div>
     <div class="mk-hint" id="extraHint" hidden>Not part of the week. Open one whenever you want it.</div>
     <div id="extraCards" hidden></div>
   </div>
@@ -3709,9 +3729,17 @@ body.wcon{overflow:hidden;}
     </div>
     <div class="footnote" id="hcNote" style="display:none;margin:6px 2px 0"></div>
     </div>
-    <!-- Backup is off the sheet for this release. doBackup/pickRestore/doRestore are untouched and
-         the file input stays, so the pair is two lines of markup away from coming back. -->
+    <!-- Backup came back onto this sheet in v5.192 (R3), off the home footer: it is a utility you
+         touch twice a year, and Settings is where anybody goes looking for it. -->
     <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="doRestore(this)">
+    <div class="set-card">
+    <div class="set-sec">Your data</div>
+    <div class="sfx-lbl"><span>Backup and restore</span></div>
+    <div class="presets" style="grid-template-columns:1fr">
+      <button class="preset sm" onclick="openBackup()">SAVE A COPY, OR PUT ONE BACK</button>
+    </div>
+    <div class="footnote" style="margin:6px 2px 0">Everything you have logged, in one file you keep.</div>
+    </div>
     <div class="set-card">
     <div class="set-sec">Learn</div>
     <div class="sfx-lbl"><span>Tutorial</span></div>
@@ -9436,7 +9464,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.191';
+var APPV='v5.192';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10707,6 +10735,8 @@ function planCard(id,i,nx,dk){
   // DB.restLabel first: what the rest day is FOR is the user's own, not the app's to state.
   var ts=totalSets(id),tsw=ts+(ts===1?' set':' sets');
   var meta=v==='rest'?(DB.restLabel||(e&&e.label)||'Rest'):(v==='opt'?'Optional':'');
+  // "Rest Day" over "Rest day" said the same thing twice on the slim rest row (v5.192).
+  if(v==='rest'&&meta&&meta.trim().toLowerCase()===String(w.name||'').trim().toLowerCase())meta='';
   return '<div class="card'+(v?' '+v:'')+(sealed?' sealed':'')+(up?' upnext':'')+(waiting?' waiting':'')+'" data-base="'+id+'" style="--c:'+dayC(id)+';--gd:-'+(i*0.77).toFixed(2)+'s" onclick="mkTap(\''+id+'\',\''+dk+'\')">'+
     (sealed?'<svg class="seal" viewBox="0 0 100 100">'+ouroboros('var(--gold)','var(--surface)',false)+'</svg>':'')+
     '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
@@ -10742,9 +10772,18 @@ function dayBox(d,nx,n0){
   // anywhere, an empty day is a plus and a drop target, nothing more: five days each saying
   // Add a workout was the clutter, not the plus.
   if(!ids.length){var bare0=!DAYS.some(function(x){return (DB.days[x.k]||[]).length;});
-    h+='<div class="dayempty dayadd'+(bare0?'':' quiet')+'" onclick="openNewDay(\''+d.k+'\')" title="Add a workout">'+PLUS+(bare0?'Add a workout':'')+'</div>';}
+    h+='<div class="dayempty dayadd'+(bare0?'':' quiet')+'" onclick="openNewDay(\''+d.k+'\')" title="Add a workout">'+PLUS+(bare0?'Add a workout':'')+
+       '<button class="dayrest" onclick="event.stopPropagation();markRest(\''+d.k+'\')" title="This is a rest day">REST</button></div>';}
   else ids.forEach(function(id,n){h+=planCard(id,n0+n,nx,d.k);});
   return h+'</div>';
+}
+// A rest day you chose reads differently from a day you have not filled in: it says Rest instead
+// of asking. The built-in rest day is the card that says so, and it is exempt from the one day per
+// workout rule, so it can stand on as many days as you rest (v5.192, F1).
+function markRest(k){
+  if(!k||(DB.days[k]||[]).length)return;
+  DB.days[k]=['rest'];saveDB();renderHome();
+  try{vib(12);sfxTick&&sfxTick();}catch(e){}
 }
 // A kept day has no weekday and no slot, so it carries the day's own name where the weekday
 // would go. Everything else on the card behaves as a week card does.
@@ -11356,9 +11395,9 @@ window.addEventListener('resize',function(){
 function APPNAME(){return MW()?'MOONWELL':FG()?'FORGE':LT()?'TUNDRA':'ARCANUM';}
 function renderName(){
   var w=document.querySelector('.wordmark');
-  // Temporary: the build number sits beside the title so it can be read at a glance instead of
-  // scrolled to. It goes when the app stops changing several times an hour.
-  if(w)w.innerHTML=mkEsc(APPNAME())+'<span class="vtag">'+mkEsc(APPV)+'</span>';
+  // The build number used to sit beside the title as well as at the foot of the page and in
+  // Settings. Three places for one number; it kept the one furthest out of the way (v5.192, R2).
+  if(w)w.textContent=APPNAME();
   var sv=document.getElementById('setVer');if(sv)sv.textContent=APPNAME()+' '+APPV;
   var sp=document.querySelector('.sp-word');
   if(sp)sp.textContent=MW()?'Moonwell':FG()?'Forge':LT()?'Tundra':'Arcanum';
@@ -11518,11 +11557,6 @@ function renderHome(){
         ?'<svg viewBox="0 0 20 20"><path d="M4 15.5h12l-1 2.5H5zM5.5 11.5h9l-.9 2.6H6.4zM7 7.5h6l-.8 2.6H7.8zM10 2.5v3.6M8.4 4.3L10 2.5l1.6 1.8"/></svg>'
         :'<svg viewBox="0 0 20 20"><path d="M3.5 3.5h13v13h-13zM3.5 7.5h13M7.5 3.5v13"/></svg>')+
         (fgw?'Pieces<br>finished':'Workouts<br>finished')+'</div>'+
-      '<div class="fbtn" onclick="openBackup()">'+(fg
-        // ingot going into the crucible
-        ?'<svg viewBox="0 0 20 20"><path d="M10 2.5v7M7 7l3 3 3-3M4 12.5h12l-1.5 5h-9z"/></svg>'
-        :'<svg viewBox="0 0 20 20"><path d="M10 13V3M6.5 9.5L10 13l3.5-3.5M3.5 15.5h13"/></svg>')+
-        (fgw?'Store<br>&amp; recover':'Backup<br>&amp; restore')+'</div>'+
     '</div>'+
     // The whole-week UNLOCK button came off the footer (owner call, 12 Sep 2026): the week
     // resets on its own, the end-of-week dialog still offers another round, and the one real
@@ -12424,6 +12458,7 @@ function savedApply(n){
   h.classList.toggle('open',SAVED_OPEN);
   var b=h.querySelector('.sv-tog');if(b)b.setAttribute('aria-expanded',SAVED_OPEN?'true':'false');
   c.hidden=!SAVED_OPEN;
+  var fb=document.getElementById('extraForge');if(fb)fb.hidden=!SAVED_OPEN;
   if(t)t.hidden=!(SAVED_OPEN&&n>0);
 }
 function openNewSaved(){
