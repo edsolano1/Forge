@@ -2528,6 +2528,21 @@ body.forge .daybox.today .dayhead{animation:dayHot 4.6s ease-in-out infinite;}
 .inp::placeholder{color:#6b533f;opacity:1;}
 body.forge .inp::placeholder{color:#7a5c46;}
 
+/* ---- The pump picker, v5.203 (owner picked A, icons 3). Three tiles with the lifter in each pose,
+   the chosen one lit; the equipment as pills under them. ---- */
+.pk-kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px;}
+.pk-kind{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px 11px;border:1px solid #2a1810;border-radius:12px;background:#0e0806;cursor:pointer;color:var(--txt2);
+  box-shadow:inset 0 1px 0 rgba(255,190,130,.12),inset 0 -1px 0 rgba(0,0,0,.5);}
+.pk-kind .pk-ic{width:58px;height:58px;display:block;}
+.pk-kind .pk-ic svg{width:100%;height:100%;display:block;overflow:visible;}
+.pk-kind b{font-family:var(--mono);font-weight:400;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;}
+.pk-kind:not(.on) .pk-ic{opacity:.55;}
+.pk-kind.on{border-color:var(--gold);background:#1f1109;box-shadow:0 0 14px -5px rgba(255,138,31,.8),inset 0 1px 0 rgba(255,190,130,.2);color:#ffd9b5;}
+.pk-lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);text-align:center;margin:14px 0 8px;}
+.pk-kits{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+.pk-kit{font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--txt3);background:#0e0806;border:1px solid #2a1810;border-radius:999px;padding:7px 13px;cursor:pointer;}
+.pk-kit.on{color:var(--gold);border-color:#6a3f26;}
+
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2c1c;}
 .fin-plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
@@ -3393,11 +3408,13 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="pumpOvl">
   <div class="sheet" style="max-width:400px">
     <h3>Pump day</h3>
-    <p>An all-over pump: high reps, light weight, short rest. It fills every muscle with blood and accentuates everything you have been building. For whenever you want to look and feel your best.</p>
-    <p style="color:var(--txt2)">Runs about 35 to 45 minutes. It does not replace a training day and its numbers stay separate, so nothing here affects your real progression.</p>
+    <p>High reps, light weight, short rests. Its numbers stay separate, so nothing here touches your real progression.</p>
+    <div class="pk-kinds" id="pkKinds"></div>
+    <div class="pk-lbl">What do you have today?</div>
+    <div class="pk-kits" id="pkKits"></div>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('pumpOvl')">Not now</div>
-      <div class="btn btn-go" onclick="closeOvl('pumpOvl');openW('pump')">Start</div>
+      <div class="btn btn-go" onclick="pumpGo()">Start</div>
     </div>
   </div>
 </div>
@@ -4216,12 +4233,61 @@ var PUMP={
   // rather than just the mirror muscles - still light, still quick, two sets each.
   p_pdown:{name:"Straight-Arm Pulldown",note:"Arms straight, sweep the bar to your thighs. Feel the upper back fan out wide",sets:"20x15\n20x15",rest:"30 sec"},
   p_lext: {name:"Leg Extension",note:"Light. Pause at the top and let the front of the thighs fill",sets:"30x15\n30x15",rest:""},
-  p_lcurl:{name:"Seated Leg Curl",note:"Smooth, no slamming. Right after extensions, then rest",sets:"30x15\n30x15",rest:"30 sec"}
+  p_lcurl:{name:"Seated Leg Curl",note:"Smooth, no slamming. Right after extensions, then rest",sets:"30x15\n30x15",rest:"30 sec"},
+  // v5.203: the lower and full body pumps, and the dumbbell and floor versions of all three. Still
+  // pump exercises, so their numbers stay out of your real progression like the rest of this list.
+  p_dbfly: {name:"Dumbbell Fly",note:"Light, a wide arc and a soft bend in the elbows. Squeeze at the top",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
+  p_dbrow: {name:"One-Arm Dumbbell Row",note:"Hand and knee on the bench, pull the weight to your hip",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
+  p_sdbcurl:{name:"Seated Dumbbell Curl",note:"Sit tall, elbows pinned to your sides. Turn the palms up as you lift. Right after it, the dips, then rest",sets:"0x15\n0x15\n0x15",rest:""},
+  p_pushup:{bw:1,name:"Push-Up",note:"Body in one straight line. On your knees is fine",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
+  p_doorrow:{bw:1,name:"Doorway Row",note:"Grip a sturdy door frame, lean back with straight arms, pull yourself in",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
+  p_row:   {name:"Seated Cable Row",note:"Chest tall, pull the handle to your stomach, squeeze your shoulder blades together",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
+  p_hthrust:{name:"Machine Hip Thrust",note:"Drive through the heels until the body is a flat line, hold the squeeze a beat",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
+  p_goblet:{name:"Goblet Squat",note:"One dumbbell held at the chest, sit straight down between the heels",sets:"0x15\n0x15\n0x15",rest:"45 sec"},
+  p_lunge: {name:"Walking Lunge",note:"A dumbbell in each hand. Long steps, the back knee comes close to the floor",sets:"0x12\n0x12",rest:"45 sec"},
+  p_sldl:  {name:"Single-Leg Romanian Deadlift",note:"One dumbbell, one leg. Hips back, the free leg rises behind you",sets:"0x12\n0x12",rest:"45 sec"},
+  p_stepup:{name:"Dumbbell Step-Up",note:"A dumbbell in each hand, the whole foot on the bench, stand all the way up",sets:"0x12\n0x12",rest:"45 sec"},
+  p_stcalf:{name:"Standing Calf Raise Machine",note:"Rise as high as you can, hold a beat, lower slowly",sets:"0x20\n0x20\n0x20",rest:"30 sec"},
+  p_dbcalf:{name:"Dumbbell Calf Raise",note:"A dumbbell in each hand. Rise as high as you can, lower slowly",sets:"0x20\n0x20\n0x20",rest:"30 sec"},
+  p_glutebr:{bw:1,name:"Glute Bridge",note:"On your back, knees bent. Drive the hips up and squeeze",sets:"0x20\n0x20",rest:"30 sec"},
+  p_sideplank:{name:"Side Plank",note:"On one forearm, body in a straight line. Both sides make one set",sets:"30 sec\n30 sec",rest:"30 sec"},
+  p_bwsquat:{bw:1,name:"Bodyweight Squat",note:"Arms forward for balance, sit back and down, stand tall",sets:"0x20\n0x20\n0x20",rest:"30 sec"},
+  p_bwcalf:{bw:1,name:"Bodyweight Calf Raise",note:"On a step if you have one. Rise high, lower slowly",sets:"0x25\n0x25",rest:"30 sec"}
 };
 for(var __p in PUMP){EX[__p]=PUMP[__p];}
+// The three pumps (v5.203, owner picked A): what goes on each, for a gym, dumbbells, or nothing.
+// A section is [title, superset?, rows]. Light and quick throughout, like the original Pump Day.
+var PUMP_KINDS={
+  upper:{
+    gym:[['Chest: blood in, no grinding',0,['p_inc','p_xover','p_fly']],['Shoulders: width',0,['p_lat']],['Back: spread it wide',0,['p_pdown']],
+         ['Arms superset: alternate, 30 sec after both',1,['p_curl','p_rope']],['Arms burnout: alternate, 30 sec after both',1,['p_hammer','p_dip']],
+         ['Core superset: tighten the midsection',1,['p_bike','p_hollow']]],
+    db: [['Chest',0,['p_inc','p_dbfly']],['Shoulders: width',0,['p_lat']],['Back',0,['p_dbrow']],
+         ['Arms superset: alternate, 30 sec after both',1,['p_sdbcurl','p_dip']],['Arms burnout',0,['p_hammer']],
+         ['Core superset: tighten the midsection',1,['p_bike','p_hollow']]],
+    none:[['Push and pull',0,['p_pushup','p_doorrow']],['Arms',0,['p_dip']],['Core superset: tighten the midsection',1,['p_bike','p_hollow']]]
+  },
+  lower:{
+    gym:[['Glutes',0,['p_hthrust']],['Thighs superset: light and quick',1,['p_lext','p_lcurl']],['Legs',0,['p_lunge','p_goblet']],
+         ['Calves',0,['p_stcalf']],['Finish',0,['p_glutebr','p_sideplank']]],
+    db: [['Legs',0,['p_goblet','p_sldl']],['Legs',0,['p_lunge','p_stepup']],['Calves',0,['p_dbcalf']],['Finish',0,['p_glutebr','p_sideplank']]],
+    none:[['Legs',0,['p_bwsquat']],['Calves',0,['p_bwcalf']],['Finish',0,['p_glutebr','p_sideplank']]]
+  },
+  full:{
+    gym:[['Legs',0,['p_goblet']],['Chest',0,['p_inc']],['Back',0,['p_row']],['Shoulders',0,['p_lat']],['Hamstrings',0,['p_lcurl']],
+         ['Arms superset: alternate, 30 sec after both',1,['p_curl','p_rope']],['Core superset: tighten the midsection',1,['p_bike','p_hollow']]],
+    db: [['Legs',0,['p_goblet']],['Chest',0,['p_inc']],['Back',0,['p_dbrow']],['Shoulders',0,['p_lat']],['Hamstrings',0,['p_sldl']],
+         ['Arms superset: alternate, 30 sec after both',1,['p_sdbcurl','p_dip']],['Core superset: tighten the midsection',1,['p_bike','p_hollow']]],
+    none:[['Legs',0,['p_bwsquat']],['Push and pull',0,['p_pushup','p_doorrow']],['Glutes',0,['p_glutebr']],
+         ['Core superset: tighten the midsection',1,['p_bike','p_hollow']]]
+  }
+};
 var PUMPGRP={p_inc:'chest-press',p_xover:'chest-fly',p_fly:'chest-fly',p_lat:'delt-side',
   p_curl:'biceps',p_hammer:'biceps',p_rope:'triceps',p_dip:'triceps',p_bike:'core',p_hollow:'core',
-  p_pdown:'back-vertical',p_lext:'quad',p_lcurl:'hamstring'};
+  p_pdown:'back-straight',p_lext:'quad',p_lcurl:'hamstring',
+  p_dbfly:'chest-fly',p_dbrow:'back-horizontal',p_sdbcurl:'biceps',p_pushup:'chest-press',p_doorrow:'back-horizontal',
+  p_row:'back-horizontal',p_hthrust:'glute',p_goblet:'quad',p_lunge:'quad',p_sldl:'hamstring',p_stepup:'glute',p_stcalf:'calf',p_dbcalf:'calf',
+  p_glutebr:'glute',p_sideplank:'core',p_bwsquat:'quad',p_bwcalf:'calf'};
 var ALTGRP={lvchest:'chest-press',dbbench:'chest-press',smbench:'chest-press',pushup:'chest-press',
   dbfly:'chest-fly',machrow:'back-horizontal',dbrow:'back-horizontal',machpd:'back-vertical',
   bbcurl:'biceps',inccurl:'biceps',dip:'triceps',bdip:'triceps',
@@ -9506,7 +9572,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.202';
+var APPV='v5.203';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12325,6 +12391,7 @@ function mergeCustom(){
   // filter rather than hidden by it, see mkFiltHit.
   for(var k in DB.cex){EX[k]=DB.cex[k];NOREF[k]=1;if(DB.cex[k].grp)GRP[k]=DB.cex[k].grp;else if(!GRP[k])GRP[k]='other';}
   for(var d in DB.custom)W[d]=DB.custom[d];
+  pumpApply();
   // Once the library is whole, hand every workout its slots. Here because it is the one place
   // that runs on load AND after every builder save, so a day that just gained a second bench
   // press is filed correctly before anything can be logged into it.
@@ -18635,9 +18702,42 @@ function walkWeek(){
   });
   return t;
 }
+// Which pump, and with what (v5.203, owner picked A with the lifter icons). A pump already under
+// way reopens as it is; otherwise the sheet asks, opened on your last answers.
+function pumpApply(){
+  var P=DB.pumpNow;if(!P||!PUMP_KINDS[P.kind])return;
+  var spec=PUMP_KINDS[P.kind][P.kit]||PUMP_KINDS[P.kind].gym;
+  var base=W.pump||{};
+  // a copy, so a migrated phone's own stored Pump Day is never rewritten underneath it
+  W.pump={};for(var k in base)W.pump[k]=base[k];
+  W.pump.sections=spec.map(function(x){return {title:x[0],ss:!!x[1],rows:x[2].filter(function(id){return !!EX[id];})};}).filter(function(x){return x.rows.length;});
+}
+function pumpKitDefault(){
+  var k=(DB.ez&&DB.ez.kit)||'gym';
+  return (k==='dbb'||k==='dbo')?'db':(k==='none'?'none':'gym');
+}
+var PK={kind:'upper',kit:'gym'};
 function openPump(){
   if(loggedCount('pump')>0){openW('pump');return;}
+  PK={kind:(DB.pumpNow&&DB.pumpNow.kind)||'upper',kit:(DB.pumpNow&&DB.pumpNow.kit)||pumpKitDefault()};
+  pumpDraw();
   document.getElementById('pumpOvl').classList.add('on');
+}
+function pumpDraw(){
+  var K=[['upper','Upper',WZ.pump[0]],['lower','Lower',WZ.pump[1]],['full','Full body',WZ.pump[2]]];
+  document.getElementById('pkKinds').innerHTML=K.map(function(k){
+    return '<button class="pk-kind'+(PK.kind===k[0]?' on':'')+'" onclick="PK.kind=\''+k[0]+'\';pumpDraw();sfxTick&&sfxTick()"><span class="pk-ic">'+k[2]+'</span><b>'+k[1]+'</b></button>';
+  }).join('');
+  var T=[['gym','Gym'],['db','Dumbbells'],['none','Nothing']];
+  document.getElementById('pkKits').innerHTML=T.map(function(t){
+    return '<button class="pk-kit'+(PK.kit===t[0]?' on':'')+'" onclick="PK.kit=\''+t[0]+'\';pumpDraw();sfxTick&&sfxTick()">'+t[1]+'</button>';
+  }).join('');
+}
+function pumpGo(){
+  DB.pumpNow={kind:PK.kind,kit:PK.kit};
+  saveDB();mergeCustom();
+  closeOvl('pumpOvl');
+  openW('pump');
 }
 function openTimerSheet(){
   initAudio();
@@ -20344,6 +20444,18 @@ var WZ={
       '<rect x="27" y="65" width="11" height="9" rx="2.5"/><path d="M45 69.5H70"/></g>'+
       '<path d="M45 82H60" stroke-width="3.5" stroke-dasharray="1 7" opacity=".6"/>'+
     '</svg>'
+  ],
+  // The pump kinds (v5.203, owner picked 3): the How To lifter pressing a bar overhead, deep in a
+  // squat, and reaching out in a star. The working part is lit; the squat is drawn a size up because
+  // a squatting man is shorter and read small beside the other two.
+  pump:[
+    '<svg viewBox="110 16 260 420"><g fill="none" stroke="#5a4232" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"><path d="M240 244L214 424M240 244L266 424"/><path d="M202 424H228M252 424H278" stroke-width="20"/></g>'+
+      '<g fill="var(--gold)"><circle cx="240" cy="98" r="24"/><rect x="128" y="26" width="20" height="56" rx="5"/><rect x="332" y="26" width="20" height="56" rx="5"/></g>'+
+      '<g fill="none" stroke="var(--gold)" stroke-linecap="round" stroke-linejoin="round"><path d="M240 150V124" stroke-width="20"/><path d="M198 154H282" stroke-width="24"/><path d="M240 246V150" stroke-width="26"/><path d="M198 154L172 108L186 56M282 154L308 108L294 56" stroke-width="22"/><path d="M142 54H338" stroke-width="14"/></g></svg>',
+    '<svg viewBox="110 16 260 420"><g transform="translate(240 424) scale(1.22) translate(-240 -424)">'+
+      '<circle cx="240" cy="160" r="24" fill="#5a4232"/><g fill="none" stroke="#5a4232" stroke-linecap="round" stroke-linejoin="round"><path d="M240 212V186" stroke-width="20"/><path d="M198 216H282" stroke-width="24"/><path d="M240 300V212" stroke-width="26"/><path d="M198 216L206 262L232 272M282 216L274 262L248 272" stroke-width="22"/></g>'+
+      '<g fill="none" stroke="var(--gold)" stroke-linecap="round" stroke-linejoin="round"><path d="M222 300H258" stroke-width="26"/><path d="M232 302L186 346L208 424M248 302L294 346L272 424" stroke-width="24"/><path d="M194 424H222M258 424H286" stroke-width="20"/></g></g></svg>',
+    '<svg viewBox="110 16 260 420"><circle cx="240" cy="98" r="24" fill="var(--gold)"/><g fill="none" stroke="var(--gold)" stroke-linecap="round" stroke-linejoin="round"><path d="M240 150V124" stroke-width="20"/><path d="M198 154H282" stroke-width="24"/><path d="M240 246V150" stroke-width="26"/><path d="M198 154L160 112L128 66M282 154L320 112L352 66" stroke-width="22"/><path d="M240 244L184 424M240 244L296 424" stroke-width="24"/><path d="M168 424H196M284 424H312" stroke-width="20"/></g></svg>'
   ],
   xp1:[
     '<svg class="mo-still" style="color:var(--txt3)" viewBox="0 0 100 100"><path fill="currentColor" fill-rule="evenodd" d="M31.6 29.3L92.0 29.3L92.0 30.4L86.8 36.2L70.1 43.1L68.4 44.2L68.4 46.5L65.0 47.1L60.9 50.0L59.8 52.3L59.8 57.5L64.4 62.7L71.3 65.5L71.3 70.7L59.2 70.7L55.8 66.7L52.3 65.5L45.4 66.1L42.5 67.8L40.8 70.7L28.1 70.7L28.1 65.5L34.5 63.2L39.1 59.2L40.2 56.9L39.6 52.3L36.8 49.4L31.6 48.3L30.4 46.0L26.4 46.0L16.6 42.5L12.0 39.1L8.0 32.2L31.6 32.2L31.6 29.3Z"/></svg>',

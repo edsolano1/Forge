@@ -89,6 +89,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   the least covered of push, pull and legs across the board, or a full body day when the board is empty or
   balanced; it never asks which muscles. The wizard's answers are kept in DB.ez (level, goal, len, kit) and
   forgeDay reads them; anything new that needs equipment reads DB.ez too.
+- **Pump Day has three kinds** (v5.203): Upper, Lower, Full body, each for a gym, dumbbells or nothing
+  (PUMP_KINDS). The choice lives in DB.pumpNow and pumpApply writes it into W.pump. Pump exercises stay p_ ids,
+  each a twin of a library lift so How To and the animation resolve, and their numbers stay out of real
+  progression. Choosing a focus is allowed here: Pump Day is a bonus you pick on purpose, not the balanced week.
 - **Saved workouts is a fold** (SAVED_OPEN, savedApply). Pump day is a built-in card at its head,
   not in DB.extra. The level-up offer at the finish is finLvl → finRaise → openLevel.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
