@@ -5219,31 +5219,29 @@ var ANIM=(function(){
   }
 
   // ---------- CALF RAISE: the whole chain rides up, toes planted ----------
+  // v5.205: the approved anatomical foot (footPose, calfBody). The old stub pivoted "at the toes" with
+  // no heel behind the ankle; now the ball and toes stay down and the rear foot turns about the ball.
+  function bbCalfPose(k){
+    var d=lerp(0,38,k), f=footPose([279,424],d), b=calfBody(f.ankle);
+    b.foot=f;b.far=footPose([263,424],d);b.farB=calfBody(b.far.ankle);return b;
+  }
   function drawCalfS(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var rise=lerp(0,-20,k);
-    var ankle=[256,424+rise];
-    var knee=P(ankle,-92,88), hip=P(knee,-88,92), sho=P(hip,-91,98);
-    var head=P(sho,-91,48);
+    var k=reduce?1:cycle(t,2800,0.12), p=bbCalfPose(k), sho=p.sho;
     x.globalAlpha=.35;
-    var a2=[240,424+rise],k2=P(a2,-92,88),h2=P(k2,-88,92);
-    seg(x,a2,k2,9);seg(x,k2,h2,9);
-    seg(x,[a2[0]-8,a2[1]],[a2[0]+26,424],9);
+    seg(x,p.far.ankle,p.farB.knee,9);seg(x,p.farB.knee,p.farB.hip,9);footSide(x,p.far);
     x.globalAlpha=1;
-    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
-    // the foot pivots at the toes: heel comes up with the ankle, toes stay down
-    seg(x,[ankle[0]-8,ankle[1]],[ankle[0]+26,424],9);
-    seg(x,sho,P(sho,-91,26),8);
-    dot(x,head,19);
+    seg(x,p.foot.ankle,p.knee,10);seg(x,p.knee,p.hip,10);seg(x,p.hip,sho,11);
+    footSide(x,p.foot);
+    seg(x,sho,p.neck,8);
+    dot(x,p.head,19);
     // bar on the traps, same grip as the squat
-    var bar=[sho[0]-8, sho[1]-2];
-    var elbow=P(sho,158,40);
-    var hand=[bar[0]+16,bar[1]+6];
+    var bar=[sho[0]-8,sho[1]-2], elbow=P(sho,158,40), hand=[bar[0]+16,bar[1]+6];
     plate(x,bar,24);
     seg(x,sho,elbow,8);seg(x,elbow,hand,8);
     dot(x,hand,5);
   }
+
 
   // ---------- LEG EXTENSION: seated, the shin is the mover ----------
   function drawLegExtS(x,t){
@@ -5444,21 +5442,22 @@ var ANIM=(function(){
   // CALF front: the whole body rides up, heels showing under the ankles
   function drawCalfF(x,t){
     x.clearRect(0,0,480,480);ground(x,110,370,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var r=lerp(0,-20,k), cx=240;
-    barF(x,cx,144+r,96,22);                       // behind the lifter, drawn first
-    seg(x,[cx,244+r],[cx,146+r],11);
-    seg(x,[cx-26,410+r],[cx,244+r],10);seg(x,[cx+26,410+r],[cx,244+r],10);
-    seg(x,[cx-26,410+r],[cx-30,424],9);seg(x,[cx+26,410+r],[cx+30,424],9);   // heels rise, toes stay
-    seg(x,[cx-40,424],[cx-18,424],9);seg(x,[cx+18,424],[cx+40,424],9);
-    seg(x,[cx-42,150+r],[cx+42,150+r],10);
-    seg(x,[cx,146+r],[cx,120+r],8);
-    var E1=[cx-60,182+r],E2=[cx+60,182+r];
-    seg(x,[cx-42,150+r],E1,8);seg(x,E1,[cx-66,138+r],8);
-    seg(x,[cx+42,150+r],E2,8);seg(x,E2,[cx+66,138+r],8);
-    dot(x,[cx-66,138+r],6);dot(x,[cx+66,138+r],6);
-    dot(x,[cx,98+r],19);
+    var k=reduce?1:cycle(t,2800,0.12), p=bbCalfPose(k), cx=240;
+    var ay=p.foot.ankle[1], ky=p.knee[1], hy=p.hip[1], sy=p.sho[1];   // every height is the side view's
+    barF(x,cx,sy-2,96,22);                         // behind the lifter, drawn first
+    seg(x,[cx,hy],[cx,sy],11);
+    seg(x,[cx-24,ay],[cx-22,ky],10);seg(x,[cx-22,ky],[cx,hy],10);
+    seg(x,[cx+24,ay],[cx+22,ky],10);seg(x,[cx+22,ky],[cx,hy],10);
+    footFront(x,cx-24,ay,cx-28,424);footFront(x,cx+24,ay,cx+28,424);
+    seg(x,[cx-42,sy+4],[cx+42,sy+4],10);
+    seg(x,[cx,sy],[cx,p.neck[1]],8);
+    var E1=[cx-60,sy+36],E2=[cx+60,sy+36];
+    seg(x,[cx-42,sy+4],E1,8);seg(x,E1,[cx-66,sy-8],8);
+    seg(x,[cx+42,sy+4],E2,8);seg(x,E2,[cx+66,sy-8],8);
+    dot(x,[cx-66,sy-8],6);dot(x,[cx+66,sy-8],6);
+    dot(x,[cx,p.head[1]],19);
   }
+
 
   // LEG EXTENSION front: same person as the side view - canonical torso, arms
   // gripping the seat edges, and feet that hang: the pad never reaches the floor.
@@ -5791,14 +5790,13 @@ var ANIM=(function(){
     seg(x,sho,[196,282],8);seg(x,[196,282],[214,316],8);
     dot(x,[214,316],5);
     // feet on the platform; the platform rides away as the legs drive
-    var foot=[lerp(312,352,k), 314];
-    var e1=elb(hip,foot,92,88,-1),e2=elb(hip,foot,92,88,1);
-    var kn=e1[1]<e2[1]?e1:e2;                      // knee folds upward
-    seg(x,hip,kn,10);seg(x,kn,foot,10);
-    seg(x,[foot[0]-1,foot[1]+11],[foot[0]+4,foot[1]-11],9);   // the sole flat against the platform
-    dot(x,kn,5,GO);                                // the working joint
-    seg(x,[foot[0]+12,270],[foot[0]+12,360],9,GO); // the platform, vertical ahead
-    seg(x,[foot[0]+20,282],[foot[0]+20,352],5,LINE); // its rail
+    // v5.205: the whole sole flat against the platform, heel low and toes high, pushing through it all
+    var px=lerp(324,364,k), f=footPose([px-8,300],0,90,1);
+    var a=legOf(hip,f,92,-1),b=legOf(hip,f,92,1), leg=a.knee[1]<b.knee[1]?a:b;   // knee folds upward
+    seg(x,[px,270],[px,360],9,GO);                 // the platform, vertical ahead
+    seg(x,[px+8,282],[px+8,352],5,LINE);           // its rail
+    legS(x,leg);
+    dot(x,leg.knee,5,GO);                          // the working joint
   }
   // ---------- LEG PRESS front, redone (owner call, round 2): the seated lifter
   // faces the viewer and presses the platform AT the screen - the soles are the
@@ -5964,44 +5962,39 @@ var ANIM=(function(){
   }
 
   // ---------- LUNGE side: split stance, rear knee toward the floor ----------
+  // v5.205: the front foot flat and planted, the back one on its ball with the heel lifting. The
+  // stance is one a real body can reach: at the top both legs are long, at the bottom the front shin
+  // is upright over the foot and the back knee hangs just off the floor, the back heel high.
+  function lungePose(k){
+    var hip=[lerp(210,222,k),lerp(280,322,k)], rf=stepFoot([104,424],lerp(35,65,k));
+    var a=legOf(hip,rf,92,1),b=legOf(hip,rf,92,-1);
+    return {hip:hip,front:legOf(hip,footPose([335,424],0),92,1),rear:a.knee[1]>b.knee[1]?a:b};
+  }
   function drawLungeS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var hipY=lerp(244,322,k);
-    var hip=[244,hipY];
-    // front leg: knee travels to sit ABOVE the planted foot - vertical shin at the bottom
-    var ff=[312,424];
-    var fk=[lerp(272,310,k), lerp(330,338,k)];
-    seg(x,hip,fk,10);seg(x,fk,ff,10);
-    dot(x,fk,5,GO);
-    seg(x,[ff[0]-10,424],[ff[0]+24,424],9);
-    // rear leg: on the toes, knee dropping to just off the floor
-    var rf=[176,424];
-    var rk=[lerp(210,204,k), lerp(330,400,k)];
-    seg(x,hip,rk,10);seg(x,rk,rf,10);
-    seg(x,[rf[0]-4,424],[rf[0]+14,424],9);
+    var p=lungePose(k), hip=p.hip, hx=hip[0], hipY=hip[1];
+    legS(x,p.rear);                                // the back leg, up on the ball of the foot
+    legS(x,p.front);                               // the front leg: the knee comes to sit over the foot
+    dot(x,p.front.knee,5,GO);
     // torso upright, dumbbell hanging at the side
-    var sho=[244,hipY-98];
+    var sho=[hx,hipY-98];
     seg(x,hip,sho,11);
-    seg(x,sho,[244,hipY-124],8);
-    dot(x,[244,hipY-146],19);
-    var hand=[252,hipY-98+112];
-    seg(x,sho,[250,hipY-40],8);seg(x,[250,hipY-40],hand,8);
+    seg(x,sho,[hx,hipY-124],8);
+    dot(x,[hx,hipY-146],19);
+    var hand=[hx+8,hipY-98+112];
+    seg(x,sho,[hx+6,hipY-40],8);seg(x,[hx+6,hipY-40],hand,8);
     plate(x,hand,13);
   }
   // ---------- LUNGE front: staggered feet, level hips dropping ----------
   function drawLungeF(x,t){
     x.clearRect(0,0,480,480);ground(x,110,370,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var hipY=lerp(244,318,k), cx=240;
-    var fk2=[cx-26,lerp(336,356,k)];
-    seg(x,[cx-20,424],fk2,10);seg(x,fk2,[cx,hipY],10);  // the front leg bends as the body drops
-    dot(x,fk2,5,GO);
-    seg(x,[cx-34,424],[cx-8,424],10);
+    var p=lungePose(k), hipY=p.hip[1], cx=240;     // every height is the side view's
     x.globalAlpha=.55;
-    seg(x,[cx+22,410],[cx,hipY],9);                // the rear leg, back and on the toes
-    seg(x,[cx+14,410],[cx+32,410],8);
+    legF(x,cx+6,hipY,cx+22,cx+20,p.rear);          // the back leg, its shin running away from you
     x.globalAlpha=1;
+    dot(x,legF(x,cx-6,hipY,cx-26,cx-22,p.front),5,GO);   // the front leg bends as the body drops
     seg(x,[cx,hipY],[cx,hipY-98],11);
     seg(x,[cx-42,hipY-94],[cx+42,hipY-94],10);
     seg(x,[cx,hipY-98],[cx,hipY-124],8);
@@ -6375,50 +6368,51 @@ var ANIM=(function(){
   }
 
   // ---------- SEATED CALF RAISE: pad ON the knees, only the heels rise ----------
+  // v5.205: the approved foot, on the platform edge. Seated, so the body stays put and the knee rides
+  // up on the shin as the heel rises.
+  function sCalfPose(k){var f=footPose([284,410],lerp(-18,32,k));return {foot:f,knee:P(f.ankle,-92,74)};}
   function drawSCalfS(x,t){
     x.clearRect(0,0,480,480);ground(x,80,400,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var rise=lerp(0,-18,k);
+    var k=reduce?1:cycle(t,2800,0.12), p=sCalfPose(k), knee=p.knee;
     seg(x,[150,344],[240,344],7,LINE);             // the seat
     seg(x,[162,344],[162,430],7,LINE);seg(x,[228,344],[228,430],7,LINE);
     var hip=[196,334], sho=[200,236];
     seg(x,hip,sho,11);
     seg(x,sho,[201,210],8);
     dot(x,[202,188],19);
-    // the toe platform: balls of the feet ON it, the heel hanging past its edge
     x.fillStyle=LINE;
     x.fillRect(278,410,30,14);                     // the platform
-    var knee=[268,332+rise];
     seg(x,hip,knee,10);                            // thigh, rising with the heels
-    seg(x,knee,[264,lerp(408,388,k)],10);          // the shin
-    seg(x,[252,lerp(422,396,k)],[296,408],9);      // heel below the platform, rising past it
+    seg(x,knee,p.foot.ankle,10);                   // the shin
+    footSide(x,p.foot);
     x.fillStyle=GO;
-    x.fillRect(244,316+rise,48,10);                // the pad ON the knees
-    // the arm holds the pad handle
-    seg(x,sho,[228,284],8);seg(x,[228,284],[252,314+rise],8);
+    x.fillRect(knee[0]-24,knee[1]-16,48,10);       // the pad ON the knees
+    seg(x,sho,[228,284],8);seg(x,[228,284],[knee[0]-16,knee[1]-18],8);   // the arm holds the pad handle
     dot(x,knee,5,GO);
   }
+
   function drawSCalfF(x,t){
     x.clearRect(0,0,480,480);ground(x,110,370,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, rise=lerp(0,-18,k);
+    var k=reduce?1:cycle(t,2800,0.12), p=sCalfPose(k), cx=240;
+    var ky=p.knee[1], ay=p.foot.ankle[1];          // the side view's knee and ankle heights
     seg(x,[cx-52,344],[cx+52,344],7,LINE);
     seg(x,[cx-42,344],[cx-42,430],7,LINE);seg(x,[cx+42,344],[cx+42,430],7,LINE);
     seg(x,[cx,336],[cx,238],11);
     seg(x,[cx-42,242],[cx+42,242],10);
     seg(x,[cx,238],[cx,212],8);
-    dot(x,[cx,190],19);
-    seg(x,[cx-42,246],[cx-48,292],8);seg(x,[cx-48,292],[cx-40,320+rise],8);
-    seg(x,[cx+42,246],[cx+48,292],8);seg(x,[cx+48,292],[cx+40,320+rise],8);
-    seg(x,[cx,336],[cx-30,342+rise*0.6],10);seg(x,[cx,336],[cx+30,342+rise*0.6],10);
-    dot(x,[cx-30,344+rise],8);dot(x,[cx+30,344+rise],8);   // the knees, rising
+    dot(x,[cx,188],19);
+    seg(x,[cx-42,246],[cx-48,292],8);seg(x,[cx-48,292],[cx-40,ky-12],8);
+    seg(x,[cx+42,246],[cx+48,292],8);seg(x,[cx+48,292],[cx+40,ky-12],8);
+    seg(x,[cx,336],[cx-30,ky],10);seg(x,[cx,336],[cx+30,ky],10);
+    dot(x,[cx-30,ky],8);dot(x,[cx+30,ky],8);       // the knees, rising
     x.fillStyle=GO;
-    x.fillRect(cx-52,330+rise,104,10);             // the pad across both knees
+    x.fillRect(cx-52,ky-14,104,10);                // the pad across both knees
     x.fillStyle=LINE;
-    x.fillRect(cx-50,408,100,14);                  // the toe platform
-    seg(x,[cx-30,350+rise],[cx-32,398+rise*0.4],10);seg(x,[cx+30,350+rise],[cx+32,398+rise*0.4],10);
-    seg(x,[cx-44,406],[cx-18,406],9);seg(x,[cx+18,406],[cx+44,406],9);   // balls of the feet ON the platform
+    x.fillRect(cx-50,410,100,14);                  // the toe platform
+    seg(x,[cx-30,ky+4],[cx-28,ay],10);seg(x,[cx+30,ky+4],[cx+28,ay],10);
+    footFront(x,cx-28,ay,cx-30,410);footFront(x,cx+28,ay,cx+30,410);   // balls of the feet ON the platform
   }
+
 
   // ---------- MACHINE ROW: chest-supported, elbows straight back ----------
   function drawMRowS(x,t){
@@ -7122,51 +7116,61 @@ var ANIM=(function(){
   }
 
   // ---------- STANDING CALF RAISE MACHINE: pads on the shoulders ----------
+  // v5.205: the approved foot. The balls sit on the toe block's edge and the heel drops below it, then
+  // rises past it; the old 57 long stub was the biggest foot in the app.
+  // The shoulder pad rides a vertical track, so the shoulders go straight up and down and never slide
+  // forward. The ankle still rolls forward a little over the ball, so the straight body leans a few
+  // degrees instead, which is what a real body under this pad does.
+  function calfMachPose(k){
+    var f=footPose([284,410],lerp(-18,32,k)), sx=calfBody(footPose([284,410],-18).ankle).sho[0];
+    var A=f.ankle, dx=sx-A[0], L=264, sho=[sx,A[1]-Math.sqrt(L*L-dx*dx)];
+    function on(d){return [A[0]+(sho[0]-A[0])*d/L,A[1]+(sho[1]-A[1])*d/L];}
+    return {foot:f,knee:on(74),hip:on(166),sho:sho,neck:[sx,sho[1]-26],head:[sx,sho[1]-48]};
+  }
   function drawCalfMachS(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var rise=lerp(0,-20,k);
+    var k=reduce?1:cycle(t,2800,0.12), p=calfMachPose(k), sho=p.sho;
     seg(x,[150,424],[150,120],7,LINE);             // the machine tower, behind
     seg(x,[136,424],[164,424],7,LINE);
-    seg(x,[150,124],[262,132],6,LINE);             // the arm reaching over the shoulders
+    seg(x,[150,124],[p.sho[0]+10,132],6,LINE);     // the arm reaching over the shoulders
     x.fillStyle=LINE;
     x.fillRect(278,410,30,14);                     // the toe block
-    var ankle=[266,lerp(420,400,k)];
-    var knee=P(ankle,-92,88), hip=P(knee,-88,92), sho=P(hip,-91,98);
-    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
-    seg(x,[252,lerp(424,402,k)],[296,410],9);      // heel past the block, driving up
-    seg(x,sho,P(sho,-91,26),8);
+    seg(x,p.foot.ankle,p.knee,10);seg(x,p.knee,p.hip,10);seg(x,p.hip,sho,11);
+    footSide(x,p.foot);
+    seg(x,sho,p.neck,8);
     x.fillStyle=GO;
-    x.fillRect(sho[0]-20,sho[1]-4+rise*0,44,9);    // the shoulder pad, riding the shoulders
-    seg(x,[258,134],[sho[0]+2,sho[1]-2],5,LINE);   // the lever down to the pad
-    dot(x,P(sho,-91,48),19);
+    x.fillRect(sho[0]-20,sho[1]-4,44,9);           // the shoulder pad, riding the shoulders
+    seg(x,[sho[0]+2,132],[sho[0]+2,sho[1]-2],5,LINE);   // the pad's track, straight down from the arm
+    dot(x,p.head,19);
     // the arm grips the pad handle in front of the shoulder
     seg(x,sho,[sho[0]+24,sho[1]+30],8);seg(x,[sho[0]+24,sho[1]+30],[sho[0]+34,sho[1]+2],8);
     dot(x,[sho[0]+34,sho[1]+2],5);
   }
+
   function drawCalfMachF(x,t){
     x.clearRect(0,0,480,480);ground(x,110,370,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var r=lerp(0,-20,k), cx=240;
+    var k=reduce?1:cycle(t,2800,0.12), p=calfMachPose(k), cx=240;
+    var ay=p.foot.ankle[1], ky=p.knee[1], hy=p.hip[1], sy=p.sho[1];   // every height is the side view's
     seg(x,[cx-80,404],[cx-80,124],6,LINE);seg(x,[cx+80,404],[cx+80,124],6,LINE);   // the towers
     seg(x,[cx-80,124],[cx+80,124],6,LINE);
     seg(x,[cx-94,404],[cx-66,404],6,LINE);seg(x,[cx+66,404],[cx+94,404],6,LINE);
     x.fillStyle=LINE;
-    x.fillRect(cx-50,408,100,14);                  // the toe block
-    seg(x,[cx,286+r],[cx,146+r],11);
-    seg(x,[cx-26,410+r],[cx,286+r],10);seg(x,[cx+26,410+r],[cx,286+r],10);
-    seg(x,[cx-26,410+r],[cx-30,406],9);seg(x,[cx+26,410+r],[cx+30,406],9);
-    seg(x,[cx-40,406],[cx-18,406],9);seg(x,[cx+18,406],[cx+40,406],9);   // balls on the block
-    seg(x,[cx-42,150+r],[cx+42,150+r],10);
-    seg(x,[cx,146+r],[cx,120+r],8);
+    x.fillRect(cx-50,410,100,14);                  // the toe block
+    seg(x,[cx,hy],[cx,sy],11);
+    seg(x,[cx-24,ay],[cx-22,ky],10);seg(x,[cx-22,ky],[cx,hy],10);
+    seg(x,[cx+24,ay],[cx+22,ky],10);seg(x,[cx+22,ky],[cx,hy],10);
+    footFront(x,cx-24,ay,cx-28,410);footFront(x,cx+24,ay,cx+28,410);   // balls on the block
+    seg(x,[cx-42,sy+4],[cx+42,sy+4],10);
+    seg(x,[cx,sy],[cx,p.neck[1]],8);
     x.fillStyle=GO;
-    x.fillRect(cx-58,140+r,32,9);x.fillRect(cx+26,140+r,32,9);   // the shoulder pads
-    seg(x,[cx-80,128],[cx-44,142+r],5,LINE);seg(x,[cx+80,128],[cx+44,142+r],5,LINE);
+    x.fillRect(cx-58,sy-6,32,9);x.fillRect(cx+26,sy-6,32,9);   // the shoulder pads
+    seg(x,[cx-80,128],[cx-44,sy-4],5,LINE);seg(x,[cx+80,128],[cx+44,sy-4],5,LINE);
     // both hands up on the grip handles beside the pads
-    seg(x,[cx-42,154+r],[cx-52,136+r],8);dot(x,[cx-52,134+r],5);
-    seg(x,[cx+42,154+r],[cx+52,136+r],8);dot(x,[cx+52,134+r],5);
-    dot(x,[cx,98+r],19);
+    seg(x,[cx-42,sy+8],[cx-52,sy-10],8);dot(x,[cx-52,sy-12],5);
+    seg(x,[cx+42,sy+8],[cx+52,sy-10],8);dot(x,[cx+52,sy-12],5);
+    dot(x,[cx,p.head[1]],19);
   }
+
 
   // ---------- STRAIGHT-ARM PULLDOWN: the arc from shoulders to thighs ----------
   function drawSaPullS(x,t){
@@ -7706,6 +7710,9 @@ var ANIM=(function(){
   }
 
   // ---------- SLANTED CALF RAISE: the 45-degree sled, heels off the platform edge ----------
+  // v5.205: the approved foot, laid on the tilted plate (base 20 degrees). The plate rises to the
+  // right, so the whole foot tilts with it, and the heel turns about the planted ball.
+  function sledFoot(k){return footPose([358,405],lerp(-18,28,k),20);}
   function drawSledCalfS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
@@ -7713,35 +7720,29 @@ var ANIM=(function(){
     seg(x,[375,414],P([375,414],-130,240),7,LINE); // the second rail
     seg(x,[331,428],[375,414],7,LINE);             // the base
     seg(x,[344,411],[374,400],11,LINE);            // the THIN foot plate, just off the floor
-    // every landmark below sits at the FRONT view's height: head 166, shoulder 216,
-    // hands 302, hip 302, knee 334, heel 422->404 - a ruler across both views lines up
     var dy=lerp(0,-10,k);                          // the same rise the front view shows
     var hip=[246+dy*0.84,302+dy];                  // riding up the rails
-    seg(x,[hip[0]-13,hip[1]+10],[hip[0]+15,hip[1]+39],8,GO);   // the seat: bending at the butt and running PARALLEL under the thigh
-    seg(x,[hip[0]-13,hip[1]+10],[hip[0]-8,hip[1]-40],8,GO);    // the low backrest, PARALLEL to the lower back
+    seg(x,[hip[0]-13,hip[1]+10],[hip[0]+15,hip[1]+39],8,GO);   // the seat, parallel under the thigh
+    seg(x,[hip[0]-13,hip[1]+10],[hip[0]-8,hip[1]-40],8,GO);    // the low backrest
     var sho=[hip[0]+9,hip[1]-86];
     seg(x,hip,sho,11);                             // seated tall with a slight forward lean
     seg(x,sho,[sho[0]+2,sho[1]-26],8);
     dot(x,[sho[0]+3,sho[1]-50],19);
-    seg(x,sho,[sho[0]+4,sho[1]+50],9);             // the upper arm hangs AT the side - elbow touching the ribs
-    seg(x,[sho[0]+4,sho[1]+50],[sho[0]+25,sho[1]+88],9);   // the forearm DOWN to the seat handle at hip height
-    seg(x,[sho[0]+21,sho[1]+78],[sho[0]+29,sho[1]+98],6,LINE);   // the handle, upright beside the seat
+    seg(x,sho,[sho[0]+4,sho[1]+50],9);             // the upper arm hangs at the side
+    seg(x,[sho[0]+4,sho[1]+50],[sho[0]+25,sho[1]+88],9);   // the forearm down to the seat handle
+    seg(x,[sho[0]+21,sho[1]+78],[sho[0]+29,sho[1]+98],6,LINE);
     dot(x,[sho[0]+26,sho[1]+89],5);
-    var ball=[358,405];                            // the ball of the foot, planted ON the thin plate - the pivot
-    var heelAng=lerp(140,183,k);                   // ALL the movement is the foot: the heel swings about that ball
-    var heel=P(ball,heelAng,22);
-    var ankle=P(ball,heelAng+23,10.5);             // the leg meets the foot AT the ankle - above the heel, never mid-foot
-    var kn=[hip[0]+(ankle[0]-hip[0])*0.32, hip[1]+(ankle[1]-hip[1])*0.32];   // the knee at the front view's height
-    seg(x,hip,kn,10);seg(x,kn,ankle,10);           // the leg stays STRAIGHT - the knee does not bend
+    var f=sledFoot(k), ankle=f.ankle;
+    var kn=[hip[0]+(ankle[0]-hip[0])*0.32, hip[1]+(ankle[1]-hip[1])*0.32];
+    seg(x,hip,kn,10);seg(x,kn,ankle,10);           // the leg stays STRAIGHT
     dot(x,kn,6);
-    seg(x,heel,ball,9);                            // the small heel behind the ankle...
-    seg(x,ball,[374,398],9);                       // ...and the toes ahead, planted, pointing AWAY
+    footSide(x,f);
   }
+
   function drawSledCalfF(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240;
-    seg(x,[cx-58,404],[cx-38,150],7,LINE);seg(x,[cx+58,404],[cx+38,150],7,LINE);   // the rails, receding up behind the seat
+    var k=reduce?1:cycle(t,2800,0.12), cx=240, ay=sledFoot(k).ankle[1];
+    seg(x,[cx-58,404],[cx-38,150],7,LINE);seg(x,[cx+58,404],[cx+38,150],7,LINE);   // the rails
     seg(x,[cx-38,150],[cx+38,150],7,LINE);
     seg(x,[cx-72,404],[cx+72,404],7,LINE);         // the base
     seg(x,[cx-40,412],[cx+40,412],8,LINE);         // the THIN foot plate
@@ -7750,14 +7751,15 @@ var ANIM=(function(){
     seg(x,[cx,188+dy],[cx,212+dy],8);
     seg(x,[cx-42,216+dy],[cx+42,216+dy],10);
     seg(x,[cx,212+dy],[cx,302+dy],11);
-    seg(x,[cx-42,220+dy],[cx-50,266+dy],9);seg(x,[cx-50,266+dy],[cx-44,300+dy],9);   // hands on the handles beside the seat
+    seg(x,[cx-42,220+dy],[cx-50,266+dy],9);seg(x,[cx-50,266+dy],[cx-44,300+dy],9);
     seg(x,[cx+42,220+dy],[cx+50,266+dy],9);seg(x,[cx+50,266+dy],[cx+44,300+dy],9);
     dot(x,[cx-44,302+dy],5);dot(x,[cx+44,302+dy],5);
-    seg(x,[cx,302+dy],[cx-20,334+dy*0.6],10);seg(x,[cx,302+dy],[cx+20,334+dy*0.6],10);   // thighs toward the viewer
+    seg(x,[cx,302+dy],[cx-20,334+dy*0.6],10);seg(x,[cx,302+dy],[cx+20,334+dy*0.6],10);   // thighs toward you
     dot(x,[cx-20,334+dy*0.6],8);dot(x,[cx+20,334+dy*0.6],8);
-    seg(x,[cx-20,334+dy*0.6],[cx-22,404],10);seg(x,[cx+20,334+dy*0.6],[cx+22,404],10);   // shins down to the plate
-    dot(x,[cx-22,lerp(422,404,k)],6);dot(x,[cx+22,lerp(422,404,k)],6);   // the heels: below the plate, then driven above it
+    seg(x,[cx-20,334+dy*0.6],[cx-22,ay],10);seg(x,[cx+20,334+dy*0.6],[cx+22,ay],10);   // shins down to the ankle
+    footFront(x,cx-22,ay,cx-24,407);footFront(x,cx+22,ay,cx+24,407);   // the feet on the plate
   }
+
 
   // ---------- CAPTAIN'S CHAIR HIP RAISE: forearms on the pads, knees to the chest ----------
   function drawChairRaiseS(x,t){
@@ -8349,25 +8351,25 @@ var ANIM=(function(){
   }
 
   // ---------- DUMBBELL STEP-UP: drive through the top foot ----------
+  // v5.205: the whole lead foot flat on the box; the trailing foot lifts clear of the edge
+  function stepUpPose(k){
+    var hip=[lerp(226,296,k),lerp(252,196,k)];
+    var tb=[lerp(234,304,k),lerp(424,368,k)-Math.sin(k*Math.PI)*18];
+    return {hip:hip,lead:legOf(hip,footPose([330,368],0),92,1),trail:legOf(hip,stepFoot(tb,0),92,1)};
+  }
   function drawStepUpS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
     x.strokeStyle=LINE;x.lineWidth=7;x.strokeRect(272,368,88,62);   // the box, low enough that the lifter stays in frame
-    var hip=[lerp(226,296,k),lerp(252,196,k)];
+    var p=stepUpPose(k), hip=p.hip;
     var sho=[hip[0]-4,hip[1]-96];
     seg(x,hip,sho,11);
     seg(x,sho,[sho[0]+1,sho[1]-26],8);
     dot(x,[sho[0]+2,sho[1]-48],19);
     seg(x,sho,[sho[0]-4,sho[1]+56],9);seg(x,[sho[0]-4,sho[1]+56],[sho[0]-8,sho[1]+104],9);
     plate(x,[sho[0]-8,sho[1]+108],11);             // the bells hang at the sides
-    var lead=[308,364];                            // the lead foot NEVER leaves the box
-    var kn=elb(hip,lead,92,88,1);
-    seg(x,hip,kn,10);seg(x,kn,lead,10);
-    seg(x,[296,364],[330,364],9);
-    var rf=[lerp(212,282,k),lerp(424,364,k)];      // the trailing foot climbs to stand beside it
-    var rk=elb(hip,rf,92,88,1);
-    seg(x,hip,rk,10);seg(x,rk,rf,10);
-    seg(x,[rf[0]-14,rf[1]],[rf[0]+10,rf[1]],9);
+    legS(x,p.lead);                                // the lead foot NEVER leaves the box
+    legS(x,p.trail);                               // the trailing foot climbs to stand beside it
   }
   function drawStepUpF(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
@@ -8382,15 +8384,9 @@ var ANIM=(function(){
     seg(x,[cx-42,hy-90],[cx-48,hy-34],9);seg(x,[cx-48,hy-34],[cx-50,hy+16],9);
     seg(x,[cx+42,hy-90],[cx+48,hy-34],9);seg(x,[cx+48,hy-34],[cx+50,hy+16],9);
     plate(x,[cx-50,hy+22],11);plate(x,[cx+50,hy+22],11);
-    var kn1=[cx-20,lerp(278,284,k)];               // the lead thigh, foreshortened toward the viewer
-    seg(x,[cx,hy],kn1,10);seg(x,kn1,[cx-18,364],10);
-    dot(x,kn1,7);
-    seg(x,[cx-32,364],[cx-4,364],9);
-    var rf=[cx+20,lerp(424,364,k)];                // the trailing foot climbing to stand beside it
-    var kn2=[cx+22,lerp(340,284,k)];
-    seg(x,[cx,hy],kn2,10);seg(x,kn2,rf,10);
-    dot(x,kn2,7);
-    seg(x,[rf[0]-12,rf[1]],[rf[0]+12,rf[1]],9);
+    var p=stepUpPose(k);                           // the side view's legs: lead on the box, trail climbing
+    dot(x,legF(x,cx,hy,cx-20,cx-18,p.lead),7);
+    dot(x,legF(x,cx,hy,cx+22,cx+20,p.trail),7);
   }
 
   // ---------- AB CRUNCH MACHINE: hips pinned, the pad rides the fold ----------
@@ -8499,6 +8495,16 @@ var ANIM=(function(){
   // ropes spin on continuous time - a crank cannot ping-pong.
 
   // ---------- POWER WALK ----------
+  // v5.205: the foot rolls through the step. It lands on the heel with the toes up, rolls flat
+  // under the hip, and pushes off the ball as the heel rises. u runs 0 (reaching) to 1 (behind).
+  function walkLeg(hip,u){
+    var bx=hip[0]+lerp(62,-22,u), deg=u<.5?lerp(-14,0,u*2):lerp(0,32,u*2-1);
+    return legOf(hip,stepFoot([bx,424],deg),92,1);
+  }
+  function walkPose(k){
+    var bob=-Math.sin(k*Math.PI)*3, hip=[228,246+bob];
+    return {bob:bob,hip:hip,l1:walkLeg(hip,k),l2:walkLeg(hip,1-k)};
+  }
   function drawWalkS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
@@ -8507,11 +8513,8 @@ var ANIM=(function(){
     seg(x,hip,sho,11);
     seg(x,sho,[233,122+bob],8);
     dot(x,[234,100+bob],19);
-    var a1=lerp(75,105,k), a2=lerp(105,75,k);      // the legs scissor about straight-down
-    var k1=P(hip,a1,92),k2=P(hip,a2,92);
-    var f1=P(k1,a1+lerp(0,13,k),88),f2=P(k2,a2+lerp(13,0,k),88);
-    seg(x,hip,k2,10);seg(x,k2,f2,10);seg(x,[f2[0]-7,f2[1]+1],[f2[0]+20,f2[1]+4],9);
-    seg(x,hip,k1,10);seg(x,k1,f1,10);seg(x,[f1[0]-7,f1[1]+1],[f1[0]+20,f1[1]+4],9);
+    var p=walkPose(k);                             // the legs scissor, each foot rolling heel to toe
+    legS(x,p.l2);legS(x,p.l1);
     var b1=lerp(116,62,k), b2=lerp(62,116,k);      // the arms swing opposite
     var e1=P(sho,b1,50),e2=P(sho,b2,50);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-30,46),9);
@@ -8524,18 +8527,24 @@ var ANIM=(function(){
     seg(x,[cx,244+bob],[cx,146+bob],11);
     seg(x,[cx-42,150+bob],[cx+42,150+bob],10);
     seg(x,[cx,146+bob],[cx,120+bob],8);
-    dot(x,[cx,98+bob],19);
-    var l1=lerp(0,-38,k), l2=lerp(-38,0,k);        // each knee lifts toward the viewer in turn
-    seg(x,[cx-14,338+l1],[cx-24,424],10);seg(x,[cx+14,338+l2],[cx+24,424],10);
-    seg(x,[cx,248+bob],[cx-14,338+l1],10);seg(x,[cx,248+bob],[cx+14,338+l2],10);
-    dot(x,[cx-14,338+l1],7);dot(x,[cx+14,338+l2],7);
-    seg(x,[cx-34,424],[cx-14,424],9);seg(x,[cx+14,424],[cx+34,424],9);
+    dot(x,[cx,100+bob],19);
+    var p=walkPose(k);                             // the side view's legs, seen from the front
+    dot(x,legF(x,cx,248+bob,cx-14,cx-22,p.l1),7);dot(x,legF(x,cx,248+bob,cx+14,cx+22,p.l2),7);
     var s1=lerp(-16,16,k), s2=lerp(16,-16,k);      // the arms counter-swing
     seg(x,[cx-42,154+bob],[cx-48,214+bob+s1],9);seg(x,[cx-48,214+bob+s1],[cx-40,266+bob+s1],9);
     seg(x,[cx+42,154+bob],[cx+48,214+bob+s2],9);seg(x,[cx+48,214+bob+s2],[cx+40,266+bob+s2],9);
   }
 
   // ---------- TREADMILL RUN ----------
+  // v5.205: lands flat under the body on the deck, then the heel lifts and the foot kicks up behind
+  function tRunLeg(hip,u){
+    var lift=44*u;
+    return legOf(hip,stepFoot([lerp(326,186,u),400-lift],lerp(0,45,u),0,1,lift>1),90,1);
+  }
+  function tRunPose(k){
+    var bob=-Math.sin(k*Math.PI)*5, hip=[238,238+bob];
+    return {bob:bob,hip:hip,l1:tRunLeg(hip,k),l2:tRunLeg(hip,1-k)};
+  }
   function drawTreadRunS(x,t){
     x.clearRect(0,0,480,480);
     var k=reduce?1:cycle(t,2800,0.12);
@@ -8548,10 +8557,8 @@ var ANIM=(function(){
     seg(x,hip,sho,11);
     seg(x,sho,[250,118+bob],8);
     dot(x,[252,96+bob],19);
-    var f1=[lerp(310,166,k),400-lerp(0,44,k)], f2=[lerp(166,310,k),400-lerp(44,0,k)];   // footstrike ON the deck, heel kicked behind
-    var k1=elb(hip,f1,90,84,1),k2=elb(hip,f2,90,84,1);
-    seg(x,hip,k2,10);seg(x,k2,f2,10);seg(x,[f2[0]-7,f2[1]+1],[f2[0]+18,f2[1]+2],9);
-    seg(x,hip,k1,10);seg(x,k1,f1,10);seg(x,[f1[0]-7,f1[1]+1],[f1[0]+18,f1[1]+2],9);
+    var p=tRunPose(k);                             // footstrike ON the deck, heel kicked behind
+    legS(x,p.l2);legS(x,p.l1);
     var b1=lerp(70,115,k), b2=lerp(115,70,k);      // the arms pump, bent hard
     var e1=P(sho,b1,48),e2=P(sho,b2,48);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-75,42),9);
@@ -8568,17 +8575,24 @@ var ANIM=(function(){
     seg(x,[cx,244+bob],[cx,148+bob],11);
     seg(x,[cx-42,152+bob],[cx+42,152+bob],10);
     seg(x,[cx,148+bob],[cx,122+bob],8);
-    dot(x,[cx,100+bob],19);
-    var l1=lerp(6,-62,k), l2=lerp(-62,6,k);        // the knees drive high
-    seg(x,[cx,248+bob],[cx-15,332+l1],10);seg(x,[cx,248+bob],[cx+15,332+l2],10);
-    dot(x,[cx-15,332+l1],7);dot(x,[cx+15,332+l2],7);
-    seg(x,[cx-15,332+l1],[cx-24,410+l1*0.4],10);seg(x,[cx+15,332+l2],[cx+24,410+l2*0.4],10);
+    dot(x,[cx,96+bob],19);
+    var p=tRunPose(k);
+    dot(x,legF(x,cx,242+bob,cx-15,cx-22,p.l1),7);dot(x,legF(x,cx,242+bob,cx+15,cx+22,p.l2),7);
     var s1=lerp(-24,24,k), s2=lerp(24,-24,k);
     seg(x,[cx-42,156+bob],[cx-52,208+bob+s1],9);seg(x,[cx-52,208+bob+s1],[cx-30,236+bob+s1],9);
     seg(x,[cx+42,156+bob],[cx+52,208+bob+s2],9);seg(x,[cx+52,208+bob+s2],[cx+30,236+bob+s2],9);
   }
 
   // ---------- INCLINE TREADMILL WALK ----------
+  // v5.205: the walking foot on the pitched deck: it lies along the slope, heel strike to push off
+  function tWalkLeg(hip,u){
+    var bx=lerp(300,186,u), lift=16*Math.max(0,(u-.6)/.4), deg=u<.5?lerp(-12,0,u*2):lerp(0,30,u*2-1);
+    return legOf(hip,stepFoot([bx,414-(bx-136)*0.25-lift],deg,14,1,lift>.5),90,1);
+  }
+  function tWalkPose(k){
+    var bob=-Math.sin(k*Math.PI)*3, hip=[228,219+bob];
+    return {bob:bob,hip:hip,l1:tWalkLeg(hip,k),l2:tWalkLeg(hip,1-k)};
+  }
   function drawTreadWalkS(x,t){
     x.clearRect(0,0,480,480);
     var k=reduce?1:cycle(t,2800,0.12);
@@ -8591,11 +8605,8 @@ var ANIM=(function(){
     seg(x,hip,sho,11);
     seg(x,sho,[248,99+bob],8);
     dot(x,[252,77+bob],19);
-    var X1=lerp(292,178,k), X2=lerp(178,292,k);    // the feet land ON the pitched deck - the stride is inclined
-    var f1=[X1,414-(X1-136)*0.25-lerp(0,16,k)], f2=[X2,414-(X2-136)*0.25-lerp(16,0,k)];
-    var k1=elb(hip,f1,90,86,1),k2=elb(hip,f2,90,86,1);
-    seg(x,hip,k2,10);seg(x,k2,f2,10);seg(x,[f2[0]-7,f2[1]-1],[f2[0]+18,f2[1]-6],9);
-    seg(x,hip,k1,10);seg(x,k1,f1,10);seg(x,[f1[0]-7,f1[1]-1],[f1[0]+18,f1[1]-6],9);
+    var p=tWalkPose(k);                            // the feet land ON the pitched deck - the stride is inclined
+    legS(x,p.l2);legS(x,p.l1);
     var b1=lerp(112,64,k), b2=lerp(64,112,k);
     var e1=P(sho,b1,48),e2=P(sho,b2,48);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-24,44),9);    // hands OFF the rails, as the note says
@@ -8614,34 +8625,38 @@ var ANIM=(function(){
     seg(x,[cx-42,129+bob],[cx+42,129+bob],10);
     seg(x,[cx,125+bob],[cx,99+bob],8);
     dot(x,[cx,77+bob],19);                         // the head at the side view height - the climb carries the body high
-    var l1=lerp(0,-34,k), l2=lerp(-34,0,k);
-    seg(x,[cx,225+bob],[cx-14,313+l1],10);seg(x,[cx,225+bob],[cx+14,313+l2],10);
-    dot(x,[cx-14,313+l1],7);dot(x,[cx+14,313+l2],7);
-    seg(x,[cx-14,313+l1],[cx-22,387+l1*0.4],10);seg(x,[cx+14,313+l2],[cx+22,387+l2*0.4],10);
+    var p=tWalkPose(k);
+    dot(x,legF(x,cx,223+bob,cx-14,cx-22,p.l1),7);dot(x,legF(x,cx,223+bob,cx+14,cx+22,p.l2),7);
     var s1=lerp(-14,14,k), s2=lerp(14,-14,k);
     seg(x,[cx-42,133+bob],[cx-48,191+bob+s1],9);seg(x,[cx-48,191+bob+s1],[cx-40,241+bob+s1],9);
     seg(x,[cx+42,133+bob],[cx+48,191+bob+s2],9);seg(x,[cx+48,191+bob+s2],[cx+40,241+bob+s2],9);
   }
 
   // ---------- STAIRMASTER ----------
+  // v5.205: the whole foot on each step, as the card says, so the steps grew to fit a real foot
+  function stairLeg(hip,u){
+    return legOf(hip,stepFoot([lerp(264,320,u),lerp(412,382,u)-Math.sin(u*Math.PI)*22],0),92,1);
+  }
+  function stairPose(k){
+    var bob=Math.sin(k*Math.PI)*4, hip=[264,232+bob];
+    return {bob:bob,hip:hip,l1:stairLeg(hip,k),l2:stairLeg(hip,1-k)};
+  }
   function drawStairS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
     x.strokeStyle=LINE;x.lineWidth=6;
     x.beginPath();                                 // the little staircase
-    x.moveTo(258,412);x.lineTo(298,412);x.lineTo(298,382);x.lineTo(338,382);x.lineTo(338,352);x.lineTo(378,352);x.lineTo(378,430);
+    x.moveTo(226,412);x.lineTo(282,412);x.lineTo(282,382);x.lineTo(338,382);x.lineTo(338,352);x.lineTo(394,352);x.lineTo(394,430);
     x.stroke();
-    seg(x,[386,352],[386,170],6,LINE);             // the console mast
-    seg(x,[372,170],[402,162],7,LINE);
+    seg(x,[402,352],[402,170],6,LINE);             // the console mast
+    seg(x,[388,170],[418,162],7,LINE);
     var bob=Math.sin(k*Math.PI)*4;
     var hip=[264,232+bob], sho=[276,140+bob];      // leaning slightly into the climb
     seg(x,hip,sho,11);
     seg(x,sho,[278,114+bob],8);
     dot(x,[280,92+bob],19);
-    var f1=[lerp(284,320,k),lerp(408,378,k)], f2=[lerp(320,284,k),lerp(378,408,k)];   // the feet trade steps
-    var k1=elb(hip,f1,90,86,1),k2=elb(hip,f2,90,86,1);
-    seg(x,hip,k2,10);seg(x,k2,f2,10);seg(x,[f2[0]-6,f2[1]],[f2[0]+18,f2[1]],9);
-    seg(x,hip,k1,10);seg(x,k1,f1,10);seg(x,[f1[0]-6,f1[1]],[f1[0]+18,f1[1]],9);
+    var p=stairPose(k);                            // the feet trade steps, lifting clear of the edge
+    legS(x,p.l2);legS(x,p.l1);
     var b1=lerp(96,70,k), b2=lerp(70,96,k);
     var e1=P(sho,b1,48),e2=P(sho,b2,48);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-40,42),9);
@@ -8653,72 +8668,71 @@ var ANIM=(function(){
     var cx=240, bob=Math.sin(k*Math.PI)*4;
     seg(x,[cx-48,428],[cx-48,180],6,LINE);seg(x,[cx+48,428],[cx+48,180],6,LINE);   // the rails
     seg(x,[cx-48,180],[cx+48,180],7,LINE);
-    seg(x,[cx-58,428],[cx+58,428],7,LINE);         // the bottom step, nearest
-    seg(x,[cx-40,398],[cx+40,398],5,LINE);         // the steps receding up
-    seg(x,[cx-32,372],[cx+32,372],4,LINE);
+    seg(x,[cx-58,414],[cx+58,414],7,LINE);         // the bottom step, nearest - at the side view's heights
+    seg(x,[cx-40,384],[cx+40,384],5,LINE);         // the steps receding up
+    seg(x,[cx-32,354],[cx+32,354],4,LINE);
     seg(x,[cx,236+bob],[cx,144+bob],11);
     seg(x,[cx-42,148+bob],[cx+42,148+bob],10);
     seg(x,[cx,144+bob],[cx,118+bob],8);
-    dot(x,[cx,96+bob],19);
-    var l1=lerp(-6,-46,k), l2=lerp(-46,-6,k);      // the knees trade heights
-    seg(x,[cx,240+bob],[cx-15,334+l1],10);seg(x,[cx,240+bob],[cx+15,334+l2],10);
-    dot(x,[cx-15,334+l1],7);dot(x,[cx+15,334+l2],7);
-    seg(x,[cx-15,334+l1],[cx-22,406+l1*0.5],10);seg(x,[cx+15,334+l2],[cx+22,406+l2*0.5],10);
+    dot(x,[cx,92+bob],19);
+    var p=stairPose(k);                            // the knees trade heights
+    dot(x,legF(x,cx,236+bob,cx-15,cx-22,p.l1),7);dot(x,legF(x,cx,236+bob,cx+15,cx+22,p.l2),7);
     seg(x,[cx-42,152+bob],[cx-50,206+bob],9);seg(x,[cx-50,206+bob],[cx-44,252+bob],9);
     seg(x,[cx+42,152+bob],[cx+50,206+bob],9);seg(x,[cx+50,206+bob],[cx+44,252+bob],9);
   }
 
   // ---------- STATIONARY BIKE ----------
+  // v5.205 (owner: "the bike is way too small for the user"): the rider sits high enough that the leg
+  // keeps only a slight bend at the bottom of the turn, as the card says, and the frame is built round
+  // him. The ball of each foot rides its pedal, the ankle flexing a little through the circle.
+  function bikeRider(th,ta,hub,crank,L1){
+    var hip=[214,254], r=th*Math.PI/180, p1=P(hub,th,crank), p2=P(hub,th+180,crank);
+    return {hip:hip,sho:P(hip,ta,98),neck:P(hip,ta,124),head:P(hip,ta,146),p1:p1,p2:p2,
+      l1:legOf(hip,stepFoot(p1,12+8*Math.sin(r),0,1,1),L1,1),l2:legOf(hip,stepFoot(p2,12-8*Math.sin(r),0,1,1),L1,1)};
+  }
+  function spinPose(t){return bikeRider(reduce?0:(t*0.26)%360,-70,[262,382],34,86);}
   function drawSpinS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var th=reduce?0:(t*0.26)%360;                  // the crank turns on real time
-    var hub=[268,368];
-    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(hub[0],hub[1],26,0,7);x.stroke();   // the flywheel
-    seg(x,[210,296],[246,296],7,LINE);             // the saddle
-    seg(x,[228,296],[252,364],6,LINE);             // the seat post to the crank
-    seg(x,[268,368],[318,282],6,LINE);             // the frame forward
-    seg(x,[318,282],[306,268],6,LINE);seg(x,[296,268],[318,262],7,LINE);   // the bars
-    seg(x,[196,428],[340,428],7,LINE);             // the stabilizer feet
-    seg(x,[268,394],[268,424],6,LINE);seg(x,[214,296],[210,424],6,LINE);
-    var p1=P(hub,th,34), p2=P(hub,th+180,34);      // the pedals, opposite
-    seg(x,hub,p1,5,LINE);seg(x,hub,p2,5,LINE);
-    seg(x,[p1[0]-9,p1[1]],[p1[0]+9,p1[1]],7,GO);
-    seg(x,[p2[0]-9,p2[1]],[p2[0]+9,p2[1]],7,GO);
-    var hip=[226,290], sho=[262,192];              // the riding lean
-    seg(x,hip,sho,11);
-    seg(x,sho,[265,172],8);
-    dot(x,[267,152],19);
-    var k1=elb(hip,p1,86,84,1),k2=elb(hip,p2,86,84,1);
+    var p=spinPose(t), hub=[262,382], hip=p.hip, sho=p.sho;
+    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(hub[0],hub[1],30,0,7);x.stroke();   // the flywheel
+    seg(x,[186,428],[346,428],7,LINE);             // the stabilizer feet
+    seg(x,[212,262],[206,428],6,LINE);seg(x,[262,412],[262,428],6,LINE);
+    seg(x,[216,262],[258,378],6,LINE);             // the seat post to the crank
+    seg(x,hub,[316,250],6,LINE);                   // the frame forward
+    seg(x,[316,250],[306,234],6,LINE);seg(x,[294,234],[322,228],7,LINE);   // the bars
+    seg(x,[194,260],[234,260],7,LINE);             // the saddle
     x.globalAlpha=.45;
-    seg(x,hip,k2,10);seg(x,k2,p2,10);              // the far leg
-    seg(x,[p2[0]-5,p2[1]-5],[p2[0]+11,p2[1]-3],8); // its foot on the pedal
+    seg(x,hub,p.p2,5,LINE);seg(x,[p.p2[0]-9,p.p2[1]+3],[p.p2[0]+9,p.p2[1]+3],7,GO);
+    legS(x,p.l2);                                  // the far leg
     x.globalAlpha=1;
-    seg(x,hip,k1,10);seg(x,k1,p1,10);              // the near leg
-    seg(x,[p1[0]-5,p1[1]-5],[p1[0]+11,p1[1]-3],8); // the foot flat on the pedal
-    var e=elb(sho,[300,266],48,52,-1);
-    seg(x,sho,e,9);seg(x,e,[300,266],9);           // the arms to the bars
+    seg(x,hip,sho,11);
+    seg(x,sho,p.neck,8);
+    dot(x,p.head,19);
+    seg(x,hub,p.p1,5,LINE);seg(x,[p.p1[0]-9,p.p1[1]+3],[p.p1[0]+9,p.p1[1]+3],7,GO);
+    legS(x,p.l1);                                  // the near leg
+    var e=elb(sho,[304,232],48,52,-1);
+    seg(x,sho,e,9);seg(x,e,[304,232],9);           // the arms to the bars
   }
   function drawSpinF(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
-    var th=reduce?0:(t*0.26)%360, cx=240;
-    var s=Math.sin(th*Math.PI/180);
+    var p=spinPose(t), cx=240, hy=p.hip[1], sy=p.sho[1];   // every height is the side view's
     seg(x,[cx-44,428],[cx+44,428],7,LINE);         // the stabilizer, faced
-    seg(x,[cx,428],[cx,352],6,LINE);
-    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(cx,368,20,0,7);x.stroke();   // the flywheel edge-on
-    seg(x,[cx-34,236],[cx+34,236],7,LINE);         // the bars
-    seg(x,[cx-34,236],[cx-34,252],6,LINE);seg(x,[cx+34,236],[cx+34,252],6,LINE);
-    seg(x,[cx,240],[cx,300],5,LINE);
-    seg(x,[cx,226+2*s],[cx,186],11);               // the torso, low over the bars
-    seg(x,[cx-42,190],[cx+42,190],10);
-    seg(x,[cx,186],[cx,168],8);
-    dot(x,[cx,150],19);
-    var l1=-16*s, l2=16*s;                         // the knees pump alternately, foreshortened toward the viewer
-    seg(x,[cx-12,230],[cx-20,276+l1],10);seg(x,[cx+12,230],[cx+20,276+l2],10);
-    dot(x,[cx-20,276+l1],8);dot(x,[cx+20,276+l2],8);
-    seg(x,[cx-20,276+l1],[cx-23,342+l1*0.5],10);seg(x,[cx+20,276+l2],[cx+23,342+l2*0.5],10);
-    seg(x,[cx-29,348+l1*0.5],[cx-17,348+l1*0.5],7,GO);seg(x,[cx+17,348+l2*0.5],[cx+29,348+l2*0.5],7,GO);
-    seg(x,[cx-42,194],[cx-40,222],9);seg(x,[cx-40,222],[cx-32,242],9);   // arms down to the bars
-    seg(x,[cx+42,194],[cx+40,222],9);seg(x,[cx+40,222],[cx+32,242],9);
+    seg(x,[cx,428],[cx,402],6,LINE);
+    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(cx,382,20,0,7);x.stroke();   // the flywheel edge-on
+    seg(x,[cx-34,232],[cx+34,232],7,LINE);         // the bars
+    seg(x,[cx-34,232],[cx-34,248],6,LINE);seg(x,[cx+34,232],[cx+34,248],6,LINE);
+    seg(x,[cx,236],[cx,300],5,LINE);
+    seg(x,[cx,hy],[cx,sy],11);                     // the torso, leaning over the bars
+    seg(x,[cx-42,sy+4],[cx+42,sy+4],10);
+    seg(x,[cx,sy],[cx,p.neck[1]],8);
+    dot(x,[cx,p.head[1]],19);
+    [[p.l1,-1],[p.l2,1]].forEach(function(L){      // the knees pump alternately
+      dot(x,legF(x,cx+L[1]*10,hy,cx+L[1]*20,cx+L[1]*23,L[0]),8);
+      var sole=Math.max(L[0].foot.ball[1],L[0].foot.heel[1]);
+      seg(x,[cx+L[1]*19,sole+3],[cx+L[1]*31,sole+3],7,GO);
+    });
+    seg(x,[cx-42,sy+8],[cx-42,sy+40],9);seg(x,[cx-42,sy+40],[cx-32,236],9);   // arms down to the bars
+    seg(x,[cx+42,sy+8],[cx+42,sy+40],9);seg(x,[cx+42,sy+40],[cx+32,236],9);
   }
 
   // ---------- ELLIPTICAL ----------
@@ -8731,9 +8745,9 @@ var ANIM=(function(){
     seg(x,[338,358],[338,428],6,LINE);
     seg(x,[300,180],[300,120],6,LINE);seg(x,[286,120],[314,114],7,LINE);   // the console mast
     var p1=[248+42*c,392+12*s], p2=[248-42*c,392-12*s];   // the pedals ride the ellipse
-    seg(x,[338,330],[p1[0]+22,p1[1]],5,LINE);seg(x,[338,330],[p2[0]+22,p2[1]],5,LINE);
-    seg(x,[p1[0]-16,p1[1]],[p1[0]+22,p1[1]],7,GO); // the foot platforms
-    seg(x,[p2[0]-16,p2[1]],[p2[0]+22,p2[1]],7,GO);
+    seg(x,[338,330],[p1[0]+26,p1[1]],5,LINE);seg(x,[338,330],[p2[0]+26,p2[1]],5,LINE);
+    seg(x,[p1[0]-32,p1[1]],[p1[0]+26,p1[1]],7,GO); // the foot platforms, a whole foot long
+    seg(x,[p2[0]-32,p2[1]],[p2[0]+26,p2[1]],7,GO);
     var g1=P([300,178],-96+13*c,-30), g2=P([300,178],-96-13*c,-30);    // the grips, UP at the chest on the moving poles
     seg(x,[300,178],P([300,178],-96+13*c,-150),5,LINE);seg(x,[300,178],P([300,178],-96-13*c,-150),5,LINE);
     dot(x,g1,5);
@@ -8741,10 +8755,9 @@ var ANIM=(function(){
     seg(x,hip,sho,11);
     seg(x,sho,[264,120],8);
     dot(x,[266,98],19);
-    var k2=elb(hip,[p2[0],p2[1]-4],90,88,1);
-    x.globalAlpha=.45;seg(x,hip,k2,10);seg(x,k2,[p2[0],p2[1]-4],10);x.globalAlpha=1;
-    var k1=elb(hip,[p1[0],p1[1]-4],90,88,1);
-    seg(x,hip,k1,10);seg(x,k1,[p1[0],p1[1]-4],10);
+    // v5.205: heels down, as the card says - the whole foot flat on the platform
+    x.globalAlpha=.45;legS(x,legOf(hip,footPose([p2[0]+10,p2[1]-4],0),90,1));x.globalAlpha=1;
+    legS(x,legOf(hip,footPose([p1[0]+10,p1[1]-4],0),90,1));
     var e1=elb(sho,g1,48,50,-1);
     seg(x,sho,e1,9);seg(x,e1,g1,9);                // push one handle, pull the other
     var e2=elb(sho,g2,48,50,-1);
@@ -8763,12 +8776,13 @@ var ANIM=(function(){
     seg(x,[cx,222+2*s],[cx,150],11);
     seg(x,[cx-42,154],[cx+42,154],10);
     seg(x,[cx,150],[cx,124],8);
-    dot(x,[cx,102],19);
+    dot(x,[cx,98],19);
     var l1=-20*s, l2=20*s;
     seg(x,[cx-12,226],[cx-18,330+l1],10);seg(x,[cx+12,226],[cx+18,330+l2],10);
     dot(x,[cx-18,330+l1],7);dot(x,[cx+18,330+l2],7);
-    seg(x,[cx-18,330+l1],[cx-22,396+l1*0.5],10);seg(x,[cx+18,330+l2],[cx+22,396+l2*0.5],10);
-    seg(x,[cx-26,402+l1*0.5],[cx-14,402+l1*0.5],7,GO);seg(x,[cx+14,402+l2*0.5],[cx+26,402+l2*0.5],7,GO);
+    seg(x,[cx-18,330+l1],[cx-22,386+l1*0.5],10);seg(x,[cx+18,330+l2],[cx+22,386+l2*0.5],10);
+    footFront(x,cx-22,386+l1*0.5,cx-24,399+l1*0.5);footFront(x,cx+22,386+l2*0.5,cx+24,399+l2*0.5);
+    seg(x,[cx-34,403+l1*0.5],[cx-14,403+l1*0.5],7,GO);seg(x,[cx+14,403+l2*0.5],[cx+34,403+l2*0.5],7,GO);
     seg(x,[cx-42,158],[cx-52,196],9);seg(x,[cx-52,196],[cx-44,h1+14],9);dot(x,[cx-44,h1+6],5);   // bent arms up to the grips
     seg(x,[cx+42,158],[cx+52,196],9);seg(x,[cx+52,196],[cx+44,h2+14],9);dot(x,[cx+44,h2+6],5);
   }
@@ -8780,7 +8794,7 @@ var ANIM=(function(){
     seg(x,[130,402],[372,402],6,LINE);             // the rail
     x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(150,364,30,0,7);x.stroke();   // the flywheel cage
     seg(x,[150,394],[150,428],6,LINE);seg(x,[356,402],[356,428],6,LINE);
-    seg(x,[188,394],[170,356],7,LINE);             // the foot plate
+    seg(x,[190,398],[164,344],7,LINE);             // the foot plate, long enough for a whole foot
     var sx=lerp(244,330,k);                        // an easier slide - no deep compression at the catch
     seg(x,[sx-16,394],[sx+16,394],7,GO);
     var hip=[sx,384];
@@ -8789,10 +8803,9 @@ var ANIM=(function(){
     seg(x,hip,sho,11);                             // one rigid torso, rocking about the hips
     seg(x,sho,P(hip,ta,124),8);
     dot(x,P(hip,ta,146),19);
-    var foot=[176,372];
-    var kn=elb(hip,foot,88,84,-1);
-    seg(x,hip,kn,10);seg(x,kn,foot,10);            // knees folded at the catch, opening long
-    seg(x,[181,381],[170,360],9);                  // the foot flat on the footplate, strapped in
+    // v5.205: the foot lies along the plate, strapped in; at the catch the heel lifts a little off it
+    var leg=legOf(hip,footPose([174.5,356.7],lerp(15,0,k),-64.3,-1),88,-1), kn=leg.knee;
+    legS(x,leg);                                   // knees folded at the catch, opening long
     dot(x,kn,5,GO);
     var hand=[lerp(196,sx-44,k),lerp(324,318,k)];
     seg(x,[158,346],[hand[0]+4,hand[1]],4,LINE);   // the chain, out of the flywheel
@@ -8829,6 +8842,8 @@ var ANIM=(function(){
   }
 
   // ---------- JUMP ROPE ----------
+  // v5.205: up on the balls of the feet the whole time, as the card says; the heels never land
+  function ropeLeg(hop){return legOf([240,250+hop],stepFoot([256,424+hop],25),88,1);}
   function drawJumpRopeS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var th=reduce?90:(t*0.4)%360;
@@ -8838,8 +8853,7 @@ var ANIM=(function(){
     seg(x,hip,sho,11);
     seg(x,sho,[238,126+hop],8);
     dot(x,[238,104+hop],19);
-    seg(x,hip,[236,338+hop],10);seg(x,[236,338+hop],[240,414+hop],10);
-    seg(x,[234,414+hop],[262,418+hop],9);
+    legS(x,ropeLeg(hop));
     var e=[252,214+hop];
     seg(x,sho,e,9);seg(x,e,[268,252+hop],9);       // the wrists do the turning
     dot(x,[268,252+hop],5);
@@ -8866,9 +8880,8 @@ var ANIM=(function(){
     seg(x,[cx-42,156+hop],[cx+42,156+hop],10);
     seg(x,[cx,152+hop],[cx,126+hop],8);
     dot(x,[cx,104+hop],19);
-    seg(x,[cx,254+hop],[cx-14,340+hop],10);seg(x,[cx,254+hop],[cx+14,340+hop],10);
-    seg(x,[cx-14,340+hop],[cx-18,414+hop],10);seg(x,[cx+14,340+hop],[cx+18,414+hop],10);
-    seg(x,[cx-28,418+hop],[cx-8,418+hop],9);seg(x,[cx+8,418+hop],[cx+28,418+hop],9);
+    var l=ropeLeg(hop);
+    legF(x,cx,252+hop,cx-14,cx-18,l);legF(x,cx,252+hop,cx+14,cx+18,l);
     seg(x,[cx-42,160+hop],[cx-54,210+hop],9);seg(x,[cx-54,210+hop],[cx-64,256+hop],9);
     seg(x,[cx+42,160+hop],[cx+54,210+hop],9);seg(x,[cx+54,210+hop],[cx+64,256+hop],9);
     dot(x,[cx-66,262+hop],5);dot(x,[cx+66,262+hop],5);
@@ -8879,6 +8892,15 @@ var ANIM=(function(){
   }
 
   // ---------- OUTDOOR RUN ----------
+  // v5.205: reaching forward heel first, the foot kicks up high behind; at the middle both are off
+  // the ground, which is what makes it a run and not a walk
+  function oRunLeg(hip,u){
+    return legOf(hip,stepFoot([lerp(306,170,u),414-50*u*u],lerp(-8,60,u),0,1,1),90,1);
+  }
+  function oRunPose(k){
+    var bob=-Math.sin(k*Math.PI)*5, hip=[236,238+bob];
+    return {bob:bob,hip:hip,l1:oRunLeg(hip,k),l2:oRunLeg(hip,1-k)};
+  }
   function drawOutRunS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
@@ -8891,11 +8913,8 @@ var ANIM=(function(){
     seg(x,hip,sho,11);
     seg(x,sho,[250,118+bob],8);
     dot(x,[252,96+bob],19);
-    var a1=lerp(58,118,k), a2=lerp(118,58,k);
-    var k1=P(hip,a1,90),k2=P(hip,a2,90);
-    var f1=P(k1,a1+lerp(-6,45,k),84),f2=P(k2,a2+lerp(45,-6,k),84);
-    seg(x,hip,k2,10);seg(x,k2,f2,10);seg(x,[f2[0]-7,f2[1]+1],[f2[0]+18,f2[1]+2],9);
-    seg(x,hip,k1,10);seg(x,k1,f1,10);seg(x,[f1[0]-7,f1[1]+1],[f1[0]+18,f1[1]+2],9);
+    var p=oRunPose(k);
+    legS(x,p.l2);legS(x,p.l1);
     var b1=lerp(72,118,k), b2=lerp(118,72,k);
     var e1=P(sho,b1,48),e2=P(sho,b2,48);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-78,42),9);
@@ -8911,11 +8930,9 @@ var ANIM=(function(){
     seg(x,[cx,242+bob],[cx,146+bob],11);
     seg(x,[cx-42,150+bob],[cx+42,150+bob],10);
     seg(x,[cx,146+bob],[cx,120+bob],8);
-    dot(x,[cx,98+bob],19);
-    var l1=lerp(6,-62,k), l2=lerp(-62,6,k);
-    seg(x,[cx,246+bob],[cx-15,330+l1],10);seg(x,[cx,246+bob],[cx+15,330+l2],10);
-    dot(x,[cx-15,330+l1],7);dot(x,[cx+15,330+l2],7);
-    seg(x,[cx-15,330+l1],[cx-24,408+l1*0.4],10);seg(x,[cx+15,330+l2],[cx+24,408+l2*0.4],10);
+    dot(x,[cx,96+bob],19);
+    var p=oRunPose(k);
+    dot(x,legF(x,cx,242+bob,cx-15,cx-22,p.l1),7);dot(x,legF(x,cx,242+bob,cx+15,cx+22,p.l2),7);
     var s1=lerp(-24,24,k), s2=lerp(24,-24,k);
     seg(x,[cx-42,154+bob],[cx-52,206+bob+s1],9);seg(x,[cx-52,206+bob+s1],[cx-30,234+bob+s1],9);
     seg(x,[cx+42,154+bob],[cx+52,206+bob+s2],9);seg(x,[cx+52,206+bob+s2],[cx+30,234+bob+s2],9);
@@ -8975,61 +8992,57 @@ var ANIM=(function(){
   }
 
   // ---------- AIR BIKE ----------
+  // v5.205: the same seated rider as the bike, sitting a little taller, the fan ahead of him
+  function airPose(t){return bikeRider(reduce?0:(t*0.26)%360,-74,[250,386],30,84);}
   function drawAirBikeS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var th=reduce?0:(t*0.26)%360;
-    var r=th*Math.PI/180, c=Math.cos(r), s=Math.sin(r);
-    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(322,352,44,0,7);x.stroke();   // the fan - ahead of the rider, near the floor
-    seg(x,[322,352],P([322,352],th,38),4,LINE);    // the spokes, turning
-    seg(x,[322,352],P([322,352],th+120,38),4,LINE);
-    seg(x,[322,352],P([322,352],th+240,38),4,LINE);
-    seg(x,[180,428],[352,428],7,LINE);
-    seg(x,[322,396],[322,424],6,LINE);
-    seg(x,[204,296],[240,296],7,LINE);             // the saddle
-    seg(x,[222,296],[248,368],6,LINE);
-    var hub=[252,372];
-    var p1=P(hub,th,30), p2=P(hub,th+180,30);
-    seg(x,hub,p1,4,LINE);seg(x,hub,p2,4,LINE);
-    seg(x,[p1[0]-8,p1[1]],[p1[0]+8,p1[1]],7,GO);
-    seg(x,[p2[0]-8,p2[1]],[p2[0]+8,p2[1]],7,GO);
-    var g1=[286,208-16*s], g2=[266,208+16*s];      // the handles pump opposite
-    seg(x,[276,300],g1,5,LINE);seg(x,[262,300],g2,5,LINE);
-    var hip=[222,290], sho=[252,192];
-    seg(x,hip,sho,11);
-    seg(x,sho,[255,166],8);
-    dot(x,[256,144],19);
-    var k1=elb(hip,p1,84,82,1);
-    var k2=elb(hip,p2,84,82,1);
-    x.globalAlpha=.45;seg(x,hip,k2,10);seg(x,k2,p2,10);
-    seg(x,[p2[0]-5,p2[1]-5],[p2[0]+10,p2[1]-3],8);x.globalAlpha=1;
-    seg(x,hip,k1,10);seg(x,k1,p1,10);
-    seg(x,[p1[0]-5,p1[1]-5],[p1[0]+10,p1[1]-3],8); // the feet flat on the pedals
-    var e1=elb(sho,g1,46,48,-1);
-    seg(x,sho,e1,9);seg(x,e1,g1,9);
+    var th=reduce?0:(t*0.26)%360, s=Math.sin(th*Math.PI/180);
+    var p=airPose(t), hub=[250,386], fan=[334,364], hip=p.hip, sho=p.sho;
+    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(fan[0],fan[1],48,0,7);x.stroke();   // the fan, ahead near the floor
+    seg(x,fan,P(fan,th,42),4,LINE);                // the spokes, turning
+    seg(x,fan,P(fan,th+120,42),4,LINE);
+    seg(x,fan,P(fan,th+240,42),4,LINE);
+    seg(x,[176,428],[364,428],7,LINE);
+    seg(x,[334,412],[334,428],6,LINE);seg(x,[212,262],[206,428],6,LINE);
+    seg(x,[216,262],[246,382],6,LINE);             // the seat post to the crank
+    seg(x,hub,fan,6,LINE);                         // the frame forward to the fan
+    seg(x,[194,260],[234,260],7,LINE);             // the saddle
+    var g1=[294,184-16*s], g2=[276,184+16*s];      // the handles pump opposite
+    seg(x,[284,318],g1,5,LINE);seg(x,[270,318],g2,5,LINE);
     x.globalAlpha=.45;
+    seg(x,hub,p.p2,4,LINE);seg(x,[p.p2[0]-8,p.p2[1]+3],[p.p2[0]+8,p.p2[1]+3],7,GO);
+    legS(x,p.l2);
     var e2=elb(sho,g2,46,48,-1);
     seg(x,sho,e2,9);seg(x,e2,g2,9);
     x.globalAlpha=1;
+    seg(x,hip,sho,11);
+    seg(x,sho,p.neck,8);
+    dot(x,p.head,19);
+    seg(x,hub,p.p1,4,LINE);seg(x,[p.p1[0]-8,p.p1[1]+3],[p.p1[0]+8,p.p1[1]+3],7,GO);
+    legS(x,p.l1);
+    var e1=elb(sho,g1,46,48,-1);
+    seg(x,sho,e1,9);seg(x,e1,g1,9);
   }
   function drawAirBikeF(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
-    var th=reduce?0:(t*0.26)%360, cx=240;
-    var s=Math.sin(th*Math.PI/180);
-    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.ellipse(cx,336,9,46,0,0,7);x.stroke();   // the fan edge-on: a slit, faced head-on
-    seg(x,[cx,292],[cx,380],4,LINE);               // its rim line
+    var th=reduce?0:(t*0.26)%360, cx=240, s=Math.sin(th*Math.PI/180);
+    var p=airPose(t), hy=p.hip[1], sy=p.sho[1];    // every height is the side view's
+    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.ellipse(cx,364,9,48,0,0,7);x.stroke();   // the fan edge-on: a slit, faced head-on
+    seg(x,[cx,316],[cx,412],4,LINE);               // its rim line
     seg(x,[cx-48,428],[cx+48,428],7,LINE);
-    dot(x,[cx,144],19);                            // the rider behind the fan
-    seg(x,[cx,166],[cx,186],8);
-    seg(x,[cx-42,190],[cx+42,190],10);
-    seg(x,[cx,186],[cx,250],11);
-    var h1=200-18*s, h2=200+18*s;                  // the moving grips
-    seg(x,[cx-38,262],[cx-38,h1],5,LINE);seg(x,[cx+38,262],[cx+38,h2],5,LINE);
-    seg(x,[cx-42,194],[cx-40,h1+16],9);dot(x,[cx-40,h1+8],5);
-    seg(x,[cx+42,194],[cx+40,h2+16],9);dot(x,[cx+40,h2+8],5);
-    var l1=-20*s, l2=20*s;
-    seg(x,[cx-10,252],[cx-26,306+l1],10);seg(x,[cx+10,252],[cx+26,306+l2],10);
-    dot(x,[cx-26,306+l1],8);dot(x,[cx+26,306+l2],8);
-    seg(x,[cx-26,306+l1],[cx-30,368+l1*0.5],10);seg(x,[cx+26,306+l2],[cx+30,368+l2*0.5],10);
+    dot(x,[cx,p.head[1]],19);                      // the rider behind the fan
+    seg(x,[cx,p.neck[1]],[cx,sy],8);
+    seg(x,[cx-42,sy+4],[cx+42,sy+4],10);
+    seg(x,[cx,sy],[cx,hy],11);
+    var h1=184-16*s, h2=184+16*s;                  // the moving grips, at the side view's heights
+    seg(x,[cx-38,300],[cx-38,h1],5,LINE);seg(x,[cx+38,300],[cx+38,h2],5,LINE);
+    seg(x,[cx-42,sy+8],[cx-40,h1+16],9);dot(x,[cx-40,h1+8],5);
+    seg(x,[cx+42,sy+8],[cx+40,h2+16],9);dot(x,[cx+40,h2+8],5);
+    [[p.l1,-1],[p.l2,1]].forEach(function(L){
+      dot(x,legF(x,cx+L[1]*10,hy,cx+L[1]*26,cx+L[1]*30,L[0]),8);
+      var sole=Math.max(L[0].foot.ball[1],L[0].foot.heel[1]);
+      seg(x,[cx+L[1]*27,sole+3],[cx+L[1]*39,sole+3],7,GO);
+    });
   }
 
   // ---------- STRETCHES: held positions - the motion is the slow sink of a stretch ----------
@@ -9446,10 +9459,14 @@ var ANIM=(function(){
   // toes stay planted and the whole rear foot turns about the ball: the heel lifts, and the ankle,
   // riding on it, lifts the body. The shin is 74 here, not the rig's 88, because the rig's ankle
   // stands ON the floor; 74 plus the 14 of the foot gives back exactly the rig's stature, hip 244.
-  function footPose(B,deg){
-    var th=deg*Math.PI/180, d=[-Math.cos(th),-Math.sin(th)], n=[Math.sin(th),-Math.cos(th)];
-    function fp(sd,h){return [B[0]+sd*d[0]+h*n[0],B[1]+sd*d[1]+h*n[1]];}
-    return {ball:B,heel:fp(36,0),ankle:fp(23,14),toe:[B[0]+16,B[1]]};
+  function footPose(B,deg,base,dir){
+    base=base||0;dir=dir||1;
+    var th=deg*Math.PI/180, d=[-dir*Math.cos(th),-Math.sin(th)], n=[dir*Math.sin(th),-Math.cos(th)];
+    var bt=base*Math.PI/180, cb=Math.cos(bt), sb=Math.sin(bt);
+    function rot(v){return [v[0]*cb+v[1]*sb,-v[0]*sb+v[1]*cb];}   // the whole foot tilts with its plate
+    function fp(sd,h){var v=rot([sd*d[0]+h*n[0],sd*d[1]+h*n[1]]);return [B[0]+v[0],B[1]+v[1]];}
+    var tv=rot([dir*16,0]);
+    return {ball:B,heel:fp(36,0),ankle:fp(23,14),toe:[B[0]+tv[0],B[1]+tv[1]]};
   }
   function calfBody(ankle){
     var knee=P(ankle,-92,74), hip=P(knee,-89,92), sho=P(hip,-91,98);
@@ -9465,6 +9482,29 @@ var ANIM=(function(){
   function footFront(x,ax,ay,bx,by){
     x.fillStyle=INK;x.strokeStyle=INK;x.lineWidth=4;x.lineJoin="round";
     x.beginPath();x.moveTo(ax-6,ay);x.lineTo(ax+6,ay);x.lineTo(bx+10,by);x.lineTo(bx-10,by);x.closePath();x.fill();x.stroke();
+  }
+  // ---------- THE FOOT ON THE MOVE (v5.205): the same foot, carried by a stride or a pedal ----------
+  // stepFoot plants it the way the moment needs: deg above 0 lifts the heel about the ball (the push
+  // off, standing on the toes), below 0 lifts the toes about the heel (the heel strike). A foot off
+  // the floor is rigid, so its toes carry on along the sole instead of lying flat.
+  function stepFoot(B,deg,base,dir,air){
+    var f=footPose(B,deg,base,dir);
+    if(deg<0){
+      var f0=footPose(B,0,base,dir),dx=f.heel[0]-f0.heel[0],dy=f.heel[1]-f0.heel[1];
+      f={ball:[f.ball[0]-dx,f.ball[1]-dy],heel:f0.heel,ankle:[f.ankle[0]-dx,f.ankle[1]-dy]};air=1;
+    }
+    if(air){var u=[(f.ball[0]-f.heel[0])/36,(f.ball[1]-f.heel[1])/36];f.toe=[f.ball[0]+16*u[0],f.ball[1]+16*u[1]];}
+    return f;
+  }
+  // a leg down to that foot: thigh L1, the foot's own 74 shin, the knee bending to side
+  function legOf(hip,f,L1,side){return {hip:hip,knee:elb(hip,f.ankle,L1,74,side),foot:f};}
+  function legS(x,l){seg(x,l.hip,l.knee,10);seg(x,l.knee,l.foot.ankle,10);footSide(x,l.foot);}
+  // the same leg from the front: every height is the side view's, only the x comes from the stance
+  function legF(x,hx,hy,kx,ax,l){
+    var ky=l.knee[1],ay=l.foot.ankle[1],sole=Math.max(l.foot.ball[1],l.foot.heel[1]);
+    seg(x,[hx,hy],[kx,ky],10);seg(x,[kx,ky],[ax,ay],10);
+    footFront(x,ax,ay,ax+(ax<240?-4:4),sole);
+    return [kx,ky];
   }
 
   // ---------- DUMBBELL CALF RAISE: balls on a step, heels below the edge ----------
@@ -9627,7 +9667,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.204';
+var APPV='v5.205';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
