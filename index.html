@@ -2707,8 +2707,9 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hdel:active{transform:scale(.99);}
 
 /* ---------- footer: a real panel, not fine print ---------- */
-/* one button wide since Backup moved into Settings, where anyone would look for it (v5.192, R3) */
-.footbar{display:grid;grid-template-columns:1fr;gap:7px;}
+/* Backup went into Settings in v5.192 and left one lonely plate; Saved workouts took the empty
+   half in v5.195, so the pair is back and neither one is an island. */
+.footbar{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
 .fbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
   padding:15px 6px 13px;border-radius:12px;border:1px solid var(--line);cursor:pointer;transition:.16s;
   background:linear-gradient(180deg,rgba(190,214,255,.05),rgba(190,214,255,.008)),var(--surface);
@@ -9492,7 +9493,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.194';
+var APPV='v5.195';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11600,10 +11601,19 @@ function renderHome(){
   // out enough to stand next to Workouts finished - it reads as metrics without being true
   // ones. showProgress and the whole sheet stay intact underneath for the deeper pass.
   document.getElementById('foot').innerHTML=
+    // Two plates, side by side (v5.195, owner picked P3): Workouts finished stopped being an
+    // island below a rule by getting a neighbour, and Saved workouts is the neighbour it should
+    // have had, since both are shelves rather than parts of the week. The fold itself still
+    // lives under the board, where a workout can be dragged out of it onto a day.
     '<div class="footbar">'+
+      '<div class="fbtn" onclick="savedTap()">'+(fg
+        // a rack of kept pieces, the shelf the fold opens
+        ?'<svg viewBox="0 0 20 20"><path d="M2.6 4.5h14.8v4h-14.8zM2.6 11.5h14.8v4h-14.8zM6 4.5v4M13 11.5v4"/></svg>'
+        :'<svg viewBox="0 0 20 20"><path d="M3.5 4.5h13v4h-13zM3.5 11.5h13v4h-13z"/></svg>')+
+        (fgw?'Kept<br>pieces':'Saved<br>workouts')+'</div>'+
       '<div class="fbtn" onclick="showHistory()">'+(fg
-        // finished pieces racked in a row
-        ?'<svg viewBox="0 0 20 20"><path d="M4 15.5h12l-1 2.5H5zM5.5 11.5h9l-.9 2.6H6.4zM7 7.5h6l-.8 2.6H7.8zM10 2.5v3.6M8.4 4.3L10 2.5l1.6 1.8"/></svg>'
+        // I1, the ledger with one line struck: a record of what you did is a page, not a stack
+        ?'<svg viewBox="0 0 20 20"><path d="M3.4 6.6h13.2M3.4 10h13.2M3.4 13.4h6" stroke-width="1.1" opacity=".5"/><path d="M2.6 2.6h14.8v14.8h-14.8z"/><path d="M8.4 13.4l2.3 2.3 4.8-6" stroke-width="2"/></svg>'
         :'<svg viewBox="0 0 20 20"><path d="M3.5 3.5h13v13h-13zM3.5 7.5h13M7.5 3.5v13"/></svg>')+
         (fgw?'Pieces<br>finished':'Workouts<br>finished')+'</div>'+
     '</div>'+
@@ -12498,6 +12508,15 @@ function openNewDay(k){
 // The Saved fold (v5.138). Shut by default; remembered. Anything that puts a workout INTO Saved
 // opens it, so the thing you just moved is never out of sight.
 var SAVED_OPEN=(function(){try{return localStorage.getItem('arc_savedopen')==='1';}catch(e){return false;}})();
+// The footer plate opens the shelf, and then puts it in front of you: the fold lives under the
+// board so that a saved workout can still be dragged onto a day, which is above the button that
+// opened it (v5.195).
+function savedTap(){
+  savedToggle();
+  if(!SAVED_OPEN)return;
+  var el=document.getElementById('extraWrap');if(!el)return;
+  setTimeout(function(){try{el.scrollIntoView({behavior:'smooth',block:'end'});}catch(e){}},60);
+}
 function savedToggle(){SAVED_OPEN=!SAVED_OPEN;try{localStorage.setItem('arc_savedopen',SAVED_OPEN?'1':'0');}catch(e){}savedApply();try{sfxTick&&sfxTick();}catch(e){}}
 function savedOpen(){if(!SAVED_OPEN){SAVED_OPEN=true;try{localStorage.setItem('arc_savedopen','1');}catch(e){}}savedApply();}
 function savedApply(n){
@@ -12508,6 +12527,7 @@ function savedApply(n){
   var b=h.querySelector('.sv-tog');if(b)b.setAttribute('aria-expanded',SAVED_OPEN?'true':'false');
   c.hidden=!SAVED_OPEN;
   var fb=document.getElementById('extraForge');if(fb)fb.hidden=!SAVED_OPEN;
+  h.hidden=!SAVED_OPEN;   // the line under the board is the fold's own header now (v5.195)
   if(t)t.hidden=!(SAVED_OPEN&&n>0);
 }
 function openNewSaved(){
