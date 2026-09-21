@@ -657,18 +657,6 @@ body.tut #askOvl{z-index:402;}
 .ex-links a.unote-btn.has{color:var(--go);border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
 /* The ramp, ticked off and thrown away. Deliberately quieter than a real set row: these are
    not your training and must never read as if they were. */
-.warm-hd{display:flex;align-items:baseline;gap:8px;margin-top:11px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);}
-.warm-hd span{text-transform:none;letter-spacing:0;color:var(--txt3);}
-.warm-row{display:flex;align-items:center;gap:9px;padding:8px 11px;margin-top:6px;border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:.15s;}
-.warm-row:hover{border-color:#33373d;}
-.warm-row.on{opacity:.45;}
-.warm-ck{width:15px;height:15px;flex:none;border:1px solid var(--line);border-radius:5px;position:relative;}
-.warm-row.on .warm-ck{background:var(--go);border-color:var(--go);}
-.warm-row.on .warm-ck:after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(43deg);}
-.warm-row b{font-size:15px;}
-.warm-u{font-size:11px;color:var(--txt3);margin-left:-5px;}
-.warm-r{font-size:12px;color:var(--txt3);}
-.warm-s{margin-left:auto;font-size:11px;color:var(--txt3);text-align:right;}
 /* the written instructions sheet: setup line, cues as a list, the one mistake, and the
    external page demoted to a reference footnote where an exact one exists */
 .ins-s{font-size:14px;line-height:1.55;color:var(--txt2);margin:4px 0 12px;}
@@ -2278,7 +2266,10 @@ body.forge .ex-body{display:flex;flex-direction:column;}
 body.forge .ex-nrow{padding:10px 8px 8px 12px;background:#130c09;border-bottom:1px solid #2a1810;align-items:center;}
 body.forge .ex-n{font-family:'Marcellus',serif;font-weight:400;font-size:16px;letter-spacing:.01em;color:#fff6e6;}
 body.forge .ex-links{order:0;margin:0;padding:8px 12px 2px;gap:6px;}
-body.forge .ex-links a{width:34px;height:34px;padding:0;justify-content:center;font-size:0;gap:0;border:1px solid #3a2214;background:#130c09;color:var(--txt3);border-radius:9px;}
+/* C1 (v5.196, owner's pick): three bare squares were a guess every time, so they carry their
+   word again. HOW TO rather than Instructions, so each one holds a single line at phone width. */
+body.forge .ex-links a{height:34px;padding:0 11px;justify-content:center;gap:6px;border:1px solid #3a2214;background:#130c09;color:var(--txt3);border-radius:9px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;}
 body.forge .ex-links a svg{width:16px;height:16px;}
 body.forge .ex-links a.unote-btn.has,body.forge .ex-links a.on{color:var(--gold);border-color:#6a3f26;}
 @media (hover:hover){body.forge .ex-links a:hover{color:var(--gold);border-color:#6a3f26;}}
@@ -2525,6 +2516,12 @@ body.forge .daybox.today .dayhead{animation:dayHot 4.6s ease-in-out infinite;}
 .wk-mins{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:var(--txt3);margin:3px 2px 0;text-align:right;}
 .wk-mins b{color:var(--txt2);font-weight:500;}
 .wk-mins[hidden]{display:none;}
+
+/* The plan, as the ghost behind an empty box (v5.196). A logged number is solid; a number you
+   have not touched is the app's suggestion and looks like one. */
+.inp.ghost{color:transparent;}
+.inp::placeholder{color:#6b533f;opacity:1;}
+body.forge .inp::placeholder{color:#7a5c46;}
 
 /* ---- The finish screen, v5.150: the seal. ---- */
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2c1c;}
@@ -4014,7 +4011,7 @@ body.wcon{overflow:hidden;}
 // climb from there. Aligned with EZ_W (the wizard's starters) where both name a lift.
 var EX = {
   bench:    {name:"Barbell Bench Press",wraps:1,note:"Flat bench, hands a little wider than the shoulders, lower it slowly",sets:"65x8\n65x8\n65x8\n65x8",rest:"3 min"},
-  incdb:    {name:"Incline Dumbbell Press",wraps:1,note:"Bench at 30 to 45 degrees, lower for 3 seconds",sets:"25x10\n25x10\n25x10",rest:"2 min"},
+  incdb:    {name:"Incline Dumbbell Press",wraps:1,note:"Bench at 30 to 45 degrees, lower slowly",sets:"25x10\n25x10\n25x10",rest:"2 min"},
   mbench:   {name:"Machine Bench Press",wraps:1,note:"Seat set so the handles sit level with mid chest, arms straight at the top, elbows in",sets:"60x10\n60x10\n60x10",rest:"90 sec"},
   xover:    {name:"Cable Crossover",note:"Pulleys set high, one foot a step ahead, squeeze at the middle rather than swinging",sets:"10x12\n10x12\n10x12",rest:""},
   vbar:     {name:"V-Bar Cable Pushdown",note:"V-shaped handle. Elbows held to your sides, no swinging",sets:"30x12\n30x12\n30x12",rest:"60 sec"},
@@ -4044,7 +4041,7 @@ var EX = {
   slegcurl: {name:"Machine Seated Leg Curl",note:"Pull the thigh pad down tight and pull yourself down into the seat. It stops the lower back lifting",sets:"60x12\n60x12\n60x12",rest:"60 sec"},
   plegcurl: {name:"Prone Leg Curl",note:"Lying face down on the leg curl machine",sets:"40x12\n40x12\n40x12\n40x12",rest:"60 sec"},
   sumo:     {name:"Dumbbell Sumo Squat",note:"One dumbbell held upright in both hands. Feet wide, toes out",sets:"20x12\n20x12\n20x12",rest:""},
-  lunge:    {name:"Walking Lunge",note:"One dumbbell in each hand, 12 steps each leg",sets:"10x12\n10x12\n10x12",rest:"60 sec"},
+  lunge:    {name:"Walking Lunge",note:"One dumbbell in each hand. Step, sink, stand, then the other leg",sets:"10x12\n10x12\n10x12",rest:"60 sec"},
   dcalfr:   {name:"Diagonal/Slanted Calf Raise",note:"Heels off the edge, all the way up and down, lower slowly",sets:"30x15\n30x15\n30x15\n30x15",rest:"45 sec"},
   scalfr:   {name:"Machine Seated Calf Raise",note:"Pads on thighs, heels hanging off platform edge",sets:"70x15\n70x15\n70x15\n70x15",rest:"45 sec"},
   hipraise: {bw:1,name:"Parallel Bar Hip Raise",note:"Captain's chair. Lift the knees to the chest, lower slowly",sets:"0x15\n0x15\n0x15",rest:""},
@@ -4056,7 +4053,7 @@ var EX = {
   mfly:     {name:"Machine Fly",note:"Chest fly machine. Slight elbow bend, squeeze at the front",sets:"60x12\n60x12\n60x12",rest:"60 sec"},
   lowchest: {name:"Cable Lower Chest Raise",note:"Low to high, arms nearly straight, only a slight bend at the elbow",sets:"10x12\n10x12\n10x12",rest:"60 sec"},
   pullover: {name:"Dumbbell Pullover",note:"One dumbbell, both hands under the top plate. Lie across the bench, lower behind the head",sets:"25x10\n25x10\n25x10",rest:"60 sec"},
-  walk:     {cardio:1,name:"Power Walk",note:"30 minutes minimum. Outdoors if you can, hills if you have them. Brisk, but you can still talk",sets:"30+ min",rest:""},
+  walk:     {cardio:1,name:"Power Walk",note:"Outdoors if you can, hills if you have them. Brisk, but you can still talk",sets:"30+ min",rest:""},
   hipflex:  {name:"Hip Flexor Stretch (kneeling)",note:"One knee on the floor, other foot forward. Sink the hips forward and down",sets:"90 sec each",rest:""},
   chestdr:  {name:"Chest Doorway Stretch",note:"Arms at 90 degrees against doorframe, lean forward gently",sets:"2 min",rest:""},
   pigeon:   {name:"Pigeon Pose",note:"Front shin laid across the floor, back leg long behind, hips facing forward. Fold over the front shin",sets:"90 sec each",rest:""},
@@ -4076,7 +4073,7 @@ var EX = {
   // 2000 is the rower's famous number, but it is METRES and this field is calories - so the
   // default read as several hours against a 200 cal bike sitting next to it. Until distance is
   // a measure the builder can offer, the default is the honest one and the 2k lives in the note.
-  rower:    {cardio:1,name:"Rowing Machine",note:"Legs, then back, then arms, and the reverse coming forward. The classic distance is 2000 m",sets:"200 cal",rest:""},
+  rower:    {cardio:1,name:"Rowing Machine",note:"Legs, then back, then arms, and the reverse coming forward",sets:"200 cal",rest:""},
   jumprope: {cardio:1,name:"Jump Rope",note:"Small hops, wrists doing the turning",sets:"10 min",rest:""},
   outrun:   {cardio:1,name:"Outdoor Run",note:"Route and pace are yours. Log the time",sets:"30 min",rest:""},
   swim:     {cardio:1,name:"Swim",note:"Any stroke. Count the time in the water, not the lengths",sets:"30 min",rest:""},
@@ -9493,7 +9490,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.195';
+var APPV='v5.196';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9776,7 +9773,7 @@ plegcurl:{s:"Face down on the machine, kneecaps hanging past the pad's edge, kne
 hipraise:{s:"Captain's chair: forearms on the arm pads, back against the back rest, legs hanging.",c:["Draw the knees up toward the chest","Roll the hips up a little at the top. That is the ab part","Lower slowly to straight legs, no swinging"],m:"Swinging into momentum. If the body rocks, pause between reps."},
 clat:{s:"Low pulley at your side, handle in the FAR hand, stand tall.",c:["Raise the arm out to shoulder height, elbow slightly bent","Lead with the elbow, not the hand","Lower slowly against the cable. The way down is half the work","All reps one side, then switch"],m:"Shrugging the shoulder up. The shoulder stays down; only the arm rises."},
 pullover:{s:"One dumbbell, both hands cupped under the top plate, lying on the bench, dumbbell over the chest.",c:["Lower it back behind the head in a wide arc, elbows slightly bent","Stop at a strong stretch, no deeper","Pull it back over the chest along the same arc"],m:"Bending the elbows more as it gets heavy. That turns it into a triceps press."},
-walk:{s:"Outside if you can, a hilly route if you have one.",c:["A pace you can talk through but not sing through","Long steps, arms swinging","30 minutes minimum. The walk works by adding up"],m:"Strolling. This is a brisk pace; you should feel it in the breath."},
+walk:{s:"Outside if you can, a hilly route if you have one.",c:["A pace you can talk through but not sing through","Long steps, arms swinging","The walk works by adding up"],m:"Strolling. This is a brisk pace; you should feel it in the breath."},
 hipflex:{s:"One knee on the floor, the other foot planted out front, torso tall.",c:["Tuck the tailbone under, then sink the hips forward and down","Feel it down the front of the kneeling side's hip","Slow breaths, a little deeper on each exhale"],m:"Bending the lower back instead of sinking. Tuck the tailbone, then lean."},
 chestdr:{s:"Forearms on the doorframe, elbows at shoulder height, one foot through the door.",c:["Lean through gently until the chest opens","Ribs down, back not arched","Hold and breathe; ease deeper, never bounce"],m:"Pushing to pain. A stretch is firm pressure, not a strain."},
 pigeon:{s:"Front shin laid across the floor, back leg long behind, hips facing forward.",c:["Fold forward over the front shin as far as comfortable","Slow breaths. Let the hip release on the exhale","Back leg's toes point straight back"],m:"Tipping onto one hip. Face both hips forward before folding."},
@@ -9794,7 +9791,7 @@ assault:{s:"Seat so the knee keeps a slight bend, hands on the moving bars.",c:[
 lvchest:{s:"Seat set so the handles start at mid-chest, back and head on the pad.",c:["Press forward and up along the machine's path to straight arms","Lower slow until the chest opens","Shoulder blades stay pulled back the whole rep"],m:"Bouncing at the stretch. Touch the bottom quietly and drive."},
 dbbench:{s:"Flat bench, a dumbbell in each hand, use a knee to lift each one up from the thighs.",c:["Start wide at the chest, press up and slightly together","Stop just short of clanking at the top","Lower until the hands reach chest level, elbows about 45 degrees from the sides"],m:"Losing one dumbbell out wide. If a side wobbles, the pair is too heavy."},
 smbench:{s:"Bench centered so the bar lines up over mid-chest. Turn the bar to unhook it, wrists straight.",c:["Bar to the lower chest, elbows about 45 degrees from the sides","Press to straight arms; the rails keep the bar on path","Turn the bar to catch the hooks, then let go"],m:"Bench in the wrong spot under the bar. Line it up before the first rep, not during."},
-pushup:{s:"Hands under the shoulders, body one straight line from head to heels, toes propping the feet.",c:["Chest almost to the floor, elbows pointing back","One straight line: hips never drop and never lift high","Push the floor away to straight arms","Once 20 in a row are easy, feet on a step"],m:"Hips dropping. When the straight line breaks, the reps stop counting."},
+pushup:{s:"Hands under the shoulders, body one straight line from head to heels, toes propping the feet.",c:["Chest almost to the floor, elbows pointing back","One straight line: hips never drop and never lift high","Push the floor away to straight arms","Once a full set is easy, feet up on a step"],m:"Hips dropping. When the straight line breaks, the reps stop counting."},
 machpd:{s:"Thighs under the pads, hands on the overhead grips, palms facing in.",c:["Pull down to the top of the chest, elbows driving down","Chest tall, a slight lean back, set once and held","Let the arms fully lengthen at the top"],m:"Rocking for reps. The lean is set once, not pumped."},
 bbcurl:{s:"Straight or wavy EZ bar, hands shoulder width, elbows pressed to the sides.",c:["Curl up without the elbows drifting forward","Squeeze, then lower all the way to straight arms","The body stays still, no swing"],m:"Swinging the hips to start the rep. If the bar needs a swing, it is too heavy."},
 inccurl:{s:"Bench at 45 to 60 degrees, sit back, arms hanging straight down behind the body.",c:["Curl without letting the elbows travel forward","Feel the stretch at the bottom. That hang is the point","Lower slow to fully straight"],m:"Scooting the elbows forward to make the top easier. The stretch position IS the exercise."},
@@ -9816,16 +9813,16 @@ rtwist:{s:"Sitting on the floor, knees bent, leaning back to about 45 degrees wi
 bbrow:{s:"Bar over mid-foot, push the hips back and lean over to about 45 degrees with a flat back, hands outside the legs, bar hanging under the shoulders.",c:["Pull the bar to the lower ribs, not the chest","Elbows stay close, shoulder blades finish the movement","Hold the lean. The body does not bob up and down","Lower under control to fully straight arms"],m:"Standing up with every rep. Holding the lean is the exercise; the arms are only hooks."},
 dbrfly:{s:"Bent over at the hips to about 45 degrees, back flat, light dumbbells hanging straight below the shoulders.",c:["Raise out WIDE, elbows slightly bent and fixed there","Squeeze the rear shoulders at the top","Lighter than you think. This is a small muscle","No swinging; the body does not rock"],m:"Turning it into a row. The arms stay long and travel out to the sides, not back to the hips."},
 crunch:{s:"On your back, knees bent, feet flat, fingertips resting at your ears.",c:["Curl the upper back off the floor. The lower back never leaves it","Exhale hard at the top and hold a beat","Lower slow; the head is the last thing down","Fingertips only touch the ears, they never pull"],m:"Yanking the neck with the hands. If the chin is being dragged to the chest, the arms are doing the set."},
-glutebr:{s:"On your back, knees bent, feet flat and close to the hips, arms flat at your sides.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin down, and do not arch the back at the top","Lower slow. When 20 are easy, weight on the hips"],m:"Pushing through the toes. Heels down, or the hamstrings take the set off the glutes."},
+glutebr:{s:"On your back, knees bent, feet flat and close to the hips, arms flat at your sides.",c:["Drive through the heels until the body is a flat line from knees to shoulders","Squeeze the glutes hard at the top for a full beat","Chin down, and do not arch the back at the top","Lower slow. Once the set is easy, weight on the hips"],m:"Pushing through the toes. Heels down, or the hamstrings take the set off the glutes."},
 sideplank:{s:"On your side, forearm under the shoulder, legs stacked or the top foot just in front, free hand on the hip.",c:["Lift the hips until the body is one straight line from head to heels","Top hip stays over the bottom one. Do not let it roll forward","Push the floor away through the forearm","Time each side; the clock is the set"],m:"Hips dropping as the clock runs. When the line breaks the set is over. Stop there and keep the honest time."},
 pullupbw:{s:"Hang at full length from a bar, hands a little wider than the shoulders, knees bent behind you.",c:["Pull the elbows DOWN to the ribs. Think of driving them into your back pockets","Chin over the bar without craning the neck","Lower all the way to straight arms every rep","Six honest reps beat twelve half ones. If you cannot do one yet, jump to the top and lower slowly"],m:"Cutting the bottom short. The full hang is where the back actually works."},
 invrow:{s:"A bar set in a rack (the squat stand) at about hip height. Lie under it, grip a little wider than the shoulders, heels on the floor, body straight from head to heels.",c:["Squeeze the whole body into one line and hold it there","Pull the chest to the bar, elbows back past the ribs","Lower until the arms are straight without letting the hips drop","Walk the feet further out to make it harder, tuck them in to make it easier"],m:"Letting the hips drop first. If the line breaks, the set is over."},
 dbrow2:{s:"A dumbbell in each hand, feet hip width, push the hips back and lean over to about 45 degrees with a flat back. The dumbbells hang under the shoulders.",c:["Pull both dumbbells to the lower ribs, elbows close to the body","Hold the lean. The body does not bob up and down","Squeeze the shoulder blades together at the top","Lower to fully straight arms every rep"],m:"Standing up with each pull. Holding the lean is the exercise; the arms are only hooks."},
 doorrow:{s:"Stand facing a sturdy door frame, feet close to the base, grip both sides at chest height. Lean back with straight arms and a straight body.",c:["Keep the body one line from head to heels, no bending at the hips","Pull yourself in until the chest is near the frame, elbows down past the ribs","Push back out slowly to straight arms","Walk the feet closer to the frame to make it easier"],m:"Bending at the waist to get there. The body travels as one piece or the back does nothing."},
 sldl:{s:"One dumbbell, held in the hand opposite the standing leg. Stand on one foot with a soft knee that does not change.",c:["Push the hips STRAIGHT back and let the free leg rise behind you as a counterweight","Hips stay level. Do not let the free hip roll open","Go as low as the back of the thigh allows with a flat back, usually shin height","Stand up by driving the hips forward, not by pulling with the back"],m:"Turning it into a one-legged squat. The knee angle is set at the top and held all the way down."},
-nordic:{s:"Kneel on something soft with the heels held down: under a couch, under a heavy barbell, or a partner holding them.",c:["Body dead straight from knees to head, hips never bending","Lower forward as SLOWLY as you can hold it","Catch yourself with the hands and push back up to the start","Three to five reps is a real set. This one is genuinely hard"],m:"Bending at the hips to slow the fall. That takes the hamstrings out of it entirely."},
+nordic:{s:"Kneel on something soft with the heels held down: under a couch, under a heavy barbell, or a partner holding them.",c:["Body dead straight from knees to head, hips never bending","Lower forward as SLOWLY as you can hold it","Catch yourself with the hands and push back up to the start","A handful of honest reps is a real set. This one is genuinely hard"],m:"Bending at the hips to slow the fall. That takes the hamstrings out of it entirely."},
 dbcalf:{s:"A dumbbell in each hand, balls of the feet on a step or a thick book, heels hanging free.",c:["Drop the heels below the step for a full stretch at the bottom","Drive up to full tiptoe and squeeze for a beat","Knees straight but not pushed back hard. The calves do all of it","Hold something with one hand if balance is the limit"],m:"Bouncing. One second up, one second down, every rep."},
-bwcalf:{s:"Standing tall, feet hip width. A step under the balls of the feet if you have one, the flat floor if you do not.",c:["Rise onto the toes as high as you can go and hold a beat","Lower slowly. The way down is half the work","Fingertips on a wall for balance, not for help","Once twenty reps is easy, do one leg at a time"],m:"Fast little pulses. Full height, full stretch, or it is not a rep."}
+bwcalf:{s:"Standing tall, feet hip width. A step under the balls of the feet if you have one, the flat floor if you do not.",c:["Rise onto the toes as high as you can go and hold a beat","Lower slowly. The way down is half the work","Fingertips on a wall for balance, not for help","Once the set is easy, do one leg at a time"],m:"Fast little pulses. Full height, full stretch, or it is not a rep."}
 };
 // Pump-day ids strip their p_ and land on these five, whose base ids do not match the strip:
 EXINSTR.inc=EXINSTR.incdb;EXINSTR.fly=EXINSTR.mfly;EXINSTR.lat=EXINSTR.dblat;
@@ -11831,12 +11828,11 @@ function renderSession(){
       // TARGET and LAST only. The personal record used to sit here as a third chip, which
       // made a one-off heavy day look like the standard you were meant to hold every set
       // to. It moved to the foot of the card, beside the rest - present, not prescriptive.
-      html+='<div class="ex-stats">'+
-            '<span class="ex-stat st-tgt">Target <b>'+esc(r.sets.split('\n').map(fmtLine).join(', '))+'</b>'+
-              // The unit, once, so nobody has to guess whether 35 is pounds or kilograms (v5.100).
-              (/^[1-9][\d.]*x/.test(String(r.sets))?' '+wUnitName():'')+'</span>'+
-            (L?'<span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span>':'')+
-            '</div></div>';   // closes ex-stats, then ex-body
+      // Target left this line in v5.196: it is the ghost inside every set box now, where the
+      // number is actually used. Last stays, because last time is the thing to beat and it is
+      // nowhere else on the card.
+      html+=(L?'<div class="ex-stats"><span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span></div>':'')+
+            '</div>';   // closes ex-body
       // The button sits beside the instructions because that is where you already look for
       // "how do I do this one".
       var rl=refLink(rf.swapId||id,r.name);
@@ -11850,30 +11846,27 @@ function renderSession(){
         var m1=String(r.sets).match(/^([\d.]+)x/);
         if(m1)plw=parseFloat(m1[1])||0;
       }
-      // The ramp UP to that weight, offered only where there is one worth climbing.
-      var wplan=showPl?warmPlan(rf.exId,r.name,plw):[];
-      if(wplan.length)WARMPLANS[id]={ex:rf.exId,name:r.name,lb:plw};
       html+='<div class="ex-links">'+
-            (hasIns?'<a onclick="event.stopPropagation();openInstr(\x27'+insEx+'\x27)"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> Instructions</a>'
-             :(rl?'<a href="'+esc(rl)+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> Instructions</a>':''))+
+            (hasIns?'<a onclick="event.stopPropagation();openInstr(\x27'+insEx+'\x27)"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> How to</a>'
+             :(rl?'<a href="'+esc(rl)+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> How to</a>':''))+
             '<a class="unote-btn'+(un?' has':'')+'" onclick="event.stopPropagation();openExNote(\''+rf.exId+'\')">'+
               '<svg viewBox="0 0 20 20"><path d="M4 3.5h9l3 3v10h-12z"/><path d="M7 8.5h6M7 12h4"/></svg> '+(un?'Note':'Add note')+'</a>'+
             // Only the id and the weight cross into the attribute. The NAME used to ride
             // along as JSON, and a name is full of double quotes - which closed the
             // onclick attribute early, left a syntax error behind, and made the tap fall
             // through to the card. openPlates looks the name up itself now.
-            (wplan.length?'<a class="warm-btn" onclick="event.stopPropagation();warmToggle(\x27'+id+'\x27)">'+
-              '<svg viewBox="0 0 20 20"><path d="M4 15.5h12"/><path d="M6 12l2.5-3.5L11 11l2.5-3.5"/></svg> Warm-up</a>':'')+
             (showPl?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+plw+',\''+id+'\')">'+
               '<svg viewBox="0 0 20 20"><path d="M2 10h16"/><path d="M5 6.5v7M7.5 5v10M12.5 5v10M15 6.5v7"/></svg> Plates</a>':'')+
             '</div>';
-      if(wplan.length)html+='<div class="warm" id="warm-'+id+'"></div>';
       html+='</div><div class="sets">';
       tg.forEach(function(t,i){
         var e=ent[i];
         var dr=draftOf(A,id,i);   // what you set but have not logged yet (v5.182)
         var vw=e?e.w:(dr&&dr.w!=null?dr.w:(t.type==='wr'?t.w:0));
         var vr=e?e.r:(dr&&dr.r!=null?dr.r:t.r);
+        // Typed means logged, carried down, or landed from the plate calculator. Everything
+        // else is the plan, and the plan is shown as the ghost in the box (v5.196).
+        var typedW=!!e||!!(dr&&dr.w!=null),typedR=!!e||!!(dr&&dr.r!=null);
         html+='<div class="srow'+(e?' done':'')+gradeClass(e)+'" id="sr-'+id+'-'+i+'"><span class="sno num">'+(i+1)+'</span>';
         // bw marks a lift that has no weight to give - a crunch, a plank, a hanging raise. The
         // sets still parse as weight-by-reps because they are written 0x20, so without the flag
@@ -11884,11 +11877,11 @@ function renderSession(){
         // inferred from the zero - Push-Up is programmed at 0 and is meant to take weight later.
         if(t.type==='wr'&&!r.bw){
           // value speaks the current unit; data-lb keeps the exact pound truth for logging
-          html+='<input class="inp" id="w-'+id+'-'+i+'" readonly value="'+fmtW(vw)+'" data-lb="'+vw+'" onclick="openEdit(\''+id+'\','+i+',\'w\')">'+
+          html+='<input class="inp'+(typedW?'':' ghost')+'" id="w-'+id+'-'+i+'" readonly value="'+(typedW?fmtW(vw):'')+'" placeholder="'+fmtW(vw)+'" data-lb="'+vw+'" onclick="openEdit(\''+id+'\','+i+',\'w\')">'+
                 '<span class="mul">&times;</span>'+
-                '<input class="inp" id="r-'+id+'-'+i+'" readonly value="'+vr+'" onclick="openEdit(\''+id+'\','+i+',\'r\')">';
+                '<input class="inp'+(typedR?'':' ghost')+'" id="r-'+id+'-'+i+'" readonly value="'+(typedR?vr:'')+'" placeholder="'+vr+'" data-tgt="'+vr+'" onclick="openEdit(\''+id+'\','+i+',\'r\')">';
         }else{
-          html+='<input class="inp wide" id="r-'+id+'-'+i+'" readonly value="'+vr+'" onclick="openEdit(\''+id+'\','+i+',\'r\')">'+
+          html+='<input class="inp wide'+(typedR?'':' ghost')+'" id="r-'+id+'-'+i+'" readonly value="'+(typedR?vr:'')+'" placeholder="'+vr+'" data-tgt="'+vr+'" onclick="openEdit(\''+id+'\','+i+',\'r\')">'+
                 '<span class="unit">'+(t.unit||(r.bw?'reps':''))+'</span><input type="hidden" id="w-'+id+'-'+i+'" value="0">';
           if(t.unit==='sec')html+='<button class="hold" id="hb-'+id+'-'+i+'" title="Time this hold" data-ic onclick="toggleHold(\''+id+'\','+i+','+(t.r||0)+',\''+(ssMid?'':restAt(r.rest,i).replace(/'/g,''))+'\')"><svg viewBox="0 0 20 20"><path d="M6 3.5l10 6.5-10 6.5z"/></svg></button>';
         }
@@ -11965,7 +11958,8 @@ function openEdit(id,i,which){
     if(rf.id===id)r=rf.data;
   });
   if(!r)return;
-  var cur=parseFloat(document.getElementById((which==='w'?'w-':'r-')+id+'-'+i).value)||0;
+  var curEl=document.getElementById((which==='w'?'w-':'r-')+id+'-'+i);
+  var cur=parseFloat(curEl.value)||parseFloat(curEl.placeholder)||0;
   var isSec=(r.sets.split('\n')[i]||'').indexOf('sec')>-1;
   edCtx={id:id,i:i,which:which,val:cur,open:cur,isSec:isSec};
   document.getElementById('edEx').textContent=r.name;
@@ -12009,6 +12003,9 @@ function draftSet(id,i,k,v){
   A.draft=A.draft||{};var d=A.draft[id]=A.draft[id]||{};d[i]=d[i]||{};d[i][k]=v;
 }
 function draftOf(A,id,i){return (A&&A.draft&&A.draft[id]&&A.draft[id][i])||null;}
+// One place decides whether a box shows its own number or the plan behind it.
+function inpOwn(el,v){if(!el)return;el.value=v;el.classList.remove('ghost');}
+function inpGhost(el){if(!el||el.type==='hidden')return;el.value='';el.classList.add('ghost');}
 function saveEdit(){
   if(!edCtx)return;
   edCtx.val=edRead();
@@ -12021,9 +12018,9 @@ function saveEdit(){
     var same=(edCtx.val===edCtx.open&&el.dataset.lb!==undefined&&el.dataset.lb!=='');
     var lb=same?parseFloat(el.dataset.lb)||0:inW(edCtx.val);
     el.dataset.lb=lb;
-    el.value=fmtW(lb);
+    inpOwn(el,fmtW(lb));
   }else{
-    el.value=Math.round(edCtx.val*100)/100;
+    inpOwn(el,Math.round(edCtx.val*100)/100);
   }
   var A=DB.active[CUR];
   if(A&&A.entries[edCtx.id]&&A.entries[edCtx.id][edCtx.i]){
@@ -12056,7 +12053,7 @@ function saveEdit(){
       var nx=document.getElementById('w-'+edCtx.id+'-'+j);
       if(!nx)break;
       if(A&&A.entries[edCtx.id]&&A.entries[edCtx.id][j])continue;
-      nx.value=el.value;
+      inpOwn(nx,el.value);
       if(el.dataset.lb!==undefined)nx.dataset.lb=el.dataset.lb;
       draftSet(edCtx.id,j,'w',parseFloat(el.dataset.lb)||0);
     }
@@ -12095,6 +12092,10 @@ function toggleSet(id,i,rest,unit){
   var row=document.getElementById('sr-'+key);
   if(A.entries[id][i]){
     A.entries[id][i]=null;
+    // Back to the plan, unless something was typed here before it was logged.
+    var dr0=draftOf(A,id,i),wU=document.getElementById('w-'+key),rU=document.getElementById('r-'+key);
+    if(dr0&&dr0.w!=null&&wU){wU.dataset.lb=dr0.w;inpOwn(wU,fmtW(dr0.w));}else if(wU&&wU.type!=='hidden'){inpGhost(wU);}
+    if(dr0&&dr0.r!=null){inpOwn(rU,dr0.r);}else{inpGhost(rU);}
     row.classList.remove('done');row.classList.remove('ispr');
     row.classList.remove('ismatch');row.classList.remove('isunder');
     sfxUndo();
@@ -12103,7 +12104,9 @@ function toggleSet(id,i,rest,unit){
     var wEl=document.getElementById('w-'+key);
     var w=wEl.dataset.lb!==undefined?(parseFloat(wEl.dataset.lb)||0):inW(wEl.value);
     // parseFloat, not parseInt: a 12.5-minute cardio set was landing as 12.
-    var r=parseFloat(document.getElementById('r-'+key).value)||0;
+    var rEl=document.getElementById('r-'+key);
+    // An untouched box is empty and shows the plan as a ghost, so the plan is what it logs.
+    var r=parseFloat(rEl.value)||parseFloat(rEl.dataset.tgt)||parseFloat(rEl.placeholder)||0;
     // A set with nothing on it is not a set. It used to log, flare gold as a first, and count.
     if(r<=0){ask('Nothing on this set yet. Tap the number, set what you did, then log it.',null,'Nothing to log');return;}
     var e={w:w,r:r,unit:unit||''};
@@ -12116,6 +12119,9 @@ function toggleSet(id,i,rest,unit){
     // Save and mark done FIRST. Nothing decorative may stand between a tapped set
     // and it being logged - a throw in the flare/sound path used to eat the whole set.
     A.entries[id][i]=e;
+    var wL=document.getElementById('w-'+key);
+    if(wL&&wL.type!=='hidden')inpOwn(wL,fmtW(e.w));
+    inpOwn(rEl,e.r);
     row.classList.add('done');
     // The live path, hit the instant a set lands. It must agree with gradeClass, which
     // no longer marks 'under' at all - the grade is stored on e.g either way.
@@ -15052,7 +15058,7 @@ function plLand(){
     var sr=document.getElementById('sr-'+PL.row+'-'+i),w=document.getElementById('w-'+PL.row+'-'+i);
     if(!sr||!w)return;
     if(sr.classList.contains('done')||w.type==='hidden')continue;
-    w.dataset.lb=lb;w.value=fmtW(lb);
+    w.dataset.lb=lb;inpOwn(w,fmtW(lb));
     try{var pa=DB.active[CUR];if(pa){var pk=CUR;draftSet(PL.row,i,'w',lb);saveDB();}}catch(e){}
     w.classList.add('pl-landed');setTimeout(function(){w.classList.remove('pl-landed');},900);
     return;
@@ -15069,128 +15075,6 @@ function plClear(){PL.want=null;PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(
 // A bodyweight lift, a timed hold and a cardio row have no weight at all, so they are the
 // only things left out - and that is structure, not opinion.
 // ---------- warm-ups ----------
-// A ramp, not a logging chore. Nobody's first heavy set is their working weight, but nobody
-// wants those sets in their numbers either: a warm-up is not volume, is not a PR, and is not
-// something anyone reviews later. So these are ticked off and thrown away - they live in the
-// open session and die with it, and never reach DB.logs at all.
-//
-// The whole value is that the rungs land on REAL plates. "137.5" is useless under a bar; the
-// weights below are solved against the very bar this lift is already known to use, in the
-// display unit, so a kilogram user gets a kilogram ladder rather than a translation.
-var WARMOPEN={}, WARMPLANS={};
-
-// The nearest weight this bar can ACTUALLY be loaded to, worked in display units because
-// that is the unit the plates in the room are stamped with.
-function warmSnapD(x,k){
-  var b=plBarDef(k),barD=plBarW(k),set=plPlates(k),sm=set[set.length-1];
-  if(b.solo){                      // plates in your hands: nothing is doubled
-    var n=Math.round(x/sm)*sm;
-    return Math.round(Math.max(sm,n)*100)/100;
-  }
-  var per=(x-barD)/2;
-  if(per<=0)return barD;
-  per=Math.max(0,Math.round(per/sm)*sm);
-  return Math.round((barD+per*2)*100)/100;
-}
-// What hangs on one end, so the rung can be loaded without doing the arithmetic under it.
-function warmSideTxt(w,k){
-  var b=plBarDef(k),barD=plBarW(k),set=plPlates(k);
-  if(b.solo)return '';
-  var per=(w-barD)/2;
-  if(per<=0.0001)return barD>0?'bar only':'';
-  var out=[],rem=per,i;
-  for(i=0;i<set.length;i++)while(rem>=set[i]-0.0001){out.push(plNum(set[i]));rem=Math.round((rem-set[i])*1000)/1000;}
-  return out.length?out.join(' + ')+' a side':'';
-}
-
-// How MANY rungs the climb is worth. The first pass used one fixed table of fractions no
-// matter how far you had to travel, which put five rungs under a 145 lb bench - five plate
-// changes to reach a weight most people get to in three. Each rung on a bar costs a plate
-// change and a minute of your life, so the count scales with the climb.
-//
-// A pin stack or a rack of dumbbells costs seconds, not minutes, which is why breadth and
-// length are decided separately: the ladder is offered widely, and kept short where it is
-// expensive.
-function warmRungs(wd,barD){
-  if(barD>0){
-    var ratio=wd/barD;
-    return ratio<2?1:(ratio<3.5?2:(ratio<5.5?3:4));
-  }
-  return wd>=(UNIT_KG?100:220)?3:2;
-}
-function warmSteps(n){
-  if(n<=1)return [{f:0.75,r:5}];
-  if(n===2)return [{f:0.60,r:8},{f:0.85,r:3}];
-  if(n===3)return [{f:0.50,r:8},{f:0.70,r:5},{f:0.88,r:3}];
-  return [{f:0.45,r:10},{f:0.65,r:8},{f:0.80,r:5},{f:0.90,r:3}];
-}
-// Whether this lift is PLATE-loaded. It no longer decides whether a ramp is offered - only
-// whether the rungs can say what hangs on one end. A pin stack has no sides, and printing
-// "10 + 2.5 a side" under a cable was not merely unnecessary, it was false.
-function warmLoaded(exId,name){
-  if(DB&&DB.exBar&&DB.exBar[exId])return true;
-  return plateEx(exId,name)||plMachine(exId,name);
-}
-function warmPlan(exId,name,lbWorking){
-  var wd=dspW(lbWorking||0);
-  if(!wd||wd<=0)return [];
-  var loaded=warmLoaded(exId,name);
-  var k=loaded?barFor(exId,name):'mac';
-  var barD=loaded?plBarW(k):0;
-  // Working within half again of the bar is not a climb - you take the bar and do the set.
-  if(barD>0&&wd<barD*1.5)return [];
-  // And below a plate a side there is nothing to ramp THROUGH: a 20 lb lateral raise does
-  // not need a ladder, it needs one lighter set you were going to do anyway.
-  if(barD<=0&&wd<(UNIT_KG?20:45))return [];
-  var out=[],prev=0;
-  if(barD>0&&barD<=wd*0.6){out.push({w:barD,r:10,bar:true});prev=barD;}
-  warmSteps(warmRungs(wd,barD)).forEach(function(s){
-    var w=loaded?warmSnapD(wd*s.f,k):natW(wd*s.f);
-    if(w<=prev+0.001)return;          // no rung repeating the one below it
-    if(w>=wd-0.001)return;            // and none that has arrived at the working weight
-    out.push({w:w,r:s.r});
-    prev=w;
-  });
-  return out;
-}
-function warmToggle(id){WARMOPEN[id]=!WARMOPEN[id];warmDraw(id);try{sfxTick&&sfxTick();}catch(e){}}
-function warmTick(id,i){
-  if(!CUR||!DB.active[CUR])return;
-  var A=DB.active[CUR];
-  A.warm=A.warm||{};
-  var a=A.warm[id]||[];
-  a[i]=!a[i];
-  A.warm[id]=a;
-  saveDB();
-  warmDraw(id);
-  try{sfxTick&&sfxTick();}catch(e){}
-}
-function warmDraw(id){
-  var el=document.getElementById('warm-'+id);
-  if(el)el.innerHTML=warmHtml(id);
-  var ex=document.getElementById('exc-'+id),b=ex&&ex.querySelector('.warm-btn');
-  if(b)b.classList.toggle('on',!!WARMOPEN[id]);
-}
-function warmHtml(id){
-  var m=WARMPLANS[id];
-  if(!m||!WARMOPEN[id])return '';
-  var plan=warmPlan(m.ex,m.name,m.lb);
-  if(!plan.length)return '';
-  var loaded=warmLoaded(m.ex,m.name);
-  var k=loaded?barFor(m.ex,m.name):null;
-  var A=CUR&&DB.active[CUR],done=(A&&A.warm&&A.warm[id])||[];
-  var h='<div class="warm-hd">Warm-up<span>doesn\'t count toward your numbers</span></div>';
-  plan.forEach(function(g,i){
-    var side=loaded?warmSideTxt(g.w,k):'';
-    h+='<div class="warm-row'+(done[i]?' on':'')+'" onclick="event.stopPropagation();warmTick(\''+id+'\','+i+')">'+
-       '<span class="warm-ck"></span>'+
-       '<b class="num">'+plNum(g.w)+'</b><span class="warm-u">'+wUnitName()+'</span>'+
-       '<span class="warm-r">&times; '+g.r+'</span>'+
-       (side?'<span class="warm-s">'+side+'</span>':'')+
-       '</div>';
-  });
-  return h;
-}
 function plateRow(row,tg){
   if(!row||row.bw)return false;
   return !!(tg&&tg[0]&&tg[0].type==='wr');
