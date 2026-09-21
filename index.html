@@ -9190,22 +9190,28 @@ var ANIM=(function(){
   // implements, feet drawn heel-ball-TOES pointing away from the body.
 
   // ---------- INVERTED ROW: heels down, body one rigid line, chest to the bar ----------
+  // One pose drives both views (v5.204). The front view used to be drawn on its own and put the
+  // head 48 above where the side view had it, which is the "same person, same instant" rule broken.
+  function invRowPose(k){
+    var ang=lerp(-25,-34,k), ankle=[86,424];     // the whole body pivots at the heels
+    var knee=P(ankle,ang,88), hip=P(knee,ang,92), sho=P(hip,ang,98), head=P(sho,ang,48);
+    var bar=[332,204];
+    var e1=elb(sho,bar,50,55,-1), e2=elb(sho,bar,50,55,1);
+    return {ang:ang,ankle:ankle,knee:knee,hip:hip,sho:sho,head:head,bar:bar,elbow:e1[0]<e2[0]?e1:e2};
+  }
   function drawInvRowS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var ang=lerp(-25,-34,k);                       // the whole body pivots at the heels
-    var ankle=[86,424];
-    var knee=P(ankle,ang,88), hip=P(knee,ang,92), sho=P(hip,ang,98), head=P(sho,ang,48);
+    var p=invRowPose(k),ang=p.ang,ankle=p.ankle,knee=p.knee,hip=p.hip,sho=p.sho,head=p.head;
     seg(x,[414,424],[414,140],7,LINE);             // the upright, clear of the arm
     seg(x,[396,424],[432,424],7,LINE);
     seg(x,[414,204],[344,204],6,LINE);             // the J-hook the bar sits in
-    var bar=[332,204];
+    var bar=p.bar;
     seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
     seg(x,ankle,[72,400],9);                       // heel planted, toes pointing up and away
     seg(x,sho,P(sho,ang,26),8);
     dot(x,head,19);
-    var e1=elb(sho,bar,50,55,-1), e2=elb(sho,bar,50,55,1);
-    var e=e1[0]<e2[0]?e1:e2;                       // the elbow tucks back toward the feet
+    var e=p.elbow;                                 // the elbow tucks back toward the feet
     seg(x,sho,e,9);seg(x,e,bar,9);
     x.fillStyle="#15171b";x.strokeStyle=GO;x.lineWidth=7;
     x.beginPath();x.arc(bar[0],bar[1],10,0,7);x.fill();x.stroke();
@@ -9213,23 +9219,25 @@ var ANIM=(function(){
   // Seen from the head end: the bar nearest, the body receding away under it. y is depth here,
   // which is why the figure is short - the width tells you it is the same person.
   function drawInvRowF(x,t){
-    x.clearRect(0,0,480,480);
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240;
+    var p=invRowPose(k),cx=240;
+    // every height below is the side view's, at the same instant: only depth folds away
+    var barY=p.bar[1],headY=p.head[1],shoY=p.sho[1],neckY=P(p.sho,p.ang,26)[1],hipY=p.hip[1],kneeY=p.knee[1],ey=p.elbow[1];
     seg(x,[cx-130,424],[cx-130,144],6,LINE);seg(x,[cx+130,424],[cx+130,144],6,LINE);
-    seg(x,[cx-118,176],[cx+118,176],8,GO);
-    var headY=lerp(238,206,k), shoY=headY+38, hipY=shoY+lerp(56,50,k), kneeY=lerp(366,348,k);
-    var ex=lerp(64,88,k), ey=lerp(198,226,k);      // the elbows finish wide and low
-    seg(x,[cx-44,shoY],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-56,176],9);
-    seg(x,[cx+44,shoY],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+56,176],9);
-    seg(x,[cx-44,shoY],[cx+44,shoY],10);
-    dot(x,[cx,headY],19);
-    seg(x,[cx,shoY],[cx,hipY],11);                 // torso foreshortened - it runs away from you
-    x.globalAlpha=.55;
+    seg(x,[cx-118,barY],[cx+118,barY],8,GO);
+    x.globalAlpha=.55;                             // the legs run away from you, under the bar
     seg(x,[cx,hipY],[cx-18,kneeY],10);seg(x,[cx,hipY],[cx+18,kneeY],10);
-    seg(x,[cx-18,kneeY],[cx-22,400],10);seg(x,[cx+18,kneeY],[cx+22,400],10);
+    seg(x,[cx-18,kneeY],[cx-22,424],10);seg(x,[cx+18,kneeY],[cx+22,424],10);
     x.globalAlpha=1;
-    seg(x,[cx-22,400],[cx-28,414],8);seg(x,[cx+22,400],[cx+28,414],8);   // the heels never move
+    seg(x,[cx-22,424],[cx-26,404],8);seg(x,[cx+22,424],[cx+26,404],8);   // heels down, toes up
+    seg(x,[cx,shoY],[cx,hipY],11);                 // torso foreshortened: it runs away from you
+    seg(x,[cx-44,shoY],[cx+44,shoY],10);
+    seg(x,[cx,shoY],[cx,neckY],8);
+    dot(x,[cx,headY],19);
+    var ex=lerp(64,88,k);                          // the elbows finish wide and low
+    seg(x,[cx-44,shoY],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-56,barY],9);
+    seg(x,[cx+44,shoY],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+56,barY],9);
   }
 
   // ---------- DUMBBELL BENT-OVER ROW: the barbell row's hinge, one bell per hand ----------
@@ -9258,16 +9266,20 @@ var ANIM=(function(){
     x.clearRect(0,0,480,480);ground(x,110,370,432);
     var k=reduce?1:cycle(t,2800,0.12);
     var cx=240;
-    // heights lifted straight off the side view: hips 257, shoulders 208, head 184
-    seg(x,[cx-24,424],[cx,261],10);seg(x,[cx+24,424],[cx,261],10);
+    // Worked from the side view's own pose (v5.204), not copied from it by hand: the heights were
+    // right but the bells sat several pixels off from where the side view lifts them.
+    var kn=P([228,424],-80,88),hp=P(kn,-120,92),sh=P(hp,-30,98),hd=P(sh,-30,48),nk=P(sh,-30,26);
+    var hand=[lerp(sh[0]+14,sh[0]-14,k), lerp(sh[1]+120,sh[1]+50,k)];
+    var e1=elb(sh,hand,50,55,-1),e2=elb(sh,hand,50,55,1),el=e1[0]<e2[0]?e1:e2;
+    seg(x,[cx-24,424],[cx,hp[1]],10);seg(x,[cx+24,424],[cx,hp[1]],10);
     seg(x,[cx-36,424],[cx-12,424],9);seg(x,[cx+12,424],[cx+36,424],9);
-    seg(x,[cx,261],[cx,214],11);
-    seg(x,[cx-52,210],[cx+52,210],11);
-    seg(x,[cx,210],[cx,198],8);
-    dot(x,[cx,184],19);
-    var by=lerp(336,272,k), ex=lerp(58,92,k), ey=lerp(266,196,k);
-    seg(x,[cx-52,214],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-58,by],9);
-    seg(x,[cx+52,214],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+58,by],9);
+    seg(x,[cx,hp[1]],[cx,sh[1]+4],11);
+    seg(x,[cx-52,sh[1]],[cx+52,sh[1]],11);
+    seg(x,[cx,sh[1]],[cx,nk[1]],8);
+    dot(x,[cx,hd[1]],19);
+    var by=hand[1], ex=lerp(58,92,k), ey=el[1];
+    seg(x,[cx-52,sh[1]+4],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-58,by],9);
+    seg(x,[cx+52,sh[1]+4],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+58,by],9);
     seg(x,[cx-76,by],[cx-40,by],8,GO);seg(x,[cx+40,by],[cx+76,by],8,GO);
     x.fillStyle=GO;
     x.fillRect(cx-84,by-14,10,28);x.fillRect(cx-46,by-14,10,28);
@@ -9299,33 +9311,45 @@ var ANIM=(function(){
   function drawDoorRowF(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, shoY=lerp(164,146,k);              // the side view's shoulder heights, exactly
+    // The side view's lean, worked through the same numbers (v5.204): the head used to sit a fixed
+    // 48 above the shoulders, which is only true of a man standing bolt upright.
+    var ang=-(90+lerp(21,3,k)),an=[366,424],kn=P(an,ang,88),hp=P(kn,ang,92),sh=P(hp,ang,98);
+    var cx=240, shoY=sh[1], neckY=P(sh,ang,26)[1], headY=P(sh,ang,48)[1];
     seg(x,[cx-100,424],[cx-100,46],6,LINE);seg(x,[cx+100,424],[cx+100,46],6,LINE);
     seg(x,[cx-100,48],[cx+100,48],6,LINE);
-    var hipY=shoY+lerp(92,98,k), kneeY=hipY+(424-hipY)*0.5, ankY=418;
+    var hipY=hp[1], kneeY=kn[1], ankY=418;
     seg(x,[cx-26,ankY],[cx-24,kneeY],10);seg(x,[cx-24,kneeY],[cx,hipY],10);
     seg(x,[cx+26,ankY],[cx+24,kneeY],10);seg(x,[cx+24,kneeY],[cx,hipY],10);
     seg(x,[cx-38,424],[cx-14,424],9);seg(x,[cx+14,424],[cx+38,424],9);
     seg(x,[cx,hipY],[cx,shoY],11);
     seg(x,[cx-42,shoY+4],[cx+42,shoY+4],10);
-    seg(x,[cx,shoY],[cx,shoY-26],8);
-    dot(x,[cx,shoY-48],19);
+    seg(x,[cx,shoY],[cx,neckY],8);
+    dot(x,[cx,headY],19);
     var ex=lerp(76,104,k), ey=lerp(180,208,k);     // the elbows finish wide and low
-    seg(x,[cx-42,shoY+8],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-96,190],9);
-    seg(x,[cx+42,shoY+8],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+96,190],9);
-    dot(x,[cx-96,190],5);dot(x,[cx+96,190],5);
+    seg(x,[cx-42,shoY+8],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-96,196],9);
+    seg(x,[cx+42,shoY+8],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+96,196],9);
+    dot(x,[cx-96,196],5);dot(x,[cx+96,196],5);     // the side view's grip height on the frame
   }
 
   // ---------- SINGLE-LEG RDL: the hinge, on one leg, the free leg the counterweight ----------
-  function drawSlRdlS(x,t){
-    x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var k=reduce?1:cycle(t,2800,0.12);
+  // One pose for both views (v5.204). The front view had its own numbers: at the bottom of the rep
+  // its head stayed 40 higher than the side view's, and the free leg swung out sideways, where a
+  // leg rising behind you stays in line under your hip and only runs away in depth.
+  function slRdlPose(k){
     var ankle=[250,424];
     var knee=P(ankle,-88,88), hip=P(knee,-95,92);  // the soft knee bend never changes
     var torso=lerp(-86,-25,k);
-    var sho=P(hip,torso,98), head=P(sho,torso,48);
+    var sho=P(hip,torso,98), head=P(sho,torso,48), neck=P(sho,torso,26);
     var legAng=lerp(101,166,k);                    // already off the floor at the top, then rises
     var kneeF=P(hip,legAng,92), ankF=P(kneeF,legAng,88);
+    var hand=[sho[0]+2,Math.min(sho[1]+105,406)];  // the bell hangs plumb from the shoulder
+    return {ankle:ankle,knee:knee,hip:hip,torso:torso,sho:sho,head:head,neck:neck,legAng:legAng,kneeF:kneeF,ankF:ankF,hand:hand};
+  }
+  function drawSlRdlS(x,t){
+    x.clearRect(0,0,480,480);ground(x,60,420,432);
+    var k=reduce?1:cycle(t,2800,0.12);
+    var p=slRdlPose(k),ankle=p.ankle,knee=p.knee,hip=p.hip,torso=p.torso,sho=p.sho,head=p.head;
+    var legAng=p.legAng,kneeF=p.kneeF,ankF=p.ankF;
     x.globalAlpha=.55;
     seg(x,hip,kneeF,10);seg(x,kneeF,ankF,10);
     seg(x,ankF,P(ankF,legAng-30,20),8);            // the trailing foot, toes pointing away
@@ -9334,38 +9358,51 @@ var ANIM=(function(){
     seg(x,[242,424],[276,424],9);
     seg(x,sho,P(sho,torso,26),8);
     dot(x,head,19);
-    var hand=[sho[0]+2,Math.min(sho[1]+105,406)];  // the bell hangs plumb from the shoulder
+    var hand=p.hand;
     seg(x,sho,hand,9);
     plate(x,hand,13);
   }
   function drawSlRdlF(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, fold=lerp(0,44,k);                 // the chest folds TOWARD you - y is depth
-    var shoY=146+fold*0.9, hipY=lerp(244,252,k);
-    seg(x,[cx-8,424],[cx-4,336],10);seg(x,[cx-4,336],[cx,hipY],10);
-    seg(x,[cx-20,424],[cx+12,424],9);
-    x.globalAlpha=.45;
-    seg(x,[cx,hipY],[cx+46,lerp(298,246,k)],10);   // the free leg swings out behind, straightening
-    seg(x,[cx+46,lerp(298,246,k)],[cx+88,lerp(374,218,k)],10);
+    var p=slRdlPose(k),cx=240;
+    // every height is the side view's at the same instant; the chest folds toward you, so the
+    // shoulders and head come down the page exactly as far as the side view lowers them
+    var shoY=p.sho[1],hipY=p.hip[1],neckY=p.neck[1],headY=p.head[1],kneeY=p.knee[1];
+    x.globalAlpha=.45;                             // the free leg, behind: straight back under its hip
+    seg(x,[cx+14,hipY],[cx+18,p.kneeF[1]],10);seg(x,[cx+18,p.kneeF[1]],[cx+20,p.ankF[1]],10);
     x.globalAlpha=1;
+    seg(x,[cx-8,424],[cx-4,kneeY],10);seg(x,[cx-4,kneeY],[cx,hipY],10);   // the standing leg
+    seg(x,[cx-20,424],[cx+12,424],9);
     seg(x,[cx,hipY],[cx,shoY],11);
     seg(x,[cx-42,shoY+4],[cx+42,shoY+4],10);
-    seg(x,[cx,shoY],[cx,shoY-26],8);
-    dot(x,[cx,98+fold],19);
-    seg(x,[cx-42,shoY+8],[cx-48,shoY+96],9);
-    plate(x,[cx-48,shoY+104],13);
+    seg(x,[cx,shoY],[cx,neckY],8);
+    dot(x,[cx,headY],19);
+    seg(x,[cx-42,shoY+8],[cx-46,p.hand[1]-8],9);   // the bell hangs straight down, as in the side view
+    plate(x,[cx-46,p.hand[1]],13);
     seg(x,[cx+42,shoY+8],[cx+76,shoY+52],9);       // the other arm out for balance
     dot(x,[cx+76,shoY+52],5);
   }
 
   // ---------- NORDIC HAMSTRING CURL: knees down, feet pinned, the body falls as one ----------
+  // One pose for both views (v5.204): the front view's head stayed over 50 higher than the side
+  // view's at the bottom, so the two views showed a man falling and a man kneeling at once.
+  function nordicPose(k){
+    var knee=[300,416];
+    var ang=lerp(-92,-152,k);                      // the whole trunk rotates about the knee
+    var hip=P(knee,ang,50), sho=P(hip,ang,98), head=P(sho,ang,48), neck=P(sho,ang,26);
+    // The arms (owner, 21 Sep: they were wrong). Hands held in front of the chest at the top, elbows
+    // tucked DOWN and back at the ribs, then reaching out to catch on the floor under the face at the
+    // bottom, the way a push-up ends. The elbow always bends back toward the feet, never up.
+    var hand=[lerp(262,128,k),lerp(292,424,k)];
+    var e1=elb(sho,hand,50,55,-1), e2=elb(sho,hand,50,55,1);
+    var elbow=e1[0]>e2[0]?e1:e2;
+    return {knee:knee,ang:ang,hip:hip,sho:sho,head:head,neck:neck,hand:hand,elbow:elbow};
+  }
   function drawNordicS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var knee=[300,416];
-    var ang=lerp(-92,-152,k);                      // the whole trunk rotates about the knee
-    var hip=P(knee,ang,50), sho=P(hip,ang,98), head=P(sho,ang,48);
+    var p=nordicPose(k),knee=p.knee,ang=p.ang,hip=p.hip,sho=p.sho,head=p.head;
     seg(x,[368,398],[420,398],7,LINE);             // whatever is holding the heels down
     seg(x,[372,398],[372,424],7,LINE);seg(x,[416,398],[416,424],7,LINE);
     seg(x,knee,[388,420],10);                      // the shin laid flat back under the anchor
@@ -9374,106 +9411,124 @@ var ANIM=(function(){
     seg(x,knee,hip,10);seg(x,hip,sho,11);
     seg(x,sho,P(sho,ang,26),8);
     dot(x,head,19);
-    var hand=[lerp(262,116,k),lerp(304,404,k)];    // the hands come out ready to catch
-    var e1=elb(sho,hand,50,55,-1), e2=elb(sho,hand,50,55,1);
-    var e=e1[1]<e2[1]?e1:e2;
+    var hand=p.hand, e=p.elbow;
     seg(x,sho,e,9);seg(x,e,hand,9);
     dot(x,hand,5);
   }
   function drawNordicF(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, fold=lerp(0,50,k);
+    var p=nordicPose(k),cx=240;
+    // he falls toward you, so every height comes straight from the side view at the same instant
+    var hipY=p.hip[1],shoY=p.sho[1],neckY=p.neck[1],headY=p.head[1],handY=p.hand[1];
     x.fillStyle=LINE;x.fillRect(cx-64,394,128,24); // whatever is pinning the heels
     x.globalAlpha=.4;
     seg(x,[cx-26,416],[cx-34,398],10);seg(x,[cx+26,416],[cx+34,398],10);   // shins running away
     x.globalAlpha=1;
-    dot(x,[cx-26,416],10);dot(x,[cx+26,416],10);   // both knees ON the floor - this is a kneel
-    seg(x,[cx-26,412],[cx,366],10);seg(x,[cx+26,412],[cx,366],10);
-    var shoY=268+fold*0.9;
-    seg(x,[cx,366],[cx,shoY],11);
+    dot(x,[cx-26,416],10);dot(x,[cx+26,416],10);   // both knees ON the floor: this is a kneel
+    seg(x,[cx-26,412],[cx,hipY],10);seg(x,[cx+26,412],[cx,hipY],10);
+    seg(x,[cx,hipY],[cx,shoY],11);
     seg(x,[cx-42,shoY+4],[cx+42,shoY+4],10);
-    seg(x,[cx,shoY],[cx,shoY-26],8);
-    dot(x,[cx,220+fold],19);
-    var hx=lerp(44,72,k), hy=shoY+lerp(86,66,k);   // arms reaching toward you, foreshortened
-    seg(x,[cx-42,shoY+8],[cx-hx,hy],9);seg(x,[cx+42,shoY+8],[cx+hx,hy],9);
-    dot(x,[cx-hx,hy],5);dot(x,[cx+hx,hy],5);
+    seg(x,[cx,shoY],[cx,neckY],8);
+    dot(x,[cx,headY],19);
+    // Bent arms at the side view's elbow and hand heights: hands in front of the chest at the top,
+    // then out to shoulder width on the floor to catch. Reaching toward you, so they foreshorten.
+    var ey=p.elbow[1], ex=lerp(52,60,k), hx=lerp(26,54,k);
+    seg(x,[cx-42,shoY+8],[cx-ex,ey],9);seg(x,[cx-ex,ey],[cx-hx,handY],9);
+    seg(x,[cx+42,shoY+8],[cx+ex,ey],9);seg(x,[cx+ex,ey],[cx+hx,handY],9);
+    dot(x,[cx-hx,handY],5);dot(x,[cx+hx,handY],5);
+  }
+
+  // ---------- THE FOOT, for the calf raises (v5.204, owner: "unusually large feet") ----------
+  // Drawn from anatomy rather than as a stub. A foot is about 15% of stature, so 52 on this figure;
+  // the ankle joint sits over the back quarter of it, about 4% of stature (14) off the ground; the
+  // ball of the foot is 36 from the heel and the toes run 16 past it. In a calf raise the ball and
+  // toes stay planted and the whole rear foot turns about the ball: the heel lifts, and the ankle,
+  // riding on it, lifts the body. The shin is 74 here, not the rig's 88, because the rig's ankle
+  // stands ON the floor; 74 plus the 14 of the foot gives back exactly the rig's stature, hip 244.
+  function footPose(B,deg){
+    var th=deg*Math.PI/180, d=[-Math.cos(th),-Math.sin(th)], n=[Math.sin(th),-Math.cos(th)];
+    function fp(sd,h){return [B[0]+sd*d[0]+h*n[0],B[1]+sd*d[1]+h*n[1]];}
+    return {ball:B,heel:fp(36,0),ankle:fp(23,14),toe:[B[0]+16,B[1]]};
+  }
+  function calfBody(ankle){
+    var knee=P(ankle,-92,74), hip=P(knee,-89,92), sho=P(hip,-91,98);
+    return {knee:knee,hip:hip,sho:sho,neck:P(sho,-91,26),head:P(sho,-91,48)};
+  }
+  // the side view's foot: a solid wedge heel, ankle, ball, and the toes flat past the ball
+  function footSide(x,f){
+    x.fillStyle=INK;x.strokeStyle=INK;x.lineWidth=5;x.lineJoin="round";
+    x.beginPath();x.moveTo(f.heel[0],f.heel[1]);x.lineTo(f.ankle[0],f.ankle[1]);x.lineTo(f.ball[0],f.ball[1]);x.closePath();x.fill();x.stroke();
+    seg(x,f.ball,f.toe,6);
+  }
+  // from the front a foot is seen end on: a short wedge from the ankle down to the planted forefoot
+  function footFront(x,ax,ay,bx,by){
+    x.fillStyle=INK;x.strokeStyle=INK;x.lineWidth=4;x.lineJoin="round";
+    x.beginPath();x.moveTo(ax-6,ay);x.lineTo(ax+6,ay);x.lineTo(bx+10,by);x.lineTo(bx-10,by);x.closePath();x.fill();x.stroke();
   }
 
   // ---------- DUMBBELL CALF RAISE: balls on a step, heels below the edge ----------
+  // The step lets the heel drop BELOW the ball first (20 degrees), then rise past it (35): that
+  // is the whole reason for the step, a longer range than the floor gives.
+  function dbCalfPose(k){var f=footPose([304,406],lerp(-20,35,k));var b=calfBody(f.ankle);b.foot=f;b.hand=[b.sho[0]+10,b.sho[1]+105];return b;}
   function drawDbCalfS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var k=reduce?1:cycle(t,2800,0.12);
+    var k=reduce?1:cycle(t,2800,0.12), p=dbCalfPose(k);
     x.fillStyle=LINE;x.fillRect(298,406,108,26);   // the step
-    // The foot is rigid and turns about the ball: heel 26 below the edge at the stretch, 26 above
-    // it at the squeeze, and the ankle rides the arc - which is what lifts the whole body 24.
-    var hy=lerp(432,376,k), ankle=[lerp(277,295,k),lerp(406,380,k)];
-    var knee=P(ankle,-92,88), hip=P(knee,-89,92), sho=P(hip,-91,98), head=P(sho,-91,48);
-    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
-    seg(x,[261,hy],[304,406],10);                  // heel hanging off the edge, driving up
-    dot(x,[261,hy],6);
-    seg(x,[304,406],[328,406],8);                  // the ball and toes ON the step
-    seg(x,sho,P(sho,-91,26),8);
-    dot(x,head,19);
-    var hand=[sho[0]+10,sho[1]+105];
-    seg(x,sho,hand,9);
-    plate(x,hand,13);
+    seg(x,p.foot.ankle,p.knee,10);seg(x,p.knee,p.hip,10);seg(x,p.hip,p.sho,11);
+    footSide(x,p.foot);
+    seg(x,p.sho,p.neck,8);
+    dot(x,p.head,19);
+    seg(x,p.sho,p.hand,9);
+    plate(x,p.hand,13);
   }
   function drawDbCalfF(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, r=lerp(0,-24,k);
+    var k=reduce?1:cycle(t,2800,0.12), p=dbCalfPose(k), cx=240;
     x.fillStyle=LINE;x.fillRect(cx-76,406,152,26);
-    // every height is the side view's: ankles 406, knees 318, hips 226, shoulders 128, head 80
-    seg(x,[cx-26,406+r],[cx-24,318+r],10);seg(x,[cx-24,318+r],[cx,226+r],10);
-    seg(x,[cx+26,406+r],[cx+24,318+r],10);seg(x,[cx+24,318+r],[cx,226+r],10);
-    seg(x,[cx-26,406+r],[cx-38,lerp(430,384,k)],9);seg(x,[cx+26,406+r],[cx+38,lerp(430,384,k)],9);
-    dot(x,[cx-38,lerp(430,384,k)],5);dot(x,[cx+38,lerp(430,384,k)],5);   // the heels, well clear
-    seg(x,[cx-44,406],[cx-16,406],9);seg(x,[cx+16,406],[cx+44,406],9);   // balls of the feet, planted
-    seg(x,[cx,226+r],[cx,132+r],11);
-    seg(x,[cx-42,128+r],[cx+42,128+r],10);
-    seg(x,[cx,128+r],[cx,104+r],8);
-    dot(x,[cx,80+r],19);
-    seg(x,[cx-42,132+r],[cx-58,224+r],9);seg(x,[cx+42,132+r],[cx+58,224+r],9);
-    plate(x,[cx-58,232+r],13);plate(x,[cx+58,232+r],13);
+    // every height is the side view's at the same instant
+    var ay=p.foot.ankle[1],ky=p.knee[1],hy=p.hip[1],sy=p.sho[1];
+    seg(x,[cx-24,ay],[cx-22,ky],10);seg(x,[cx-22,ky],[cx,hy],10);
+    seg(x,[cx+24,ay],[cx+22,ky],10);seg(x,[cx+22,ky],[cx,hy],10);
+    footFront(x,cx-24,ay,cx-28,406);footFront(x,cx+24,ay,cx+28,406);
+    seg(x,[cx,hy],[cx,sy+4],11);
+    seg(x,[cx-42,sy],[cx+42,sy],10);
+    seg(x,[cx,sy],[cx,p.neck[1]],8);
+    dot(x,[cx,p.head[1]],19);
+    seg(x,[cx-42,sy+4],[cx-58,p.hand[1]-8],9);seg(x,[cx+42,sy+4],[cx+58,p.hand[1]-8],9);
+    plate(x,[cx-58,p.hand[1]],13);plate(x,[cx+58,p.hand[1]],13);
   }
 
   // ---------- STANDING CALF RAISE: nothing but a floor and a wall to steady on ----------
+  // No step, so the heel starts on the floor and every degree of the range is upward.
+  function bwCalfPose(k){var f=footPose([272,424],lerp(0,38,k));var b=calfBody(f.ankle);b.foot=f;return b;}
   function drawBwCalfS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var k=reduce?1:cycle(t,2800,0.12);
+    var k=reduce?1:cycle(t,2800,0.12), p=bwCalfPose(k), sho=p.sho;
     seg(x,[412,424],[412,120],7,LINE);             // the wall, for balance only
-    // no step, so the heel starts on the floor: all of the range is upward
-    var hy=lerp(424,370,k), ankle=[lerp(248,266,k),lerp(420,394,k)];
-    var knee=P(ankle,-92,88), hip=P(knee,-89,92), sho=P(hip,-91,98), head=P(sho,-91,48);
-    seg(x,ankle,knee,10);seg(x,knee,hip,10);seg(x,hip,sho,11);
-    seg(x,[232,hy],[272,424],10);                  // the heel lifts, the ball stays down
-    dot(x,[232,hy],6);
-    seg(x,[272,424],[296,424],8);                  // toes planted, pointing away
-    seg(x,sho,P(sho,-91,26),8);
-    dot(x,head,19);
-    seg(x,sho,[310,sho[1]+40],9);seg(x,[310,sho[1]+40],[394,sho[1]+30],9);
-    dot(x,[394,sho[1]+30],5);                      // fingertips on the wall
+    seg(x,p.foot.ankle,p.knee,10);seg(x,p.knee,p.hip,10);seg(x,p.hip,sho,11);
+    footSide(x,p.foot);
+    seg(x,sho,p.neck,8);
+    dot(x,p.head,19);
+    seg(x,sho,[316,sho[1]+40],9);seg(x,[316,sho[1]+40],[404,sho[1]+30],9);
+    dot(x,[404,sho[1]+30],5);                      // fingertips ON the wall
     seg(x,[sho[0]-10,sho[1]+6],[sho[0]-18,sho[1]+100],9);dot(x,[sho[0]-18,sho[1]+106],5);
   }
   function drawBwCalfF(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, r=lerp(0,-24,k);
-    seg(x,[424,424],[424,120],7,LINE);
-    // the side view's heights: ankles 420, knees 332, hips 240, shoulders 142, head 94
-    seg(x,[cx-26,420+r],[cx-24,332+r],10);seg(x,[cx-24,332+r],[cx,240+r],10);
-    seg(x,[cx+26,420+r],[cx+24,332+r],10);seg(x,[cx+24,332+r],[cx,240+r],10);
-    seg(x,[cx-26,420+r],[cx-40,lerp(424,386,k)],9);seg(x,[cx+26,420+r],[cx+40,lerp(424,386,k)],9);
-    dot(x,[cx-40,lerp(424,386,k)],5);dot(x,[cx+40,lerp(424,386,k)],5);
-    seg(x,[cx-44,424],[cx-16,424],9);seg(x,[cx+16,424],[cx+44,424],9);   // balls of the feet, planted
-    seg(x,[cx,240+r],[cx,146+r],11);
-    seg(x,[cx-42,142+r],[cx+42,142+r],10);
-    seg(x,[cx,142+r],[cx,120+r],8);
-    dot(x,[cx,94+r],19);
-    seg(x,[cx+42,146+r],[cx+92,168+r],9);seg(x,[cx+92,168+r],[cx+176,180+r],9);
-    dot(x,[cx+176,180+r],5);
-    seg(x,[cx-42,146+r],[cx-52,240+r],9);dot(x,[cx-52,246+r],5);   // the other arm just hangs
+    var k=reduce?1:cycle(t,2800,0.12), p=bwCalfPose(k), cx=240;
+    // the wall is in front of him, so from the front it is the plane you look through
+    var ay=p.foot.ankle[1],ky=p.knee[1],hy=p.hip[1],sy=p.sho[1];
+    seg(x,[cx-24,ay],[cx-22,ky],10);seg(x,[cx-22,ky],[cx,hy],10);
+    seg(x,[cx+24,ay],[cx+22,ky],10);seg(x,[cx+22,ky],[cx,hy],10);
+    footFront(x,cx-24,ay,cx-28,424);footFront(x,cx+24,ay,cx+28,424);
+    seg(x,[cx,hy],[cx,sy+4],11);
+    seg(x,[cx-42,sy],[cx+42,sy],10);
+    seg(x,[cx,sy],[cx,p.neck[1]],8);
+    dot(x,[cx,p.head[1]],19);
+    seg(x,[cx+42,sy+4],[cx+56,sy+40],9);seg(x,[cx+56,sy+40],[cx+50,sy+30],9);
+    dot(x,[cx+50,sy+30],6);                        // the near arm, reaching forward to the wall
+    seg(x,[cx-42,sy+4],[cx-52,sy+98],9);dot(x,[cx-52,sy+104],5);   // the other arm just hangs
   }
 
   var R={
@@ -9572,7 +9627,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.203';
+var APPV='v5.204';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
