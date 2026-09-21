@@ -9495,7 +9495,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.198';
+var APPV='v5.199';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -18459,6 +18459,10 @@ function startTimer(secs,exName){
       else restAlert();   // posts the notice itself, so it can decide which of the two sounds
       skipQuiet=false;
       restEndedAt=Date.now();
+      // Tell the wrist the rest is over (v5.199). The watch chip is posted once and counts to the
+      // end time it was given; nothing told it the countdown had finished, so it kept counting into
+      // negative days until the next push happened to arrive.
+      try{wearPush();}catch(e){}
       // Only start counting it out if there is somebody there to see it.
       if(document.visibilityState==='visible')restHideSoon();
     }
