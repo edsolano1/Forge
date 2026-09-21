@@ -360,7 +360,12 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .sv-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;}
 .sv-forge{color:var(--go);border-color:color-mix(in srgb,var(--go) 34%,var(--line));}
 #svForgeIco{width:19px;height:19px;fill:currentColor;stroke:none;}
-#extraCards[hidden],#extraHint[hidden]{display:none;}
+#extraCards[hidden],#extraHint[hidden],#extraForge[hidden]{display:none;}
+/* Forge me a week moved into the fold in v5.192 and landed on top of the line under it: .mk-hint
+   carries a -6px top margin, which is right when it tucks under a heading and wrong under a
+   button. The button holds the gap itself and the line below sits where it is put (owner, 20 Sep). */
+#extraForge{margin:2px 0 12px;}
+#extraHint{margin-top:0;}
 .sec-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 12px;}
 .sec-row .sec-label{margin:0;}
 .wk-flip{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt2);border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 10px;cursor:pointer;white-space:nowrap;transition:.15s;}
@@ -9490,7 +9495,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.197';
+var APPV='v5.198';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
