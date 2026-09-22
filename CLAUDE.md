@@ -116,6 +116,24 @@ main constraint on how to work in it. See **Traps** below before editing.
 
 ## Verifying
 
+**The phone and the watch are the owner's, not a test rig.** Whatever a session changes on them
+gets changed back before the session ends, every time, without being asked (owner, 22 Sep: the
+phone kept being left with auto-rotate on and stuck in landscape, and the watch in a portrait it
+cannot be read in on either wrist, and he had to fix both by hand afterwards). The rule covers
+anything the device carries, not just display: rotation, screen timeout, stay-awake, brightness,
+volume, Do Not Disturb, the watch face, the app's own state (an open fold, a half-started session)
+and any app data touched on the way.
+
+```bash
+tools/device-settings.sh save    <serial>   # FIRST, before touching anything
+tools/device-settings.sh show    <serial>   # what drifted
+tools/device-settings.sh restore <serial>   # put it all back, then say so in the reply
+```
+
+The snapshot is written beside the script, so a later session can restore what an earlier one
+saved. Adding a setting to `KEYS` in that script is what makes it get restored. A run that changes
+something not listed there adds it to the list in the same commit.
+
 Rendering claims cannot be verified in a desktop browser.
 
 **Restarting the Browser-pane preview server hands the tab FRESH storage.** An empty app after
