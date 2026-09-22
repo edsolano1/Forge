@@ -95,6 +95,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   progression. Choosing a focus is allowed here: Pump Day is a bonus you pick on purpose, not the balanced week.
 - **Saved workouts is a fold** (SAVED_OPEN, savedApply). Pump day is a built-in card at its head,
   not in DB.extra. The level-up offer at the finish is finLvl → finRaise → openLevel.
+- **Lift animations keep one even tempo** (owner, 22 Sep: follow the standard only if there is no debate).
+  ACSM 2009 advised 1 s up, 2 s down for novices, but the 2026 ACSM position stand sets no tempo and the
+  evidence finds 0.5 to 8 s reps equivalent, so there is no settled standard. Continuous activities
+  (walks, runs, stairs, rower, swim) do get their real rhythm (v5.207 to v5.209).
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
   strength and underfills "move"; longer would only add rest.
 - The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated
