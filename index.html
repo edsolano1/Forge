@@ -9751,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.210';
+var APPV='v5.211';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -21216,6 +21216,9 @@ function sbEnd(){
   // What is stored is read but not obeyed while there is only one world, so the choice survives
   // untouched for whenever the other three come back.
   applyTheme(THEMES_ON?(t||'dark'):ONE_THEME);
+  // v5.211: data from before the week board (plan and slots, no days) crashed the first render,
+  // which reads DB.days, and left a blank home. dayMap is the migration; run it before drawing.
+  try{dayMap();}catch(e){}
   renderHome();
   // The retired walk clock: anything still running when the feature ended becomes a
   // logged walk instead of a stranded timer nobody can see or stop.
