@@ -8534,80 +8534,96 @@ var ANIM=(function(){
   // The gaits ride the same 2800ms ping-pong (legs scissor A-B-A); the wheels and
   // ropes spin on continuous time - a crank cannot ping-pong.
 
-  // ---------- POWER WALK ----------
-  // v5.205: the foot rolls through the step. It lands on the heel with the toes up, rolls flat
-  // under the hip, and pushes off the ball as the heel rises. u runs 0 (reaching) to 1 (behind).
-  function walkLeg(hip,u){
-    var bx=hip[0]+lerp(62,-22,u), deg=u<.5?lerp(-14,0,u*2):lerp(0,32,u*2-1);
-    return legOf(hip,stepFoot([bx,424],deg),92,1);
+  // ---------- THE STRIDE LOOP (v5.207, owner: "the running animations look really awkward") ----------
+  // The gaits used to ping-pong: the legs scissored forward and back and then reversed, so every foot
+  // slid backwards through the air on the way home. Now each foot goes round a real loop. For the
+  // stance (st of the cycle) it is planted and carried back under the body by the ground or the belt,
+  // landing on the heel (strike), rolling flat and pushing off the ball (pd); for the rest it swings
+  // forward through the air, lifting (lift) and, running, kicking up behind first (hold, kick). The
+  // two legs run half a cycle apart. fr and bk are where the ball of the foot lands and leaves,
+  // measured from the hip; gy is the floor under the foot.
+  function gaitLeg(hip,ph,G){
+    ph=ph%1;
+    var st=G.st, bx, lift=0, deg, air=0;
+    if(ph<st){
+      var u=ph/st;
+      bx=lerp(G.fr,G.bk,u);
+      deg=u<G.roll?lerp(G.strike,0,u/G.roll):u>1-G.push?lerp(0,G.pd,(u-1+G.push)/G.push):0;
+    }else{
+      var w=(ph-st)/(1-st), e=w<G.hold?0:(1-Math.cos(Math.PI*(w-G.hold)/(1-G.hold)))/2;
+      bx=lerp(G.bk,G.fr,e);
+      lift=G.lift*Math.pow(Math.sin(Math.PI*w),G.lp);
+      deg=lerp(G.pd,G.strike,w)+G.kick*Math.sin(Math.PI*w);
+      air=Math.min(1,lift/12);
+    }
+    bx+=hip[0];
+    return legOf(hip,stepFoot([bx,G.gy(bx)-lift],deg,G.base,1,air),G.th,1);
   }
-  function walkPose(k){
-    var bob=-Math.sin(k*Math.PI)*3, hip=[228,246+bob];
-    return {bob:bob,hip:hip,l1:walkLeg(hip,k),l2:walkLeg(hip,1-k)};
+  function gaitPh(t,period){return reduce?0.3:(t%period)/period;}
+  var WALK={st:.6,fr:62,bk:-22,strike:-14,roll:.2,pd:32,push:.35,lift:14,lp:1,hold:0,kick:0,base:0,th:92,gy:function(){return 424;}};
+  var TWALK={st:.6,fr:62,bk:-30,strike:-12,roll:.2,pd:30,push:.35,lift:16,lp:1,hold:0,kick:0,base:14,th:90,gy:function(x){return 414-(x-136)*0.25;}};
+  var TRUN={st:.38,fr:40,bk:-34,strike:0,roll:.01,pd:40,push:.45,lift:60,lp:.8,hold:.25,kick:40,base:0,th:90,gy:function(){return 400;}};
+  var ORUN={st:.38,fr:34,bk:-38,strike:0,roll:.01,pd:40,push:.45,lift:64,lp:.8,hold:.25,kick:44,base:0,th:90,gy:function(){return 424;}};
+
+  // ---------- POWER WALK ----------
+  // Walking the body rides highest over the planted foot; both feet are down at each hand over.
+  function walkPose(ph){
+    var bob=-3*Math.cos(4*Math.PI*(ph-0.3)), hip=[228,246+bob];
+    return {bob:bob,hip:hip,l1:gaitLeg(hip,ph,WALK),l2:gaitLeg(hip,ph+.5,WALK)};
   }
   function drawWalkS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var bob=-Math.sin(k*Math.PI)*3;
-    var hip=[228,246+bob], sho=[232,148+bob];
+    var ph=gaitPh(t,1400), p=walkPose(ph), bob=p.bob;
+    var hip=p.hip, sho=[232,148+bob];
     seg(x,hip,sho,11);
     seg(x,sho,[233,122+bob],8);
     dot(x,[234,100+bob],19);
-    var p=walkPose(k);                             // the legs scissor, each foot rolling heel to toe
-    legS(x,p.l2);legS(x,p.l1);
-    var b1=lerp(116,62,k), b2=lerp(62,116,k);      // the arms swing opposite
+    legS(x,p.l2);legS(x,p.l1);                     // each foot rolling heel to toe, then swinging through
+    var c=Math.cos(2*Math.PI*ph), b1=89+27*c, b2=89-27*c;   // the arms swing opposite the legs
     var e1=P(sho,b1,50),e2=P(sho,b2,50);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-30,46),9);
     seg(x,sho,e2,9);seg(x,e2,P(e2,b2-30,46),9);
   }
   function drawWalkF(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var bob=-Math.sin(k*Math.PI)*3, cx=240;
+    var ph=gaitPh(t,1400), p=walkPose(ph), bob=p.bob, cx=240;
     seg(x,[cx,244+bob],[cx,146+bob],11);
     seg(x,[cx-42,150+bob],[cx+42,150+bob],10);
     seg(x,[cx,146+bob],[cx,120+bob],8);
     dot(x,[cx,100+bob],19);
-    var p=walkPose(k);                             // the side view's legs, seen from the front
-    dot(x,legF(x,cx,248+bob,cx-14,cx-22,p.l1),7);dot(x,legF(x,cx,248+bob,cx+14,cx+22,p.l2),7);
-    var s1=lerp(-16,16,k), s2=lerp(16,-16,k);      // the arms counter-swing
+    dot(x,legF(x,cx,248+bob,cx-14,cx-22,p.l1),7);dot(x,legF(x,cx,248+bob,cx+14,cx+22,p.l2),7);   // the side view's legs
+    var c=Math.cos(2*Math.PI*ph), s1=-16*c, s2=16*c;   // the arms counter-swing
     seg(x,[cx-42,154+bob],[cx-48,214+bob+s1],9);seg(x,[cx-48,214+bob+s1],[cx-40,266+bob+s1],9);
     seg(x,[cx+42,154+bob],[cx+48,214+bob+s2],9);seg(x,[cx+48,214+bob+s2],[cx+40,266+bob+s2],9);
   }
 
   // ---------- TREADMILL RUN ----------
-  // v5.205: lands flat under the body on the deck, then the heel lifts and the foot kicks up behind
-  function tRunLeg(hip,u){
-    var lift=44*u;
-    return legOf(hip,stepFoot([lerp(326,186,u),400-lift],lerp(0,45,u),0,1,lift>1),90,1);
-  }
-  function tRunPose(k){
-    var bob=-Math.sin(k*Math.PI)*5, hip=[238,238+bob];
-    return {bob:bob,hip:hip,l1:tRunLeg(hip,k),l2:tRunLeg(hip,1-k)};
+  // Running the body sinks over the planted foot and floats between steps, when both feet are off
+  // the deck; the foot lands under the body and kicks up behind before it swings through.
+  function tRunPose(ph){
+    var bob=5*Math.cos(4*Math.PI*(ph-0.19)), hip=[238,238+bob];
+    return {bob:bob,hip:hip,l1:gaitLeg(hip,ph,TRUN),l2:gaitLeg(hip,ph+.5,TRUN)};
   }
   function drawTreadRunS(x,t){
     x.clearRect(0,0,480,480);
-    var k=reduce?1:cycle(t,2800,0.12);
+    var ph=gaitPh(t,900), p=tRunPose(ph), bob=p.bob;
     seg(x,[130,404],[344,398],8,LINE);             // the deck
     dot(x,[136,404],6,LINE);dot(x,[338,398],6,LINE);
     seg(x,[336,398],[336,240],6,LINE);             // the console post
     seg(x,[322,240],[356,232],7,LINE);
-    var bob=-Math.sin(k*Math.PI)*5;
-    var hip=[238,238+bob], sho=[248,144+bob];      // a slight forward lean
+    var hip=p.hip, sho=[248,144+bob];              // a slight forward lean
     seg(x,hip,sho,11);
     seg(x,sho,[250,118+bob],8);
     dot(x,[252,96+bob],19);
-    var p=tRunPose(k);                             // footstrike ON the deck, heel kicked behind
     legS(x,p.l2);legS(x,p.l1);
-    var b1=lerp(70,115,k), b2=lerp(115,70,k);      // the arms pump, bent hard
+    var c=Math.cos(2*Math.PI*ph), b1=92.5+22.5*c, b2=92.5-22.5*c;   // the arms pump, bent hard
     var e1=P(sho,b1,48),e2=P(sho,b2,48);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-75,42),9);
     seg(x,sho,e2,9);seg(x,e2,P(e2,b2-75,42),9);
   }
   function drawTreadRunF(x,t){
     x.clearRect(0,0,480,480);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, bob=-Math.sin(k*Math.PI)*5;
+    var ph=gaitPh(t,900), p=tRunPose(ph), bob=p.bob, cx=240;
     seg(x,[cx-52,428],[cx-52,404],6,LINE);seg(x,[cx+52,428],[cx+52,404],6,LINE);
     seg(x,[cx-58,428],[cx+58,428],7,LINE);         // the belt, nearest
     seg(x,[cx-40,214],[cx+40,214],7,LINE);         // the console crossbar
@@ -8616,46 +8632,38 @@ var ANIM=(function(){
     seg(x,[cx-42,152+bob],[cx+42,152+bob],10);
     seg(x,[cx,148+bob],[cx,122+bob],8);
     dot(x,[cx,96+bob],19);
-    var p=tRunPose(k);
     dot(x,legF(x,cx,242+bob,cx-15,cx-22,p.l1),7);dot(x,legF(x,cx,242+bob,cx+15,cx+22,p.l2),7);
-    var s1=lerp(-24,24,k), s2=lerp(24,-24,k);
+    var c=Math.cos(2*Math.PI*ph), s1=-24*c, s2=24*c;
     seg(x,[cx-42,156+bob],[cx-52,208+bob+s1],9);seg(x,[cx-52,208+bob+s1],[cx-30,236+bob+s1],9);
     seg(x,[cx+42,156+bob],[cx+52,208+bob+s2],9);seg(x,[cx+52,208+bob+s2],[cx+30,236+bob+s2],9);
   }
 
   // ---------- INCLINE TREADMILL WALK ----------
-  // v5.205: the walking foot on the pitched deck: it lies along the slope, heel strike to push off
-  function tWalkLeg(hip,u){
-    var bx=lerp(300,186,u), lift=16*Math.max(0,(u-.6)/.4), deg=u<.5?lerp(-12,0,u*2):lerp(0,30,u*2-1);
-    return legOf(hip,stepFoot([bx,414-(bx-136)*0.25-lift],deg,14,1,lift>.5),90,1);
-  }
-  function tWalkPose(k){
-    var bob=-Math.sin(k*Math.PI)*3, hip=[228,219+bob];
-    return {bob:bob,hip:hip,l1:tWalkLeg(hip,k),l2:tWalkLeg(hip,1-k)};
+  // The walking loop on the pitched deck: the foot lies along the slope, heel strike to push off.
+  function tWalkPose(ph){
+    var bob=-3*Math.cos(4*Math.PI*(ph-0.3)), hip=[228,219+bob];
+    return {bob:bob,hip:hip,l1:gaitLeg(hip,ph,TWALK),l2:gaitLeg(hip,ph+.5,TWALK)};
   }
   function drawTreadWalkS(x,t){
     x.clearRect(0,0,480,480);
-    var k=reduce?1:cycle(t,2800,0.12);
+    var ph=gaitPh(t,1500), p=tWalkPose(ph), bob=p.bob;
     seg(x,[136,414],[344,362],8,LINE);             // the deck, pitched UP
     dot(x,[142,413],6,LINE);dot(x,[338,363],6,LINE);
     seg(x,[336,364],[336,220],6,LINE);
     seg(x,[322,220],[356,212],7,LINE);
-    var bob=-Math.sin(k*Math.PI)*3;
-    var hip=[228,219+bob], sho=[244,125+bob];      // leaning INTO the hill
+    var hip=p.hip, sho=[244,125+bob];              // leaning INTO the hill
     seg(x,hip,sho,11);
     seg(x,sho,[248,99+bob],8);
     dot(x,[252,77+bob],19);
-    var p=tWalkPose(k);                            // the feet land ON the pitched deck - the stride is inclined
-    legS(x,p.l2);legS(x,p.l1);
-    var b1=lerp(112,64,k), b2=lerp(64,112,k);
+    legS(x,p.l2);legS(x,p.l1);                     // the feet land ON the pitched deck - the stride is inclined
+    var c=Math.cos(2*Math.PI*ph), b1=88+24*c, b2=88-24*c;
     var e1=P(sho,b1,48),e2=P(sho,b2,48);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-24,44),9);    // hands OFF the rails, as the note says
     seg(x,sho,e2,9);seg(x,e2,P(e2,b2-24,44),9);
   }
   function drawTreadWalkF(x,t){
     x.clearRect(0,0,480,480);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, bob=-Math.sin(k*Math.PI)*3;
+    var ph=gaitPh(t,1500), p=tWalkPose(ph), bob=p.bob, cx=240;
     seg(x,[cx-58,428],[cx+58,428],7,LINE);
     seg(x,[cx-52,428],[cx-40,352],6,LINE);seg(x,[cx+52,428],[cx+40,352],6,LINE);   // the deck rising away
     seg(x,[cx-40,352],[cx+40,352],5,LINE);
@@ -8665,9 +8673,8 @@ var ANIM=(function(){
     seg(x,[cx-42,129+bob],[cx+42,129+bob],10);
     seg(x,[cx,125+bob],[cx,99+bob],8);
     dot(x,[cx,77+bob],19);                         // the head at the side view height - the climb carries the body high
-    var p=tWalkPose(k);
     dot(x,legF(x,cx,223+bob,cx-14,cx-22,p.l1),7);dot(x,legF(x,cx,223+bob,cx+14,cx+22,p.l2),7);
-    var s1=lerp(-14,14,k), s2=lerp(14,-14,k);
+    var c=Math.cos(2*Math.PI*ph), s1=-14*c, s2=14*c;
     seg(x,[cx-42,133+bob],[cx-48,191+bob+s1],9);seg(x,[cx-48,191+bob+s1],[cx-40,241+bob+s1],9);
     seg(x,[cx+42,133+bob],[cx+48,191+bob+s2],9);seg(x,[cx+48,191+bob+s2],[cx+40,241+bob+s2],9);
   }
@@ -8932,38 +8939,32 @@ var ANIM=(function(){
   }
 
   // ---------- OUTDOOR RUN ----------
-  // v5.205: reaching forward heel first, the foot kicks up high behind; at the middle both are off
-  // the ground, which is what makes it a run and not a walk
-  function oRunLeg(hip,u){
-    return legOf(hip,stepFoot([lerp(306,170,u),414-50*u*u],lerp(-8,60,u),0,1,1),90,1);
-  }
-  function oRunPose(k){
-    var bob=-Math.sin(k*Math.PI)*5, hip=[236,238+bob];
-    return {bob:bob,hip:hip,l1:oRunLeg(hip,k),l2:oRunLeg(hip,1-k)};
+  // The running loop on open ground. The runner sits 12 lower than on the treadmill because the ground
+  // is lower than the deck, so the planted leg can still bend.
+  function oRunPose(ph){
+    var bob=12+5*Math.cos(4*Math.PI*(ph-0.19)), hip=[236,238+bob];
+    return {bob:bob,hip:hip,l1:gaitLeg(hip,ph,ORUN),l2:gaitLeg(hip,ph+.5,ORUN)};
   }
   function drawOutRunS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
-    var k=reduce?1:cycle(t,2800,0.12);
+    var ph=gaitPh(t,900), p=oRunPose(ph), bob=p.bob;
     x.globalAlpha=.3;
     seg(x,[96,300],[136,300],5,LINE);seg(x,[84,338],[130,338],5,LINE);   // the speed lines
     seg(x,[100,376],[142,376],5,LINE);
     x.globalAlpha=1;
-    var bob=-Math.sin(k*Math.PI)*5;
-    var hip=[236,238+bob], sho=[248,144+bob];
+    var hip=p.hip, sho=[248,144+bob];
     seg(x,hip,sho,11);
     seg(x,sho,[250,118+bob],8);
     dot(x,[252,96+bob],19);
-    var p=oRunPose(k);
     legS(x,p.l2);legS(x,p.l1);
-    var b1=lerp(72,118,k), b2=lerp(118,72,k);
+    var c=Math.cos(2*Math.PI*ph), b1=95+23*c, b2=95-23*c;
     var e1=P(sho,b1,48),e2=P(sho,b2,48);
     seg(x,sho,e1,9);seg(x,e1,P(e1,b1-78,42),9);
     seg(x,sho,e2,9);seg(x,e2,P(e2,b2-78,42),9);
   }
   function drawOutRunF(x,t){
     x.clearRect(0,0,480,480);ground(x,90,390,432);
-    var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240, bob=-Math.sin(k*Math.PI)*5;
+    var ph=gaitPh(t,900), p=oRunPose(ph), bob=p.bob, cx=240;
     x.globalAlpha=.3;
     seg(x,[cx-96,300],[cx-72,316],5,LINE);seg(x,[cx+72,316],[cx+96,300],5,LINE);
     x.globalAlpha=1;
@@ -8971,9 +8972,8 @@ var ANIM=(function(){
     seg(x,[cx-42,150+bob],[cx+42,150+bob],10);
     seg(x,[cx,146+bob],[cx,120+bob],8);
     dot(x,[cx,96+bob],19);
-    var p=oRunPose(k);
     dot(x,legF(x,cx,242+bob,cx-15,cx-22,p.l1),7);dot(x,legF(x,cx,242+bob,cx+15,cx+22,p.l2),7);
-    var s1=lerp(-24,24,k), s2=lerp(24,-24,k);
+    var c=Math.cos(2*Math.PI*ph), s1=-24*c, s2=24*c;
     seg(x,[cx-42,154+bob],[cx-52,206+bob+s1],9);seg(x,[cx-52,206+bob+s1],[cx-30,234+bob+s1],9);
     seg(x,[cx+42,154+bob],[cx+52,206+bob+s2],9);seg(x,[cx+52,206+bob+s2],[cx+30,234+bob+s2],9);
   }
@@ -9536,7 +9536,10 @@ var ANIM=(function(){
       var f0=footPose(B,0,base,dir),dx=f.heel[0]-f0.heel[0],dy=f.heel[1]-f0.heel[1];
       f={ball:[f.ball[0]-dx,f.ball[1]-dy],heel:f0.heel,ankle:[f.ankle[0]-dx,f.ankle[1]-dy]};air=1;
     }
-    if(air){var u=[(f.ball[0]-f.heel[0])/36,(f.ball[1]-f.heel[1])/36];f.toe=[f.ball[0]+16*u[0],f.ball[1]+16*u[1]];}
+    if(air){
+      var a=air===true?1:+air, u=[(f.ball[0]-f.heel[0])/36,(f.ball[1]-f.heel[1])/36], rt=[f.ball[0]+16*u[0],f.ball[1]+16*u[1]];
+      f.toe=a>=1||!f.toe?rt:[lerp(f.toe[0],rt[0],a),lerp(f.toe[1],rt[1],a)];
+    }
     return f;
   }
   // the push-up and plank foot: heel up, sole facing back, the toes tucked under and pressing the floor
@@ -9720,7 +9723,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.206';
+var APPV='v5.207';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
