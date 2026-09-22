@@ -85,6 +85,13 @@ main constraint on how to work in it. See **Traps** below before editing.
   arrow, no finish-screen raise, no alarms, pushes or prompts while TUTON. The seed data trips isReady;
   the finish screen's raise is fenced off with TUTON since v5.212, and the seed itself gets fixed with the
   tutorial rewrite. Check any new live feature against TUTON before it ships.
+- **Back is a list, not a run of ifs** (v5.217). `BACK_RULES` in index.html holds every place the
+  hardware back has to answer for, in stack order (splash, ritual, welcome, tour, a night in the
+  history, the sheet on top, a session, the builder, the saved fold), and `onBackButton` just walks
+  it. **A new full screen means one line there.** Sheets need nothing: any `.ovl` is covered by the
+  sheet-on-top rule. `backWould()` names what back would do right now. `tools/back-audit.js` pasted
+  into the console opens every sheet found in the page plus the screens it lists, presses back, and
+  prints PASS or what it could not get out of. Run it after anything that adds a screen.
 - **Sheets stack by opening order** (v5.213). ovlWatch lifts a sheet opened over another of its own z layer
   one step above it (Backup over Settings used to hide behind it). A backup carries arc_kg, arc_km and
   arc_bar; add any new user setting to BK_KEYS or a restore onto a new phone loses it.

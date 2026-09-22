@@ -9751,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.216';
+var APPV='v5.217';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16223,53 +16223,55 @@ function leaveSession(){
   }
   renderHome();
 }
-function onBackButton(){
-  if(!splashGone){dismissSplash();backGuard();return;}
-  // The welcome is not an .ovl, so back fell straight past it and asked whether to quit - on the
-  // one screen where quitting is the last thing anybody means. It answers with the empty week,
-  // which is the choice that assumes least: nothing is built, and the builder is one tap away.
-  // the ritual steps back one question at a time, then out to the welcome
-  var ez=document.getElementById('ez');
-  if(ez&&ez.classList.contains('on')){ezBack();backGuard();return;}
+// v5.217: every place back has to answer for, written as one ordered list instead of a run of
+// ifs. Back has been lost twice by somebody adding a screen and not knowing there was a branch to
+// add it to; a new screen now means one line here, and backAudit() below walks this same list and
+// says out loud what is unreachable. Order is the stack: the thing on top answers first.
+var BACK_RULES=[
+  {n:'splash',       when:function(){return !splashGone;},                              act:function(){dismissSplash();}},
+  {n:'the ritual',   when:function(){return onScr('ez');},                              act:function(){ezBack();}},
+  {n:'the welcome',  when:function(){return onScr('welcome');},                         act:function(){wcBack();}},
+  {n:'the tour',     when:function(){var o=topOvl();return TUTON&&!(o&&o.id==='askOvl');},act:function(){if(TUTI>0)tutBack();else tutAskEnd();}},
+  {n:'a night in the history',when:function(){return tops('histOvl')&&HIST.sel!==null;},act:function(){histBack();}},
+  {n:'the sheet on top',when:function(){return !!topOvl();},                            act:function(){backCloses(topOvl().id);}},
+  {n:'a session',    when:function(){return sessionOpen();},                            act:function(){leaveSession();}},
+  {n:'the builder',  when:function(){return onScr('make');},                            act:function(){mkBack();}},
+  // Not a screen and not a sheet, which is exactly how it was missed: the fold under the week
+  // opens over half the board, and back left it standing and asked whether to quit instead.
+  // The home screen carries no class of its own: it is what is left when nothing is over it,
+  // which every rule above has already ruled out by the time this one is asked.
+  {n:'the saved fold',when:function(){return !!SAVED_OPEN;},                              act:function(){savedToggle();}}
+];
+function onScr(id){var e=document.getElementById(id);return !!(e&&e.classList.contains('on'));}
+function tops(id){var o=topOvl();return !!(o&&o.id===id);}
+// The welcome's own three stages, kept together so the rule above reads as one thing.
+function wcBack(){
   var wc=document.getElementById('welcome');
-  // On the safety questions back does nothing: skipping them silently wrote no answer (v5.101).
-  // v5.182: decide by the stage on screen. The safety questions ignore back (their CONTINUE also
-  // carries .wc-pick, which is how back used to skip them for good); the note after them goes on
-  // to the start question; the start question takes back as the empty week, as before.
-  if(wc&&wc.classList.contains('on')){
-    if(document.getElementById('wcGo')){}
-    else if(wc.querySelector('.ez-card'))wcPick(0);
-    else if(wc.querySelector('.wc-pick[onclick^="wcAsk"]'))wcAsk();
-    else if(wc.querySelector('.wc-pick'))wcPick(0);
-    backGuard();return;
+  if(document.getElementById('wcGo'))return;                         // the safety questions ignore back
+  if(wc.querySelector('.ez-card')){wcPick(0);return;}                // the start question: the empty week
+  if(wc.querySelector('.wc-pick[onclick^="wcAsk"]')){wcAsk();return;}
+  if(wc.querySelector('.wc-pick'))wcPick(0);
+}
+function onBackButton(){
+  for(var i=0;i<BACK_RULES.length;i++){
+    var r=BACK_RULES[i];
+    var hit=false;try{hit=!!r.when();}catch(e){}
+    if(!hit)continue;
+    try{r.act();}catch(e){}
+    backGuard();
+    return;
   }
-  var ov=topOvl();
-  // The tour builds each card's screen itself, so back closing a sheet out from under it stranded
-  // the spotlight. Back steps the tour back a card; on the first card it offers to leave (v5.184).
-  if(TUTON&&!(ov&&ov.id==='askOvl')){
-    if(TUTI>0)tutBack();else tutAskEnd();
-    backGuard();return;
-  }
-  if(ov){                                  // an open sheet closes first
-    if(ov.id==='histOvl'&&HIST.sel!==null){histBack();backGuard();return;}
-    // Through closeOvl rather than stripping the class here: it is what aborts a level-up
-    // mid-transfer so nothing is written, stops an instruction animation, and hands the ask
-    // sheet on to whatever queued behind it. Backing out used to strand all three.
-    backCloses(ov.id);backGuard();return;
-  }
-  if(sessionOpen()){leaveSession();backGuard();return;}
-  // The day editor is a full screen like a session, but it is not .ovl and not #session, so back
-  // fell straight past it to "close the app?" - held a day to edit it, pressed back, and were
-  // asked whether to quit. It goes back to the week, which is where it was opened from.
-  if(document.getElementById('make').classList.contains('on')){mkBack();backGuard();return;}
   backGuard();                             // hold our place while the question is up
-  // history.go(-2) is how a browser tab leaves. The APK has no history to walk out through, so
-  // closing there is the plugin's job.
   ask(TXT('closeMsg'),function(){
     var A=capApp();
     if(A&&A.exitApp){try{A.exitApp();return;}catch(e){}}
     try{history.go(-2);}catch(e){}
   },TXT('closeTtl'),'CLOSE');
+}
+// What back would do, screen by screen, without pressing it: the audit tool asks this.
+function backWould(){
+  for(var i=0;i<BACK_RULES.length;i++){var h=false;try{h=!!BACK_RULES[i].when();}catch(e){}if(h)return BACK_RULES[i].n;}
+  return 'offer to close the app';
 }
 function initBack(){
   try{
