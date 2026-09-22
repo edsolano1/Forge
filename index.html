@@ -9751,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.214';
+var APPV='v5.215';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10867,7 +10867,44 @@ function dayMap(){
         null,'It has its own copy now');}catch(e){}},420);
     }
   }
+  putSync();
   return DB.days;
+}
+// ---- when each workout landed on its day (v5.215) ----
+// A workout is only SKIPPED if it was standing on that day while the day ran. Putting one on a
+// weekday that has already gone by - Forge a day, a drag, a workout built onto Sunday on a
+// Wednesday - used to tag it Skipped the moment it landed, which reads as a failure for
+// something nobody could have done yet. DB.put remembers when each id-on-day pair appeared.
+// Pairs already in place when this shipped are backfilled with 0, which reads as always there,
+// so nothing anybody already had changes its badge.
+function putKey(id,k){return id+'@'+k;}
+function putSync(){
+  DB.put=DB.put||{};
+  var seed=!DB.putSeed,now=Date.now(),changed=false;
+  DAYS.forEach(function(d){
+    (DB.days[d.k]||[]).forEach(function(id){
+      var key=putKey(id,d.k);
+      if(DB.put[key]===undefined){DB.put[key]=seed?0:now;changed=true;}
+    });
+  });
+  // Only entries whose workout is gone for good are dropped: the two week program swaps whole
+  // boards in and out, and those pairs come back next week with their history intact.
+  Object.keys(DB.put).forEach(function(key){
+    var id=key.slice(0,key.lastIndexOf('@'));
+    if(!W[id]){delete DB.put[key];changed=true;}
+  });
+  if(seed){DB.putSeed=1;changed=true;}
+  if(changed){try{saveDB();}catch(e){}}
+}
+// Midnight at the end of that weekday, this calendar week.
+function dayEnded(js){
+  var n=new Date();
+  return new Date(n.getFullYear(),n.getMonth(),n.getDate()-n.getDay()+js+1).getTime();
+}
+// Was it on the day while the day was still running?
+function wasThere(id,k,js){
+  var t=(DB.put||{})[putKey(id,k)];
+  return t===undefined||t<dayEnded(js);
 }
 // Flattened in weekday order - for anything that just wants "the week's workouts, in order".
 function planIds(){
@@ -10886,6 +10923,7 @@ function waitingCount(){
     (DB.days[d.k]||[]).forEach(function(id){
       if(!W[id]||wkVar(id))return;
       if(loggedCount(id)>0||lwOn(lw,id,d.k))return;
+      if(!wasThere(id,d.k,d.js))return;   // it landed after the day had gone by (v5.215)
       n++;
     });
   });
@@ -11005,7 +11043,7 @@ function planCard(id,i,nx,dk){
   // A weekday that has already passed this week with its workout still undone. It is not
   // skipped, it is waiting: open it any day before the week turns over (v5.108).
   var dObj=null;DAYS.forEach(function(x){if(x.k===dk)dObj=x;});
-  var waiting=!offw&&!live&&!sealed&&!v&&dObj&&dObj.js<new Date().getDay();
+  var waiting=!offw&&!live&&!sealed&&!v&&dObj&&dObj.js<new Date().getDay()&&wasThere(id,dk,dObj.js);
   // Three or more waiting days would tag most of the board: then the week carries one calm
   // line instead (see renderHome) and the cards stay plain (v5.111).
   if(waiting&&waitingCount()>=3)waiting=false;
