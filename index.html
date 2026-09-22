@@ -2171,6 +2171,10 @@ body.forge .bg-vig{background:radial-gradient(130% 100% at 50% 30%,transparent 4
    Today's column turns to embers. Empty days shrink to one thin row with a slim slot, still a
    place to tap or drop. A four-workout week fits one phone screen. */
 body.forge .daybox{display:block;position:relative;padding:0 0 0 54px;margin:0 0 8px;}
+/* v5.210: the tour's compact board (body.tut, written before this layout) reset the padding that
+   makes room for the day column, so the cards slid over SUN 20, MON 21 and the rest */
+body.forge.tut #weekCards .daybox{padding:0 0 0 54px;margin:0 0 8px;}
+body.forge.tut #weekCards .dayhead{padding:0;}
 body.forge .dayhead{position:absolute;left:0;top:0;bottom:0;width:46px;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0;box-sizing:border-box;
   border:1px solid #4a2c1c;border-radius:9px;background:#1a100b;}
 body.forge .dayhead > span:first-child{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;margin:0;top:0;
@@ -9747,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.209';
+var APPV='v5.210';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
