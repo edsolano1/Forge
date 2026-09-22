@@ -9751,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.211';
+var APPV='v5.212';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14185,7 +14185,8 @@ function renderSummary(s){
     document.getElementById('finRecList').hidden=true;rec.classList.remove('open');}
   // The raise you earned, offered right here (v5.150). Later is DONE; the arrow waits on the board.
   var lv=document.getElementById('finLvl'),n=0;
-  try{n=levelPlan(FINWK).length;}catch(e){}
+  // v5.212: never inside the tour, which is a sealed space; its seed data trips isReady
+  try{n=TUTON?0:levelPlan(FINWK).length;}catch(e){}
   lv.hidden=!n;
   if(n)document.getElementById('finLvlT').innerHTML='Level up <b class="fin-x">× '+n+'</b>';
   // The first real session gets the one place the colours are explained (v5.99).
@@ -19800,7 +19801,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Your own notes',b:'Tap Add note on the bench.'},
   {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a reminder that keeps your technique right. It shows up on that exercise every time it comes around.'},
   {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is fine for the tour.'},
-  {t:'Logged and saved',b:'Your session is already saved in the app. History lives on this phone, not in a cloud. COPY takes the plain text, to send to anyone or paste into a chat. Closing this changes nothing.'},
+  {t:'Logged and saved',b:'Your session is already saved in the app. History lives on this phone, not in a cloud. Closing this changes nothing.'},
   {t:'Locked in',b:'Push Day is locked in. It stays that way until the week turns over, so you work through the other days instead of repeating one.<p>Everything you logged is already in your history.</p>'},
   {t:'Your history',b:'Workouts finished holds every session you have logged, week by week. Backup and restore keeps a copy off the phone. A locked day opens again on its own when the week turns over, and holding a locked card offers to unlock just that one.'}]};
 function TUTC(){
