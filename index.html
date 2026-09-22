@@ -9751,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.215';
+var APPV='v5.216';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15540,6 +15540,25 @@ function ntFix(){
   if(ra&&ra.openNotifSettings)try{ra.openNotifSettings().catch(function(){});}catch(e){}
 }
 // Asked once, and only at the moment it matters: a rest is running that will not be heard.
+// v5.216: the first rest is where notifications are asked for. Android's own box comes up with
+// the countdown behind it, so the reason is in front of the person being asked. Whoever has
+// answered already never sees it again, and whoever refused gets ntNudge instead, which offers
+// the way back through the phone's settings.
+function notifGate(){
+  if(SANDBOX||TUTON)return;
+  if(!isNative()){ntNudge();return;}
+  var ln=LN();
+  if(!ln){ntNudge();return;}
+  try{
+    var p=ln.checkPermissions();
+    if(!p||!p.then){ntNudge();return;}
+    p.then(function(r){
+      var st=r&&r.display;
+      if(st==='prompt'||st==='prompt-with-rationale'||!st)nativeAsk();
+      else ntNudge();
+    },function(){ntNudge();});
+  }catch(e){ntNudge();}
+}
 function ntNudge(){
   if(SANDBOX||TUTON)return;
   try{if(localStorage.getItem('arc_ntnudge'))return;}catch(e){}
@@ -18822,7 +18841,7 @@ function startTimer(secs,exName){
   stopTimer();
   // Once ever, and only while a rest is actually counting down: if Android is holding the
   // notifications back, this rest will end in silence and now is when that matters.
-  try{setTimeout(ntNudge,900);}catch(e){}
+  try{setTimeout(notifGate,900);}catch(e){}
   restExName=exName||'';
   var pill=document.getElementById('timerPill'),lbl=document.getElementById('tTime');
   timerEnd=Date.now()+secs*1000;
@@ -21313,18 +21332,11 @@ function sbEnd(){
   }
   setTimeout(weekHello,900);
   initBack();
-  // Android 13 and up will not deliver a notification until the app has asked, and unlike the web
-  // this ask needs no tap behind it. Written once and never called, which is why the first build
-  // installed silently and then never buzzed.
-  // The bridge is injected around page load, so this waits rather than testing for it too early.
-  setTimeout(function(){
-    if(!isNative())return;
-    try{
-      var ln=LN(),p=ln.checkPermissions();
-      if(p&&p.then)p.then(function(r){if(!r||r.display!=='granted')nativeAsk();},function(){nativeAsk();});
-      else nativeAsk();
-    }catch(e){}
-  },1200);
+  // Android 13 and up will not deliver a notification until the app has asked. That ask used to
+  // happen here, a second into the very first launch, on top of the welcome: a permission box
+  // before the app had said what it was for, which is the one moment somebody is most likely to
+  // refuse. It moved to the first rest timer (notifGate, from startTimer), where the countdown
+  // is on screen and the reason is obvious (v5.216).
   // Walks catch up quietly on every launch - a no-op until Health Connect is connected
   // from Settings, and throttled inside hcSync so it never becomes chatter.
   setTimeout(function(){try{hcSync(false);}catch(e){}},3000);
