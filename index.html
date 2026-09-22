@@ -9751,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.212';
+var APPV='v5.213';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14594,7 +14594,9 @@ function igniteDiamond(cb){
 // whatever keys the file happens to hold: a backup is a file that has been off the phone and
 // back, and looping a stranger's keys straight into storage is a wider door than this needs.
 // One list, so the two halves can never drift into disagreeing about what a backup contains.
-var BK_KEYS=['arc_sfx','arc_alert10','arc_notif','arc_motion','arc_sfxoff','arc_autobk','arc_bknudge','arc_lastbk'];
+// v5.213: the units and the plate bar travel too. Found rehearsing migration day on the phone: a kg user
+// restoring onto a new install came back in pounds, and miles and the remembered bar were lost with them.
+var BK_KEYS=['arc_sfx','arc_alert10','arc_notif','arc_motion','arc_sfxoff','arc_autobk','arc_bknudge','arc_lastbk','arc_kg','arc_km','arc_bar'];
 function backupBlob(){
   var s={};
   BK_KEYS.forEach(function(k){
@@ -16111,7 +16113,21 @@ function ovlWatch(){
   try{
     var mo=new MutationObserver(function(ms){ms.forEach(function(m){
       var el=m.target,on=el.classList.contains('on');
-      if(on&&!el._wasOn)el._openSeq=++OVLSEQ;
+      if(on&&!el._wasOn){
+        el._openSeq=++OVLSEQ;
+        // v5.213: and it DRAWS on top. Two sheets on the same layer paint in file order, so Backup
+        // opened from Settings sat hidden behind it and the button seemed to do nothing. A sheet
+        // opened over another of its own layer steps just above it; it never climbs past a
+        // layer that is meant to be higher (a question, the tour), which sit 50 or more above.
+        var mz=parseInt(getComputedStyle(el).zIndex,10)||0,top=mz;
+        document.querySelectorAll('.ovl.on').forEach(function(o){
+          if(o===el)return;
+          var z=parseInt(o.style.zIndex||getComputedStyle(o).zIndex,10)||0;
+          if(z>=top&&z<mz+50)top=z+1;
+        });
+        if(top!==mz)el.style.zIndex=String(top);
+      }
+      if(!on&&el._wasOn)el.style.zIndex='';
       el._wasOn=on;
     });});
     document.querySelectorAll('.ovl').forEach(function(el){
