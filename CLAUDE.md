@@ -82,9 +82,12 @@ main constraint on how to work in it. See **Traps** below before editing.
   ongoing chip (ic_anvil, the coming set with its weight) and lets a set picked from the ladder mid-rest
   be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
 - **The tour is a sealed space** (owner, 20 Sep). Nothing from the live app reaches into it: no level-up
-  arrow, no finish-screen raise, no alarms, pushes or prompts while TUTON. The seed data currently trips
-  isReady, which is why a level-up shows in the tour today; fix it with the tutorial rewrite, and check any
-  new live feature against TUTON before it ships.
+  arrow, no finish-screen raise, no alarms, pushes or prompts while TUTON. The seed data trips isReady;
+  the finish screen's raise is fenced off with TUTON since v5.212, and the seed itself gets fixed with the
+  tutorial rewrite. Check any new live feature against TUTON before it ships.
+- **Sheets stack by opening order** (v5.213). ovlWatch lifts a sheet opened over another of its own z layer
+  one step above it (Backup over Settings used to hide behind it). A backup carries arc_kg, arc_km and
+  arc_bar; add any new user setting to BK_KEYS or a restore onto a new phone loses it.
 - **Forge a day** (v5.202). The plus on an EMPTY day asks I'll build it / Forge it for me (dfAsk). The forge fills
   the least covered of push, pull and legs across the board, or a full body day when the board is empty or
   balanced; it never asks which muscles. The wizard's answers are kept in DB.ez (level, goal, len, kit) and
