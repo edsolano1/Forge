@@ -4,3 +4,6 @@
 # stray grep redirects
 This
 icons/wizard/raw/
+
+# device snapshots are per machine and go stale; each session saves its own
+tools/.device-*.txt
