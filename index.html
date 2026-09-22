@@ -9751,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.213';
+var APPV='v5.214';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14730,6 +14730,9 @@ function doRestore(input){
           try{localStorage.setItem(k,String(s[k]));}catch(e){}
         });
         mergeCustom();persistNow();
+        // A restore answers the welcome question: this phone is carrying somebody's history now,
+        // so the next launch is an ordinary one (v5.214, restoring from the welcome card).
+        ownChosen();
         try{if(s[TKEY])Store.set(TKEY,s[TKEY]);}catch(e){}
         // A full boot is the only way to be sure every screen is rebuilt from the restored data
         // rather than half of it still showing what was there before.
@@ -20580,11 +20583,20 @@ function wcAsk(){
     '<button class="ez-card" style="--i:0" onclick="wcPick(0)"><span class="ez-art">'+WZ.wc[0]+'</span><span><b>I know what I\'m building</b>'+
     '<small>Start with an empty week</small></span></button>'+
     '<button class="ez-card" style="--i:1" onclick="wcPick(1)"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Build one for me</b>'+
-    '<small>Answer a few questions, get a week</small></span></button>');
+    '<small>Answer a few questions, get a week</small></span></button>'+
+    // v5.214: the third way in, for a new phone. Restore used to be three taps deep in Settings,
+    // behind these very questions, which is the wrong place for the one person who already has
+    // everything. Owner picked the card (A) over a quiet button underneath.
+    '<button class="ez-card" style="--i:2" onclick="wcPick(2)"><span class="ez-art">'+WZ.wc[1]+'</span><span><b>I have a backup</b>'+
+    '<small>Bring your history back from a Forge file</small></span></button>');
 }
 // 0 = their own week, 1 = one laid out for them. Both land on the same screen afterwards, and
 // both hand over to the tour offer - whichever they picked, this is still a first launch.
 function wcPick(n){
+  // The backup card leaves the welcome standing: the file picker can be backed out of, and
+  // whoever does that is still a first run with a choice to make. A restore that goes through
+  // reloads the app onto the restored week by itself.
+  if(n===2){restoreAsk();return;}
   var w=document.getElementById('welcome');
   if(w){w.classList.remove('on');w.setAttribute('aria-hidden','true');}
   document.body.classList.remove('wcon');
@@ -20627,6 +20639,23 @@ var WZ={
       '<g stroke-width="3.5"><rect x="15" y="39" width="16" height="16" rx="3"/><rect x="35" y="39" width="16" height="16" rx="3"/><rect x="55" y="39" width="16" height="16" rx="3"/><rect x="75" y="39" width="11" height="16" rx="3" opacity=".5"/>'+
       '<rect x="15" y="61" width="16" height="16" rx="3"/><rect x="35" y="61" width="16" height="16" rx="3"/><rect x="55" y="61" width="16" height="16" rx="3"/><rect x="75" y="61" width="11" height="16" rx="3" opacity=".5"/></g>'+
       '<path d="M16 23H30M36 23H44M50 23H58" stroke-width="3" opacity=".6"/>'+
+    '</svg>',
+    // v5.214, the third card: a sealed record. The page with its corner turned, and on it the
+    // finish screen's own seal at the same tilt, the app's anvil stamped in the middle. The dark
+    // disc under the ring is the card's own ground, so the seal sits ON the page rather than
+    // through it. Owner picked the stamped ring over a solid wax one.
+    '<svg class="mo-still" viewBox="0 0 100 100">'+
+      '<path d="M16 12H54L74 32V82Q74 88 68 88H22Q16 88 16 82Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" opacity=".5"/>'+
+      '<path d="M54 12V32H74" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" opacity=".5"/>'+
+      '<path d="M27 44H63M27 55H63M27 66H47" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" opacity=".5"/>'+
+      '<g transform="rotate(-12 70 71)">'+
+        '<circle cx="70" cy="71" r="23" fill="#130c09"/>'+
+        '<circle cx="70" cy="71" r="21" fill="none" stroke="currentColor" stroke-width="5"/>'+
+        '<circle cx="70" cy="71" r="14.5" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".5"/>'+
+        '<svg x="58" y="64" width="24" height="12.5" viewBox="110 570 1030 500" preserveAspectRatio="xMidYMid meet">'+
+          '<path fill="currentColor" d="M130 590H1120L1050 668L1010 700H840C800 740 770 790 760 830C752 870 770 910 830 950L900 1000V1060H345V1000L415 950C475 910 493 870 485 830C475 790 445 740 405 700H235L190 668Z"/>'+
+        '</svg>'+
+      '</g>'+
     '</svg>'
   ],
   // Forge a day (v5.202, owner picked pair 1): the welcome's blueprint of a week, drawn for a single
