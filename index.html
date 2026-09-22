@@ -8562,8 +8562,8 @@ var ANIM=(function(){
   function gaitPh(t,period){return reduce?0.3:(t%period)/period;}
   var WALK={st:.6,fr:62,bk:-22,strike:-14,roll:.2,pd:32,push:.35,lift:14,lp:1,hold:0,kick:0,base:0,th:92,gy:function(){return 424;}};
   var TWALK={st:.6,fr:62,bk:-30,strike:-12,roll:.2,pd:30,push:.35,lift:16,lp:1,hold:0,kick:0,base:14,th:90,gy:function(x){return 414-(x-136)*0.25;}};
-  var TRUN={st:.38,fr:40,bk:-34,strike:0,roll:.01,pd:40,push:.45,lift:60,lp:.8,hold:.25,kick:40,base:0,th:90,gy:function(){return 400;}};
-  var ORUN={st:.38,fr:34,bk:-38,strike:0,roll:.01,pd:40,push:.45,lift:64,lp:.8,hold:.25,kick:44,base:0,th:90,gy:function(){return 424;}};
+  var TRUN={st:.38,fr:40,bk:-34,strike:0,roll:.01,pd:40,push:.45,lift:60,lp:1.2,hold:.25,kick:40,base:0,th:90,gy:function(){return 400;}};
+  var ORUN={st:.38,fr:34,bk:-38,strike:0,roll:.01,pd:40,push:.45,lift:64,lp:1.2,hold:.25,kick:44,base:0,th:90,gy:function(){return 424;}};
 
   // ---------- POWER WALK ----------
   // Walking the body rides highest over the planted foot; both feet are down at each hand over.
@@ -8939,10 +8939,10 @@ var ANIM=(function(){
   }
 
   // ---------- OUTDOOR RUN ----------
-  // The running loop on open ground. The runner sits 12 lower than on the treadmill because the ground
+  // The running loop on open ground. The runner sits 14 lower than on the treadmill because the ground
   // is lower than the deck, so the planted leg can still bend.
   function oRunPose(ph){
-    var bob=12+5*Math.cos(4*Math.PI*(ph-0.19)), hip=[236,238+bob];
+    var bob=14+5*Math.cos(4*Math.PI*(ph-0.19)), hip=[236,238+bob];
     return {bob:bob,hip:hip,l1:gaitLeg(hip,ph,ORUN),l2:gaitLeg(hip,ph+.5,ORUN)};
   }
   function drawOutRunS(x,t){
@@ -9723,7 +9723,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.207';
+var APPV='v5.208';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
