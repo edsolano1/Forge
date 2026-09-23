@@ -109,6 +109,11 @@ main constraint on how to work in it. See **Traps** below before editing.
   ACSM 2009 advised 1 s up, 2 s down for novices, but the 2026 ACSM position stand sets no tempo and the
   evidence finds 0.5 to 8 s reps equivalent, so there is no settled standard. Continuous activities
   (walks, runs, stairs, rower, swim) do get their real rhythm (v5.207 to v5.209).
+- **How long a workout takes lives INSIDE it** (v5.219, owner picked C). The board stays clean: no
+  times on the week cards. The session screen's set-count line carries it (`estLabel` in
+  `updateProg`), the whole day before the first set and what is left after that, nothing at the
+  end. `estSecs(wk,left)` reads the plan, never the clock. The week in minutes is not on the week
+  screen at all any more; Workouts finished totals it and carries the comparison to the week before.
 - **A declined level up can always be found again** (v5.218). Turning a raise down asks which no it
   is: REMIND ME NEXT TIME leaves the arrow on the card and lifts any earlier refusal of those rows
   (`skipLevelSoft`), STOP SUGGESTING IT records it as before (`skipLevelHard`, `DB.upSkip` keyed to

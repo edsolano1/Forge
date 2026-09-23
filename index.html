@@ -2522,9 +2522,6 @@ body.forge .daybox.today .dayhead{animation:dayHot 4.6s ease-in-out infinite;}
 :root.mo-off body.forge .daybox.today .dayhead{animation:none;
   box-shadow:0 0 14px -4px rgba(255,120,30,.6),inset 0 1px 0 rgba(255,190,130,.22);}
 /* the week in minutes, under the board (F2) */
-.wk-mins{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:var(--txt3);margin:3px 2px 0;text-align:right;}
-.wk-mins b{color:var(--txt2);font-weight:500;}
-.wk-mins[hidden]{display:none;}
 
 /* The plan, as the ghost behind an empty box (v5.196). A logged number is solid; a number you
    have not touched is the app's suggestion and looks like one. */
@@ -3357,9 +3354,6 @@ body.wcon{overflow:hidden;}
   <div class="sec-row"><div class="sec-label" id="weekLabel">Your Week</div><div class="wk-flip" id="weekFlip" onclick="twoFlip()" hidden></div></div>
   <div class="mk-hint" id="weekHint"></div>
   <div id="weekCards"></div>
-  <!-- Sessions have carried their length since v5.177 and nothing added them up (v5.193, F2).
-       One line, this week against last, and only once there is something to say. -->
-  <div class="wk-mins" id="wkMins" hidden></div>
   <!-- label, hint and cards are one thing to look at, so the tour can light them as one -->
   <div id="extraWrap">
     <!-- Saved is folded by default (v5.138): one line under the week, the shelf one tap away and still
@@ -9751,7 +9745,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.218';
+var APPV='v5.219';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11135,6 +11129,62 @@ function dayBox(d,nx,n0){
 // workout rule, so it can stand on as many days as you rest (v5.192, F1).
 // Time under the hammer. A session with no stored length still counts as a session but adds no
 // minutes, so an old log never reads as a week that got shorter (v5.193, F2).
+// ---- What a workout is going to cost you (v5.219, owner picked C). ----
+// Worked from the plan, because that is all there is before you start: every set is its reps at
+// a steady tempo plus a moment to get set, every rest is the rest it asks for, and there is a
+// walk between one exercise and the next. A superset's inner rows take no rest, the same rule
+// the session itself follows. The one session the owner has with a recorded length ran 58
+// minutes where this says 49, so it reads a little under a real gym hour; it is an estimate and
+// it says about, and the honest fix is his own times once enough sessions have saved one.
+var EST_REP=3, EST_SET=12, EST_MOVE=45;   // seconds: per rep, per set to get set, per exercise
+function estSet(t){
+  if(!t)return EST_SET;
+  if(t.unit==='min')return t.r*60;
+  if(t.unit==='cal')return t.r*6;          // about ten calories a minute
+  if(t.unit==='sec')return t.r+EST_SET;
+  return (t.r||10)*EST_REP+EST_SET;
+}
+// left===true counts only the sets still to do, so the line can count down as you log.
+function estSecs(wk,left){
+  var w=W[wk];if(!w)return 0;
+  var A=DB.active[wk],ent=(A&&A.entries)||{};
+  var sec=0,rows=0;
+  var secs=(w.sections||[]);
+  secs.forEach(function(S){
+    var R=(S.rows||[]);
+    R.forEach(function(row,ri){
+      var rf=rowFor(A&&A.swaps,row,wk);
+      var id=rf.id,d=rf.data;
+      var lines=String(d.sets||'').split('\n');
+      var done=ent[id]||[];
+      var any=false;
+      lines.forEach(function(ln,i){
+        if(left&&done[i])return;           // already in the book
+        any=true;
+        sec+=estSet(parseTarget(ln));
+        if(!(S.ss&&ri<R.length-1))sec+=parseRest(restAt(d.rest,i));
+      });
+      if(any)rows++;
+    });
+  });
+  return sec+Math.max(0,rows-1)*EST_MOVE;
+}
+// Rounded the way anybody says it out loud: to five minutes, and to the minute once it is close.
+function estMins(sec){
+  var m=sec/60;
+  if(m<10)return Math.max(1,Math.round(m));
+  return Math.round(m/5)*5;
+}
+// The line beside the set count. Before the first set it is the whole day; after that it is what
+// is left; at the end it says nothing, because the ring has already said 22 of 22.
+function estLabel(wk,done,tot){
+  try{
+    if(!wk||!W[wk]||(tot&&done>=tot))return '';
+    var sec=estSecs(wk,done>0);
+    if(sec<30)return '';
+    return fmtMins(estMins(sec))+(done>0?' left':'');
+  }catch(e){return '';}
+}
 function weekMins(t0,t1){
   var m=0,c=0;
   (DB.logs||[]).forEach(function(L){
@@ -11144,15 +11194,10 @@ function weekMins(t0,t1){
   });
   return {m:m,n:c};
 }
-function renderMins(){
-  var el=document.getElementById("wkMins");if(!el)return;
-  var wk=7*86400000,ws=weekStartTs();
-  var now=weekMins(ws,ws+wk),prev=weekMins(ws-wk,ws);
-  if(!now.n&&!prev.n){el.hidden=true;return;}
-  var out=now.n?("<b>"+fmtMins(now.m)+"</b> across "+now.n+(now.n===1?" session":" sessions")):"Nothing logged yet this week";
-  if(prev.m)out+=" &middot; last week "+fmtMins(prev.m);
-  el.innerHTML=out;el.hidden=false;
-}
+// Time under the hammer (v5.219). It used to sit under the board on the week screen, which is a
+// plan, not a record. Workouts finished already totals the week's minutes on its own summary line,
+// so the only thing that had to move is the comparison: what the week BEFORE the one on show cost.
+function prevWeekMins(wk0){return weekMins(wk0-7*86400000,wk0).m;}
 function markRest(k){
   if(!k||(DB.days[k]||[]).length)return;
   DB.days[k]=['rest'];saveDB();renderHome();
@@ -11857,7 +11902,6 @@ function renderTagline(){
 }
 function renderHome(){
   renderMark();renderName();renderPumpIcon();renderTagline();renderBg();
-  try{renderMins();}catch(e){}
   // A live pump day is not part of the fixed week, so without a card of its own there is
   // nothing on this screen to carry you back into it.
   var pumpOpen=loggedCount('pump')>0?
@@ -12499,7 +12543,9 @@ function toggleSet(id,i,rest,unit){
 }
 function updateProg(){
   var tot=totalSets(CUR),done=loggedCount(CUR),pct=tot?done/tot:0;
-  document.getElementById('sSub').innerHTML='<b>'+done+'</b> of '+tot+(tot===1?' set':' sets');
+  var tm=estLabel(CUR,done,tot);
+  document.getElementById('sSub').innerHTML='<b>'+done+'</b> of '+tot+(tot===1?' set':' sets')+
+    (tm?' &middot; '+tm:'');
   var C=106.8;
   document.getElementById('ringBar').setAttribute('stroke-dashoffset',C-C*pct);
   document.getElementById('ringLbl').textContent=done+'/'+tot;
@@ -15938,7 +15984,8 @@ function histWeekHtml(){
   var planned=0,done=0;
   DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){if(wkVar(id)||!W[id])return;planned++;if(doneIds[id])done++;});});
   var walks=items.filter(function(it){return it.walk;}).length;
-  h+='<div class="hline"><b>'+(planned?done+'</b> of '+planned+' workouts':sess+'</b> '+(sess===1?'workout':'workouts'))+' &middot; <b>'+sets+'</b> '+(sets===1?'set':'sets')+(recs?' &middot; <em>'+recs+' record'+(recs===1?'':'s')+'</em>':'')+(mins?' &middot; <b>'+fmtMins(mins)+'</b>':'')+'</div>';
+  h+='<div class="hline"><b>'+(planned?done+'</b> of '+planned+' workouts':sess+'</b> '+(sess===1?'workout':'workouts'))+' &middot; <b>'+sets+'</b> '+(sets===1?'set':'sets')+(recs?' &middot; <em>'+recs+' record'+(recs===1?'':'s')+'</em>':'')+(mins?' &middot; <b>'+fmtMins(mins)+'</b>':'')+
+    (function(){var pm=prevWeekMins(wk0);return pm?' &middot; the week before <b>'+fmtMins(pm)+'</b>':'';})()+'</div>';
   var sessions=items.filter(function(it){return it.log!==undefined;});
   h+='<div class="hscroll">'+(sessions.length?sessions.map(histRowHtml).join(''):'<div class="hnone">'+(off===0?'Nothing finished yet this week.':'Nothing finished this week.')+'</div>')+
     ((DB.walks||[]).length?'<div class="hrow hwalk hadd" onclick="histMode(\'walks\')">WALKS'+(walks?' &middot; '+walks+' this week':'')+' &rsaquo;</div>':
