@@ -9745,7 +9745,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.219';
+var APPV='v5.220';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11169,6 +11169,34 @@ function estSecs(wk,left){
   });
   return sec+Math.max(0,rows-1)*EST_MOVE;
 }
+// THE BUFFER (v5.220, owner: nobody teleports between machines). The walk between exercises was
+// already counted; what was not is everything else a real hour holds. You put the phone down and
+// pick it back up, you find the machine occupied, you answer a message, you change the music, you
+// fill the bottle, you talk to somebody. Nobody trains to the arithmetic, so the arithmetic is
+// lifted by a fifth before it is shown.
+//
+// And it stops being a guess as soon as there is evidence. Sessions have carried their own length
+// since v5.177, so every finished session is one measurement of how much longer YOUR hour runs
+// than its plan. With two of them the default gives way to the middle of your own, which is what
+// makes the figure yours rather than a rule of thumb. The owner's first measured session ran 58
+// minutes against a 49 minute plan: a fifth, near enough, before he had said a word about it.
+var EST_BUF=1.2;
+function estRatio(){
+  try{
+    var r=[];
+    (DB.logs||[]).forEach(function(L){
+      if(!L||!L.mins||L.marked||!W[L.day])return;
+      var plan=estSecs(L.day)/60;
+      if(plan<5)return;                       // too small to measure anything by
+      var k=L.mins/plan;
+      if(k>0.5&&k<3)r.push(k);                // a day left open for an hour is not a pace
+    });
+    if(r.length<2)return EST_BUF;
+    r=r.slice(-8).sort(function(a,b){return a-b;});   // the last eight, middle one
+    var m=r.length%2?r[(r.length-1)/2]:(r[r.length/2-1]+r[r.length/2])/2;
+    return Math.max(1,Math.min(2,m));
+  }catch(e){return EST_BUF;}
+}
 // Rounded the way anybody says it out loud: to five minutes, and to the minute once it is close.
 function estMins(sec){
   var m=sec/60;
@@ -11180,7 +11208,7 @@ function estMins(sec){
 function estLabel(wk,done,tot){
   try{
     if(!wk||!W[wk]||(tot&&done>=tot))return '';
-    var sec=estSecs(wk,done>0);
+    var sec=estSecs(wk,done>0)*estRatio();
     if(sec<30)return '';
     return fmtMins(estMins(sec))+(done>0?' left':'');
   }catch(e){return '';}

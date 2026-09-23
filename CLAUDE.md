@@ -114,6 +114,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   `updateProg`), the whole day before the first set and what is left after that, nothing at the
   end. `estSecs(wk,left)` reads the plan, never the clock. The week in minutes is not on the week
   screen at all any more; Workouts finished totals it and carries the comparison to the week before.
+  The figure carries a **buffer** (v5.220): `EST_BUF` 1.2, because nobody moves between machines at
+  the speed of the arithmetic, replaced by `estRatio()` (the median of the last eight sessions'
+  actual minutes over their planned minutes, clamped 1 to 2) once two sessions carry a length. The
+  owner's first measured session was +18%, so never present the raw plan as the time.
 - **A declined level up can always be found again** (v5.218). Turning a raise down asks which no it
   is: REMIND ME NEXT TIME leaves the arrow on the card and lifts any earlier refusal of those rows
   (`skipLevelSoft`), STOP SUGGESTING IT records it as before (`skipLevelHard`, `DB.upSkip` keyed to
