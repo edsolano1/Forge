@@ -158,6 +158,13 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .pill-live{background:var(--go);color:#0b0c0e;}
 /* a passed day still undone: quiet, outlined, not a scolding */
 .pill-wait{background:transparent;border:1px solid color-mix(in srgb,var(--txt3) 55%,transparent);color:var(--txt3);}
+/* A finished bonus: the same card, stepped back, wearing the violet of a matched set rather than
+   the gold of the plan. The gap holds the grip's place so BONUS sits under DONE (v5.222). */
+.pill-bonus{background:transparent;border:1px solid color-mix(in srgb,var(--match) 60%,transparent);color:var(--match);}
+.card.bonus{opacity:.72;border-style:dashed;}
+.card.bonus:hover{opacity:.85;}
+.cardgap{display:inline-flex;width:23px;padding:13px 4px 13px 13px;margin:-13px -4px -13px 6px;
+  border-left:1px solid transparent;pointer-events:none;}
 .card.waiting .card-name{color:var(--txt2);}
 /* Level up: a lit arrow rather than a word. The old RISE/ASCEND/HEAT labels made you read
    four different nouns to find the one day that was ready. */
@@ -9746,7 +9753,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.221';
+var APPV='v5.222';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11099,7 +11106,8 @@ function dayBox(d,nx,n0){
   // Every piece off this day's fire is finished: the whole bench cools, header and all.
   var ltw=loggedThisWeek();
   var quenched=!offw&&ids.length&&ids.every(function(id){return loggedCount(id)===0&&lwOn(ltw,id,d.k);});
-  var h='<div class="daybox'+(isToday?' today':'')+(ids.length?'':' empty')+(quenched?' quenched':'')+'" data-day="'+d.k+'">'+(isToday?'<i class="dayglow"></i>':'');
+  var bon=bonusOn(d.k);
+  var h='<div class="daybox'+(isToday?' today':'')+((ids.length||bon.length)?'':' empty')+(quenched?' quenched':'')+'" data-day="'+d.k+'">'+(isToday?'<i class="dayglow"></i>':'');
   // No count. How many a day can hold is not something to be reminded of on every day you own -
   // it only matters at the moment you try to exceed it, and it says so then.
   // The add for a day that already holds something rides IN the header now, not on a dashed
@@ -11119,10 +11127,11 @@ function dayBox(d,nx,n0){
   // The words stay only while the whole board is empty (v5.119). Once one workout stands
   // anywhere, an empty day is a plus and a drop target, nothing more: five days each saying
   // Add a workout was the clutter, not the plus.
-  if(!ids.length){var bare0=!DAYS.some(function(x){return (DB.days[x.k]||[]).length;});
+  if(!ids.length&&!bon.length){var bare0=!DAYS.some(function(x){return (DB.days[x.k]||[]).length;});
     h+='<div class="dayempty dayadd'+(bare0?'':' quiet')+'" onclick="openNewDay(\''+d.k+'\')" title="Add a workout">'+PLUS+(bare0?'Add a workout':'')+
        '<button class="dayrest" onclick="event.stopPropagation();markRest(\''+d.k+'\')" title="This is a rest day">REST</button></div>';}
   else ids.forEach(function(id,n){h+=planCard(id,n0+n,nx,d.k);});
+  bonusOn(d.k).forEach(function(id){h+=bonusCard(id,d.k);});
   return h+'</div>';
 }
 // A rest day you chose reads differently from a day you have not filled in: it says Rest instead
@@ -11231,6 +11240,49 @@ function markRest(k){
   if(!k||(DB.days[k]||[]).length)return;
   DB.days[k]=['rest'];saveDB();renderHome();
   try{vib(12);sfxTick&&sfxTick();}catch(e){}
+}
+// ---- The bonus day (v5.222, owner picked A). ----
+// A workout finished on a day the board was not carrying it leaves no trace: the board draws the
+// plan, and Pump Day on a Sunday simply vanished. It shows up now where it happened, finished and
+// stepped back, and it stays out of the week's arithmetic: it is not in DB.days, so nothing that
+// counts the week (the Skipped pill, workouts planned against workouts done, the turnover) sees it.
+function bonusOn(dk){
+  if(twoOff())return [];                       // the other week's board is a plan, not a record
+  var lw=loggedThisWeek(),ids=(DB.days[dk]||[]),out=[];
+  for(var id in lw){
+    if(!lw[id][dk])continue;                   // logs from before weekdays were recorded stay off
+    if(ids.indexOf(id)>=0)continue;            // this day planned it: an ordinary card already
+    if(!W[id]||wkVar(id)==='rest')continue;
+    out.push(id);
+  }
+  return out;
+}
+// The newest sealed session for this workout on this weekday, so tapping the card opens the night
+// it records rather than starting the workout again.
+function bonusLog(id,dk){
+  var ws=weekStartTs(),best=-1;
+  (DB.logs||[]).forEach(function(L,i){
+    if(L.day!==id||!L.sealed||L.unsealed)return;
+    if((L.wk||'*')!==dk)return;
+    var t=new Date(L.date+'T12:00:00').getTime();
+    if(isNaN(t)||t<ws)return;
+    best=i;
+  });
+  return best;
+}
+function bonusTap(id,dk){
+  var i=bonusLog(id,dk);
+  showHistory();
+  if(i>=0)try{histOpen(i);}catch(e){}
+}
+function bonusCard(id,dk){
+  var w=W[id];if(!w)return '';
+  // No grip: this is a record of a day that happened, not a plan item to be dragged somewhere
+  // else. The space a grip would take is held open so BONUS lines up with DONE on the cards
+  // above it (owner, 22 Sep).
+  return '<div class="card sealed bonus" style="--c:'+dayC(id)+'" onclick="bonusTap(\''+id+'\',\''+dk+'\')">'+
+    '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
+      '<span class="card-r"><span class="pill pill-bonus">Bonus</span><span class="cardgap"></span></span></div></div>';
 }
 // A kept day has no weekday and no slot, so it carries the day's own name where the weekday
 // would go. Everything else on the card behaves as a week card does.
