@@ -121,7 +121,9 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **A bonus workout shows where it happened** (v5.222). A session finished on a day that was not
   carrying that workout draws a dimmed, dashed card with a violet BONUS pill on that day (bonusOn,
   bonusCard, bonusTap opens it in Workouts finished). It has no grip on purpose: a record is not a
-  plan item. It never enters DB.days, so nothing that counts the week counts it.
+  plan item. It never enters DB.days, so nothing that counts the week counts it. Which day it lands
+  on comes from bonusDay: the weekday the session recorded, or the date it carries, because a Pump
+  Day opened from its own button records no weekday (v5.223, caught on the live phone).
 - **Do not redraw the sumo squat's side view** (owner, 22 Sep). Three directions were drawn: turned
   out feet only, a foreshortened thigh with the hips dropping between the feet, and that plus an
   opened stance. The last two are anatomically defensible and look like a body that cannot exist;

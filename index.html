@@ -9753,7 +9753,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.222';
+var APPV='v5.223';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11246,15 +11246,29 @@ function markRest(k){
 // plan, and Pump Day on a Sunday simply vanished. It shows up now where it happened, finished and
 // stepped back, and it stays out of the week's arithmetic: it is not in DB.days, so nothing that
 // counts the week (the Skipped pill, workouts planned against workouts done, the turnover) sees it.
+// Which weekday a finished session belongs on. What it recorded, and failing that the date it
+// carries: Pump Day is opened from its own button, so it never had a weekday to record, and the
+// first cut of this read the recorded one only. The owner's own Sunday pump stayed invisible,
+// which was the whole point of the feature (v5.223).
+function bonusDay(L){
+  if(L.wk&&L.wk!=='*')return L.wk;
+  var t=new Date(L.date+'T12:00:00').getTime();
+  if(isNaN(t))return null;
+  var d=DAYS[new Date(t).getDay()];
+  return d?d.k:null;
+}
 function bonusOn(dk){
   if(twoOff())return [];                       // the other week's board is a plan, not a record
-  var lw=loggedThisWeek(),ids=(DB.days[dk]||[]),out=[];
-  for(var id in lw){
-    if(!lw[id][dk])continue;                   // logs from before weekdays were recorded stay off
-    if(ids.indexOf(id)>=0)continue;            // this day planned it: an ordinary card already
-    if(!W[id]||wkVar(id)==='rest')continue;
-    out.push(id);
-  }
+  var ws=weekStartTs(),ids=(DB.days[dk]||[]),out=[],seen={};
+  (DB.logs||[]).forEach(function(L){
+    if(!L||!L.sealed||L.unsealed||L.marked)return;
+    var t=new Date(L.date+'T12:00:00').getTime();
+    if(isNaN(t)||t<ws||t>=ws+7*864e5)return;   // this week only
+    if(bonusDay(L)!==dk)return;
+    if(ids.indexOf(L.day)>=0)return;           // this day planned it: an ordinary card already
+    if(!W[L.day]||wkVar(L.day)==='rest'||seen[L.day])return;
+    seen[L.day]=1;out.push(L.day);
+  });
   return out;
 }
 // The newest sealed session for this workout on this weekday, so tapping the card opens the night
@@ -11263,7 +11277,7 @@ function bonusLog(id,dk){
   var ws=weekStartTs(),best=-1;
   (DB.logs||[]).forEach(function(L,i){
     if(L.day!==id||!L.sealed||L.unsealed)return;
-    if((L.wk||'*')!==dk)return;
+    if(bonusDay(L)!==dk)return;
     var t=new Date(L.date+'T12:00:00').getTime();
     if(isNaN(t)||t<ws)return;
     best=i;
