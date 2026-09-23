@@ -109,6 +109,12 @@ main constraint on how to work in it. See **Traps** below before editing.
   ACSM 2009 advised 1 s up, 2 s down for novices, but the 2026 ACSM position stand sets no tempo and the
   evidence finds 0.5 to 8 s reps equivalent, so there is no settled standard. Continuous activities
   (walks, runs, stairs, rower, swim) do get their real rhythm (v5.207 to v5.209).
+- **A declined level up can always be found again** (v5.218). Turning a raise down asks which no it
+  is: REMIND ME NEXT TIME leaves the arrow on the card and lifts any earlier refusal of those rows
+  (`skipLevelSoft`), STOP SUGGESTING IT records it as before (`skipLevelHard`, `DB.upSkip` keyed to
+  the last log's date plus the targets). `levelPlan(wk,true)` returns declined rows, `lvlHidden(wk)`
+  says a workout is sitting on one, and the card's hold menu carries SHOW THE LEVEL UP. Never make a
+  no silent again: the owner lost a raise on 12 Sep and had no way back to it.
 - **The splash strike stays as it is** (owner picked A, 22 Sep). The flare and the sparks both fire at
   1.05s, the instant the hammer lands, but the flare reaches full in 75ms and the sparks in 144ms, so the
   light reads a beat ahead. Four timings were compared side by side and in slow motion; he kept the

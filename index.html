@@ -9751,7 +9751,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.217';
+var APPV='v5.218';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10362,7 +10362,7 @@ function latticeNext(id,w,down){
 }
 // Every lift that met all its targets last time, with the numbers it would move to. Nothing
 // is written until the sheet is confirmed - this only describes the change.
-function levelPlan(wk){
+function levelPlan(wk,showAll){
   var w=W[wk],out=[];
   if(!w)return out;
   var A=DB.active[wk];
@@ -10439,7 +10439,7 @@ function levelPlan(wk){
     // A declined raise stays declined until the lift is beaten again. The signature pins the
     // refusal to one session and one set of targets, so a newer log - or a target that moved
     // for any other reason - brings the arrow back on its own.
-    if((DB.upSkip||{})[sk]===skipSig(id,lines))return;
+    if(!showAll&&(DB.upSkip||{})[sk]===skipSig(id,lines))return;
     out.push({id:id,name:rf.data.name,from:lines,to:next,est:est,slot:rf.id,baseId:rf.baseId,swapped:!!rf.swapId,sk:sk});
   });
   return out;
@@ -10448,7 +10448,11 @@ function skipSig(exId,lines){
   var L=lastFor(exId);
   return (L&&L.date||'')+'|'+lines.join(',');
 }
-var LVLWK=null;
+var LVLWK=null,LVLALL=false;
+// Raises this workout has that are being kept quiet, because the offer was turned down and the
+// lift has not been logged since. There is nothing left on the card to tap, so this is how the
+// card's hold menu knows to offer a way back to them (v5.218).
+function lvlHidden(wk){try{return levelPlan(wk,true).length>levelPlan(wk).length;}catch(e){return false;}}
 // What the chip's inline editor is actually editing, read off the target's shape:
 // a zero-weight line edits reps, a timed line edits seconds, anything else the weight.
 function lvlKind(t){return /^0x\d+$/.test(t)?'r':/sec$/.test(t)?'s':'w';}
@@ -10456,9 +10460,9 @@ function lvlKind(t){return /^0x\d+$/.test(t)?'r':/sec$/.test(t)?'s':'w';}
 // used to recompute levelPlan on confirm; with editable offers that would silently discard
 // every adjustment made in the sheet. The cache is rebuilt every time the sheet opens.
 var LVLPLAN=null,LVLED=null,LVLEDV=0;
-function openLevel(wk){
-  LVLWK=wk;LVLED=null;
-  LVLPLAN=levelPlan(wk);
+function openLevel(wk,showAll){
+  LVLWK=wk;LVLED=null;LVLALL=!!showAll;
+  LVLPLAN=levelPlan(wk,LVLALL);
   var plan=LVLPLAN,W1=W[wk];
   plan.forEach(function(p){p.done=false;});
   document.getElementById('lvlTitle').textContent=plan.length?(W1?W1.name.replace('Optional: ',''):''):'Nothing to raise yet';
@@ -10662,9 +10666,33 @@ function lvlAbort(){
   var o=document.getElementById('lvlOvl');
   if(o)o.classList.remove('busy');
 }
+// Turning a raise down is a question now, with two honest answers (v5.218, owner: a silent no is
+// how one gets lost). Backing out or tapping outside still records nothing at all.
 function skipLevel(){
   lvlAbort();
-  var plan=(LVLPLAN&&LVLPLAN.length)?LVLPLAN:levelPlan(LVLWK);
+  ask('Remind me next time leaves the arrow on the card, so you can take the raise whenever you want it. '+
+      'Stop suggesting it hides the arrow until you log the lift again. Either way, holding the workout '+
+      'always brings the offer back.',
+      function(){skipLevelSoft();},
+      'Not this time?','REMIND ME NEXT TIME',
+      function(){skipLevelHard();},null,'STOP SUGGESTING IT');
+}
+// The soft no leaves the arrow where it is. Asked from the hold menu, where the rows on screen are
+// ones already turned down, it also takes that refusal back: the answer is remind me, so the card
+// has to carry the arrow again for there to be anything to remind with.
+function skipLevelSoft(){
+  var plan=(LVLPLAN&&LVLPLAN.length)?LVLPLAN:levelPlan(LVLWK,LVLALL);
+  DB.upSkip=DB.upSkip||{};
+  var n=0;
+  plan.forEach(function(p){if(p.done)return;var k=p.sk||p.id;if(DB.upSkip[k]){delete DB.upSkip[k];n++;}});
+  if(n)saveDB();
+  closeOvl('lvlOvl');renderHome();
+  if(sessionOpen())renderSession();
+}
+// The hard no. Pinned to this session and these targets, so logging the lift again brings it back
+// on its own, and the hold menu brings it back before that.
+function skipLevelHard(){
+  var plan=(LVLPLAN&&LVLPLAN.length)?LVLPLAN:levelPlan(LVLWK,LVLALL);
   DB.upSkip=DB.upSkip||{};
   plan.forEach(function(p){if(p.done)return;DB.upSkip[p.sk||p.id]=skipSig(p.id,p.from);});
   saveDB();closeOvl('lvlOvl');renderHome();
@@ -13048,8 +13076,12 @@ function mkActions(id,dk){
     :(onDays.length?'<div class="btn" onclick="savedOpen();mkRestore(\''+id+'\')">'+(mine?'MOVE TO SAVED WORKOUTS':'TAKE IT OFF THE WEEK')+'</div>':'');
   // Locked this week: the first thing offered is to open just this one again (v5.112).
   var locked=loggedCount(id)===0&&lwOn(loggedThisWeek(),id,dk);
+  // A raise that was turned down leaves nothing on the card. The menu is where it can be asked
+  // for again (v5.218): the same sheet, the declined rows included.
+  var hid=lvlHidden(id);
   document.getElementById('mkActBody').innerHTML=
     (locked?'<div class="btn btn-go" onclick="unsealOne(\''+id+'\')">UNLOCK THIS ONE</div>':'')+
+    (hid?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openLevel(\''+id+'\',true)">SHOW THE LEVEL UP</div>':'')+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     // Adding a second workout to this day moved here from the day column (v5.145).
@@ -13075,8 +13107,10 @@ function mkActionsX(id){
   document.getElementById('mkActTtl').textContent=nm;
   document.getElementById('mkActSub').textContent='';
   var locked=loggedCount(id)===0&&!!loggedThisWeek()[id];
+  var hid=lvlHidden(id);
   document.getElementById('mkActBody').innerHTML=
     (locked?'<div class="btn btn-go" onclick="unsealOne(\''+id+'\')">UNLOCK THIS ONE</div>':'')+
+    (hid?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openLevel(\''+id+'\',true)">SHOW THE LEVEL UP</div>':'')+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(null,\''+id+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     '<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDeleteX(\''+id+'\')">DELETE THIS WORKOUT</div>';
