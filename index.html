@@ -2389,6 +2389,7 @@ body.forge .sheet p{color:var(--txt2);}
 body.forge .sheet .footnote{color:var(--txt3);}
 /* buttons: pills in mono. The primary one is the ember bar, a "go" one is outlined in ember. */
 body.forge .sheet-btns .btn,body.forge .mk-acts .btn{border-radius:999px;min-height:40px;padding:0 14px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);
+  display:flex;align-items:center;justify-content:center;text-align:center;
   font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
 body.forge .sheet-btns .btn-go,body.forge .mk-acts .btn-go{border-color:#a0521c;color:var(--gold);background:rgba(255,138,31,.08);}
 body.forge .sheet-btns .btn-prime,body.forge .mk-acts .btn-prime{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
@@ -9753,7 +9754,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.223';
+var APPV='v5.224';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11284,6 +11285,25 @@ function bonusLog(id,dk){
   });
   return best;
 }
+// Held, a bonus card offers the two things that are true about it: it is a night you can read,
+// and it is a workout you may not have kept. It is not reshaped, moved or deleted from here -
+// it is a record, and the session behind it is deleted from Workouts finished like any other.
+function bonusKept(id){
+  return id==='pump'||onPlan(id)||((DB.extra||[]).indexOf(id)>=0);
+}
+function bonusActions(id,dk){
+  var w=W[id];if(!w)return;
+  document.getElementById('mkActTtl').textContent=w.name.replace('Optional: ','');
+  document.getElementById('mkActSub').textContent='A bonus, not on this week\'s plan.';
+  document.getElementById('mkActBody').innerHTML=
+    '<div class="btn btn-go" onclick="closeOvl(\'mkActOvl\');bonusTap(\''+id+'\',\''+dk+'\')">OPEN THE SESSION</div>'+
+    (bonusKept(id)?'':'<div class="btn" onclick="bonusKeep(\''+id+'\')">SAVE THIS WORKOUT</div>');
+  openHeld('mkActOvl');
+}
+function bonusKeep(id){
+  shelve(id);saveDB();closeOvl('mkActOvl');savedOpen();renderHome();
+  try{sfxLog();}catch(e){}
+}
 function bonusTap(id,dk){
   var i=bonusLog(id,dk);
   showHistory();
@@ -11294,7 +11314,7 @@ function bonusCard(id,dk){
   // No grip: this is a record of a day that happened, not a plan item to be dragged somewhere
   // else. The space a grip would take is held open so BONUS lines up with DONE on the cards
   // above it (owner, 22 Sep).
-  return '<div class="card sealed bonus" style="--c:'+dayC(id)+'" onclick="bonusTap(\''+id+'\',\''+dk+'\')">'+
+  return '<div class="card sealed bonus" data-bonus="'+id+'" style="--c:'+dayC(id)+'" onclick="bonusTap(\''+id+'\',\''+dk+'\')">'+
     '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
       '<span class="card-r"><span class="pill pill-bonus">Bonus</span><span class="cardgap"></span></span></div></div>';
 }
@@ -12932,8 +12952,8 @@ function mkTap(wk,dk){if(LP.fired){LP.fired=false;return;}openW(wk,dk);}
 var LP={t:null,fired:false,x:0,y:0};
 function mkBindCards(){
   [].forEach.call(document.querySelectorAll('#weekCards .card,#extraCards .card'),function(el){
-    var base=el.getAttribute('data-base'),xid=el.getAttribute('data-extra');
-    if(!base&&!xid)return;        // the pump card is not a week slot - nothing to reshape
+    var base=el.getAttribute('data-base'),xid=el.getAttribute('data-extra'),bon=el.getAttribute('data-bonus');
+    if(!base&&!xid&&!bon)return;  // the pump card is not a week slot - nothing to reshape
     el.addEventListener('pointerdown',function(ev){
       // The grip owns the hold. Relying on stopPropagation from the grip's own listener was not
       // enough in practice - the menu came up mid-drag - so the card checks for itself where the
@@ -12956,7 +12976,11 @@ function mkBindCards(){
         try{if(navigator.vibrate)navigator.vibrate(14);}catch(e){}
         // belt and braces: drop any selection the press already started before the sheet lands
         try{var s=window.getSelection();if(s&&s.removeAllRanges)s.removeAllRanges();}catch(e){}
-        if(xid)mkActionsX(xid);
+        if(bon){
+          var bdb=el.closest?el.closest('.daybox'):null;
+          bonusActions(bon,bdb?bdb.getAttribute('data-day'):null);
+        }
+        else if(xid)mkActionsX(xid);
         else{
           // which DAY the held card stands on, so the sheet can offer to clear just that one
           var db=el.closest?el.closest('.daybox'):null;
