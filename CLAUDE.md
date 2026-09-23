@@ -118,6 +118,12 @@ main constraint on how to work in it. See **Traps** below before editing.
   the speed of the arithmetic, replaced by `estRatio()` (the median of the last eight sessions'
   actual minutes over their planned minutes, clamped 1 to 2) once two sessions carry a length. The
   owner's first measured session was +18%, so never present the raw plan as the time.
+- **Do not redraw the sumo squat's side view** (owner, 22 Sep). Three directions were drawn: turned
+  out feet only, a foreshortened thigh with the hips dropping between the feet, and that plus an
+  opened stance. The last two are anatomically defensible and look like a body that cannot exist;
+  his words were scary and impossible for most human beings. The shipped drawing stands, the feet
+  only version was closest but still worse than what ships, and the whole question is parked for the
+  next version. The leg raise, drawn on the floor in the same pass, was approved and shipped.
 - **A declined level up can always be found again** (v5.218). Turning a raise down asks which no it
   is: REMIND ME NEXT TIME leaves the arrow on the card and lifts any earlier refusal of those rows
   (`skipLevelSoft`), STOP SUGGESTING IT records it as before (`skipLevelHard`, `DB.upSkip` keyed to

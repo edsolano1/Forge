@@ -7501,25 +7501,26 @@ var ANIM=(function(){
   }
 
   // ---------- LEG RAISE: flat bench, legs straight, slow descent ----------
+  // On the FLOOR, which is what the card note and the instructions have always said: on your back,
+  // hands under the hips, stop before the lower back lifts off. It was drawn on a bench with the
+  // head hanging off the end until v5.221 - the words were corrected in v5.187 and the picture was
+  // not, which the owner spotted mid-session.
   function drawLegRaiseS(x,t){
     x.clearRect(0,0,480,480);ground(x,60,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    seg(x,[120,360],[330,360],8,LINE);             // the bench
-    seg(x,[140,360],[140,430],7,LINE);seg(x,[310,360],[310,430],7,LINE);
-    dot(x,[140,338],19);                           // the head at the bench end
-    var sho=[172,348], hip=[268,352];
+    var fl=432;
+    dot(x,[142,fl-20],19);                         // the head resting on the floor
+    var sho=[178,fl-15], hip=[274,fl-13];
     seg(x,sho,hip,11);
-    seg(x,sho,[196,356],8);                        // the hands tucked under the lower back
-    var f=P(hip,lerp(-4,-78,k),130);               // the legs, straight, hip to vertical
+    seg(x,sho,[202,fl-7],8);                       // the hands tucked under the hips
+    var f=P(hip,lerp(-6,-78,k),130);               // the legs, straight, floor to vertical
     seg(x,hip,f,10);
-    seg(x,f,P(hip,lerp(-4,-78,k),146),9);          // the feet
+    seg(x,f,P(hip,lerp(-6,-78,k),146),9);          // the feet
   }
   function drawLegRaiseF(x,t){
     x.clearRect(0,0,480,480);
     var k=reduce?1:cycle(t,2800,0.12);
     var cx=240;
-    x.strokeStyle=LINE;x.lineWidth=7;
-    x.strokeRect(192,56,96,378);                   // the bench, seen from ABOVE
     dot(x,[cx,96],19);                             // the head
     seg(x,[cx-24,124],[cx+24,124],10);             // the shoulders
     seg(x,[cx,124],[cx,238],11);                   // the torso
@@ -9745,7 +9746,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.220';
+var APPV='v5.221';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
