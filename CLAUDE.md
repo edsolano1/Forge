@@ -109,6 +109,11 @@ main constraint on how to work in it. See **Traps** below before editing.
   ACSM 2009 advised 1 s up, 2 s down for novices, but the 2026 ACSM position stand sets no tempo and the
   evidence finds 0.5 to 8 s reps equivalent, so there is no settled standard. Continuous activities
   (walks, runs, stairs, rower, swim) do get their real rhythm (v5.207 to v5.209).
+- **The splash strike stays as it is** (owner picked A, 22 Sep). The flare and the sparks both fire at
+  1.05s, the instant the hammer lands, but the flare reaches full in 75ms and the sparks in 144ms, so the
+  light reads a beat ahead. Four timings were compared side by side and in slow motion; he kept the
+  current one. The gold before the blow is the hearth (the static ember under the mark and the mark's own
+  drop shadow), on from the first frame on purpose. Do not "fix" either as a bug.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
   strength and underfills "move"; longer would only add rest.
 - The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated
