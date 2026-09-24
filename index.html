@@ -3030,17 +3030,18 @@ html.light .sp-mark .cut,body.light .sp-mark .cut{fill:#e9eef5;}
 /* v5.186 (owner picked A, the overhead swing): the first strike read as a careful low tap. The
    hammer now hauls back over the top from a pivot past the handle's end (the arm, not the wrist),
    hangs, and slams down; the anvil sinks further, the sparks fly higher and the mark shakes. */
-.lx-mark{animation:lxShake .4s linear 1.05s both;}
-.lx-hammer{transform-box:fill-box;transform-origin:112% -4%;animation:lxSwing 1.5s .1s both;}
-.lx-sparks path{transform-box:view-box;transform-origin:560px 560px;opacity:0;animation:lxSpark .8s cubic-bezier(.1,.8,.3,1) 1.05s both;}
-.lx-anvil{transform-box:view-box;transform-origin:625px 1060px;animation:lxTake .55s ease-out 1.05s both;}
-.lx-rule{animation-delay:1.09s;}
-.lx-word{animation-delay:1.13s;}
-.lx-tag{margin-top:12px;font-size:12.5px;letter-spacing:.02em;color:var(--txt2);opacity:0;animation:lxIn .5s cubic-bezier(.2,.7,.3,1) 1.42s both;}
+.lx-mark{animation:lxShake .4s linear 1.09s both;}
+.lx-hammer{transform-box:fill-box;transform-origin:112% -4%;animation:lxSwing 1.5s .1s both;
+  will-change:transform;backface-visibility:hidden;}
+.lx-sparks path{transform-box:view-box;transform-origin:560px 560px;opacity:0;animation:lxSpark .8s cubic-bezier(.1,.8,.3,1) 1.09s both;}
+.lx-anvil{transform-box:view-box;transform-origin:625px 1060px;animation:lxTake .55s ease-out 1.09s both;}
+.lx-rule{animation-delay:1.13s;}
+.lx-word{animation-delay:1.17s;}
+.lx-tag{margin-top:12px;font-size:12.5px;letter-spacing:.02em;color:var(--txt2);opacity:0;animation:lxIn .5s cubic-bezier(.2,.7,.3,1) 1.46s both;}
 :root.mo-off .lx-tag{animation:none;opacity:1;}
 .lx-flash{position:absolute;inset:0;pointer-events:none;opacity:0;
   background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--gold) 38%,transparent),transparent 40%);
-  animation:lxFlash .5s ease-out 1.05s both;}
+  animation:lxFlash .5s ease-out 1.09s both;}
 @keyframes lxSwing{0%{transform:rotate(40deg);animation-timing-function:cubic-bezier(.2,.7,.4,1);}
   48%{transform:rotate(104deg);}56%{transform:rotate(106deg);animation-timing-function:cubic-bezier(.8,0,1,.7);}
   64%{transform:rotate(-6deg);animation-timing-function:ease-out;}72%{transform:rotate(6deg);}84%{transform:rotate(-1deg);}100%{transform:rotate(0);}}
@@ -9782,7 +9783,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.227';
+var APPV='v5.228';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
