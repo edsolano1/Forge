@@ -158,6 +158,15 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .pill-live{background:var(--go);color:#0b0c0e;}
 /* a passed day still undone: quiet, outlined, not a scolding */
 .pill-wait{background:transparent;border:1px solid color-mix(in srgb,var(--txt3) 55%,transparent);color:var(--txt3);}
+/* One lift at a time (v5.227, owner: lifters like control). The two numbers are the whole of it,
+   and the buttons name them, so nobody has to work out what my best means. */
+.ease-one{border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:14px 14px 12px;margin:2px 0 4px;}
+.ease-n{font-family:'Marcellus',serif;font-size:19px;color:var(--txt);line-height:1.2;}
+.ease-nums{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:13px;color:var(--txt3);
+  font-variant-numeric:tabular-nums;}
+.ease-nums b{color:var(--txt2);font-weight:600;}
+.ease-nums b.up{color:var(--go);}
+.ease-where{margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
 /* A finished bonus: the same card, stepped back, wearing the violet of a matched set rather than
    the gold of the plan. The gap holds the grip's place so BONUS sits under DONE (v5.222). */
 .pill-bonus{background:transparent;border:1px solid color-mix(in srgb,var(--match) 60%,transparent);color:var(--match);}
@@ -3677,14 +3686,19 @@ body.wcon{overflow:hidden;}
 <!-- Out of reach (v5.225): the mirror of the level up. Same rows, same numbers, pointing the
      other way, and the same one button for all of them. -->
 <div class="ovl" id="easeOvl">
-  <div class="sheet" style="max-width:440px">
+  <div class="sheet" style="max-width:420px">
     <h3>Out of reach</h3>
     <p id="easeSub"></p>
-    <div id="easeList" class="lvl-list"></div>
-    <div class="mk-acts" style="margin-top:12px">
-      <div class="btn btn-go" id="easeGo" onclick="easeApply()">SET THEM TO MY BEST</div>
+    <div class="ease-one">
+      <div class="ease-n" id="easeName"></div>
+      <div class="ease-nums"><span>asks for <b id="easeAsk"></b></span><span>your best is <b class="up" id="easeBest"></b></span></div>
+      <div class="ease-where" id="easeWhere"></div>
     </div>
-    <div class="sheet-btns"><div class="btn" onclick="easeLeave()">LEAVE THEM</div></div>
+    <div class="mk-acts" style="margin-top:12px">
+      <div class="btn btn-go" id="easeUse" onclick="easeUse()"></div>
+      <div class="btn" id="easeKeep" onclick="easeSkip()"></div>
+    </div>
+    <div class="sheet-btns"><div class="btn" onclick="easeLeave()">STOP FOR NOW</div></div>
   </div>
 </div>
 
@@ -9768,7 +9782,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.226';
+var APPV='v5.227';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10784,49 +10798,67 @@ function skipLevelSoft(){
 }
 // The hard no. Pinned to this session and these targets, so logging the lift again brings it back
 // on its own, and the hold menu brings it back before that.
-var EASEWK=null,EASEPLAN=[];
+// One lift, not one row: the same leg press stands in three saved copies of the same day, and
+// nobody wants to answer for it three times. Accepting fixes it everywhere it stands (v5.227).
+function easeLifts(only){
+  var by={},out=[];
+  easeAll().forEach(function(g){
+    if(only&&g.wk!==only)return;
+    g.rows.forEach(function(r){
+      var e=by[r.id];
+      if(!e){e=by[r.id]={id:r.id,name:r.name,ask:r.ask,best:r.best,rows:[]};out.push(e);}
+      e.rows.push({wk:g.wk,row:r});
+    });
+  });
+  return out;
+}
+var EASEQ=[],EASEI=0,EASEDONE=0;
 function openEase(wk){
-  EASEWK=wk;EASEPLAN=easePlan(wk);
-  var w=W[wk];
-  document.getElementById('easeSub').textContent=
-    (w?w.name.replace('Optional: ','')+'. ':'')+
-    (EASEPLAN.length===1?'One lift asks for more than you have ever lifted.'
-                        :EASEPLAN.length+' lifts ask for more than you have ever lifted.');
+  EASEQ=easeLifts(wk||null);EASEI=0;EASEDONE=0;
+  if(!EASEQ.length)return;
   easeRender();
   openHeld('easeOvl');
 }
 function easeRender(){
-  var el=document.getElementById('easeList');if(!el)return;
-  el.innerHTML=EASEPLAN.map(function(r,i){
-    var t0=parseTarget(r.from[0]),t1=parseTarget(r.to[0]);
-    return '<div class="lvl-row"'+(r.done?'':' onclick="easeOne('+i+')"')+'>'+
-      '<div class="lvl-n">'+esc(r.name)+(r.done?' <span style="color:var(--go);font-size:11px">SET</span>':'')+'</div>'+
-      '<div class="lvl-d"><span>asks for <b>'+fmtW(t0.w)+'</b></span>'+
-      '<span>your best is <b class="up">'+fmtW(t1.w)+'</b></span></div></div>';
-  }).join('');
-  var go=document.getElementById('easeGo'),left=EASEPLAN.filter(function(r){return !r.done;});
-  go.style.display=left.length?'':'none';
-  go.textContent=left.length===1?'USE MY BEST INSTEAD':'USE MY BEST FOR BOTH';
-  if(left.length>2)go.textContent='USE MY BEST FOR ALL '+left.length;
+  var q=EASEQ[EASEI];
+  if(!q){easeEnd();return;}
+  document.getElementById('easeSub').textContent=
+    EASEQ.length===1?'One lift to look at.':('Lift '+(EASEI+1)+' of '+EASEQ.length+'.');
+  document.getElementById('easeName').textContent=q.name;
+  document.getElementById('easeAsk').textContent=fmtW(q.ask);
+  document.getElementById('easeBest').textContent=fmtW(q.best);
+  // Where it stands, so accepting once for three copies is never a surprise.
+  var names={};q.rows.forEach(function(x){var w=W[x.wk];if(w)names[w.name.replace('Optional: ','')]=1;});
+  var list=Object.keys(names);
+  document.getElementById('easeWhere').textContent=
+    list.length>2?('in '+list.length+' of your workouts'):
+    list.length>1?('in '+list.join(' and ')):('in '+(list[0]||''));
+  document.getElementById('easeUse').textContent='USE '+fmtW(q.best);
+  document.getElementById('easeKeep').textContent='KEEP '+fmtW(q.ask);
 }
-function easeOne(i){
-  var r=EASEPLAN[i];if(!r||r.done)return;
-  var keep=LVLWK;LVLWK=EASEWK;try{lvlWrite([r]);}finally{LVLWK=keep;}
-  easeNoteDone();easeRender();mergeCustom();renderHome();
+// Accepting writes every row this lift stands in, each through its own workout.
+function easeUse(){
+  var q=EASEQ[EASEI];if(!q)return;
+  var keep=LVLWK;
+  try{
+    q.rows.forEach(function(x){LVLWK=x.wk;lvlWrite([x.row]);});
+  }finally{LVLWK=keep;}
+  EASEDONE++;
+  mergeCustom();renderHome();
   if(sessionOpen())renderSession();
   try{sfxLog();}catch(e){}
+  EASEI++;easeRender();
 }
-function easeApply(){
-  var left=EASEPLAN.filter(function(r){return !r.done;});
-  if(!left.length){closeOvl('easeOvl');return;}
-  var keep=LVLWK;LVLWK=EASEWK;try{lvlWrite(left);}finally{LVLWK=keep;}
-  easeNoteDone();mergeCustom();closeOvl('easeOvl');renderHome();
-  if(sessionOpen())renderSession();
-  try{sfxLog();}catch(e){}
+function easeSkip(){EASEI++;easeRender();}
+// Reaching the end counts as having answered for this list; stopping halfway does not, so the
+// ones not looked at come back next launch.
+function easeEnd(){
+  easeNoteDone();closeOvl('easeOvl');
+  if(EASEDONE)try{vib(12);}catch(e){}
 }
-// Left alone is an answer too, and it is remembered: the notice stays quiet until the list itself
-// changes. The sheet is always there on the card's hold menu for whenever it is wanted.
-function easeLeave(){easeNoteDone();closeOvl('easeOvl');}
+// Stopping halfway is not an answer: whatever was not looked at is offered again next launch. Only
+// walking to the end of the list, or saying LEAVE THEM to the question itself, settles it.
+function easeLeave(){closeOvl('easeOvl');}
 function easeNoteDone(){DB.stSeen=easeSig(easeAll());saveDB();}
 // One notice, at the start, only when there is something to say. Never during the tour, never in
 // the sandbox, and never twice for the same list.
@@ -10850,12 +10882,15 @@ function easeNotice(){
     // the gym in a second; "targets that cannot be met" is a sentence about the app instead.
     var eg=worst?(' Your '+String(worst.name).toLowerCase()+' asks for '+fmtW(worst.ask)+
                   ' and your best ever is '+fmtW(worst.best)+'.'):'';
+    // Three answers, because the wrong moment for this is the moment somebody is about to lift
+    // (owner, 23 Sep). LATER records nothing at all and the question comes back next launch;
+    // LEAVE THEM settles it until the list itself changes.
     ask((n===1?'One lift asks for more weight than you have ever lifted.'
              :n+' lifts ask for more weight than you have ever lifted.')+eg+
-        ' They can be set to your best, keeping the same reps.',
-        function(){openEase((worst&&worst.wk)||first.wk);},
+        ' They can be set to your best, one at a time, keeping the same reps.',
+        function(){openEase(null);},
         n===1?'A weight is set too high':'Some weights are set too high','SHOW ME',
-        function(){easeNoteDone();},null,'NOT NOW');
+        function(){easeNoteDone();},{label:'LATER',fn:function(){}},'LEAVE THEM');
   }catch(e){}
 }
 // The hard no. Pinned to this session and these targets, so logging the lift again brings it back

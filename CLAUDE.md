@@ -123,6 +123,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   falling short on the last set is training and judging reps flagged 58 of the owner's 104 rows. The
   fix writes through `lvlWrite` and keeps the reps. `easeNotice()` asks once per distinct list at
   launch (`DB.stSeen`), and the card's hold menu carries TARGETS OUT OF REACH.
+  The question has three answers (SHOW ME, LATER which records nothing and comes back next launch,
+  LEAVE THEM which settles that list), and the sheet walks ONE LIFT at a time with USE <best> and
+  KEEP <target>, never a bulk fix: the owner asked for control and for nothing that interrupts a
+  lifter mid-session. Accepting writes every copy that lift stands in.
 - **A bonus workout shows where it happened** (v5.222). A session finished on a day that was not
   carrying that workout draws a dimmed, dashed card with a violet BONUS pill on that day (bonusOn,
   bonusCard, bonusTap opens it in Workouts finished). It has no grip on purpose: a record is not a
