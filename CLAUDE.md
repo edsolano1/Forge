@@ -118,6 +118,11 @@ main constraint on how to work in it. See **Traps** below before editing.
   the speed of the arithmetic, replaced by `estRatio()` (the median of the last eight sessions'
   actual minutes over their planned minutes, clamped 1 to 2) once two sessions carry a length. The
   owner's first measured session was +18%, so never present the raw plan as the time.
+- **Targets can come back down** (v5.225). `easePlan(wk)` flags a row whose target WEIGHT has never
+  been reached in two or more logged sessions (inverted for assisted); reps are never judged, because
+  falling short on the last set is training and judging reps flagged 58 of the owner's 104 rows. The
+  fix writes through `lvlWrite` and keeps the reps. `easeNotice()` asks once per distinct list at
+  launch (`DB.stSeen`), and the card's hold menu carries TARGETS OUT OF REACH.
 - **A bonus workout shows where it happened** (v5.222). A session finished on a day that was not
   carrying that workout draws a dimmed, dashed card with a violet BONUS pill on that day (bonusOn,
   bonusCard, bonusTap opens it in Workouts finished). It has no grip on purpose: a record is not a

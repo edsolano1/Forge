@@ -3674,6 +3674,20 @@ body.wcon{overflow:hidden;}
   </div>
 </div>
 
+<!-- Out of reach (v5.225): the mirror of the level up. Same rows, same numbers, pointing the
+     other way, and the same one button for all of them. -->
+<div class="ovl" id="easeOvl">
+  <div class="sheet" style="max-width:440px">
+    <h3>Out of reach</h3>
+    <p id="easeSub"></p>
+    <div id="easeList" class="lvl-list"></div>
+    <div class="mk-acts" style="margin-top:12px">
+      <div class="btn btn-go" id="easeGo" onclick="easeApply()">SET THEM TO MY BEST</div>
+    </div>
+    <div class="sheet-btns"><div class="btn" onclick="easeLeave()">LEAVE THEM AS THEY ARE</div></div>
+  </div>
+</div>
+
 <div class="ovl" id="timerOvl">
   <div class="sheet" style="max-width:400px">
     <h3>Quick timer</h3>
@@ -9754,7 +9768,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.224';
+var APPV='v5.225';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10447,6 +10461,82 @@ function levelPlan(wk,showAll){
   });
   return out;
 }
+// ---- TARGETS OUT OF REACH (v5.225). ----
+// Progression only ever went up. A raise you accept and then never hit sits there for good, and
+// six of the owner's did: a target asking 125 against a best of 120, for weeks, with no way back
+// down. A seventh was older wreckage, a bodyweight crunch asking 2.5 lb from a raise made before
+// the app knew that a zero weight lift levels by reps.
+//
+// What counts as wrong is narrow on purpose. Falling a rep short on the last set is training, and
+// judging on reps flagged 58 of his 104 rows. A WEIGHT never once lifted is a different thing: it
+// is a number no session can satisfy. That fires on 11 rows, and every one of them is real.
+function attemptsFor(exId){
+  var n=0,best=null,inv=!!invEx(exId);
+  (DB.logs||[]).forEach(function(L){
+    if(!L.entries)return;
+    var got=false;
+    for(var k in L.entries){
+      if(exOfKey(L,k)!==exId)continue;
+      L.entries[k].forEach(function(e){
+        if(!e||typeof e.w!=='number')return;
+        got=true;
+        if(best===null)best=e.w;else best=inv?Math.min(best,e.w):Math.max(best,e.w);
+      });
+    }
+    if(got)n++;
+  });
+  return {n:n,best:best};
+}
+// Two sessions is the floor: one bad day is not evidence that a number is wrong.
+var EASE_TRIES=2;
+function easePlan(wk){
+  var w=W[wk],out=[];
+  if(!w)return out;
+  try{
+    var A=DB.active[wk];
+    edAllRows(wk).forEach(function(row){
+      var rf=rowFor(A&&A.swaps,row,wk);
+      var id=rf.exId,lines=String(rf.data.sets||'').split('\n'),t0=parseTarget(lines[0]);
+      if(!t0||t0.type!=='wr'||!t0.w)return;          // only a loaded target can be out of reach
+      var at=attemptsFor(id);
+      if(at.n<EASE_TRIES||at.best===null)return;
+      var inv=!!invEx(id);
+      if(inv?(at.best<=t0.w):(at.best>=t0.w))return; // it has been reached at least once
+      var to=lines.map(function(ln){
+        var t=parseTarget(ln);
+        return t.type==='wr'?(at.best+'x'+t.r):ln;   // the reps stay; only the load comes back
+      });
+      if(to.join('\n')===lines.join('\n'))return;
+      out.push({id:id,name:rf.data.name,from:lines,to:to,slot:rf.id,baseId:rf.baseId,
+                swapped:!!rf.swapId,sk:(String(rf.id).indexOf('~')>=0)?rf.id:id,
+                ask:t0.w,best:at.best,tries:at.n});
+    });
+  }catch(e){}
+  return out;
+}
+// Every workout the user owns: the board on show, the other week's board, and the shelf.
+function easeAll(){
+  var seen={},out=[];
+  function add(id){
+    if(!id||seen[id]||!W[id]||wkVar(id)==='rest')return;
+    seen[id]=1;
+    var pl=easePlan(id);
+    if(pl.length)out.push({wk:id,rows:pl});
+  }
+  try{
+    DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(add);});
+    var o=(DB.two&&DB.two.other)||{};
+    for(var k in o)(o[k]||[]).forEach(add);
+    (DB.extra||[]).forEach(add);
+  }catch(e){}
+  return out;
+}
+// What the notice has already been shown for. It asks again only when the list itself changes.
+function easeSig(all){
+  return all.map(function(g){
+    return g.wk+':'+g.rows.map(function(r){return r.id+'@'+r.ask+'>'+r.best;}).join(',');
+  }).join('|');
+}
 function skipSig(exId,lines){
   var L=lastFor(exId);
   return (L&&L.date||'')+'|'+lines.join(',');
@@ -10691,6 +10781,71 @@ function skipLevelSoft(){
   if(n)saveDB();
   closeOvl('lvlOvl');renderHome();
   if(sessionOpen())renderSession();
+}
+// The hard no. Pinned to this session and these targets, so logging the lift again brings it back
+// on its own, and the hold menu brings it back before that.
+var EASEWK=null,EASEPLAN=[];
+function openEase(wk){
+  EASEWK=wk;EASEPLAN=easePlan(wk);
+  var w=W[wk];
+  document.getElementById('easeSub').textContent=
+    (w?w.name.replace('Optional: ',''):'')+(EASEPLAN.length===1?', one target':', '+EASEPLAN.length+' targets')+
+    ' asking for a weight you have never lifted.';
+  easeRender();
+  openHeld('easeOvl');
+}
+function easeRender(){
+  var el=document.getElementById('easeList');if(!el)return;
+  el.innerHTML=EASEPLAN.map(function(r,i){
+    var t0=parseTarget(r.from[0]),t1=parseTarget(r.to[0]);
+    return '<div class="lvl-row"'+(r.done?'':' onclick="easeOne('+i+')"')+'>'+
+      '<div class="lvl-n">'+esc(r.name)+(r.done?' <span style="color:var(--go);font-size:11px">SET</span>':'')+'</div>'+
+      '<div class="lvl-d"><span>asks <b>'+fmtW(t0.w)+'</b></span>'+
+      '<span>your best <b class="up">'+fmtW(t1.w)+'</b></span>'+
+      '<span>'+r.tries+' sessions</span></div></div>';
+  }).join('');
+  var go=document.getElementById('easeGo'),left=EASEPLAN.filter(function(r){return !r.done;});
+  go.style.display=left.length?'':'none';
+  go.textContent=left.length===1?'SET IT TO MY BEST':'SET THEM TO MY BEST';
+}
+function easeOne(i){
+  var r=EASEPLAN[i];if(!r||r.done)return;
+  var keep=LVLWK;LVLWK=EASEWK;try{lvlWrite([r]);}finally{LVLWK=keep;}
+  easeNoteDone();easeRender();mergeCustom();renderHome();
+  if(sessionOpen())renderSession();
+  try{sfxLog();}catch(e){}
+}
+function easeApply(){
+  var left=EASEPLAN.filter(function(r){return !r.done;});
+  if(!left.length){closeOvl('easeOvl');return;}
+  var keep=LVLWK;LVLWK=EASEWK;try{lvlWrite(left);}finally{LVLWK=keep;}
+  easeNoteDone();mergeCustom();closeOvl('easeOvl');renderHome();
+  if(sessionOpen())renderSession();
+  try{sfxLog();}catch(e){}
+}
+// Left alone is an answer too, and it is remembered: the notice stays quiet until the list itself
+// changes. The sheet is always there on the card's hold menu for whenever it is wanted.
+function easeLeave(){easeNoteDone();closeOvl('easeOvl');}
+function easeNoteDone(){DB.stSeen=easeSig(easeAll());saveDB();}
+// One notice, at the start, only when there is something to say. Never during the tour, never in
+// the sandbox, and never twice for the same list.
+function easeNotice(){
+  try{
+    if(TUTON||SANDBOX)return;
+    var all=easeAll();
+    if(!all.length)return;
+    var sig=easeSig(all);
+    if(DB.stSeen===sig)return;
+    var n=0;all.forEach(function(g){n+=g.rows.length;});
+    var first=all[0];
+    ask(n===1?'One target asks for a weight you have never lifted, so no session can ever meet it. '+
+               'It can come back to your best.'
+             :n+' targets ask for weights you have never lifted, so no session can ever meet them. '+
+               'They can come back to your best.',
+        function(){openEase(first.wk);},
+        'Check your targets?','SHOW ME',
+        function(){easeNoteDone();},null,'NOT NOW');
+  }catch(e){}
 }
 // The hard no. Pinned to this session and these targets, so logging the lift again brings it back
 // on its own, and the hold menu brings it back before that.
@@ -13243,10 +13398,11 @@ function mkActions(id,dk){
   var locked=loggedCount(id)===0&&lwOn(loggedThisWeek(),id,dk);
   // A raise that was turned down leaves nothing on the card. The menu is where it can be asked
   // for again (v5.218): the same sheet, the declined rows included.
-  var hid=lvlHidden(id);
+  var hid=lvlHidden(id),far=easePlan(id).length;
   document.getElementById('mkActBody').innerHTML=
     (locked?'<div class="btn btn-go" onclick="unsealOne(\''+id+'\')">UNLOCK THIS ONE</div>':'')+
     (hid?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openLevel(\''+id+'\',true)">SHOW THE LEVEL UP</div>':'')+
+    (far?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openEase(\''+id+'\')">TARGETS OUT OF REACH</div>':'')+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     // Adding a second workout to this day moved here from the day column (v5.145).
@@ -13272,10 +13428,11 @@ function mkActionsX(id){
   document.getElementById('mkActTtl').textContent=nm;
   document.getElementById('mkActSub').textContent='';
   var locked=loggedCount(id)===0&&!!loggedThisWeek()[id];
-  var hid=lvlHidden(id);
+  var hid=lvlHidden(id),far=easePlan(id).length;
   document.getElementById('mkActBody').innerHTML=
     (locked?'<div class="btn btn-go" onclick="unsealOne(\''+id+'\')">UNLOCK THIS ONE</div>':'')+
     (hid?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openLevel(\''+id+'\',true)">SHOW THE LEVEL UP</div>':'')+
+    (far?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openEase(\''+id+'\')">TARGETS OUT OF REACH</div>':'')+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(null,\''+id+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     '<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDeleteX(\''+id+'\')">DELETE THIS WORKOUT</div>';
@@ -21550,6 +21707,9 @@ function sbEnd(){
   // The one-time backup nudge waits for the app to settle; it refuses to fire inside the
   // sandbox, a tour, or any life that already has a backup.
   setTimeout(function(){try{bkNudge();}catch(e){}},6000);
+  // And the targets check (v5.225). It runs on its own, says nothing at all when every target is
+  // reachable, and asks only once for any given list.
+  setTimeout(function(){try{easeNotice();}catch(e){}},8000);
   // A first run is asked how it wants to start, and that hands over to the tour offer itself.
   // Everyone else goes straight to the offer as before.
   setTimeout(function(){if(STARTPEND)offerStart();else tutOffer();},1600);
