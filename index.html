@@ -9786,7 +9786,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.231';
+var APPV='v5.232';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10489,7 +10489,7 @@ function levelPlan(wk,showAll){
 // judging on reps flagged 58 of his 104 rows. A WEIGHT never once lifted is a different thing: it
 // is a number no session can satisfy. That fires on 11 rows, and every one of them is real.
 function attemptsFor(exId){
-  var n=0,best=null,inv=!!invEx(exId);
+  var n=0,best=null,last=0,inv=!!invEx(exId);
   (DB.logs||[]).forEach(function(L){
     if(!L.entries)return;
     var got=false;
@@ -10501,9 +10501,13 @@ function attemptsFor(exId){
         if(best===null)best=e.w;else best=inv?Math.min(best,e.w):Math.max(best,e.w);
       });
     }
-    if(got)n++;
+    if(got){
+      n++;
+      var t=new Date(L.date+'T12:00:00').getTime();
+      if(!isNaN(t)&&t>last)last=t;
+    }
   });
-  return {n:n,best:best};
+  return {n:n,best:best,last:last};
 }
 // Two sessions is the floor: one bad day is not evidence that a number is wrong.
 var EASE_TRIES=2;
@@ -10518,6 +10522,10 @@ function easePlan(wk){
       if(!t0||t0.type!=='wr'||!t0.w)return;          // only a loaded target can be out of reach
       var at=attemptsFor(id);
       if(at.n<EASE_TRIES||at.best===null)return;
+      // A raise taken five minutes ago asks for a weight never lifted BY DESIGN. Only a target
+      // that has survived a session since it was set can be called out of reach (v5.232).
+      var stamp=(DB.upAt||{})[(String(rf.id).indexOf('~')>=0)?rf.id:id];
+      if(stamp&&at.last<=stamp)return;
       var inv=!!invEx(id);
       if(inv?(at.best<=t0.w):(at.best>=t0.w))return; // it has been reached at least once
       var to=lines.map(function(ln){
@@ -10718,6 +10726,9 @@ function lvlWrite(items){
     });
     if(!wrote)DB.up[p.id]=p.to.join('\n');
     delete DB.upSkip[p.sk||p.id];
+    // When this target was written. Until the lift is logged again, it has not been tried, so the
+    // out of reach check leaves it alone (v5.232).
+    DB.upAt=DB.upAt||{};DB.upAt[p.sk||p.id]=Date.now();
     p.done=true;
   });
   saveDB();
