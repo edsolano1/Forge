@@ -95,10 +95,16 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **Sheets stack by opening order** (v5.213). ovlWatch lifts a sheet opened over another of its own z layer
   one step above it (Backup over Settings used to hide behind it). A backup carries arc_kg, arc_km and
   arc_bar; add any new user setting to BK_KEYS or a restore onto a new phone loses it.
-- **Forge a day** (v5.202). The plus on an EMPTY day asks I'll build it / Forge it for me (dfAsk). The forge fills
+- **Forge a day** (v5.202, widened v5.231). The plus on ANY day asks I'll build it / Forge it for me (dfAsk). The forge fills
   the least covered of push, pull and legs across the board, or a full body day when the board is empty or
   balanced; it never asks which muscles. The wizard's answers are kept in DB.ez (level, goal, len, kit) and
-  forgeDay reads them; anything new that needs equipment reads DB.ez too.
+  forgeDay reads them; anything new that needs equipment reads DB.ez too. Forging also asks Gym,
+  Dumbbells or Nothing for THAT day (dfForge, dfForgeGo, forgeDay(k,kit)) and never writes the
+  answer back to DB.ez. With Nothing the day is always full body, because there is no vertical pull
+  without a bar; EZ_BW gives each role its bodyweight answer, EZ_BWFILL tops a thin day up to five
+  rows, and bwReps works unloaded movements in their own rep range instead of a scaled-down barbell
+  count. DB.ez.level is still only ever written by the ritual, so a hand-built week forges at the
+  beginner numbers until the owner runs Forge me a week.
 - **Pump Day has three kinds** (v5.203): Upper, Lower, Full body, each for a gym, dumbbells or nothing
   (PUMP_KINDS). The choice lives in DB.pumpNow and pumpApply writes it into W.pump. Pump exercises stay p_ ids,
   each a twin of a library lift so How To and the animation resolve, and their numbers stay out of real

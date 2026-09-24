@@ -9786,7 +9786,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.230';
+var APPV='v5.231';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13252,9 +13252,11 @@ var PLUS='<svg viewBox="0 0 20 20"><path d="M10 4.5v11M4.5 10h11"/></svg>';
 // The plus on an EMPTY day asks first: build it yourself, or have the day your week is missing
 // forged for you (v5.202). A day that already holds something goes straight to the builder, and
 // so does the tour, which is a sealed space that must not grow new questions.
-var DFDAY=null;
+var DFDAY=null,DFKIT=null;
 function openNewDay(k){
-  if(k&&!TUTON&&!SANDBOX&&!(DB.days[k]||[]).length){dfAsk(k);return;}
+  // Any day, not just an empty one (v5.231). A day that already holds a workout can take a second,
+  // and there is no reason the app cannot build that one too.
+  if(k&&!TUTON&&!SANDBOX)  {dfAsk(k);return;}
   openNewDayNow(k);
 }
 function dfAsk(k){
@@ -13269,7 +13271,22 @@ function dfAsk(k){
   document.getElementById('dfOvl').classList.add('on');
 }
 function dfBuild(){closeOvl('dfOvl');openNewDayNow(DFDAY);}
-function dfForge(){closeOvl('dfOvl');forgeDay(DFDAY);}
+// Forging asks one more thing, the only question that changes what it can build: what you have
+// today. It opens on what you own, so a gym day is still two taps (v5.231).
+function dfForge(){
+  var have=DFKIT||ezKitShort((DB.ez||{}).kit);
+  var T=[['gym','Gym','Everything a gym has'],['db','Dumbbells','A pair, and a bench if there is one'],
+         ['none','Nothing','Your own bodyweight, anywhere']];
+  document.getElementById('dfTtl').textContent='What do you have?';
+  document.getElementById('dfPicks').innerHTML=T.map(function(t,i){
+    return '<button class="ez-card'+(have===t[0]?' on':'')+'" style="--i:'+i+'" onclick="dfForgeGo(\''+t[0]+'\')">'+
+      '<span class="ez-art">'+WZ.pump[i===0?2:i===1?0:1]+'</span><span><b>'+t[1]+'</b><small>'+t[2]+'</small></span></button>';
+  }).join('');
+}
+function dfForgeGo(kit){DFKIT=kit;closeOvl('dfOvl');forgeDay(DFDAY,kit);}
+// The wizard's own five kits collapse to the three a person can answer on the spot.
+function ezKitShort(k){return (k==='dbb'||k==='dbo')?'db':(k==='none'?'none':'gym');}
+function ezKitLong(k){return k==='db'?'dbo':k==='none'?'none':'gym';}
 // What the week is missing: every exercise already on the board counts toward pushing, pulling or
 // legs, and the day forged is the one with the least. An empty board gets a full body day. This is
 // the app's opinion of balance, the same as Forge me a week: it never asks which muscles you want.
@@ -13292,15 +13309,21 @@ function forgeFocus(){
   var best='legs';['legs','pull','push'].forEach(function(k){if(B[k]<B[best])best=k;});
   return best;
 }
-function forgeDay(k){
+function forgeDay(k,kit){
   if(!k)return;
   var f=forgeFocus();
+  // With nothing in the room there is no vertical pull and one horizontal one, so a push or pull
+  // day would be a name with nothing under it. The body is the equipment: the day is full body.
+  if(kit==='none')f='full';
   var tpl=f==='legs'?EZ_DAYS.legs:f==='push'?EZ_DAYS.push:f==='pull'?EZ_DAYS.pull:EZ_DAYS.fullA;
   // The answers from the last time the forge asked its questions (DB.ez, v5.202). Somebody who
   // built their week by hand never answered them: a gym, a steady goal, the gentle level.
   var P=DB.ez||{},keep=EZ;
-  EZ={step:0,level:P.level||'beg',days:null,goal:P.goal||'muscle',kit:P.kit||null,len:P.len||60,into:'day',done:true};
+  // kit is what he has TODAY, asked for this day only; P.kit is what he owns and is left alone.
+  EZ={step:0,level:P.level||'beg',days:null,goal:P.goal||'muscle',
+      kit:kit?ezKitLong(kit):(P.kit||null),len:P.len||60,into:'day',done:true};
   var level=EZ.level,goal=EZ.goal,mult=level==='beg'?0.6:level==='adv'?1.4:1;
+  var own=ezOwns();                        // this day's equipment, read before EZ is put back
   var sections=[],straight=[],used=[];
   try{
     ezTrim(tpl.r,EZ.len,goal).forEach(function(slot){
@@ -13316,11 +13339,25 @@ function forgeDay(k){
       if(row)straight.push(row);
     });
   }finally{EZ=keep;}
+  // A gym day that loses a slot still has five; a room with nothing can lose most of them. Rather
+  // than hand back one push-up, the day is topped up from what a body can do anywhere.
+  var have=sections.reduce(function(n,x){return n+x.rows.length;},0)+straight.length;
+  if(have<5){
+    for(var bi=0;bi<EZ_BWFILL.length&&have<5;bi++){
+      var bid=EZ_BWFILL[bi];
+      if(!EX[bid]||used.indexOf(bid)>=0||!ezCan(bid,own))continue;
+      var cls=/plank|hollow|sideplank/.test(bid)?'core':/bike|crunch|legraise/.test(bid)?'core':'acc';
+      var r=ezRow2(bid,cls,goal,mult,level);
+      if(r){straight.push(r);used.push(bid);have++;}
+    }
+  }
   if(straight.length)sections.push({title:'Straight sets',ss:false,rows:straight});
-  if(!sections.length){mkNote('Nothing could be forged with the equipment on record. Build this one yourself.','Nothing to forge');return;}
+  if(!sections.length){mkNote(kit==='none'?'Nothing could be built with no equipment at all. Build this one yourself.'
+      :'Nothing could be forged with that equipment. Build this one yourself.','Nothing to forge');return;}
   var NM={legs:'Legs',push:'Push',pull:'Pull',full:'Full body'};
+  var TAG=kit==='none'?' (bodyweight)':kit==='db'?' (dumbbells)':'';
   var id='cus'+Date.now().toString(36)+'f';
-  DB.custom[id]={name:NM[f],custom:1,made:Date.now(),kind:'lift',tag:'Yours',time:'~9:00 PM',
+  DB.custom[id]={name:(NM[f]||'Day')+TAG,custom:1,made:Date.now(),kind:'lift',tag:'Yours',time:'~9:00 PM',
     color:MK_COLS[Object.keys(DB.custom).length%MK_COLS.length],sections:sections};
   DB.days[k]=DB.days[k]||[];if(DB.days[k].indexOf(id)<0)DB.days[k].push(id);
   mergeCustom();saveDB();renderHome();
@@ -21447,6 +21484,15 @@ function ezCan(id,own){
 // with nothing to hang from, Full Body B and Upper Body came out with no pulling AT ALL, which is
 // not an honest shorter week, it is a hole. A row stands in for the pull-up there.
 var EZ_FALL={vpull:'hpull'};
+// The bodyweight answer to each role, used only when the pool and the fallback chain both come up
+// empty for the equipment in the room (v5.231). Roles with no honest bodyweight version - a side
+// delt raise, a curl, a vertical pull with nothing to hang from - are simply absent, and their
+// slot drops as it always did.
+var EZ_BW={squat:'bwsquat',hinge:'glutebr',hpress:'pushup',vpress:'pushup',incline:'pushup',
+  chestI:'pushup',hpull:'doorrow',quadI:'bwsquat',hamI:'nordic',calf:'bwcalf',gluteI:'glutebr',
+  tricep:'pushup',tricep2:'pushup',core:'plank',core2:'bike'};
+// What a thin day gets topped up with, in the order a person would add them.
+var EZ_BWFILL=['bwsquat','pushup','glutebr','plank','bwcalf','bike','sideplank','crunch','legraise','hollow'];
 function ezPickLift(role,level,own,used){
   var list=(EZ_POOL[role]||{})[level];
   if(!list)return null;
@@ -21458,7 +21504,10 @@ function ezPickLift(role,level,own,used){
     return id;
   }
   var fb=EZ_FALL[role];
-  if(fb)return ezPickLift(fb,level,own,used);
+  if(fb){var got=ezPickLift(fb,level,own,used);if(got)return got;}
+  // the last resort: your own bodyweight, if this role has one
+  var bw=EZ_BW[role];
+  if(bw&&EX[bw]&&ezCan(bw,own)&&!(used&&used.indexOf(bw)>=0)){if(used)used.push(bw);return bw;}
   return null;                                          // nothing fits: the slot drops
 }
 // Each day is roles with a ROLE CLASS: main / sec / acc / iso / core. Pairs in [] are
@@ -21517,6 +21566,27 @@ var EZ_RX={
 };
 var EZ_SLOTS={1:['mon'],2:['mon','thu'],3:['mon','wed','fri'],4:['mon','tue','thu','fri'],5:['mon','tue','wed','thu','fri']};
 var EZ_FIN=['stairs','rower','cbike'];   // weight-loss finishers, rotated across the week
+// How many reps an unloaded movement is worth. A loaded rep count is scaled down for a beginner,
+// which is correct for a bar and nonsense for a push-up: it handed back eight bodyweight squats.
+// A movement with no weight to add is worked in the range it is actually trained in, and level
+// moves it a little rather than halving it.
+function bwReps(id,base,mult){
+  var free=false;try{free=(kitOf(id)||[]).length===0;}catch(e){}
+  if(!free)return Math.max(1,Math.round((base||10)*mult));     // loaded work is unchanged
+  var n=Math.round((base||12)*(mult<1?1.4:mult>1?2:1.7));      // 12 becomes 17, 20 for the strongest
+  return Math.max(10,Math.min(30,n));
+}
+// The same row, for a lift already chosen (the bodyweight top-up, v5.231).
+function ezRow2(id,cls,goal,mult,level){
+  if(!id||!EX[id])return null;
+  var rx=EZ_RX[goal][cls]||EZ_RX[goal].acc;
+  var sets=Math.max(2,rx.s-(level==='beg'?1:0));
+  var line;
+  if(cls==='core'&&/sec/.test(EX[id].sets))line=Math.max(15,Math.round(rx.t*mult/5)*5)+' sec';
+  else line='0x'+bwReps(id,rx.r||12,mult);
+  var out=[];for(var i=0;i<sets;i++)out.push(line);
+  return [id,{sets:out.join('\n'),rest:rx.rest}];
+}
 function ezRow(role,cls,level,mult,goal,used){
   var id=ezPickLift(role,level,ezOwns(),used);if(!id||!EX[id])return null;
   if(used)used.push(id);
@@ -21537,7 +21607,7 @@ function ezRow(role,cls,level,mult,goal,used){
     var w=natW(EZ_W[id]*mult,5);
     line=(Math.round(w*100)/100)+'x'+rx.r;
   }
-  else line='0x'+rx.r;
+  else line='0x'+bwReps(id,rx.r,mult);
   var out=[];for(var i=0;i<sets;i++)out.push(line);
   return [id,{sets:out.join('\n'),rest:rx.rest}];
 }
