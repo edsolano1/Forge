@@ -9786,7 +9786,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.232';
+var APPV='v5.233';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10511,6 +10511,10 @@ function attemptsFor(exId){
 }
 // Two sessions is the floor: one bad day is not evidence that a number is wrong.
 var EASE_TRIES=2;
+// Noon on the day a moment falls in, which is how every log's date is read. Comparing a raise's
+// real timestamp against a session read as noon made a morning session look like an attempt at an
+// afternoon raise, which is how the warning came back the instant he took one.
+function dayNoon(ms){var d=new Date(ms);return new Date(d.getFullYear(),d.getMonth(),d.getDate(),12,0,0,0).getTime();}
 function easePlan(wk){
   var w=W[wk],out=[];
   if(!w)return out;
@@ -10523,9 +10527,10 @@ function easePlan(wk){
       var at=attemptsFor(id);
       if(at.n<EASE_TRIES||at.best===null)return;
       // A raise taken five minutes ago asks for a weight never lifted BY DESIGN. Only a target
-      // that has survived a session since it was set can be called out of reach (v5.232).
+      // that has survived a session since it was set can be called out of reach (v5.232), and the
+      // comparison is by DAY, because a log carries a date and nothing finer (v5.233).
       var stamp=(DB.upAt||{})[(String(rf.id).indexOf('~')>=0)?rf.id:id];
-      if(stamp&&at.last<=stamp)return;
+      if(stamp&&at.last<=dayNoon(stamp))return;
       var inv=!!invEx(id);
       if(inv?(at.best<=t0.w):(at.best>=t0.w))return; // it has been reached at least once
       var to=lines.map(function(ln){
