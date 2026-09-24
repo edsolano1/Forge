@@ -9786,7 +9786,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.229';
+var APPV='v5.230';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11333,11 +11333,18 @@ function dayBox(d,nx,n0){
   // The words stay only while the whole board is empty (v5.119). Once one workout stands
   // anywhere, an empty day is a plus and a drop target, nothing more: five days each saying
   // Add a workout was the clutter, not the plus.
-  if(!ids.length&&!bon.length){var bare0=!DAYS.some(function(x){return (DB.days[x.k]||[]).length;});
-    h+='<div class="dayempty dayadd'+(bare0?'':' quiet')+'" onclick="openNewDay(\''+d.k+'\')" title="Add a workout">'+PLUS+(bare0?'Add a workout':'')+
-       '<button class="dayrest" onclick="event.stopPropagation();markRest(\''+d.k+'\')" title="This is a rest day">REST</button></div>';}
-  else ids.forEach(function(id,n){h+=planCard(id,n0+n,nx,d.k);});
-  bonusOn(d.k).forEach(function(id){h+=bonusCard(id,d.k);});
+  // The bonus card goes FIRST on a day that holds nothing else, because it is what happened there;
+  // the plus follows it, still offering to put a real workout on the day (v5.230).
+  if(bon.length&&!ids.length)bon.forEach(function(id){h+=bonusCard(id,d.k);});
+  if(!ids.length){var bare0=!DAYS.some(function(x){return (DB.days[x.k]||[]).length;});
+    // REST belongs to a day with nothing on it at all. A day that already carries a bonus is not a
+    // rest day, so it keeps the plus and loses the label.
+    h+='<div class="dayempty dayadd'+(bare0?'':' quiet')+'" onclick="openNewDay(\''+d.k+'\')" title="Add or forge a workout">'+PLUS+(bare0?'Add a workout':'')+
+       (bon.length?'':'<button class="dayrest" onclick="event.stopPropagation();markRest(\''+d.k+'\')" title="This is a rest day">REST</button>')+'</div>';}
+  else{
+    ids.forEach(function(id,n){h+=planCard(id,n0+n,nx,d.k);});
+    bon.forEach(function(id){h+=bonusCard(id,d.k);});
+  }
   return h+'</div>';
 }
 // A rest day you chose reads differently from a day you have not filled in: it says Rest instead
