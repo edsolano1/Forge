@@ -95,6 +95,11 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **Sheets stack by opening order** (v5.213). ovlWatch lifts a sheet opened over another of its own z layer
   one step above it (Backup over Settings used to hide behind it). A backup carries arc_kg, arc_km and
   arc_bar; add any new user setting to BK_KEYS or a restore onto a new phone loses it.
+- **The day sheet** (v5.234, owner picked A). The DAY COLUMN (`.dayhead`) opens `openDay(k)`: the
+  day's workouts, each with a row of labelled icon buttons (`dsActions`) carrying what the hold menu
+  had. A tap on a CARD still starts the workout, on the board and inside the sheet, and holding a
+  week card opens the same sheet. Icons always keep their word underneath. `mkActionsX` still serves
+  saved cards until the Saved fold gets the same treatment.
 - **Forge a day** (v5.202, widened v5.231). The plus on ANY day asks I'll build it / Forge it for me (dfAsk). The forge fills
   the least covered of push, pull and legs across the board, or a full body day when the board is empty or
   balanced; it never asks which muscles. The wizard's answers are kept in DB.ez (level, goal, len, kit) and

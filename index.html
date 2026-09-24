@@ -167,6 +167,30 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .ease-nums b{color:var(--txt2);font-weight:600;}
 .ease-nums b.up{color:var(--go);}
 .ease-where{margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
+/* The day sheet (v5.234, owner picked A): the day on a plate, its workouts, and under each one the
+   actions as labelled icons. Icons alone were rejected as a guessing game; the word under each
+   glyph costs one line and settles it. */
+.dsh{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.dsd{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:46px;
+  border:1px solid #4a2c1c;border-radius:9px;background:#1a100b;font-family:var(--mono);flex:none;}
+.dsd b{font-size:10px;letter-spacing:.14em;color:var(--txt2);font-weight:800;}
+.dsd i{font-style:normal;font-size:14px;color:var(--txt);font-weight:500;}
+.dst{flex:1;font-family:'Marcellus',serif;font-size:19px;color:var(--txt);min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dsrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px;}
+.dsrow.two .dsb{flex:1;}
+.dsb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  min-width:62px;min-height:58px;padding:8px 6px;border:1px solid #3a2214;border-radius:11px;
+  background:#130c09;color:var(--txt2);cursor:pointer;}
+.dsb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.dsb b{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:500;}
+@media (hover:hover){.dsb:hover{color:var(--gold);border-color:#6a3f26;}}
+.dsb:active{transform:scale(.97);}
+.dsb.bad{color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 34%,#3a2214);}
+.dsx{min-width:38px;min-height:38px;border:0;background:transparent;padding:0;}
+.dswide{width:100%;flex-direction:row;gap:9px;min-height:44px;}
+.dswide b{font-size:9.5px;}
+.dsnone{color:var(--txt3);font-size:13.5px;text-align:center;padding:12px 0 2px;}
 /* A finished bonus: the same card, stepped back, wearing the violet of a matched set rather than
    the gold of the plan. The gap holds the grip's place so BONUS sits under DONE (v5.222). */
 .pill-bonus{background:transparent;border:1px solid color-mix(in srgb,var(--match) 60%,transparent);color:var(--match);}
@@ -3852,6 +3876,18 @@ body.wcon{overflow:hidden;}
     <p>Each one is its own place, and changes everything: palette, lettering, and the sounds it makes.</p>
     <div class="mk-acts" id="themeSheet"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('themeOvl')">CLOSE</div></div>
+  </div>
+</div>
+
+<!-- The day sheet (v5.234). Opened by the day column, or by holding a card on it. -->
+<div class="ovl" id="dayOvl">
+  <div class="sheet" style="max-width:440px">
+    <div class="dsh">
+      <span class="dsd"><b id="dsDow"></b><i id="dsNum"></i></span>
+      <span class="dst" id="dsName"></span>
+      <button class="dsb dsx" onclick="closeOvl('dayOvl')" title="Close"><svg viewBox="0 0 20 20"><path d="M6 6l8 8M14 6l-8 8"/></svg></button>
+    </div>
+    <div id="dsBody"></div>
   </div>
 </div>
 
@@ -9786,7 +9822,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.233';
+var APPV='v5.234';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11339,7 +11375,8 @@ function dayBox(d,nx,n0){
   // The agenda column (v5.142): three letters over the date, today's column lit. The other week's
   // board shows the other week's dates.
   var dnum=new Date(weekStartTs()+((twoOn()&&twoOff())?7:0)*864e5+d.js*864e5).getDate();
-  h+='<div class="dayhead"><span title="'+d.n+(isToday?', today':'')+'"><b class="dh-n">'+d.n.slice(0,3).toUpperCase()+'</b><b class="dh-d">'+dnum+'</b></span>'+
+  // The column is the way into the day; the cards beside it still open their workouts (v5.234).
+  h+='<div class="dayhead" onclick="event.stopPropagation();openDay(\''+d.k+'\')" title="'+d.n+(isToday?', today':'')+'"><span><b class="dh-n">'+d.n.slice(0,3).toUpperCase()+'</b><b class="dh-d">'+dnum+'</b></span>'+
      (false&&ids.length&&ids.length<DAY_MAX?'<span class="dayhead-add" onclick="openNewDay(\''+d.k+'\')" title="Add another workout to '+d.n+'">'+PLUS+'</span>':'')+
      '</div>';
   // "Drag a workout here" is only an instruction if you HAVE a workout to drag. On a week that
@@ -13245,9 +13282,10 @@ function mkBindCards(){
         }
         else if(xid)mkActionsX(xid);
         else{
-          // which DAY the held card stands on, so the sheet can offer to clear just that one
+          // Holding a week card opens the DAY it stands on (v5.234): one surface, two ways in.
           var db=el.closest?el.closest('.daybox'):null;
-          mkActions(base,db?db.getAttribute('data-day'):null);
+          var dk=db?db.getAttribute('data-day'):null;
+          if(dk)openDay(dk);else mkActions(base,dk);
         }
       },520);
     });
@@ -13522,6 +13560,77 @@ function mkDuplicate(id){
 // behind WORKOUT SETTINGS - deleting a workout was "tricky" in exactly those words. The
 // hold now opens a small sheet: edit, take it off the week, delete. One extra tap on the
 // edit path buys a visible way out for everything else.
+// The glyphs, 20 by 20 at 1.7, drawn to sit beside the grip and the swap (v5.234).
+var DSI={
+  up:'<path d="M10 15.5V5M10 5l-4.3 4.3M10 5l4.3 4.3"/>',
+  down:'<path d="M10 4.5V15M10 15l-4.3-4.3M10 15l4.3-4.3"/>',
+  edit:'<path d="M4 16h3l9-9-3-3-9 9z"/><path d="M13 4l3 3"/>',
+  copy:'<rect x="7" y="7" width="9" height="9" rx="1.6"/><path d="M12 4H5a1 1 0 0 0-1 1v7"/>',
+  add:'<path d="M10 4.5v11M4.5 10h11"/>',
+  shelf:'<path d="M3.5 5.5h13v4h-13zM3.5 12h13v3.5h-13"/><path d="M7 5.5v4"/>',
+  bin:'<path d="M4.5 6.5h11M8.5 6.5V5h3v1.5M6 6.5l.7 9h6.6l.7-9"/>',
+  unlock:'<rect x="5" y="9.5" width="10" height="7" rx="2"/><path d="M7.5 9.5V6.8A2.5 2.5 0 0 1 12 5.4"/>',
+  forge:'<path d="M3.5 15.5h13"/><path d="M6 15.5c0-3 1.6-4.4 4-4.4s4 1.4 4 4.4"/><path d="M10 10.6V4.5M7.6 6.3L10 4.5l2.4 1.8"/>',
+  build:'<path d="M4 16l4.5-4.5"/><path d="M11 3.5l5.5 5.5-2.2 2.2-5.5-5.5z"/><path d="M8.8 5.7l2.2-2.2"/>',
+  rest:'<path d="M5 15.5h10"/><path d="M6.5 15.5c0-2.6 1.6-4 3.5-4s3.5 1.4 3.5 4"/><path d="M10 8.5V4.6"/>'
+};
+function dsBtn(icon,label,call,cls){
+  return '<button class="dsb'+(cls?' '+cls:'')+'" onclick="'+call+'"><svg viewBox="0 0 20 20">'+DSI[icon]+'</svg><b>'+label+'</b></button>';
+}
+var DSDAY=null;
+// Everything the hold used to offer, for one workout, as icons with their words under them.
+function dsActions(id,dk){
+  var mine=!!(DB.custom&&DB.custom[id]);
+  var locked=loggedCount(id)===0&&lwOn(loggedThisWeek(),id,dk);
+  var raise=levelPlan(id).length||lvlHidden(id);
+  var far=easePlan(id).length;
+  var h='<div class="dsrow">';
+  if(locked)h+=dsBtn('unlock','Unlock','unsealOne(\''+id+'\')');
+  if(raise)h+=dsBtn('up','Level up','closeOvl(\'dayOvl\');openLevel(\''+id+'\',true)');
+  if(far)h+=dsBtn('down','Targets','closeOvl(\'dayOvl\');openEase(\''+id+'\')');
+  h+=dsBtn('edit','Edit','closeOvl(\'dayOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')');
+  h+=dsBtn('copy','Duplicate','closeOvl(\'dayOvl\');mkDuplicate(\''+id+'\')');
+  h+=dsBtn('shelf',mine?'To saved':'Off the week','closeOvl(\'dayOvl\');savedOpen();planDropDay(\''+id+'\',\''+dk+'\')');
+  if(mine)h+=dsBtn('bin','Delete','dsDelete(\''+id+'\')','bad');
+  return h+'</div>';
+}
+function dsDelete(id){closeOvl('dayOvl');mkDelete(id);}
+// A card inside the sheet reads like the card on the board and does the same thing: it opens the
+// workout. Nothing here is a second way to start a session, it IS the session.
+function dsCard(id,dk){
+  var w=W[id];if(!w)return '';
+  var live=loggedCount(id)>0,sealed=!live&&lwOn(loggedThisWeek(),id,dk);
+  var pill=live?'<span class="pill pill-live">Resume '+loggedCount(id)+'/'+totalSets(id)+'</span>':
+           sealed?'<span class="pill pill-done">'+LOCKI+TXT('done')+'</span>':'';
+  return '<div class="card'+(sealed?' sealed':'')+'" style="--c:'+dayC(id)+'" onclick="closeOvl(\'dayOvl\');mkTap(\''+id+'\',\''+dk+'\')">'+
+    '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
+    '<span class="card-r">'+pill+'</span></div></div>';
+}
+function openDay(k){
+  if(!k||TUTON)return;
+  DSDAY=k;
+  var d=null;DAYS.forEach(function(x){if(x.k===k)d=x;});
+  if(!d)return;
+  var num=new Date(weekStartTs()+((twoOn()&&twoOff())?7:0)*864e5+d.js*864e5).getDate();
+  document.getElementById('dsDow').textContent=d.n.slice(0,3).toUpperCase();
+  document.getElementById('dsNum').textContent=num;
+  document.getElementById('dsName').textContent=d.n;
+  var ids=(DB.days[k]||[]),h='';
+  ids.forEach(function(id){if(W[id]){h+=dsCard(id,k);h+=dsActions(id,k);}});
+  bonusOn(k).forEach(function(id){h+=bonusCard(id,k);});
+  if(!ids.length){
+    h+='<div class="dsnone">Nothing on this day yet.</div>'+
+       '<div class="dsrow two">'+
+       dsBtn('build','I\'ll build it','closeOvl(\'dayOvl\');openNewDayNow(\''+k+'\')')+
+       dsBtn('forge','Forge it for me','closeOvl(\'dayOvl\');DFDAY=\''+k+'\';dfAsk(\''+k+'\');dfForge()')+
+       '</div>'+
+       '<div class="dsrow"><button class="dsb dswide" onclick="closeOvl(\'dayOvl\');markRest(\''+k+'\')"><svg viewBox="0 0 20 20">'+DSI.rest+'</svg><b>This is a rest day</b></button></div>';
+  }else if(ids.length<DAY_MAX&&k!=='rest'){
+    h+='<div class="dsrow"><button class="dsb dswide" onclick="closeOvl(\'dayOvl\');openNewDay(\''+k+'\')"><svg viewBox="0 0 20 20">'+DSI.add+'</svg><b>Add another workout to '+d.n+'</b></button></div>';
+  }
+  document.getElementById('dsBody').innerHTML=h;
+  openHeld('dayOvl');
+}
 function mkActions(id,dk){
   var mine=!!(DB.custom&&DB.custom[id]);
   var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'This workout';
