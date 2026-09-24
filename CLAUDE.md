@@ -145,15 +145,16 @@ main constraint on how to work in it. See **Traps** below before editing.
   the last log's date plus the targets). `levelPlan(wk,true)` returns declined rows, `lvlHidden(wk)`
   says a workout is sitting on one, and the card's hold menu carries SHOW THE LEVEL UP. Never make a
   no silent again: the owner lost a raise on 12 Sep and had no way back to it.
-- **The splash strike: the blow lands, THEN it lights** (v5.228). The hammer's contact is at 1.060s,
-  which is where its easing actually puts it, so the impact cluster (flare, sparks, anvil sink, shake)
-  fires at 1.09s and the rule, word and tagline follow at 1.13s, 1.17s and 1.46s. Never set them back
-  to 1.05s: that is 10ms BEFORE contact and the owner saw it on a real launch. The relationship inside
-  the blow is his pick of 22 Sep and does not change: the flare reaches full in 75ms and the sparks in
-  144ms, so the flare reads a beat ahead of them. The gold BEFORE the blow is the hearth (the static
-  ember under the mark and the mark's own drop shadow), on from the first frame on purpose; that part
-  is not a bug. To check either, pause document.getAnimations() and step currentTime: the hammer's
-  rotation crossing 0 is contact.
+- **The splash blow is fired by the hammer, never by a delay** (v5.229). Nothing about the impact is
+  scheduled: a rAF loop beside `logoSvgParts` reads the hammer's real rotation every drawn frame and
+  adds `.struck` to #splash when it crosses the anvil, and every part of the blow (flare and sparks
+  .03s behind, anvil sink, shake, then rule, word, tagline) hangs off that class. **Never put the
+  impact back on a timed delay.** A launch buries the main thread, the hammer freezes mid air, and a
+  composited opacity fade keeps perfect time: that is how a scheduled flare arrives before the metal,
+  which is what the owner saw twice, on 1.05s and again on 1.09s. A 2.2s backstop covers a hammer that
+  never moves, Motion Off strikes at once, and `dismissSplash` holds until the blow has had 820ms
+  (4.6s ceiling). The gold BEFORE the blow is the hearth and is deliberate. The preview pane cannot
+  test any of this: it draws no frames, so only the backstop ever fires there.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
   strength and underfills "move"; longer would only add rest.
 - The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated

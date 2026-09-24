@@ -3009,11 +3009,12 @@ html.light .sp-mark .cut,body.light .sp-mark .cut{fill:#e9eef5;}
   filter:drop-shadow(0 0 20px color-mix(in srgb,var(--gold) 42%,transparent));
   opacity:0;animation:lxIn .52s cubic-bezier(.2,.7,.3,1) .06s both;}
 .lx-rule{width:0;height:1px;margin:21px 0 17px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-  animation:lxRule .5s cubic-bezier(.3,.7,.3,1) .34s both;}
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+#splash.struck .lx-rule{animation:lxRule .5s cubic-bezier(.3,.7,.3,1) .04s both;}
 .lx-word{font-family:'Big Shoulders Display','Barlow Condensed',var(--sans);font-weight:800;
   font-size:31px;line-height:1.2;letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;
-  color:var(--txt);opacity:0;animation:lxIn .5s cubic-bezier(.2,.7,.3,1) .46s both;}
+  color:var(--txt);opacity:0;}
+#splash.struck .lx-word{animation:lxIn .5s cubic-bezier(.2,.7,.3,1) .08s both;}
 /* The ember the mark is standing on. Static - it is a light source, not an effect. */
 #splash::after{content:'';position:absolute;left:50%;bottom:-14%;width:min(150vw,620px);
   height:min(80vw,340px);transform:translateX(-50%);pointer-events:none;border-radius:50%;
@@ -3030,18 +3031,20 @@ html.light .sp-mark .cut,body.light .sp-mark .cut{fill:#e9eef5;}
 /* v5.186 (owner picked A, the overhead swing): the first strike read as a careful low tap. The
    hammer now hauls back over the top from a pivot past the handle's end (the arm, not the wrist),
    hangs, and slams down; the anvil sinks further, the sparks fly higher and the mark shakes. */
-.lx-mark{animation:lxShake .4s linear 1.09s both;}
+#splash.struck .lx-mark{animation:lxShake .4s linear both;}
 .lx-hammer{transform-box:fill-box;transform-origin:112% -4%;animation:lxSwing 1.5s .1s both;
   will-change:transform;backface-visibility:hidden;}
-.lx-sparks path{transform-box:view-box;transform-origin:560px 560px;opacity:0;animation:lxSpark .8s cubic-bezier(.1,.8,.3,1) 1.09s both;}
-.lx-anvil{transform-box:view-box;transform-origin:625px 1060px;animation:lxTake .55s ease-out 1.09s both;}
-.lx-rule{animation-delay:1.13s;}
-.lx-word{animation-delay:1.17s;}
-.lx-tag{margin-top:12px;font-size:12.5px;letter-spacing:.02em;color:var(--txt2);opacity:0;animation:lxIn .5s cubic-bezier(.2,.7,.3,1) 1.46s both;}
-:root.mo-off .lx-tag{animation:none;opacity:1;}
+.lx-sparks path{transform-box:view-box;transform-origin:560px 560px;opacity:0;}
+#splash.struck .lx-sparks path{animation:lxSpark .8s cubic-bezier(.1,.8,.3,1) .03s both;}
+.lx-anvil{transform-box:view-box;transform-origin:625px 1060px;}
+#splash.struck .lx-anvil{animation:lxTake .55s ease-out both;}
+.lx-tag{margin-top:12px;font-size:12.5px;letter-spacing:.02em;color:var(--txt2);opacity:0;}
+#splash.struck .lx-tag{animation:lxIn .5s cubic-bezier(.2,.7,.3,1) .37s both;}
+:root.mo-off #splash.struck .lx-tag,:root.mo-off .lx-tag{animation:none;opacity:1;}
 .lx-flash{position:absolute;inset:0;pointer-events:none;opacity:0;
   background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--gold) 38%,transparent),transparent 40%);
-  animation:lxFlash .5s ease-out 1.09s both;}
+  }
+#splash.struck .lx-flash{animation:lxFlash .5s ease-out .03s both;}
 @keyframes lxSwing{0%{transform:rotate(40deg);animation-timing-function:cubic-bezier(.2,.7,.4,1);}
   48%{transform:rotate(104deg);}56%{transform:rotate(106deg);animation-timing-function:cubic-bezier(.8,0,1,.7);}
   64%{transform:rotate(-6deg);animation-timing-function:ease-out;}72%{transform:rotate(6deg);}84%{transform:rotate(-1deg);}100%{transform:rotate(0);}}
@@ -3049,11 +3052,11 @@ html.light .sp-mark .cut,body.light .sp-mark .cut{fill:#e9eef5;}
 @keyframes lxTake{0%{transform:translateY(0);}25%{transform:translateY(26px) scaleY(.93);}100%{transform:none;}}
 @keyframes lxShake{0%,100%{transform:none;}15%{transform:translate(4px,5px);}35%{transform:translate(-4px,-2px);}55%{transform:translate(3px,2px);}75%{transform:translate(-1px,-1px);}}
 @keyframes lxFlash{0%{opacity:0;}15%{opacity:1;}100%{opacity:0;}}
-:root.mo-off .lx-hammer,:root.mo-off .lx-anvil,:root.mo-off .lx-flash,:root.mo-off .lx-mark{animation:none;}
-:root.mo-off .lx-sparks path{animation:none;opacity:1;}
+:root.mo-off .lx-hammer,:root.mo-off #splash.struck .lx-anvil,:root.mo-off #splash.struck .lx-flash,:root.mo-off #splash.struck .lx-mark{animation:none;}
+:root.mo-off #splash.struck .lx-sparks path,:root.mo-off .lx-sparks path{animation:none;opacity:1;}
 /* Motion Off still gets the launch, it just gets it already arrived. */
-:root.mo-off .lx-logo,:root.mo-off .lx-word{animation:none;opacity:1;}
-:root.mo-off .lx-rule{animation:none;width:112px;}
+:root.mo-off .lx-logo,:root.mo-off #splash.struck .lx-word,:root.mo-off .lx-word{animation:none;opacity:1;}
+:root.mo-off #splash.struck .lx-rule,:root.mo-off .lx-rule{animation:none;width:112px;}
 :root.mo-off .lx-in{transition:opacity .28s ease;}
 :root.mo-off #splash.out .lx-in{transform:none;}
 @media(max-width:360px){.lx-word{font-size:27px;}}
@@ -9783,7 +9786,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.228';
+var APPV='v5.229';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11818,7 +11821,17 @@ document.documentElement.style.background=                 // no pale gutter if 
 // three builds. See the comment in dismissSplash.
 var SPLASH_ON=1;
 function dismissSplash(){
-  if(splashGone)return;splashGone=true;
+  if(splashGone)return;
+  // The word, the line and the tagline land after the blow, and since v5.229 the blow waits for
+  // the hammer to actually arrive on screen. A launch slow enough to delay the hammer would other-
+  // wise have the screen taken away mid strike, so the hold stretches to cover it - with a ceiling,
+  // because a launch that never strikes still has to hand over.
+  try{
+    var sps=document.getElementById('splash'),age=Date.now()-bootT0;
+    if(sps&&SPLASH_ON&&age<4200&&!sps.classList.contains('struck')){setTimeout(dismissSplash,120);return;}
+    if(sps&&sps.__struckAt&&age<4600&&(Date.now()-sps.__struckAt)<820){setTimeout(dismissSplash,120);return;}
+  }catch(e){}
+  splashGone=true;
   initAudio();
   var s=document.getElementById('splash');
   if(!s)return;
@@ -11972,6 +11985,31 @@ function logoSvgParts(cls,size){
 (function(){
   var L=document.getElementById('lxLogo');
   if(L)L.innerHTML=logoSvgParts('lx-mark',104);
+  // The blow waits for the hammer to arrive, measured off the screen rather than off the clock
+  // (v5.229). Only frames that are actually drawn move this on, so a launch that stalls delays
+  // the light by exactly as much as it delayed the hammer.
+  var sp=document.getElementById('splash');
+  var hm=L&&L.querySelector('.lx-hammer');
+  if(!sp)return;
+  function strike(){if(!sp||sp.classList.contains('struck'))return;sp.__struckAt=Date.now();sp.classList.add('struck');}
+  var off=false;try{off=document.documentElement.classList.contains('mo-off');}catch(e){}
+  if(!hm||off||!window.requestAnimationFrame||!window.getComputedStyle){strike();return;}
+  // A backstop, so a launch never loses its word to a hammer that never moved.
+  var bail=setTimeout(strike,2200);
+  var lift=false;
+  (function look(){
+    if(sp.classList.contains('struck')){clearTimeout(bail);return;}
+    var deg=0;
+    try{
+      var m=new DOMMatrixReadOnly(getComputedStyle(hm).transform);
+      deg=Math.atan2(m.b,m.a)*180/Math.PI;
+    }catch(e){clearTimeout(bail);strike();return;}
+    // It starts at 40 degrees and hauls back over the top before it comes down, so the crossing
+    // that matters is the one AFTER it has been lifted clear.
+    if(deg>60)lift=true;
+    if(lift&&deg<=0){clearTimeout(bail);strike();return;}
+    requestAnimationFrame(look);
+  })();
 })();
 // w is how wide the anvil should sit inside a 100-unit box; the scale follows from its own
 // width, so changing the path does not silently resize every mark that uses it.
