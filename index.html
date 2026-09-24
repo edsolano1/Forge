@@ -3684,7 +3684,7 @@ body.wcon{overflow:hidden;}
     <div class="mk-acts" style="margin-top:12px">
       <div class="btn btn-go" id="easeGo" onclick="easeApply()">SET THEM TO MY BEST</div>
     </div>
-    <div class="sheet-btns"><div class="btn" onclick="easeLeave()">LEAVE THEM AS THEY ARE</div></div>
+    <div class="sheet-btns"><div class="btn" onclick="easeLeave()">LEAVE THEM</div></div>
   </div>
 </div>
 
@@ -9768,7 +9768,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.225';
+var APPV='v5.226';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10789,8 +10789,9 @@ function openEase(wk){
   EASEWK=wk;EASEPLAN=easePlan(wk);
   var w=W[wk];
   document.getElementById('easeSub').textContent=
-    (w?w.name.replace('Optional: ',''):'')+(EASEPLAN.length===1?', one target':', '+EASEPLAN.length+' targets')+
-    ' asking for a weight you have never lifted.';
+    (w?w.name.replace('Optional: ','')+'. ':'')+
+    (EASEPLAN.length===1?'One lift asks for more than you have ever lifted.'
+                        :EASEPLAN.length+' lifts ask for more than you have ever lifted.');
   easeRender();
   openHeld('easeOvl');
 }
@@ -10800,13 +10801,13 @@ function easeRender(){
     var t0=parseTarget(r.from[0]),t1=parseTarget(r.to[0]);
     return '<div class="lvl-row"'+(r.done?'':' onclick="easeOne('+i+')"')+'>'+
       '<div class="lvl-n">'+esc(r.name)+(r.done?' <span style="color:var(--go);font-size:11px">SET</span>':'')+'</div>'+
-      '<div class="lvl-d"><span>asks <b>'+fmtW(t0.w)+'</b></span>'+
-      '<span>your best <b class="up">'+fmtW(t1.w)+'</b></span>'+
-      '<span>'+r.tries+' sessions</span></div></div>';
+      '<div class="lvl-d"><span>asks for <b>'+fmtW(t0.w)+'</b></span>'+
+      '<span>your best is <b class="up">'+fmtW(t1.w)+'</b></span></div></div>';
   }).join('');
   var go=document.getElementById('easeGo'),left=EASEPLAN.filter(function(r){return !r.done;});
   go.style.display=left.length?'':'none';
-  go.textContent=left.length===1?'SET IT TO MY BEST':'SET THEM TO MY BEST';
+  go.textContent=left.length===1?'USE MY BEST INSTEAD':'USE MY BEST FOR BOTH';
+  if(left.length>2)go.textContent='USE MY BEST FOR ALL '+left.length;
 }
 function easeOne(i){
   var r=EASEPLAN[i];if(!r||r.done)return;
@@ -10836,14 +10837,24 @@ function easeNotice(){
     if(!all.length)return;
     var sig=easeSig(all);
     if(DB.stSeen===sig)return;
-    var n=0;all.forEach(function(g){n+=g.rows.length;});
-    var first=all[0];
-    ask(n===1?'One target asks for a weight you have never lifted, so no session can ever meet it. '+
-               'It can come back to your best.'
-             :n+' targets ask for weights you have never lifted, so no session can ever meet them. '+
-               'They can come back to your best.',
-        function(){openEase(first.wk);},
-        'Check your targets?','SHOW ME',
+    // Counted by LIFT, not by row: the same leg press standing in three saved copies is one
+    // problem, and saying eleven made it sound like the app had lost its mind.
+    var lifts={},worst=null,first=all[0];
+    all.forEach(function(g){g.rows.forEach(function(r){
+      lifts[r.id]=1;
+      var gap=Math.abs(r.ask-r.best);
+      if(!worst||gap>worst.gap)worst={name:r.name,ask:r.ask,best:r.best,gap:gap,wk:g.wk};
+    });});
+    var n=Object.keys(lifts).length;
+    // One lift, named, with its two numbers. A person can check that against their own memory of
+    // the gym in a second; "targets that cannot be met" is a sentence about the app instead.
+    var eg=worst?(' Your '+String(worst.name).toLowerCase()+' asks for '+fmtW(worst.ask)+
+                  ' and your best ever is '+fmtW(worst.best)+'.'):'';
+    ask((n===1?'One lift asks for more weight than you have ever lifted.'
+             :n+' lifts ask for more weight than you have ever lifted.')+eg+
+        ' They can be set to your best, keeping the same reps.',
+        function(){openEase((worst&&worst.wk)||first.wk);},
+        n===1?'A weight is set too high':'Some weights are set too high','SHOW ME',
         function(){easeNoteDone();},null,'NOT NOW');
   }catch(e){}
 }
