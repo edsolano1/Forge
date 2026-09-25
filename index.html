@@ -167,6 +167,15 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .ease-nums b{color:var(--txt2);font-weight:600;}
 .ease-nums b.up{color:var(--go);}
 .ease-where{margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
+/* The scrap heap (v5.236): one plate per deleted workout, its name, when it went and how big it
+   was, with the two answers underneath. Same plate as the day sheet, because it is the same kind
+   of thing: a workout and what you can do with it. */
+.scr{border:1px solid #3a2214;border-radius:12px;background:#130c09;padding:12px 13px;margin-bottom:10px;}
+.scr-n{font-family:'Marcellus',serif;font-size:17px;color:var(--txt);margin-bottom:3px;
+  overflow-wrap:anywhere;}
+.scr-m{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);}
+.scr .dsrow{margin:11px 0 0;}
+.scr .dsb{flex:1;}
 /* The day sheet (v5.234, owner picked A): the day on a plate, its workouts, and under each one the
    actions as labelled icons. Icons alone were rejected as a guessing game; the word under each
    glyph costs one line and settles it. */
@@ -3413,6 +3422,8 @@ body.wcon{overflow:hidden;}
     <div id="extraForge" hidden><button class="sv-btn sv-forge" onclick="ezOpen('saved')" title="Forge me a week"><svg viewBox="0 0 100 100" id="svForgeIco"></svg><span>Forge me a week</span></button></div>
     <div class="mk-hint" id="extraHint" hidden>Not part of the week. Open one whenever you want it.</div>
     <div id="extraCards" hidden></div>
+    <!-- The scrap heap sits with the workouts, and only when it holds something (v5.236). -->
+    <div id="scrapLine" hidden><button class="sv-btn" onclick="openScrap()"><svg viewBox="0 0 20 20"><path d="M4.5 6.5h11M8.5 6.5V5h3v1.5M6 6.5l.7 9h6.6l.7-9"/></svg><span id="scrapLineTxt">Scrap heap</span></button></div>
   </div>
   <div class="sides" id="sides"></div>
   <div class="foot" id="foot"></div>
@@ -3849,6 +3860,13 @@ body.wcon{overflow:hidden;}
       <button class="preset sm" onclick="openBackup()">SAVE A COPY, OR PUT ONE BACK</button>
     </div>
     <div class="footnote" style="margin:6px 2px 0">Everything you have logged, in one file you keep.</div>
+    <div id="scrapSet" hidden>
+      <div class="sfx-lbl" style="margin-top:14px"><span>Scrap heap</span></div>
+      <div class="presets" style="grid-template-columns:1fr">
+        <button class="preset sm" onclick="closeOvl('settingsOvl');openScrap()" id="scrapSetBtn">WHAT YOU DELETED</button>
+      </div>
+      <div class="footnote" style="margin:6px 2px 0">A deleted workout waits here. Nothing is thrown away behind your back.</div>
+    </div>
     </div>
     <div class="set-card">
     <div class="set-sec">Learn</div>
@@ -3876,6 +3894,19 @@ body.wcon{overflow:hidden;}
     <p>Each one is its own place, and changes everything: palette, lettering, and the sounds it makes.</p>
     <div class="mk-acts" id="themeSheet"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('themeOvl')">CLOSE</div></div>
+  </div>
+</div>
+
+<!-- The scrap heap (v5.236): what you deleted, and the way back. -->
+<div class="ovl" id="scrapOvl">
+  <div class="sheet" style="max-width:440px">
+    <div class="dsh">
+      <span class="dsd"><b>OUT</b><i id="scrapN"></i></span>
+      <span class="dst">Scrap heap</span>
+      <button class="dsb dsx" onclick="closeOvl('scrapOvl')" title="Close"><svg viewBox="0 0 20 20"><path d="M6 6l8 8M14 6l-8 8"/></svg></button>
+    </div>
+    <div class="mk-hint" style="margin:0 0 12px">Workouts you deleted. Put one back and it lands in Saved workouts.</div>
+    <div id="scrapBody"></div>
   </div>
 </div>
 
@@ -9822,7 +9853,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.235';
+var APPV='v5.236';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13105,6 +13136,7 @@ function MKTXT(){
   return {t:'Inscribe a workout',save:'INSCRIBE THIS WORKOUT',hint:'Hold a workout to inscribe your own',act:'Inscribe this workout again',mk:'INSCRIBE A NEW WORKOUT',xl:'Kept days',xa:'Keep it off the plan',xc:'KEPT'};
 }
 function effWk(wk){return (DB.slots&&DB.slots[wk])||wk;}
+var WSTOCK=null;
 function mergeCustom(){
   if(!DB.custom)DB.custom={};
   if(!DB.slots)DB.slots={};
@@ -13114,6 +13146,9 @@ function mergeCustom(){
   // it. Untagged ones still land on 'other' - and 'other' is deliberately exempt from the muscle
   // filter rather than hidden by it, see mkFiltHit.
   for(var k in DB.cex){EX[k]=DB.cex[k];NOREF[k]=1;if(DB.cex[k].grp)GRP[k]=DB.cex[k].grp;else if(!GRP[k])GRP[k]='other';}
+  // The built-ins, before anything of the user's lands on top of them. W is never pruned when a
+  // workout is deleted, so it cannot be asked whether an id is free (v5.236).
+  if(!WSTOCK){WSTOCK={};for(var sk in W)if(!DB.custom[sk])WSTOCK[sk]=1;}
   for(var d in DB.custom)W[d]=DB.custom[d];
   pumpApply();
   // Once the library is whole, hand every workout its slots. Here because it is the one place
@@ -13467,6 +13502,7 @@ function savedApply(n){
   var fb=document.getElementById('extraForge');if(fb)fb.hidden=!SAVED_OPEN;
   h.hidden=!SAVED_OPEN;   // the line under the board is the fold's own header now (v5.195)
   if(t)t.hidden=!(SAVED_OPEN&&n>0);
+  scrapApply();
 }
 function openNewSaved(){
   savedOpen();
@@ -13720,11 +13756,101 @@ function openHeld(id){
     document.addEventListener(n,function h(){document.removeEventListener(n,h);setTimeout(clear,60);});
   });
 }
+// The scrap heap (v5.236). Twenty is plenty to get a mistake back and small enough that it never
+// weighs on storage; nothing expires, because a bin that empties itself is the same lost workout
+// with a delay on it.
+var SCRAP_MAX=20;
+function scrapPut(id){
+  try{
+    var w=DB.custom&&DB.custom[id];if(!w)return;
+    DB.scrap=DB.scrap||[];
+    DB.scrap.unshift({id:id,at:Date.now(),w:JSON.parse(JSON.stringify(w))});
+    if(DB.scrap.length>SCRAP_MAX)DB.scrap.length=SCRAP_MAX;
+  }catch(e){}
+}
+function scrapCount(){return ((DB&&DB.scrap)||[]).length;}
+function scrapRows(w){
+  var n=0;((w&&w.sections)||[]).forEach(function(sec){n+=((sec&&sec.rows)||[]).length;});
+  return n;
+}
+// Near dates read better as words, and anything older than a week is clearer as the date itself.
+function scrapWhen(ms){
+  var d=Math.round((dayNoon(Date.now())-dayNoon(ms))/864e5);
+  if(d<=0)return 'Deleted today';
+  if(d===1)return 'Deleted yesterday';
+  if(d<7)return 'Deleted '+d+' days ago';
+  var t=new Date(ms),M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return 'Deleted '+t.getDate()+' '+M[t.getMonth()];
+}
+function scrapApply(){
+  var n=scrapCount();
+  var L=document.getElementById('scrapLine'),T=document.getElementById('scrapLineTxt');
+  if(L)L.hidden=!(SAVED_OPEN&&n>0);
+  if(T)T.textContent='Scrap heap ('+n+')';
+  var S=document.getElementById('scrapSet');if(S)S.hidden=!n;
+  var B=document.getElementById('scrapSetBtn');
+  if(B)B.textContent=n===1?'ONE DELETED WORKOUT':(n+' DELETED WORKOUTS');
+  var C=document.getElementById('scrapN');if(C)C.textContent=n;
+}
+function openScrap(){
+  scrapDraw();
+  openHeld('scrapOvl');
+}
+function scrapDraw(){
+  var b=document.getElementById('scrapBody');if(!b)return;
+  var L=DB.scrap||[],h='';
+  if(!L.length)h='<div class="dsnone">Nothing in it. A workout you delete waits here.</div>';
+  L.forEach(function(e,i){
+    var rows=scrapRows(e.w);
+    h+='<div class="scr"><div class="scr-n">'+esc(String((e.w&&e.w.name)||'A workout').replace('Optional: ',''))+'</div>'+
+       '<div class="scr-m">'+scrapWhen(e.at)+' \u00b7 '+rows+' exercise'+(rows===1?'':'s')+'</div>'+
+       '<div class="dsrow">'+
+       dsBtn('up','Put it back','scrapBack('+i+')')+
+       dsBtn('bin','Delete for good','scrapBurn('+i+')','bad')+
+       '</div></div>';
+  });
+  b.innerHTML=h;
+  scrapApply();
+}
+// It comes back to Saved workouts, never straight onto a day: the week moved on while it was gone,
+// and putting it back where it used to stand could land it on top of whatever took its place.
+function scrapBack(i){
+  var e=(DB.scrap||[])[i];if(!e)return;
+  DB.custom=DB.custom||{};DB.extra=DB.extra||[];
+  if(DB.extra.length>=BANK_MAX){
+    ask('Saved workouts is full at '+BANK_MAX+'. Delete one of those first, then come back.',null,'No room for it',"OK",false);
+    return;
+  }
+  var id=e.id;
+  if(!id||DB.custom[id]||(WSTOCK&&WSTOCK[id])){
+    do{id='cus'+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);}
+    while(DB.custom[id]||W[id]);   // a NEW id has to dodge the stale ones too
+  }
+  DB.custom[id]=JSON.parse(JSON.stringify(e.w));
+  DB.custom[id].custom=1;
+  if(DB.extra.indexOf(id)<0)DB.extra.push(id);
+  DB.scrap.splice(i,1);
+  saveDB();mergeCustom();
+  closeOvl('scrapOvl');
+  savedOpen();renderHome();scrapApply();
+  try{sfxLog();}catch(err){}
+  var nm=String((e.w&&e.w.name)||'It').replace('Optional: ','');
+  ask(nm+' is back in Saved workouts. Hold it to put it on a day.',null,'Back from the heap',"OK",false);
+}
+function scrapBurn(i){
+  var e=(DB.scrap||[])[i];if(!e)return;
+  var nm=String((e.w&&e.w.name)||'this workout').replace('Optional: ','');
+  ask('Delete '+nm+' for good? This one cannot be undone.',function(){
+    (DB.scrap||[]).splice(i,1);
+    saveDB();scrapDraw();renderHome();
+  },'Gone for good','DELETE');
+}
 function mkDeleteX(id){
   if(openHere(id)){closeOvl('mkActOvl');mkNote('This workout has a session open. Finish it first.');return;}
   var nm=(W[id]&&W[id].name.replace('Optional: ',''))||'this workout';
   closeOvl('mkActOvl');
-  ask('Delete '+nm+'? Sessions you already logged stay in your history.',function(){
+  ask('Delete '+nm+'? It goes to the scrap heap, and sessions you already logged stay in your history.',function(){
+    scrapPut(id);
     DB.extra=(DB.extra||[]).filter(function(x){return x!==id;});
     if(DB.custom)delete DB.custom[id];
     saveDB();mergeCustom();renderHome();
@@ -13763,9 +13889,10 @@ function mkDelete(id){
   closeOvl('mkActOvl');
   // Day-to-day model: a workout stands on one day, so a delete can only ever take the day
   // you are looking at. No other day needs naming - none is touched.
-  var msg='Delete '+nm+'? Sessions you already logged stay in your history.';
+  var msg='Delete '+nm+'? It goes to the scrap heap, and sessions you already logged stay in your history.';
   ask(msg,
     function(){
+      scrapPut(id);                          // recoverable for the next twenty deletes (v5.236)
       planDropSilent(id);                    // out of whichever day held it, and off the rack
       if(DB.custom)delete DB.custom[id];
       if(DB.active)delete DB.active[id];     // nothing stale left behind (v5.101)
@@ -19637,6 +19764,7 @@ function openTimerSheet(){
 function openSettings(){
   initAudio();
   drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();ntDraw();hcDraw();
+  scrapApply();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   // The two tour buttons say which LENGTH they are, so the theme's word for "Tutorial" no longer

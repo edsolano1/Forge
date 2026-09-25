@@ -57,6 +57,13 @@ main constraint on how to work in it. See **Traps** below before editing.
   the 7th arg names the no-button (NOT NOW). The queue signature moved to index 7.
 - **Every user-typed string is `esc()`'d where it lands in HTML** (names, notes, custom links).
 - **Unlocking is per card** (v5.112). `unsealOne(id)` on the hold menu of a locked card; the footer UNLOCK THE WEEK button is gone and must not come back. `doUnseal` survives only for the end-of-week "go round again" dialog. A passed day still undone shows a Waiting pill; three or more collapse into one line (`waitingCount`).
+- **A deleted workout is recoverable** (v5.236). `mkDelete` and `mkDeleteX` call `scrapPut(id)`
+  first, which copies it into `DB.scrap` (newest first, `SCRAP_MAX` 20, no expiry). `openScrap`
+  shows them; `scrapBack` returns one to Saved workouts keeping its own id, `scrapBurn` is the
+  only thing that really deletes. Never add a clock to it, and never restore straight onto a day.
+  `W` is NOT pruned when a workout is deleted, so `W[id]` cannot answer whether an id is free:
+  `WSTOCK` (the built-ins, snapshotted in `mergeCustom` before the user's are merged over them) is
+  what to ask.
 - **Sheets guard their edits** (v5.123). Back on a sheet with an unsaved change asks Keep the change? (SAVE or DISCARD) through `UNSAVED[id]` in `backCloses`; register a dirty test and a save there when adding a sheet with a SAVE or ADD. CANCEL buttons still cancel outright. Notes autosave (v5.122); the plate calculator SAVE writes the total into the next unlogged set (`plLand`, v5.121). Held weight: `held(x,c)` draws a dumbbell or, when `KBNOW` is on for that exercise (`DB.kb`, `KB_OK`), a kettlebell.
 - **The look is settled (v5.125 to v5.156).** Blackened steel plates on an agenda board over the
   hearth ground; the wizard icons in WZ with per-icon idles; the banner level-up sheet; the seal
