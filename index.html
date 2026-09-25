@@ -9822,7 +9822,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.234';
+var APPV='v5.235';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10916,11 +10916,29 @@ function easeEnd(){
 // walking to the end of the list, or saying LEAVE THEM to the question itself, settles it.
 function easeLeave(){closeOvl('easeOvl');}
 function easeNoteDone(){DB.stSeen=easeSig(easeAll());saveDB();}
+// The amnesty (v5.235). Runs once, before the first notice: everything out of reach right now is
+// treated as having been set today, so the check starts from evidence gathered from here rather
+// than from a history it cannot read the intent of.
+function easeAmnesty(){
+  try{
+    if(DB.stAmnesty)return;
+    var n=0;
+    DB.upAt=DB.upAt||{};
+    easeAll().forEach(function(g){g.rows.forEach(function(r){
+      var k=r.sk||r.id;
+      if(!DB.upAt[k]){DB.upAt[k]=Date.now();n++;}
+    });});
+    DB.stAmnesty=1;
+    saveDB();
+    return n;
+  }catch(e){}
+}
 // One notice, at the start, only when there is something to say. Never during the tour, never in
 // the sandbox, and never twice for the same list.
 function easeNotice(){
   try{
     if(TUTON||SANDBOX)return;
+    easeAmnesty();                 // once, and it silences everything that predates the check
     var all=easeAll();
     if(!all.length)return;
     var sig=easeSig(all);

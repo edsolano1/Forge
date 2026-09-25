@@ -135,7 +135,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   fix writes through `lvlWrite` and keeps the reps. A target is only judged once it has been TRIED:
   `lvlWrite` stamps `DB.upAt[slot]` and `easePlan` skips anything whose stamp is newer than that
   lift's last session, compared BY DAY because a log carries only a date (v5.232, v5.233), because a raise you just accepted is a weight you have not lifted by
-  definition and the check was condemning the app's own offer. `easeNotice()` asks once per distinct list at
+  definition and the check was condemning the app's own offer. Stamping only covers raises written
+  since it existed, so easeAmnesty stamps everything out of reach at upgrade once (DB.stAmnesty) and
+  the check earns its warnings from there (v5.235). A stale target is not lost: train it, fall short,
+  and it comes back with a real attempt behind it. `easeNotice()` asks once per distinct list at
   launch (`DB.stSeen`), and the card's hold menu carries TARGETS OUT OF REACH.
   The question has three answers (SHOW ME, LATER which records nothing and comes back next launch,
   LEAVE THEM which settles that list), and the sheet walks ONE LIFT at a time with USE <best> and
