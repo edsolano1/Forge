@@ -167,6 +167,31 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .ease-nums b{color:var(--txt2);font-weight:600;}
 .ease-nums b.up{color:var(--go);}
 .ease-where{margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
+/* Your data, and Bring one in (v5.237). A row can hold a name, a line saying what it does and
+   the state, which is exactly what a backup screen has to say and what a tile cannot. */
+.ydg{border:1px solid var(--line);border-radius:14px;background:var(--surface2);overflow:hidden;margin-top:8px;}
+.yd{display:flex;align-items:center;gap:13px;width:100%;text-align:left;font:inherit;color:var(--txt);
+  background:none;border:0;border-top:1px solid var(--line);padding:13px 14px;min-height:58px;cursor:pointer;}
+.yd[hidden]{display:none;}
+.yd:first-child{border-top:0;}
+.yd>svg{flex:none;width:21px;height:21px;fill:none;stroke:var(--go);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.yd>svg.chv{width:16px;height:16px;stroke:var(--txt3);}
+.ydw{flex:1;min-width:0;}
+.ydw b{display:block;font-size:15px;font-weight:500;line-height:1.3;}
+.ydw span{display:block;font-size:12.4px;line-height:1.5;color:var(--txt3);margin-top:2px;}
+@media (hover:hover){.yd:hover .ydw b{color:var(--gold);}}
+.yd:active{background:rgba(255,255,255,.03);}
+/* the one that replaces everything never looks like the ones that do not */
+.yd.bad>svg{stroke:#e2705b;}
+.yd.bad .ydw b{color:#e2705b;}
+.ydlbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--txt3);margin:16px 2px 0;}
+.ydstat{display:flex;align-items:center;gap:12px;padding:13px 14px;margin-top:10px;border-radius:14px;
+  border:1px solid color-mix(in srgb,var(--go) 40%,transparent);
+  background:color-mix(in srgb,var(--go) 7%,transparent);}
+.ydstat[hidden]{display:none;}
+.ydstat>svg{flex:none;width:23px;height:23px;fill:none;stroke:var(--gold);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.ydstat .ydw b{font-family:'Marcellus',serif;font-size:16px;font-weight:400;}
+.ydstat .ydw span{color:var(--txt2);}
 /* The scrap heap (v5.236): one plate per deleted workout, its name, when it went and how big it
    was, with the two answers underneath. Same plate as the day sheet, because it is the same kind
    of thing: a workout and what you can do with it. */
@@ -3414,12 +3439,11 @@ body.wcon{overflow:hidden;}
          on the same page so drag and hold keep working. The plus and Forge me a week sit on the line. -->
     <div class="sv-head" id="extraLabel">
       <button class="sv-tog" onclick="savedToggle()" aria-expanded="false"><svg class="sv-chev" viewBox="0 0 20 20"><path d="M6 8l4 4 4-4"/></svg><span class="sec-label" id="extraLabelTxt">Saved workouts</span></button>
-      <span class="sv-acts"><button class="sv-btn" onclick="openNewSaved()" title="New saved workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></span>
+      <span class="sv-acts"><button class="sv-btn" onclick="svAdd()" title="Add a workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></span>
     </div>
     <!-- Forge me a week moved off that line and into the fold (v5.192, R4): a forged week lands in
          Saved, so the button belongs where its result does, and the line under the board is two
          controls instead of three. -->
-    <div id="extraForge" hidden><button class="sv-btn sv-forge" onclick="ezOpen('saved')" title="Forge me a week"><svg viewBox="0 0 100 100" id="svForgeIco"></svg><span>Forge me a week</span></button></div>
     <div class="mk-hint" id="extraHint" hidden>Not part of the week. Open one whenever you want it.</div>
     <div id="extraCards" hidden></div>
     <!-- The scrap heap sits with the workouts, and only when it holds something (v5.236). -->
@@ -3515,47 +3539,45 @@ body.wcon{overflow:hidden;}
   </div>
 </div>
 
-<div class="ovl" id="backupOvl">
-  <div class="sheet">
-    <h3>Backup &amp; restore</h3>
-    <!-- Two views on one sheet (user note, Aug 23): the front is three words - BACKUP,
-         RESTORE, CLOSE - and BACKUP turns the page to a menu with room to explain each
-         way out. Everything the user reads here is plain english; the machine text lives
-         only inside the file it belongs to. -->
-    <div id="bkMain">
-      <p>Your logs live on this phone and nowhere else. Clearing the app or its data erases them. The safest copy is one that leaves the phone.</p>
-      <!-- Native app only (a browser cannot quietly write a file, and quietly is the point);
-           autoBkDraw shows it when the Filesystem bridge is really there. -->
-      <div class="btn" id="bkAuto" onclick="autoBkToggle()" style="display:none">AUTOMATIC SAFETY COPY: OFF</div>
-      <div class="footnote" id="bkAutoNote" style="display:none;margin:6px 2px 12px">A backup file that refreshes itself after every finished workout, in Documents under a Forge folder. It survives even deleting the app.<span id="bkAutoState"></span></div>
-      <!-- A week is not a backup and the two must not be reachable by the same button:
-           one replaces everything the other person owns, the other adds to it. -->
-      <div class="btn" onclick="bkView('week')" style="margin-bottom:12px">SHARE A WEEK</div>
-      <div class="footnote" style="margin:-6px 2px 12px">Your workouts only. No logged sessions, nothing personal. Whoever opens it keeps everything they already have.</div>
-      <div class="sheet-btns">
-        <div class="btn btn-go" onclick="bkView(true)">BACKUP</div>
-        <div class="btn" onclick="restoreAsk()">RESTORE</div>
-        <div class="btn" onclick="closeOvl('backupOvl')">CLOSE</div>
+<div class="ovl" id="bringOvl">
+  <div class="sheet" style="max-width:440px">
+    <h3>Bring a workout in</h3>
+    <p>It lands in Saved workouts, ready to put on a day. Your week, your logs and your records are untouched.</p>
+    <div id="bringList">
+      <!-- Shown only when the app can really be handed a file by the phone: the wrapper sets the
+           flag. Promising a tap that does nothing is worse than not offering it. -->
+      <div class="ydstat" id="bringTap" hidden>
+        <svg viewBox="0 0 20 20"><path d="M6.5 3.5h5l3 3v10h-8z"/><path d="M11.5 3.5v3h3"/></svg>
+        <span class="ydw"><b>Just tap the file</b><span>Wherever it arrived. Forge opens and asks whether to keep it.</span></span>
       </div>
-    </div>
-    <div id="bkWeek" style="display:none">
-      <div class="btn btn-go" onclick="shareWeek('file')">SEND MY WEEK</div>
-      <div class="footnote" style="margin:6px 2px 12px">A small file holding the workouts on your week. Whoever opens it in Forge gains them; nothing of theirs is replaced.</div>
-      <div class="btn" onclick="shareWeek('text')">MY WEEK AS TEXT</div>
-      <div class="footnote" style="margin:6px 2px 12px">The same week written out, for reading or pasting into a message. Cannot be imported back.</div>
-      <div class="btn" onclick="pickWeek()">OPEN SOMEONE’S WEEK</div>
-      <div class="footnote" style="margin:6px 2px 12px">Adds their workouts to your saved workouts, ready to place on a day. Your week, your logs and your records are untouched.</div>
+      <div class="ydg">
+        <button class="yd" onclick="pickWeek()">
+          <svg viewBox="0 0 20 20"><path d="M3 6.5h5.5l1.5 2h7v8H3z"/></svg>
+          <span class="ydw"><b>Find the file myself</b><span>Downloads, Drive, wherever you put it.</span></span>
+          <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+        </button>
+        <button class="yd" onclick="bringView('paste')">
+          <svg viewBox="0 0 20 20"><rect x="6.5" y="4.5" width="9" height="12" rx="1.6"/><path d="M4.5 13.5v-9h2"/></svg>
+          <span class="ydw"><b>Paste a code</b><span>The block of text somebody sent you in a message.</span></span>
+          <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+        </button>
+      </div>
       <input type="file" id="weekFile" accept="application/json,.json" style="display:none" onchange="doWeekImport(this)">
-      <div class="sheet-btns"><div class="btn" onclick="bkView(false)">CANCEL</div></div>
+      <div class="ydg" style="margin-top:14px">
+        <button class="yd" onclick="sendWeekAsk()">
+          <svg viewBox="0 0 20 20"><path d="M10 14V4M10 4L6.6 7.4M10 4l3.4 3.4M4 14.5v2h12v-2"/></svg>
+          <span class="ydw"><b>Send my week instead</b><span>Your workouts, for somebody else to keep.</span></span>
+          <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+        </button>
+      </div>
+      <div class="sheet-btns"><div class="btn" onclick="closeOvl('bringOvl')">CLOSE</div></div>
     </div>
-    <div id="bkMenu" style="display:none">
-      <div class="btn btn-go" onclick="exportDest('backup')">BACKUP FILE</div>
-      <div class="footnote" style="margin:6px 2px 12px">Everything, as one file. The only kind RESTORE can bring back. Send it to Google Drive or email it to yourself.</div>
-      <div class="btn" onclick="exportDest('text')">PLAIN TEXT FILE</div>
-      <div class="footnote" style="margin:6px 2px 12px">Your whole history as a readable file. For reading and sharing, not restoring.</div>
-      <div class="btn" id="bkCopy" onclick="copyHistoryText()">COPY TEXT</div>
-      <div class="footnote" style="margin:6px 2px 12px">The same history straight to your clipboard, ready to paste into a note, a document, or an email.</div>
-      <div class="sheet-btns"><div class="btn" onclick="bkView(false)">CANCEL</div></div>
+    <div id="bringPasteV" style="display:none">
+      <textarea id="bringBox" placeholder="Hold here and paste" style="min-height:150px"></textarea>
+      <div class="sheet-btns">
+        <div class="btn btn-go" onclick="bringPaste()">BRING IT IN</div>
+        <div class="btn" onclick="bringView('list')">CANCEL</div>
+      </div>
     </div>
   </div>
 </div>
@@ -3853,20 +3875,42 @@ body.wcon{overflow:hidden;}
     <!-- Backup came back onto this sheet in v5.192 (R3), off the home footer: it is a utility you
          touch twice a year, and Settings is where anybody goes looking for it. -->
     <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="doRestore(this)">
+    <!-- Your data (v5.237): the state first, then what you can do, with the one that replaces
+         everything set apart at the bottom. A tile could carry none of that. -->
     <div class="set-card">
     <div class="set-sec">Your data</div>
-    <div class="sfx-lbl"><span>Backup and restore</span></div>
-    <div class="presets" style="grid-template-columns:1fr">
-      <button class="preset sm" onclick="openBackup()">SAVE A COPY, OR PUT ONE BACK</button>
+    <div class="ydstat" id="ydAuto" hidden>
+      <svg viewBox="0 0 20 20"><path d="M16 10a6 6 0 1 1-2.2-4.6"/><path d="M16.2 3.6v3h-3"/></svg>
+      <span class="ydw"><b>Copying itself</b><span id="ydAutoSt"></span></span>
+      <button class="sfx-tog" id="ydAutoTog" onclick="autoBkToggle()">ON</button>
     </div>
-    <div class="footnote" style="margin:6px 2px 0">Everything you have logged, in one file you keep.</div>
-    <div id="scrapSet" hidden>
-      <div class="sfx-lbl" style="margin-top:14px"><span>Scrap heap</span></div>
-      <div class="presets" style="grid-template-columns:1fr">
-        <button class="preset sm" onclick="closeOvl('settingsOvl');openScrap()" id="scrapSetBtn">WHAT YOU DELETED</button>
-      </div>
-      <div class="footnote" style="margin:6px 2px 0">A deleted workout waits here. Nothing is thrown away behind your back.</div>
+    <div class="ydlbl">A COPY YOU KEEP</div>
+    <div class="ydg">
+      <button class="yd" onclick="exportDest('backup')">
+        <svg viewBox="0 0 20 20"><path d="M10 3v9M10 12l-3.4-3.4M10 12l3.4-3.4M3.5 14v2.5h13V14"/></svg>
+        <span class="ydw"><b>Save a copy now</b><span>Everything you have logged, in one file.</span></span>
+        <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+      </button>
+      <button class="yd" onclick="exportDest('text')">
+        <svg viewBox="0 0 20 20"><path d="M4 5.5h12v11H4z"/><path d="M7 9h6M7 12h4"/></svg>
+        <span class="ydw"><b>My history as text</b><span>Readable, for keeping or sending. Cannot be put back.</span></span>
+        <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+      </button>
+      <button class="yd" onclick="copyHistoryText()">
+        <svg viewBox="0 0 20 20"><rect x="7" y="7" width="9" height="9" rx="1.6"/><path d="M12 4H5a1 1 0 0 0-1 1v7"/></svg>
+        <span class="ydw"><b id="ydCopyLbl">Copy my history</b><span>Straight to the clipboard, to paste into a note or an email.</span></span>
+        <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+      </button>
     </div>
+    <div class="ydlbl">STARTING OVER</div>
+    <div class="ydg">
+      <button class="yd bad" onclick="restoreAsk()">
+        <svg viewBox="0 0 20 20"><path d="M10 12V3M10 3L6.6 6.4M10 3l3.4 3.4M3.5 14v2.5h13V14"/></svg>
+        <span class="ydw"><b>Put a copy back</b><span>Everything on this phone is replaced by the file.</span></span>
+        <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
+      </button>
+    </div>
+    <div class="footnote" style="margin:8px 2px 0">New phone, or something went wrong. It asks you twice.</div>
     </div>
     <div class="set-card">
     <div class="set-sec">Learn</div>
@@ -4114,7 +4158,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="dfOvl">
   <div class="sheet" style="max-width:420px">
     <h3 id="dfTtl">This day</h3>
-    <p>What goes on it?</p>
+    <p id="dfSub">What goes on it?</p>
     <div id="dfPicks" style="display:grid;gap:10px;margin-top:6px"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('dfOvl')">CANCEL</div></div>
   </div>
@@ -9853,7 +9897,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.236';
+var APPV='v5.237';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13370,6 +13414,7 @@ function dfAsk(k){
   DFDAY=k;
   var d=null;DAYS.forEach(function(x){if(x.k===k)d=x;});
   document.getElementById('dfTtl').textContent=d?d.n:'This day';
+  dfSay('What goes on it?');
   document.getElementById('dfPicks').innerHTML=
     '<button class="ez-card" style="--i:0" onclick="dfBuild()"><span class="ez-art">'+WZ.fd[0]+'</span><span><b>I\'ll build it</b>'+
     '<small>Pick the exercises yourself</small></span></button>'+
@@ -13385,6 +13430,7 @@ function dfForge(){
   var T=[['gym','Gym','Everything a gym has'],['db','Dumbbells','A pair, and a bench if there is one'],
          ['none','Nothing','Your own bodyweight, anywhere']];
   document.getElementById('dfTtl').textContent='What do you have?';
+  dfSay('It decides what can go on the day.');
   document.getElementById('dfPicks').innerHTML=T.map(function(t,i){
     return '<button class="ez-card'+(have===t[0]?' on':'')+'" style="--i:'+i+'" onclick="dfForgeGo(\''+t[0]+'\')">'+
       '<span class="ez-art">'+WZ.pump[i===0?2:i===1?0:1]+'</span><span><b>'+t[1]+'</b><small>'+t[2]+'</small></span></button>';
@@ -13499,11 +13545,32 @@ function savedApply(n){
   h.classList.toggle('open',SAVED_OPEN);
   var b=h.querySelector('.sv-tog');if(b)b.setAttribute('aria-expanded',SAVED_OPEN?'true':'false');
   c.hidden=!SAVED_OPEN;
-  var fb=document.getElementById('extraForge');if(fb)fb.hidden=!SAVED_OPEN;
   h.hidden=!SAVED_OPEN;   // the line under the board is the fold's own header now (v5.195)
   if(t)t.hidden=!(SAVED_OPEN&&n>0);
   scrapApply();
 }
+// The plus offers the three ways a workout appears, in the wizard's own cards (v5.237). Bring one
+// in used to be four taps down inside Backup & restore, where nobody would ever have found it.
+function dfSay(t){var e=document.getElementById('dfSub');if(e)e.textContent=t;}
+function svAdd(){
+  DFDAY=null;
+  document.getElementById('dfTtl').textContent='Add a workout';
+  dfSay('Where does it come from?');
+  document.getElementById('dfPicks').innerHTML=
+    '<button class="ez-card" style="--i:0" onclick="closeOvl(\'dfOvl\');openNewSaved()"><span class="ez-art">'+WZ.fd[0]+'</span><span><b>I\'ll build it</b>'+
+    '<small>Pick the exercises yourself</small></span></button>'+
+    '<button class="ez-card" style="--i:1" onclick="closeOvl(\'dfOvl\');ezOpen(\'saved\')"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Forge me a week</b>'+
+    '<small>A balanced week, built for you</small></span></button>'+
+    '<button class="ez-card" style="--i:2" onclick="closeOvl(\'dfOvl\');openBring()"><span class="ez-art">'+SV_IN+'</span><span><b>Bring one in</b>'+
+    '<small>A file or a code somebody sent you</small></span></button>';
+  document.getElementById('dfOvl').classList.add('on');
+}
+// drawn to the wizard's scale, 100 by 100 with the same weights: a workout coming down into the rack
+var SV_IN='<svg class="mo-still" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">'+
+  '<path d="M50 14V54" stroke-width="4"/><path d="M36 41L50 55L64 41" stroke-width="4"/>'+
+  '<path d="M20 62V86H80V62" stroke-width="4" opacity=".55"/>'+
+  '<path d="M20 62H80" stroke-width="3.5" opacity=".55"/>'+
+  '<path d="M33 74H67" stroke-width="3" opacity=".8"/></svg>';
 function openNewSaved(){
   savedOpen();
   openMake(null,null,false,null);
@@ -13623,6 +13690,7 @@ var DSI={
   add:'<path d="M10 4.5v11M4.5 10h11"/>',
   shelf:'<path d="M3.5 5.5h13v4h-13zM3.5 12h13v3.5h-13"/><path d="M7 5.5v4"/>',
   bin:'<path d="M4.5 6.5h11M8.5 6.5V5h3v1.5M6 6.5l.7 9h6.6l.7-9"/>',
+  send:'<path d="M10 14V4M10 4L6.6 7.4M10 4l3.4 3.4M4 14.5v2h12v-2"/>',
   unlock:'<rect x="5" y="9.5" width="10" height="7" rx="2"/><path d="M7.5 9.5V6.8A2.5 2.5 0 0 1 12 5.4"/>',
   forge:'<path d="M3.5 15.5h13"/><path d="M6 15.5c0-3 1.6-4.4 4-4.4s4 1.4 4 4.4"/><path d="M10 10.6V4.5M7.6 6.3L10 4.5l2.4 1.8"/>',
   build:'<path d="M4 16l4.5-4.5"/><path d="M11 3.5l5.5 5.5-2.2 2.2-5.5-5.5z"/><path d="M8.8 5.7l2.2-2.2"/>',
@@ -13644,6 +13712,7 @@ function dsActions(id,dk){
   if(far)h+=dsBtn('down','Targets','closeOvl(\'dayOvl\');openEase(\''+id+'\')');
   h+=dsBtn('edit','Edit','closeOvl(\'dayOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')');
   h+=dsBtn('copy','Duplicate','closeOvl(\'dayOvl\');mkDuplicate(\''+id+'\')');
+  h+=dsBtn('send','Send','closeOvl(\'dayOvl\');shareOne(\''+id+'\')');
   h+=dsBtn('shelf',mine?'To saved':'Off the week','closeOvl(\'dayOvl\');savedOpen();planDropDay(\''+id+'\',\''+dk+'\')');
   if(mine)h+=dsBtn('bin','Delete','dsDelete(\''+id+'\')','bad');
   return h+'</div>';
@@ -13743,6 +13812,7 @@ function mkActionsX(id){
     (far?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openEase(\''+id+'\')">TARGETS OUT OF REACH</div>':'')+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(null,\''+id+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
+    '<div class="btn" onclick="closeOvl(\'mkActOvl\');shareOne(\''+id+'\')">SEND THIS WORKOUT</div>'+
     '<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDeleteX(\''+id+'\')">DELETE THIS WORKOUT</div>';
   openHeld('mkActOvl');
 }
@@ -15586,6 +15656,39 @@ function routineBlob(){
                          days:days,workouts:wk,cex:outCex});
 }
 function routineName(){return 'forge-week-'+today()+'.json';}
+// One workout, in the same shape a week travels in, so the other end needs to know nothing new.
+function oneBlob(id){
+  var src=W[id]||(DB.custom||{})[id];
+  if(!src)return '';
+  var cex={},cn=0;
+  var copy=JSON.parse(JSON.stringify({name:src.name,tag:src.tag,color:src.color,time:src.time,
+    kind:src.kind,sections:src.sections||[]}));
+  (copy.sections||[]).forEach(function(sec){
+    (sec.rows||[]).forEach(function(r){
+      var ex=r[0];
+      if(DB.cex&&DB.cex[ex]){
+        if(!cex[ex]){cex[ex]=JSON.parse(JSON.stringify(DB.cex[ex]));cex[ex].__k='x'+(cn++);}
+        r[0]=cex[ex].__k;
+      }
+    });
+  });
+  var outCex={};
+  for(var k in cex){var c=cex[k],kk=c.__k;delete c.__k;outCex[kk]=c;}
+  var days={};DAYS.forEach(function(D){days[D.k]=[];});
+  return JSON.stringify({forge:1,kind:'routine',app:APPV,at:new Date().toISOString(),
+                         days:days,workouts:{w0:copy},cex:outCex});
+}
+function shareOne(id){
+  var w=W[id];if(!w)return;
+  var nm=w.name.replace('Optional: ','');
+  var txt=oneBlob(id);
+  if(!txt){mkNote('That workout could not be read.');return;}
+  var name='forge-workout-'+today()+'.json';
+  ask('Send '+nm+', or keep a copy on this phone? It carries the workout only. No logged sessions, no records, nothing personal.',
+    function(){saveToPhone(txt,name,false);},
+    'Share this workout','SAVE TO PHONE',null,
+    {label:'SEND',fn:function(){sendOut(txt,name,false);}});
+}
 // The same week in words, for when a file is more ceremony than the thing deserves.
 function routineText(){
   var out=APPNAME()+' \u00b7 a week\n\n';
@@ -15640,15 +15743,20 @@ function doWeekImport(input){
       ask('That file is not a Forge week. The one to open is the forge-week file ending in .json.',null,'Could not read it');
       return;
     }
-    var names=[],cnt=0;
-    for(var k in d.workouts){cnt++;if(names.length<4)names.push(d.workouts[k].name||'a workout');}
-    if(!cnt){ask('That week has no workouts in it.',null,'Nothing to add');return;}
-    ask(cnt+' workout'+(cnt===1?'':'s')+': '+names.join(', ')+(cnt>names.length?' and more':'')+
-        '. They go to your saved workouts, ready to place on any day you like. Nothing you already have is changed or replaced.',
-      function(){weekAdd(d);},
-      'Add '+cnt+' workout'+(cnt===1?'':'s')+'?','ADD THEM');
+    weekConsider(d);
   };
   rd.readAsText(f);
+}
+// Names them, counts them and says plainly that nothing already here is touched, whether they
+// arrived as a file or as a pasted code (v5.237).
+function weekConsider(d){
+  var names=[],cnt=0;
+  for(var k in d.workouts){cnt++;if(names.length<4)names.push(d.workouts[k].name||'a workout');}
+  if(!cnt){ask('That week has no workouts in it.',null,'Nothing to add',"OK",false);return;}
+  ask(cnt+' workout'+(cnt===1?'':'s')+': '+names.join(', ')+(cnt>names.length?' and more':'')+
+      (cnt===1?'. It goes':'. They go')+' to your saved workouts, ready to place on any day you like. Nothing you already have is changed or replaced.',
+    function(){weekAdd(d);},
+    'Add '+cnt+' workout'+(cnt===1?'':'s')+'?','ADD THEM');
 }
 // v5.182: a week file from someone else is data, never markup. Everything is copied field by field:
 // strings only, sets and rest only in the shapes the builder itself writes, links only http(s),
@@ -15729,10 +15837,41 @@ function histShare(){
   var b=document.getElementById('histShareBtn');
   if(b){var o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);}
 }
-function openBackup(){
-  bkView(false);
-  autoBkDraw();
-  document.getElementById('backupOvl').classList.add('on');
+// Bring a workout in (v5.237). One obvious way and two fallbacks, which is the shape of every
+// import screen worth using. The obvious one is a tap on the file itself, so it only shows when
+// the phone can really hand the app a file.
+function openBring(){
+  bringView('list');
+  var t=document.getElementById('bringTap');
+  if(t)t.hidden=!fileInOK();
+  document.getElementById('bringOvl').classList.add('on');
+}
+function fileInOK(){try{return !!window.__forgeFileIn;}catch(e){return false;}}
+function bringView(v){
+  var l=document.getElementById('bringList'),b=document.getElementById('bringPasteV');
+  if(l)l.style.display=(v==='paste')?'none':'';
+  if(b)b.style.display=(v==='paste')?'':'none';
+  if(v==='paste'){var x=document.getElementById('bringBox');if(x){x.value='';setTimeout(function(){try{x.focus();}catch(e){}},60);}}
+}
+// A code is the same file, as text: somebody can paste it into a message where a file will not go.
+function bringPaste(){
+  var x=document.getElementById('bringBox'),t=x?String(x.value||'').trim():'';
+  if(!t){ask('Paste the code into the box first. It is a long block of text that starts with a curly bracket.',null,'Nothing pasted',"OK",false);return;}
+  var d=null;try{d=JSON.parse(t);}catch(e){}
+  if(!d||d.kind!=='routine'||!d.workouts){
+    ask('That is not a Forge workout. Copy the whole block they sent you, from the first bracket to the last.',null,'Could not read it',"OK",false);
+    return;
+  }
+  closeOvl('bringOvl');
+  weekConsider(d);
+}
+// Sending a week is still here, at the foot of the sheet, because it is the same errand seen from
+// the other end. One workout on its own is sent from its own Send button.
+function sendWeekAsk(){
+  ask('A file they open in Forge, and it adds your workouts to theirs? Or the same week written out, to read or paste into a message?',
+    function(){shareWeek('file');},
+    'Send your week','AS A FILE',null,
+    {label:'AS TEXT',fn:function(){shareWeek('text');}});
 }
 // ---------- the automatic safety copy ----------
 // Opt-in, because nothing is written without being asked (user note, Aug 23) - the toggle
@@ -15743,19 +15882,21 @@ function autoBkAvail(){
   var C=window.Capacitor;
   try{return !!(C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.Filesystem);}catch(e){return false;}
 }
+// v5.237: the switch and how it is doing are one line at the head of Your data, because whether a
+// copy exists is the thing you came to find out.
 function autoBkDraw(){
-  var b=document.getElementById('bkAuto'),n=document.getElementById('bkAutoNote');
-  if(!b)return;
-  var ok=autoBkAvail();
-  b.style.display=ok?'':'none';if(n)n.style.display=ok?'':'none';
-  b.textContent='AUTOMATIC SAFETY COPY: '+(autoBkOn()?'ON':'OFF');
-  b.classList.toggle('btn-go',autoBkOn());
-  // v5.182: say how it is actually doing, not just that the switch is on.
-  var st=document.getElementById('bkAutoState');
+  var box=document.getElementById('ydAuto');
+  if(!box)return;
+  box.hidden=!autoBkAvail();
+  var on=autoBkOn(),tg=document.getElementById('ydAutoTog'),st=document.getElementById('ydAutoSt');
+  if(tg){tg.textContent=on?'ON':'OFF';tg.style.color=on?'var(--go)':'';tg.style.borderColor=on?'var(--go)':'';}
   if(st){
     var okT=0,failT=0;try{okT=+localStorage.getItem('arc_autobk_ok')||0;failT=+localStorage.getItem('arc_autobk_fail')||0;}catch(e){}
-    st.textContent=!autoBkOn()?'':(failT>okT?' It could not be written last time. Make a backup and send it off the phone.':(okT?' Last saved '+pretty(new Date(okT).toISOString().slice(0,10))+'.':''));
-    st.style.color=(autoBkOn()&&failT>okT)?'#f0645a':'';
+    st.textContent=!on?'Off. Nothing is being written.':
+      (failT>okT?'It could not be written last time. Save a copy below and send it off the phone.':
+      (okT?'Saved '+pretty(new Date(okT).toISOString().slice(0,10))+', in Documents under a Forge folder.':
+           'On. It writes itself after your next workout.'));
+    st.style.color=(on&&failT>okT)?'#f0645a':'';
   }
 }
 function autoBkToggle(){
@@ -15782,7 +15923,7 @@ function autoBk(first){
   }
   function fail(){
     var warned=false;try{localStorage.setItem('arc_autobk_fail',String(Date.now()));warned=!!localStorage.getItem('arc_autobk_warned');localStorage.setItem('arc_autobk_warned','1');}catch(e){}
-    if(!warned)mkNote('The automatic safety copy could not be written to Documents this time. Open Backup and restore, tap BACKUP, and send the file off the phone to be safe.','Safety copy not saved');
+    if(!warned)mkNote('The automatic safety copy could not be written to Documents this time. Open Settings, Your data, tap Save a copy now, and send the file off the phone to be safe.','Safety copy not saved');
   }
   try{
     write(tag).then(ok).catch(function(){
@@ -15812,12 +15953,6 @@ function bkNudge(){
 }
 // BACKUP turns the sheet's page to the three ways out, each with its explanation in
 // plain sight; CANCEL turns it back.
-function bkView(v){
-  var m=document.getElementById('bkMain'),k=document.getElementById('bkMenu'),w=document.getElementById('bkWeek');
-  if(m)m.style.display=v?'none':'';
-  if(k)k.style.display=(v===true)?'':'none';
-  if(w)w.style.display=(v==='week')?'':'none';
-}
 // RESTORE says what is about to happen before the system's own file browser opens, so
 // the picker never appears unexplained.
 function restoreAsk(){
@@ -15848,8 +15983,8 @@ function exportGo(kind,dest){
 function copyHistoryText(){
   if(!DB.logs.length){ask('Finish a session first.',null,'Nothing to copy');return;}
   clipCopy(historyText());
-  var b=document.getElementById('bkCopy');
-  if(b){var o=b.textContent;b.textContent='COPIED';setTimeout(function(){b.textContent=o;},1400);}
+  var b=document.getElementById('ydCopyLbl');
+  if(b){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o;},1400);}
 }
 // Paste-restore is retired (user note, Aug 23): a person pasting plain words would have
 // been refused by a JSON parser they never heard of. Restore is a picked backup file,
@@ -19763,7 +19898,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();ntDraw();hcDraw();
+  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();ntDraw();hcDraw();autoBkDraw();
   scrapApply();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
@@ -20638,7 +20773,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is fine for the tour.'},
   {t:'Logged and saved',b:'Your session is already saved in the app. History lives on this phone, not in a cloud. Closing this changes nothing.'},
   {t:'Locked in',b:'Push Day is locked in. It stays that way until the week turns over, so you work through the other days instead of repeating one.<p>Everything you logged is already in your history.</p>'},
-  {t:'Your history',b:'Workouts finished holds every session you have logged, week by week. Backup and restore keeps a copy off the phone. A locked day opens again on its own when the week turns over, and holding a locked card offers to unlock just that one.'}]};
+  {t:'Your history',b:'Workouts finished holds every session you have logged, week by week. Your data, in Settings, keeps a copy off the phone. A locked day opens again on its own when the week turns over, and holding a locked card offers to unlock just that one.'}]};
 function TUTC(){
   var t=curTheme();
   var C={
@@ -21064,7 +21199,7 @@ function tutAdvance(){
 // A tap where a hold was meant used to open a sheet the step knew nothing about, and the
 // fence then locked every button on it. Anything the step did not ask for is closed.
 var TUT_STRAY=['editOvl','exEditOvl','exNoteOvl','exAddOvl','exJoinOvl','swapOvl','settingsOvl','themeOvl','timerOvl',
-  'pumpOvl','lvlOvl','mkActOvl','mkPickOvl','progOvl','histOvl','backupOvl','askOvl','bwOvl','plateOvl'];
+  'pumpOvl','lvlOvl','mkActOvl','mkPickOvl','progOvl','histOvl','bringOvl','askOvl','bwOvl','plateOvl'];
 function tutStray(i){
   var keep=TUT_STEPS[i==null?TUTI:i].ovl||'';
   TUT_STRAY.forEach(function(id){

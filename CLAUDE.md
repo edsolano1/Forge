@@ -64,6 +64,13 @@ main constraint on how to work in it. See **Traps** below before editing.
   `W` is NOT pruned when a workout is deleted, so `W[id]` cannot answer whether an id is free:
   `WSTOCK` (the built-ins, snapshotted in `mergeCustom` before the user's are merged over them) is
   what to ask.
+- **Your data is a list, and sharing lives with the workouts** (v5.237). The Backup & restore sheet
+  is gone; Settings carries the status line (`ydAuto`, drawn by `autoBkDraw`), then rows, with
+  `Put a copy back` alone in warning colour. **Never put this back in a grid**: a tile cannot hold
+  the state line, forces the label under a legible size, and makes the destructive action look
+  like the safe one. Sending a workout is `shareOne`/`oneBlob` from the workout's own buttons;
+  `openBring` (the plus in Saved workouts) is the only way in, with `window.__forgeFileIn`
+  gating the tap the file card until the wrapper can really be handed a file.
 - **Sheets guard their edits** (v5.123). Back on a sheet with an unsaved change asks Keep the change? (SAVE or DISCARD) through `UNSAVED[id]` in `backCloses`; register a dirty test and a save there when adding a sheet with a SAVE or ADD. CANCEL buttons still cancel outright. Notes autosave (v5.122); the plate calculator SAVE writes the total into the next unlogged set (`plLand`, v5.121). Held weight: `held(x,c)` draws a dumbbell or, when `KBNOW` is on for that exercise (`DB.kb`, `KB_OK`), a kettlebell.
 - **The look is settled (v5.125 to v5.156).** Blackened steel plates on an agenda board over the
   hearth ground; the wizard icons in WZ with per-icon idles; the banner level-up sheet; the seal
