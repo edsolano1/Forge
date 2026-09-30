@@ -167,6 +167,43 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .ease-nums b{color:var(--txt2);font-weight:600;}
 .ease-nums b.up{color:var(--go);}
 .ease-where{margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);}
+/* The history of one lift (v5.238): every session you have logged it in, newest first, with the
+   best you have ever done at the head. The arrow says how that session stood against the one
+   before it, in the app's own colours: gold beat it, violet matched it, nothing means under. */
+.xh-best{display:flex;align-items:center;gap:10px;padding:11px 13px;margin-bottom:12px;border-radius:12px;
+  border:1px solid color-mix(in srgb,var(--go) 40%,transparent);
+  background:color-mix(in srgb,var(--go) 7%,transparent);}
+.xh-best>svg{flex:none;width:19px;height:19px;fill:none;stroke:var(--gold);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.xh-best b{font-family:var(--mono);font-size:12.5px;font-weight:400;color:var(--txt);}
+.xh-best span{font-size:12.4px;color:var(--txt3);}
+.xh-list{max-height:calc(var(--usablevh) * .38);overflow-y:auto;}
+.xh-r{display:flex;align-items:center;gap:11px;padding:11px 2px;border-top:1px solid var(--line2, #3a2214);}
+.xh-r:first-child{border-top:0;}
+.xh-d{flex:none;width:54px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--txt3);}
+.xh-s{flex:1;min-width:0;font-family:var(--mono);font-size:12.5px;color:var(--txt2);overflow-wrap:anywhere;}
+.xh-m{flex:none;width:16px;height:16px;}
+.xh-m svg{width:16px;height:16px;fill:none;stroke:var(--gold);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.xh-m.mt svg{stroke:var(--match);}
+.xh-none{color:var(--txt3);font-size:13.5px;text-align:center;padding:14px 0;}
+/* The switch, the same sentence in all three sheets. */
+.xs{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--txt);
+  border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:12px 13px;cursor:pointer;margin-top:14px;}
+.xs .bx{flex:none;width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:var(--bg);
+  display:flex;align-items:center;justify-content:center;}
+.xs .bx svg{width:14px;height:14px;fill:none;stroke:var(--gold);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.xs.on .bx{border-color:var(--go);background:color-mix(in srgb,var(--go) 18%,transparent);}
+.xs u{text-decoration:none;flex:1;min-width:0;font-size:14px;}
+.xs small{display:block;font-size:12px;line-height:1.45;color:var(--txt3);margin-top:2px;}
+/* An i beside a title: one sentence on the sheet, the long story behind the button (v5.238). */
+.ask-h{display:flex;align-items:center;gap:9px;}
+.ask-h h3{flex:1;margin:0;}
+.ask-i{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:50%;background:var(--surface2);
+  color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-family:'Marcellus',serif;font-size:14px;line-height:1;}
+.ask-i[hidden]{display:none;}
+@media (hover:hover){.ask-i:hover{color:var(--gold);border-color:#6a3f26;}}
+.ask-more{font-size:13px;line-height:1.6;color:var(--txt3);margin:0 0 14px;}
+.ask-more[hidden]{display:none;}
 /* Your data, and Bring one in (v5.237). A row can hold a name, a line saying what it does and
    the state, which is exactly what a backup screen has to say and what a tile cannot. */
 .ydg{border:1px solid var(--line);border-radius:14px;background:var(--surface2);overflow:hidden;margin-top:8px;}
@@ -2348,12 +2385,18 @@ body.forge .ex-h{padding:0;}
 body.forge .ex-body{display:flex;flex-direction:column;}
 body.forge .ex-nrow{padding:10px 8px 8px 12px;background:#130c09;border-bottom:1px solid #2a1810;align-items:center;}
 body.forge .ex-n{font-family:'Marcellus',serif;font-weight:400;font-size:16px;letter-spacing:.01em;color:#fff6e6;}
-body.forge .ex-links{order:0;margin:0;padding:8px 12px 2px;gap:6px;}
+body.forge .ex-links{order:0;margin:0;padding:8px 12px 4px;gap:7px;}
 /* C1 (v5.196, owner's pick): three bare squares were a guess every time, so they carry their
-   word again. HOW TO rather than Instructions, so each one holds a single line at phone width. */
-body.forge .ex-links a{height:34px;padding:0 11px;justify-content:center;gap:6px;border:1px solid #3a2214;background:#130c09;color:var(--txt3);border-radius:9px;
-  font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;}
-body.forge .ex-links a svg{width:16px;height:16px;}
+   word again. HOW TO rather than Instructions, so each one holds a single line at phone width.
+   B (v5.238, owner's pick): and they are plates now, icon over word, the day sheet's own
+   language. His reason: if it is a thing you choose, it should look like a button. Four of them
+   share the width, so nothing wraps and nothing has to be aimed at. */
+body.forge .ex-links a{flex:1;min-width:0;min-height:54px;height:auto;padding:8px 4px;
+  flex-direction:column;justify-content:center;gap:5px;border:1px solid #3a2214;background:#130c09;
+  color:var(--txt3);border-radius:11px;
+  font-family:var(--mono);font-size:8.4px;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;}
+body.forge .ex-links a svg{width:19px;height:19px;}
+body.forge .ex-links a:active{transform:scale(.97);}
 body.forge .ex-links a.unote-btn.has,body.forge .ex-links a.on{color:var(--gold);border-color:#6a3f26;}
 @media (hover:hover){body.forge .ex-links a:hover{color:var(--gold);border-color:#6a3f26;}}
 body.forge .ex-note,body.forge .ex-unote{margin:6px 12px 0;font-size:12px;}
@@ -3539,6 +3582,16 @@ body.wcon{overflow:hidden;}
   </div>
 </div>
 
+<!-- Every time you have lifted it (v5.238). Opened by HISTORY on the exercise. -->
+<div class="ovl" id="exHistOvl">
+  <div class="sheet" style="max-width:430px">
+    <h3 id="xhName">Exercise</h3>
+    <div class="footnote" style="margin:0 2px 12px">Every session you have logged it in, newest first.</div>
+    <div id="xhBody"></div>
+    <div class="sheet-btns"><div class="btn" onclick="closeOvl('exHistOvl')">CLOSE</div></div>
+  </div>
+</div>
+
 <div class="ovl" id="bringOvl">
   <div class="sheet" style="max-width:440px">
     <h3>Bring a workout in</h3>
@@ -3596,6 +3649,7 @@ body.wcon{overflow:hidden;}
         Assisted machine</button>
       <button class="dayact" title="What this means" aria-label="What assisted machine means" onclick="exInvInfo()"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v4.5M10 6.6v.3"/></svg>Info</button>
     </div>
+    <div id="exNoteShow"></div>
     <div class="sheet-btns">
       <div class="btn btn-go" onclick="saveExNote()">DONE</div>
     </div>
@@ -3706,8 +3760,10 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="askOvl">
   <div class="sheet" style="max-width:400px">
-    <h3 id="askTitle">Are you sure?</h3>
+    <div class="ask-h"><h3 id="askTitle">Are you sure?</h3>
+      <button class="ask-i" id="askInfo" hidden onclick="askMore()" aria-label="What this means">i</button></div>
     <p id="askMsg"></p>
+    <p class="ask-more" id="askMore" hidden></p>
     <!-- The main answer, alone on the top row so it is full width and unmistakably the answer the
          question is asking for. The alternate and CANCEL share the row beneath it, equal and
          quiet.
@@ -4041,6 +4097,7 @@ body.wcon{overflow:hidden;}
     <div class="ins-s" id="insSetup"></div>
     <ul class="ins-c" id="insCues"></ul>
     <div class="ins-m"><span>The usual mistake:</span> <em id="insMistake"></em></div>
+    <div id="insShow"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('instrOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -9897,7 +9954,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.237';
+var APPV='v5.238';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9987,12 +10044,93 @@ function pretty(iso){var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);re
 // Anything the user typed goes through this before it is put into innerHTML. Their own exercise
 // notes are the first free text in the app that gets rendered rather than sat in a textarea.
 var exNoteFor=null;
+// What each exercise prints on its card (v5.238). Absent means shown: a switch nobody has
+// touched cannot take anything away. Keys: ref (the app's coaching line), note (your own),
+// last (the Last chip).
+function exShow(exId,k){
+  var o=(DB.exShow||{})[exId];
+  return !o||o[k]===undefined?true:!!o[k];
+}
+function exShowSet(exId,k,v){
+  DB.exShow=DB.exShow||{};
+  var o=DB.exShow[exId]=DB.exShow[exId]||{};
+  if(v)delete o[k];else o[k]=0;
+  var n=0;for(var x in o)n++;
+  if(!n)delete DB.exShow[exId];
+  saveDB();
+}
+// One sentence in all three sheets, with a line under it saying what would appear.
+function exShowTick(exId,k,sub){
+  var on=exShow(exId,k);
+  return '<button class="xs'+(on?' on':'')+'" onclick="exShowTap(\''+exId+'\',\''+k+'\')">'+
+    '<span class="bx">'+(on?'<svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9"/></svg>':'')+'</span>'+
+    '<u>Show this on the exercise<small>'+sub+'</small></u></button>';
+}
+function exShowTap(exId,k){
+  exShowSet(exId,k,!exShow(exId,k));
+  var box=document.getElementById(k==='last'?'xhShow':k==='note'?'exNoteShow':'insShow');
+  if(box)box.innerHTML=exShowTick(exId,k,box.getAttribute('data-sub')||'');
+  if(CUR)renderSession();
+  try{sfxTick&&sfxTick();}catch(e){}
+}
+function exShowBox(id,exId,k,sub){
+  var box=document.getElementById(id);
+  if(!box)return;
+  box.setAttribute('data-sub',sub);
+  box.innerHTML=exShowTick(exId,k,sub);
+}
+// Every session this lift appears in, newest first, each with what it did against the one before.
+function histForEx(exId){
+  var out=[];
+  for(var i=DB.logs.length-1;i>=0;i--){
+    var L=DB.logs[i];if(!L.entries)continue;
+    var sets=[];
+    for(var k in L.entries){if(exOfKey(L,k)===exId&&(L.entries[k]||[]).length)sets=sets.concat(L.entries[k]);}
+    if(!sets.length)continue;
+    var top=0;
+    sets.forEach(function(x){if(x){var sc=setScore(exId,x);if(sc>top)top=sc;}});
+    out.push({date:L.date,sets:sets,top:top});
+  }
+  return out;
+}
+function openExHist(exId){
+  var nm=(EX[exId]&&EX[exId].name)||exId;
+  document.getElementById('xhName').textContent=nm;
+  var H=histForEx(exId),h='';
+  if(!H.length)h='<div class="xh-none">Nothing logged on this one yet.</div>';
+  else{
+    var bi=0;H.forEach(function(x,i){if(x.top>H[bi].top)bi=i;});
+    var bs=null,bsc=-1;
+    (H[bi].sets||[]).forEach(function(x){if(!x)return;var sc=setScore(exId,x);if(sc>bsc){bsc=sc;bs=x;}});
+    if(bs)h+='<div class="xh-best"><svg viewBox="0 0 20 20"><path d="M6 3h8v4a4 4 0 0 1-8 0zM10 11v3M7 17h6M6 4H4v1a3 3 0 0 0 2 2.8M14 4h2v1a3 3 0 0 1-2 2.8"/></svg>'+
+      '<span><b>'+(bs.w?fmtW(bs.w)+'\u00d7'+bs.r:bs.r+(bs.unit?' '+bs.unit:''))+'</b> \u00b7 your best, '+pretty(H[bi].date)+'</span></div>';
+    h+='<div class="xh-list">'+H.map(function(x,i){
+      var older=H[i+1],mark='';
+      if(older){
+        if(x.top>older.top)mark='<span class="xh-m"><svg viewBox="0 0 20 20"><path d="M10 4v12M5 9l5-5 5 5"/></svg></span>';
+        else if(x.top===older.top)mark='<span class="xh-m mt"><svg viewBox="0 0 20 20"><path d="M4 10h12"/></svg></span>';
+      }
+      return '<div class="xh-r"><span class="xh-d">'+shortDay(x.date)+'</span>'+
+             '<span class="xh-s">'+esc(fmtSets(x.sets))+'</span>'+(mark||'<span class="xh-m"></span>')+'</div>';
+    }).join('')+'</div>';
+  }
+  h+='<div id="xhShow"></div>';
+  document.getElementById('xhBody').innerHTML=h;
+  exShowBox('xhShow',exId,'last','Last time, as the line under the name.');
+  document.getElementById('exHistOvl').classList.add('on');
+}
+// 25 SEP, in the mono the rest of the numbers use.
+function shortDay(iso){
+  var d=new Date(iso+'T12:00:00'),M=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()];
+}
 function openExNote(exId){
   exNoteFor=exId;
   var nm=(EX[exId]&&EX[exId].name)||'Note';
   document.getElementById('exNoteName').textContent=nm;
   document.getElementById('exNoteBox').value=(DB.exNotes||{})[exId]||'';
   exNoteInvSet(invEx(exId));
+  exShowBox('exNoteShow',exId,'note','Your note sits under the name while you lift.');
   document.getElementById('exNoteOvl').classList.add('on');
 }
 // Same tick the custom-exercise sheet wears, same drawing. It commits on SAVE with the
@@ -10268,6 +10406,12 @@ function openInstr(exId){
     su.style.display='none';ul.style.display='none';mi.parentNode.style.display='none';
   }
   insAnimShow(exId);
+  var isb=document.getElementById('insShow');
+  if(isb){
+    var cue=(EX[exId]&&EX[exId].note)||'';
+    if(cue)exShowBox('insShow',exId,'ref',esc(cue));
+    else isb.innerHTML='';
+  }
   document.getElementById('instrOvl').classList.add('on');
 }
 // External references are gone (owner call, 31 Aug): if videos ship one day they ship for
@@ -11841,8 +11985,12 @@ function weekHello(){
       if(!hit)missed.push(W[id].name.replace('Optional: ',''));
     });});
   }catch(e){}
+  // One sentence (owner, 30 Sep: "just say week has been reset, something super simple"). The
+  // four line version was right about what it said and wrong about when it said it: this lands
+  // at launch, before anybody has asked a question. It waits behind the i now.
   var tail=missed.length?' '+(missed.length===1?missed[0]+' did not happen last week. It is':missed.slice(0,-1).join(', ')+' and '+missed[missed.length-1]+' did not happen last week. They are')+' back on the board, unlocked, no catching up owed.':'';
-  ask('The week turned over. Every day is unlocked and ready to go, and last week is saved in your history.'+tail,null,'A new week','OK');
+  askAlso('Every day is unlocked and ready to go, and last week is saved in your history.'+tail);
+  ask('Your week has been reset.',null,'A new week','OK',false);
 }
 // Offered once per week, and only after the last day is done. Finishing the week left you with
 // nothing to do and a button you had to know about; this says the round is over and offers the
@@ -12708,15 +12856,17 @@ function renderSession(){
       // button below still read "Note" because that is written after the assignment, so the only
       // thing missing was the one thing it is for: seeing it without opening anything.
       var un=(DB.exNotes||{})[rf.exId]||'';
-      if(r.note)html+='<div class="ex-note">'+esc(r.note)+'</div>';
-      if(un)html+='<div class="ex-unote">'+esc(un)+'</div>';
+      // Each of these three is now the owner's to show or hide, from the sheet it belongs to
+      // (v5.238). Absent means shown, so an untouched card is the card it always was.
+      if(r.note&&exShow(rf.swapId||rf.exId,'ref'))html+='<div class="ex-note">'+esc(r.note)+'</div>';
+      if(un&&exShow(rf.exId,'note'))html+='<div class="ex-unote">'+esc(un)+'</div>';
       // TARGET and LAST only. The personal record used to sit here as a third chip, which
       // made a one-off heavy day look like the standard you were meant to hold every set
       // to. It moved to the foot of the card, beside the rest - present, not prescriptive.
       // Target left this line in v5.196: it is the ghost inside every set box now, where the
       // number is actually used. Last stays, because last time is the thing to beat and it is
       // nowhere else on the card.
-      html+=(L?'<div class="ex-stats"><span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span></div>':'')+
+      html+=((L&&exShow(rf.exId,'last'))?'<div class="ex-stats"><span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span></div>':'')+
             '</div>';   // closes ex-body
       // The button sits beside the instructions because that is where you already look for
       // "how do I do this one".
@@ -12735,7 +12885,11 @@ function renderSession(){
             (hasIns?'<a onclick="event.stopPropagation();openInstr(\x27'+insEx+'\x27)"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> How to</a>'
              :(rl?'<a href="'+esc(rl)+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> How to</a>':''))+
             '<a class="unote-btn'+(un?' has':'')+'" onclick="event.stopPropagation();openExNote(\''+rf.exId+'\')">'+
-              '<svg viewBox="0 0 20 20"><path d="M4 3.5h9l3 3v10h-12z"/><path d="M7 8.5h6M7 12h4"/></svg> '+(un?'Note':'Add note')+'</a>'+
+              '<svg viewBox="0 0 20 20"><path d="M4 3.5h9l3 3v10h-12z"/><path d="M7 8.5h6M7 12h4"/></svg> Note</a>'+
+            // HISTORY earns its place only once there is one; on a lift you have never logged it
+            // would open an empty sheet whose only switch controls a line that is not there.
+            (L?'<a onclick="event.stopPropagation();openExHist(\''+rf.exId+'\')">'+
+              '<svg viewBox="0 0 20 20"><path d="M3 15V9M7.3 15V5M11.6 15v-4M16 15V7"/></svg> History</a>':'')+
             // Only the id and the weight cross into the attribute. The NAME used to ride
             // along as JSON, and a name is full of double quotes - which closed the
             // onclick attribute early, left a syntax error behind, and made the tap fall
@@ -15944,11 +16098,11 @@ function bkNudge(){
     localStorage.setItem('arc_bknudge','1');
   }catch(e){return;}
   if(autoBkAvail()){
-    ask('Everything you have logged lives only on this phone. Turn on the automatic safety copy? A backup file will quietly refresh itself after every finished workout. Backup & restore, under your week, is always there too.',
+    ask('Everything you have logged lives only on this phone. Turn on the automatic safety copy? A backup file will quietly refresh itself after every finished workout. Your data, in Settings, is always there too.',
       function(){try{localStorage.setItem('arc_autobk','1');}catch(e){}autoBk(true);},
       'Guard your history?','TURN IT ON');
   }else{
-    ask('Everything you have logged lives only on this phone. A backup that leaves the phone is the safe kind. Backup & restore, under your week, makes one.',null,'Guard your history?');
+    ask('Everything you have logged lives only on this phone. A backup that leaves the phone is the safe kind. Your data, in Settings, makes one.',null,'Guard your history?');
   }
 }
 // BACKUP turns the sheet's page to the three ways out, each with its explanation in
@@ -16981,10 +17135,12 @@ function ask(msg,onYes,title,yesLabel,onNo,alt,noLabel){
     var sig=String(title)+' '+String(msg);
     if(ASKCUR===sig)return;
     for(var i=0;i<ASKQ.length;i++)if(ASKQ[i][7]===sig)return;
-    ASKQ.push([msg,onYes,title,yesLabel,onNo,alt,noLabel,sig]);
+    ASKQ.push([msg,onYes,title,yesLabel,onNo,alt,noLabel,sig,ASKI]);
+    ASKI=null;
     return;
   }
-  askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel);
+  var info=ASKI;ASKI=null;
+  askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info);
 }
 // Every exit from the sheet comes through closeOvl, which calls this. The short delay lets the
 // sheet finish closing so the next question reads as a new question rather than a flicker.
@@ -16992,12 +17148,24 @@ function askDrain(){
   ASKCUR=null;
   if(!ASKQ.length)return;
   var a=ASKQ.shift();
-  setTimeout(function(){askNow(a[0],a[1],a[2],a[3],a[4],a[5],a[6]);},120);
+  setTimeout(function(){askNow(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[8]);},120);
 }
-function askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel){
+// The long version of a short question, behind an i beside the title. Set it on the line before
+// the ask and it belongs to that question alone (v5.238).
+var ASKI=null;
+function askAlso(t){ASKI=t;}
+function askMore(){
+  var m=document.getElementById('askMore'),b=document.getElementById('askInfo');
+  if(m)m.hidden=false;
+  if(b)b.hidden=true;
+}
+function askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info){
   ASKCUR=String(title)+' '+String(msg);   // what is on screen, so a repeat of it is not queued
   document.getElementById('askTitle').textContent=title||'Are you sure?';
   document.getElementById('askMsg').textContent=msg;
+  var im=document.getElementById('askMore'),ib=document.getElementById('askInfo');
+  if(im){im.textContent=info||'';im.hidden=true;}
+  if(ib)ib.hidden=!info;
   var y=document.getElementById('askYes'),n=document.getElementById('askNo');
   var a=document.getElementById('askAlt');
   // The alternate lives in the bottom row beside CANCEL now, so there is no row to show or hide -
