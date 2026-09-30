@@ -9954,7 +9954,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.238';
+var APPV='v5.239';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16849,7 +16849,7 @@ function showProgress(){
 }
 function showHistory(){
   if(!DB.logs.length){ask('Finish a session and it will show up here.',null,'No history yet');return;}
-  HIST.sel=null;HIST.mon=null;HIST.wk0=null;HIST.day=null;
+  HIST.sel=null;HIST.mon=null;HIST.wk0=null;HIST.day=null;HIST.wkAll=false;
   if(HIST.mode==='walks')HIST.mode='week';
   try{hcSyncProbe();}catch(e){}
   renderHist();
@@ -16908,6 +16908,12 @@ function histItems(t0,t1){
   return items;
 }
 function isoOf(t){var d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+// This week, Last week, or the dates it ran between.
+function histWeekName(wk0){
+  var day=86400000,off=Math.round((weekStartTs()-wk0)/(7*day)),wk1=wk0+7*day;
+  return off===0?'This week':off===1?'Last week':
+    (MO[new Date(wk0).getMonth()]+' '+new Date(wk0).getDate()+' to '+MO[new Date(wk1-day).getMonth()]+' '+new Date(wk1-day).getDate());
+}
 // The week: seven days across the top, what you did under them.
 function histWeekHtml(){
   var day=86400000,ws=weekStartTs(),wk0=HIST.wk0||ws,wk1=wk0+7*day,todayIso=isoOf(Date.now());
@@ -16925,8 +16931,8 @@ function histWeekHtml(){
     strip+='<div class="hwk-c'+(sess?' has':'')+(walk&&!sess?' walk':'')+(pr?' pr':'')+(iso===todayIso?' now':'')+(t>Date.now()?' fut':'')+(HIST.day===iso?' sel':'')+'"'+col+
       (list.length?' onclick="histDay(\''+iso+'\')"':'')+'><i>'+DW[new Date(t).getDay()].slice(0,1)+'</i><b>'+new Date(t).getDate()+'</b></div>';
   }
-  var off=Math.round((ws-wk0)/(7*day));
-  var title=off===0?'This week':off===1?'Last week':(MO[new Date(wk0).getMonth()]+' '+new Date(wk0).getDate()+' to '+MO[new Date(wk1-day).getMonth()]+' '+new Date(wk1-day).getDate());
+  var off=Math.round((ws-wk0)/(7*day));   // how many weeks back, for the forward arrow and the empty line
+  var title=histWeekName(wk0);
   var h='<div class="hcal-h"><div class="hnav" onclick="histWeek(-1)">&lsaquo;</div>'+
     '<div class="hcal-t">'+title+'</div>'+
     '<div class="hnav'+(off===0?' off':'')+'" onclick="'+(off===0?'':'histWeek(1)')+'">&rsaquo;</div></div>'+
@@ -16958,6 +16964,7 @@ function histWeekHtml(){
   return h;
 }
 function histOpen(i){HIST.sel=i;HIST.ed=null;renderHist();}
+function walkAllTog(){HIST.wkAll=!HIST.wkAll;renderHist();try{sfxTick&&sfxTick();}catch(e){}}
 // ---------- correcting a sealed set ----------
 function histEditSet(key,si){
   var L=DB.logs[HIST.sel];if(!L||!L.entries[key]||!L.entries[key][si])return;
@@ -17077,12 +17084,19 @@ function renderHist(){
   document.getElementById('hsegCal').className='hsegb'+(HIST.mode==='cal'?' on':'');
   if(HIST.mode==='week'){body.innerHTML=histWeekHtml();return;}
   if(HIST.mode==='walks'){
-    // The walk totals and the walks themselves, behind one row off the week (v5.109).
-    var wl=histItems().filter(function(it){return it.walk;});
-    body.innerHTML='<div class="hback" onclick="histMode(\'week\')">&larr; This week</div>'+
+    // The walk totals and the walks themselves, behind one row off the week (v5.109). The list is
+    // THAT WEEK's walks, because that is the row you tapped and the count it carried (v5.239);
+    // every walk you have ever logged is one deliberate tap further.
+    var wday=86400000,wwk0=HIST.wk0||weekStartTs(),wwk1=wwk0+7*wday;
+    var wall=!!HIST.wkAll;
+    var wl=(wall?histItems():histItems(wwk0,wwk1)).filter(function(it){return it.walk;});
+    body.innerHTML='<div class="hback" onclick="histMode(\'week\')">&larr; '+histWeekName(wwk0)+'</div>'+
       '<div class="hscroll">'+walkStrip()+hcSyncRow()+
       '<div class="hrow hwalk hadd" onclick="openWalkAdd()">+ ADD A WALK</div>'+
-      wl.map(histRowHtml).join('')+'</div>';
+      (wl.length?wl.map(histRowHtml).join('')
+        :'<div class="hnone">'+(wall?'No walks logged yet.':'No walks '+(histWeekName(wwk0)==='This week'?'yet this week':'that week')+'.')+'</div>')+
+      ((DB.walks||[]).length?'<div class="hrow hwalk hadd" onclick="walkAllTog()">'+(wall?histWeekName(wwk0).toUpperCase()+' ONLY':'EVERY WALK')+'</div>':'')+
+      '</div>';
     return;
   }
   if(HIST.mode==='list'){
