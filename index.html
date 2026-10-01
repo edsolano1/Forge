@@ -401,7 +401,12 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   border-left:1px solid var(--line);color:var(--txt2);opacity:.6;touch-action:none;cursor:grab;}
 .carddrag:active{opacity:1;color:var(--go);}
 .carddrag svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;pointer-events:none;}
-.card.cdrag{z-index:60;opacity:.96;transition:none;box-shadow:0 20px 44px -14px rgba(0,0,0,.6);pointer-events:none;}
+.card.cdrag{z-index:60;opacity:.96;transition:none;box-shadow:0 20px 44px -14px rgba(0,0,0,.6);pointer-events:none;
+  animation:cdPick .14s ease-out both;}
+/* The card answers the grab (v5.243): a card that lifts off the board is the only thing telling
+   you the press became a drag. */
+@keyframes cdPick{from{transform:scale(1);}to{transform:scale(1.03);}}
+html.mo-off .card.cdrag{animation:none;}
 /* While a card is in the air (v5.242): the day it came from holds its own height, set inline at
    the start, and every other day keeps a band deep enough to drop onto. Without the first the
    board lurches upward the instant the slot leaves; without the second an empty day is a 30px
@@ -410,7 +415,13 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 /* The space the card will drop into. It is a real element in the list, so everything below it
    moves down to make room - which is the animation, without animating anything. */
 .dropslot{border:1px dashed color-mix(in srgb,var(--go) 60%,var(--line));border-radius:var(--r);
-  background:color-mix(in srgb,var(--go) 12%,transparent);margin-bottom:9px;}
+  background:color-mix(in srgb,var(--go) 12%,transparent);margin-bottom:9px;
+  box-sizing:border-box;overflow:hidden;
+  transition:height .17s cubic-bezier(.2,.7,.2,1),margin .17s cubic-bezier(.2,.7,.2,1),opacity .14s linear;}
+/* The space it is leaving, closing as the new one opens, so the two days trade height over the
+   same 170ms and everything between them slides (v5.243). */
+.dropslot.shut{opacity:0;}
+html.mo-off .dropslot{transition:none;}
 /* A day is a container: header, then whatever is in it, growing and shrinking to fit. An empty
    one keeps its header and offers somewhere to drop, because empty is a real answer - it is a
    rest day - not an absence. */
@@ -9995,7 +10006,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.242';
+var APPV='v5.243';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20576,11 +20587,16 @@ function cardStart(el,sx,sy){
   var slot=document.createElement('div');
   slot.className='dropslot';
   slot.style.height=r.height+'px';
+  // the card's own gap, not the stylesheet's guess at it: a pixel of difference is a visible
+  // nudge of everything below the moment the card lifts (v5.243)
+  var cs=null;try{cs=getComputedStyle(el);}catch(e){}
+  slot.style.marginBottom=cs?cs.marginBottom:'';
   el.parentNode.insertBefore(slot,el);
   // Out of the flow, so the slot alone represents where it will land.
   el.style.position='fixed';el.style.left=r.left+'px';el.style.top=r.top+'px';
   el.style.width=r.width+'px';el.style.margin='0';
-  CDRAG={el:el,id:id,slot:slot,from:dayKeyOf(id),src:null,
+  CDRAG={el:el,id:id,slot:slot,from:dayKeyOf(id),src:null,h:Math.round(r.height),
+         mb:slot.style.marginBottom,ghost:null,
          dx:sx-r.left,dy:sy-r.top,cx:sx,cy:sy,mv:false,zone:null};
   // The day it is leaving keeps the height it has right now, so the board under the finger does
   // not move when the slot follows it somewhere else (v5.242).
@@ -20619,8 +20635,39 @@ function cardApply(){
     var cr=cards[i].getBoundingClientRect();
     if(d.cy<cr.top+cr.height/2){before=cards[i];break;}
   }
-  if(before){if(d.slot.nextSibling!==before)z.el.insertBefore(d.slot,before);}
-  else if(d.slot.parentNode!==z.el||d.slot.nextSibling)z.el.appendChild(d.slot);
+  if(before){if(d.slot.nextSibling!==before)slotTo(z.el,before);}
+  else if(d.slot.parentNode!==z.el||d.slot.nextSibling)slotTo(z.el,null);
+}
+// Put the slot somewhere else without the board jumping: the place it leaves closes, the place
+// it arrives opens, both on the same curve (v5.243).
+function slotTo(parent,before){
+  var d=CDRAG;if(!d||!parent)return;
+  var old=d.slot.parentNode;
+  if(MOTION==='off'){
+    if(before)parent.insertBefore(d.slot,before);else parent.appendChild(d.slot);
+    return;
+  }
+  if(old){
+    // only one ghost at a time: a fast finger would otherwise leave a trail of closing gaps
+    if(d.ghost&&d.ghost.parentNode)d.ghost.parentNode.removeChild(d.ghost);
+    var g=document.createElement('div');
+    g.className='dropslot';
+    g.style.height=d.h+'px';g.style.marginBottom=d.mb;
+    old.insertBefore(g,d.slot);
+    d.ghost=g;
+    requestAnimationFrame(function(){
+      g.style.height='0px';g.style.marginBottom='0px';g.classList.add('shut');
+    });
+    setTimeout(function(){
+      if(g.parentNode)g.parentNode.removeChild(g);
+      if(d.ghost===g)d.ghost=null;
+    },220);
+  }
+  d.slot.style.height='0px';d.slot.style.marginBottom='0px';
+  if(before)parent.insertBefore(d.slot,before);else parent.appendChild(d.slot);
+  // read back once so the browser has a zero height to animate away from
+  void d.slot.offsetHeight;
+  d.slot.style.height=d.h+'px';d.slot.style.marginBottom=d.mb;
 }
 function cardMove(ev){
   if(!CDRAG)return;
@@ -20649,6 +20696,7 @@ function cardEnd(){
     }
   }
   [].forEach.call(document.querySelectorAll('.dropok,.dropfull'),function(x){x.classList.remove('dropok','dropfull');});
+  if(d.ghost&&d.ghost.parentNode)d.ghost.parentNode.removeChild(d.ghost);
   if(d.src)d.src.style.minHeight='';
   var wc2=document.getElementById('weekCards');
   if(wc2)wc2.classList.remove('cdragging');

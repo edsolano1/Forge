@@ -174,6 +174,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   `walkRowHtml`, `WALKI` (the walking mark), `emberPill`. The streak is the ember and nothing
   else: nothing at zero, lit at seven, never a headline figure. Never put a streak back in the
   totals, and never let a missed day say anything at all.
+- **A card in the air moves the board, never jumps it** (v5.243). `slotTo` closes the gap it
+  leaves with a ghost while the new gap opens from zero, both 170ms; the slot copies the card's
+  computed margin; `cdPick` answers the grab. Motion Off keeps the instant path. Never go back
+  to inserting the slot straight into a new parent: that is one frame, and it reads as a jerk.
 - **A card in the air never shrinks the board** (v5.242). `cardStart` pins the source
   container's height inline and adds `cdragging` to `#weekCards` (every daybox floors at 62px);
   `cardEnd` clears both. The slot IS a day's body during a drag, so without this the day you
