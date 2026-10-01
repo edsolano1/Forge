@@ -239,6 +239,12 @@ main constraint on how to work in it. See **Traps** below before editing.
   never moves, Motion Off strikes at once, and `dismissSplash` holds until the blow has had 820ms
   (4.6s ceiling). The gold BEFORE the blow is the hearth and is deliberate. The preview pane cannot
   test any of this: it draws no frames, so only the backstop ever fires there.
+- **The one moving thing in the rest bar is borrowed from the framework** (APK 1.5).
+  `rtShimmer` is a stock indeterminate ProgressBar with nothing of ours in it, tinted
+  `#4DFFE9B8` so the stock sweep reads as a heat haze instead of a cream stripe. It needs no
+  repost and keeps going while the process sleeps. It sits BELOW `rtTrack` so the eraser keeps
+  it inside the lava; never move it above, and never let `setFlow` touch it. Order bottom to
+  top: rtFlow, rtShimmer, rtHeat, rtTrack.
 - **Nothing an app supplies animates in the notification shade** (measured on the Fold,
   1 Oct). An AnimatedVectorDrawable from our APK draws perfectly and never moves, while the
   framework's own indeterminate drawable moves in the same ProgressBar; a frame by frame
