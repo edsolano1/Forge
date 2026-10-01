@@ -4046,19 +4046,6 @@ body.wcon{overflow:hidden;}
       </button>
     </div>
     <div class="footnote" style="margin:8px 2px 0">New phone, or something went wrong. It asks you twice.</div>
-    <!-- TUNEUP (v5.247, temporary): the four changes agreed on 1 Oct, as one button. Delete this
-         block, tuneUp() and the tuneRow() call when it has been used. -->
-    <div id="tuneWrap" hidden>
-      <div class="ydlbl">THE CHANGES WE TALKED ABOUT</div>
-      <div class="ydg">
-        <button class="yd" onclick="tuneUp()">
-          <svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg>
-          <span class="ydw"><b>Add them to my week</b><span>Step-up and a fourth curl set on Lower B, glute bridge on Lower A, lateral raise on Push.</span></span>
-          <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
-        </button>
-      </div>
-      <div class="footnote" style="margin:8px 2px 0">Nothing is removed and nothing is replaced. This button goes away once it has run.</div>
-    </div>
     </div>
     <div class="set-card">
     <div class="set-sec">Learn</div>
@@ -10046,7 +10033,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.248';
+var APPV='v5.249';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20349,68 +20336,10 @@ function openTimerSheet(){
   }).join('');
   document.getElementById('timerOvl').classList.add('on');
 }
-// TUNEUP (v5.247, temporary). Delete with its markup block once it has been used.
-var TUNE_PLAN=[
-  {wk:'lowb',add:[['stepup',4]],more:[['slegcurl',4],['plegcurl',4]]},
-  {wk:'lowa',add:[['glutebr',3]],more:[]},
-  {wk:'push',add:[['machlat',3]],more:[]}
-];
-function tuneRow(){
-  var e=document.getElementById('tuneWrap');
-  if(e)e.hidden=!!(DB&&DB.tuneUp1);
-}
-// One line repeated to make a set count, from the row's own last line so his weights carry.
-function tuneLines(cur,n,fallback){
-  var L=String(cur||fallback||'').split('\n').filter(function(x){return x.length;});
-  if(!L.length)L=[String(fallback||'0x10')];
-  while(L.length<n)L.push(L[L.length-1]);
-  return L.slice(0,n).join('\n');
-}
-function tuneFind(w,ex){
-  var hit=null;
-  ((w||{}).sections||[]).forEach(function(sec){
-    (sec.rows||[]).forEach(function(r){
-      if(Array.isArray(r)&&slotBase(r[0])===ex&&!hit)hit={sec:sec,row:r};
-    });
-  });
-  return hit;
-}
-function tuneUp(){
-  if(DB.tuneUp1){tuneRow();return;}
-  var did=[],missed=[];
-  TUNE_PLAN.forEach(function(P){
-    var w=(DB.custom||{})[P.wk];
-    if(!w||!(w.sections||[]).length){missed.push(P.wk);return;}
-    var last=w.sections[w.sections.length-1];
-    P.add.forEach(function(A){
-      var ex=A[0],n=A[1];
-      if(tuneFind(w,ex))return;                      // already there: leave it alone
-      var def=EX[ex]||{};
-      last.rows=last.rows||[];
-      last.rows.push([ex,{sets:tuneLines(def.sets,n,'0x10'),rest:def.rest||'60 sec'}]);
-      did.push((def.name||ex)+' on '+(w.name||P.wk).replace('Optional: ',''));
-    });
-    P.more.forEach(function(M){
-      var ex=M[0],n=M[1],hit=tuneFind(w,ex);
-      if(!hit)return;
-      var cur=String(hit.row[1].sets||'').split('\n').filter(function(x){return x.length;});
-      if(cur.length>=n)return;                       // already at or past that many
-      hit.row[1].sets=tuneLines(hit.row[1].sets,n,(EX[ex]||{}).sets);
-      did.push(((EX[ex]||{}).name||ex)+' to '+n+' sets');
-    });
-  });
-  DB.tuneUp1=1;
-  saveDB();mergeCustom();dayMap();renderHome();tuneRow();
-  try{sfxLog();}catch(e){}
-  var msg=did.length?did.join('. ')+'.':'Everything was already in place, so nothing changed.';
-  if(missed.length)msg+=' '+missed.join(' and ')+' could not be found, so '+(missed.length===1?'that one was':'those were')+' left alone.';
-  ask(msg,null,'Your week is updated',"OK",false);
-}
 function openSettings(){
   initAudio();
   drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();ntDraw();hcDraw();autoBkDraw();
   scrapApply();
-  tuneRow();                                    // TUNEUP (v5.247, temporary)
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   // The two tour buttons say which LENGTH they are, so the theme's word for "Tutorial" no longer
