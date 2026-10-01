@@ -174,6 +174,9 @@ main constraint on how to work in it. See **Traps** below before editing.
   `walkRowHtml`, `WALKI` (the walking mark), `emberPill`. The streak is the ember and nothing
   else: nothing at zero, lit at seven, never a headline figure. Never put a streak back in the
   totals, and never let a missed day say anything at all.
+- **A fold opens, it does not appear** (v5.245). `svFold` animates height in pixels and returns
+  it to auto when the transition ends; the first pass after a launch is instant. Any new fold
+  gets the same treatment: `hidden` alone is a redraw, not an opening.
 - **A card in the air moves the board, never jumps it** (v5.243). `slotTo` closes the gap it
   leaves with a ghost while the new gap opens from zero, both 170ms; the slot copies the card's
   computed margin; `cdPick` answers the grab. Motion Off keeps the instant path. Never go back

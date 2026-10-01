@@ -421,6 +421,12 @@ html.mo-off .card.cdrag{animation:none;}
 /* The space it is leaving, closing as the new one opens, so the two days trade height over the
    same 170ms and everything between them slides (v5.243). */
 .dropslot.shut{opacity:0;}
+/* Saved workouts opens (v5.245). It was hidden, which happens between two frames and reads as
+   a redraw rather than as a thing opening. Height is animated in pixels, because auto does not
+   interpolate, and handed back to the content at the end so a card added later is never cut. */
+.svfold{overflow:hidden;transition:height .22s cubic-bezier(.2,.7,.2,1),opacity .18s linear;}
+.svfold.shut{height:0 !important;opacity:0;}
+html.mo-off .svfold{transition:none;}
 html.mo-off .dropslot{transition:none;}
 /* A day is a container: header, then whatever is in it, growing and shrinking to fit. An empty
    one keeps its header and offers somewhere to drop, because empty is a real answer - it is a
@@ -879,6 +885,9 @@ body.tut #askOvl{z-index:402;}
 .hold.running{background:var(--gold);border-color:var(--gold);color:#0b0c0e;}
 .hold.resume{border-color:var(--gold);color:var(--gold);}
 .ex-foot{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:2px 16px 13px;}
+/* The marks on that line (v5.245): the same colour as the words, so they read as part of them. */
+.ex-foot .footi{width:12px;height:12px;margin-right:5px;vertical-align:-1.5px;
+  fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.85;}
 .ex-foot .ex-rest{padding:0;}
 .ex-pr{font-size:12px;letter-spacing:.08em;color:var(--txt3);white-space:nowrap;flex:0 0 auto;}
 .ex-pr b{font-weight:600;color:color-mix(in srgb,var(--gold) 72%,var(--txt3));letter-spacing:0;font-size:12.5px;}
@@ -3555,12 +3564,14 @@ body.wcon{overflow:hidden;}
       <div class="s-title" id="sTitle"></div>
       <div class="s-sub" id="sSub"></div>
     </div>
-    <div class="iconbtn" onclick="openTimerSheet()" title="Quick timer"><svg viewBox="0 0 20 20"><circle cx="10" cy="11" r="6.5"/><path d="M10 8v3.2l2.2 1.6M7 2.5h6"/></svg></div>
-    <div class="iconbtn" onclick="openSettings()" title="Settings"><svg viewBox="0 0 20 20"><path d="M16.38 8.30L18.29 8.66L18.29 11.34L16.38 11.70L15.71 13.31L16.81 14.92L14.92 16.81L13.31 15.71L11.70 16.38L11.34 18.29L8.66 18.29L8.30 16.38L6.69 15.71L5.08 16.81L3.19 14.92L4.29 13.31L3.62 11.70L1.71 11.34L1.71 8.66L3.62 8.30L4.29 6.69L3.19 5.08L5.08 3.19L6.69 4.29L8.30 3.62L8.66 1.71L11.34 1.71L11.70 3.62L13.31 4.29L14.92 3.19L16.81 5.08L15.71 6.69Z"/><circle cx="10" cy="10" r="2.6"/></svg></div>
+    <!-- How far through the day comes first (v5.245, his note): it is the thing you look at,
+         and the two buttons are things you only occasionally reach for. -->
     <div class="ring" id="ring">
       <svg width="42" height="42"><circle class="trk" cx="21" cy="21" r="17" fill="none" stroke-width="3.5"/><circle class="bar" id="ringBar" cx="21" cy="21" r="17" fill="none" stroke-width="3.5" stroke-dasharray="106.8" stroke-dashoffset="106.8"/></svg>
       <div class="lbl" id="ringLbl">0/0</div>
     </div>
+    <div class="iconbtn" onclick="openTimerSheet()" title="Quick timer"><svg viewBox="0 0 20 20"><circle cx="10" cy="11" r="6.5"/><path d="M10 8v3.2l2.2 1.6M7 2.5h6"/></svg></div>
+    <div class="iconbtn" onclick="openSettings()" title="Settings"><svg viewBox="0 0 20 20"><path d="M16.38 8.30L18.29 8.66L18.29 11.34L16.38 11.70L15.71 13.31L16.81 14.92L14.92 16.81L13.31 15.71L11.70 16.38L11.34 18.29L8.66 18.29L8.30 16.38L6.69 15.71L5.08 16.81L3.19 14.92L4.29 13.31L3.62 11.70L1.71 11.34L1.71 8.66L3.62 8.30L4.29 6.69L3.19 5.08L5.08 3.19L6.69 4.29L8.30 3.62L8.66 1.71L11.34 1.71L11.70 3.62L13.31 4.29L14.92 3.19L16.81 5.08L15.71 6.69Z"/><circle cx="10" cy="10" r="2.6"/></svg></div>
   </div>
   <div class="s-body" id="sBody"></div>
 </div>
@@ -4035,8 +4046,8 @@ body.wcon{overflow:hidden;}
       <button class="preset sm" onclick="sbStart()">REPLAY THE FIRST RUN &middot; nothing is saved</button>
     </div>
     </div>
-    <div class="footnote" style="margin:16px 2px 0;text-align:center"><span id="setVer"></span> &middot; <a href="terms.html" style="color:inherit">Terms</a> &middot; <a href="privacy.html" style="color:inherit">Privacy</a></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('settingsOvl')">CLOSE</div></div>
+    <div class="footnote" style="margin:16px 2px 0;text-align:center"><span id="setVer"></span> &middot; <a href="terms.html" style="color:inherit">Terms</a> &middot; <a href="privacy.html" style="color:inherit">Privacy</a></div>
   </div>
 </div>
 
@@ -10006,7 +10017,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.244';
+var APPV='v5.245';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12990,9 +13001,11 @@ function renderSession(){
                        :(r.rest?'Rest '+r.rest+((sec.ss&&!/round/i.test(r.rest))?' after the round':''):'');   // a rest that already says round is not told twice
       var prTxt=bst?(bst.w?fmtW(bst.w)+'×'+bst.r:bst.r+(bst.unit?' '+bst.unit:'')):'';
       if(restTxt||prTxt){
+        // A mark each (v5.245): the line read as leftover text without one. The glass is the
+        // rest, the cup is the best, both at the size of the words beside them.
         html+='<div class="ex-foot">'+
-              '<span class="ex-rest">'+esc(restTxt)+'</span>'+
-              (prTxt?'<span class="ex-pr" title="Your best set ever on this lift">Best <b>'+prTxt+'</b></span>':'')+
+              '<span class="ex-rest">'+FOOT_REST+esc(restTxt)+'</span>'+
+              (prTxt?'<span class="ex-pr" title="Your best set ever on this lift">'+FOOT_BEST+'Best <b>'+prTxt+'</b></span>':'')+
               '</div>';
       }
       html+='</div>';
@@ -13754,7 +13767,7 @@ function savedApply(n){
   if(n===undefined)n=extraIds().length;
   h.classList.toggle('open',SAVED_OPEN);
   var b=h.querySelector('.sv-tog');if(b)b.setAttribute('aria-expanded',SAVED_OPEN?'true':'false');
-  c.hidden=!SAVED_OPEN;
+  svFold(c,SAVED_OPEN);
   h.hidden=!SAVED_OPEN;   // the line under the board is the fold's own header now (v5.195)
   if(t)t.hidden=!(SAVED_OPEN&&n>0);
   scrapApply();
@@ -13781,6 +13794,42 @@ var SV_IN='<svg class="mo-still" viewBox="0 0 100 100" fill="none" stroke="curre
   '<path d="M20 62V86H80V62" stroke-width="4" opacity=".55"/>'+
   '<path d="M20 62H80" stroke-width="3.5" opacity=".55"/>'+
   '<path d="M33 74H67" stroke-width="3" opacity=".8"/></svg>';
+// Open or shut a fold with its own height, and leave it owning that height again afterwards
+// (v5.245). Called on every savedApply, including the ones that only redraw, so it does
+// nothing at all when the state has not changed.
+function svFold(el,open){
+  if(!el)return;
+  el.classList.add('svfold');
+  var was=el.getAttribute('data-open')==='1';
+  if(was===!!open&&el.hidden===!open){
+    if(open)el.style.height='';           // content may have grown since
+    return;
+  }
+  // The first pass after a launch is not an opening, it is the fold arriving in the state it
+  // was left in. Animating that would have the board shuffling itself every time the app starts.
+  var first=!el.hasAttribute('data-open');
+  el.setAttribute('data-open',open?'1':'0');
+  if(first){el.hidden=!open;el.style.height='';el.classList.toggle('shut',!open);return;}
+  if(MOTION==='off'||typeof MOTION==='undefined'){
+    el.hidden=!open;el.style.height='';el.classList.toggle('shut',!open);
+    return;
+  }
+  if(open){
+    el.hidden=false;el.classList.add('shut');
+    void el.offsetHeight;
+    el.classList.remove('shut');
+    var hh=el.scrollHeight;
+    el.style.height=hh+'px';
+    clearTimeout(el._ft);
+    el._ft=setTimeout(function(){el.style.height='';},240);   // back to the content's own height
+  }else{
+    el.style.height=el.scrollHeight+'px';
+    void el.offsetHeight;
+    el.classList.add('shut');
+    clearTimeout(el._ft);
+    el._ft=setTimeout(function(){el.hidden=true;el.style.height='';},240);
+  }
+}
 function openNewSaved(){
   savedOpen();
   openMake(null,null,false,null);
@@ -18348,6 +18397,10 @@ function restKill(g){
 // cadence. The earlier version cut both blows short and pitched the second pair up,
 // which is what made it sound rushed and repeat awkwardly.
 var HAM_S=0.68,HAM_3=1.36,HAM_3D=0.72,HAM_GAP=2900;
+// The two marks on the foot of an exercise (v5.245). Drawn at 12px to sit on the same line as
+// 10px mono without lifting it.
+var FOOT_REST='<svg class="footi" viewBox="0 0 20 20"><circle cx="10" cy="11" r="6.2"/><path d="M10 7.6V11l2.3 1.7"/><path d="M7.6 2.8h4.8"/></svg>';   // a clock: rest is time, and a cup beside a trophy read as the same mark
+var FOOT_BEST='<svg class="footi" viewBox="0 0 20 20"><path d="M6.5 3.5h7v3.8a3.5 3.5 0 0 1-7 0z"/><path d="M10 11v2.6M7.5 16.5h5"/><path d="M6.5 4.5H4.6v.9a2.6 2.6 0 0 0 1.9 2.4"/><path d="M13.5 4.5h1.9v.9a2.6 2.6 0 0 1-1.9 2.4"/></svg>';
 // Where the clip's second blow begins, less 40ms so its attack is whole (v5.244). Measured off
 // the decoded buffer: onsets at 0.12 and 0.80 in a 1.62s recording.
 var HAM_ONE=0.76,SPLASH_VOL=0.55;
