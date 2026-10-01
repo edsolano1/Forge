@@ -111,8 +111,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   wall clock** (watch 1.12, 1 Oct). `restEnd` crosses from the phone as `Date.now()`, and
   `Status.TimerPart` reads against `SystemClock.elapsedRealtime()`; feeding it the wall clock
   made the face chip read **497428:51** on the owner's wrist. Convert at the boundary:
-  `elapsedRealtime() + (end - now)`. The two earlier sightings, minus fourteen hours and minus
-  five days, were the same bug patched around twice without anyone finding it.
+  `elapsedRealtime() + (end - now)`. The number decodes as HOURS and minutes, not minutes and
+  seconds: 56.7 years, the age of the unix epoch less the watch's uptime. The older minus
+  fourteen hours and minus five days sightings are NOT this bug and remain unexplained,
+  because this one can only ever read huge and positive.
 - **The wrist chip has an expiry** (watch 1.12). `setTimeoutAfter` six hours, re-set on every
   state update. An ongoing chip cannot be swiped away and only the phone can clear it, so a
   session left open used to hold the watch face slot against Spotify and every timer forever.
