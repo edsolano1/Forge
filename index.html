@@ -9954,7 +9954,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.239';
+var APPV='v5.240';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13735,6 +13735,7 @@ function openNewSaved(){
 // beats silently dropping it back on the rack.
 function planAdd(id,k){
   dayMap();
+  var wasOn=dayKeyOf(id);                      // where it stood, before it stops standing there
   planDropSilent(id);
   var key=k;
   if(!key){
@@ -13748,8 +13749,51 @@ function planAdd(id,k){
     return;
   }
   DB.days[key].push(id);
+  moveWeekLogs(id,wasOn,key);                  // the session goes with it (v5.240)
   saveDB();mergeCustom();closeOvl('mkActOvl');renderHome();
   try{sfxLog();}catch(e){}
+}
+// This week's sealed sessions for one workout, moved from one weekday to another (v5.240).
+// Only sessions stamped with the day it is leaving: one it did on another day of the same week
+// is its own thing and stays where it happened.
+function moveWeekLogs(id,from,to){
+  if(!id||!from||!to||from===to)return 0;
+  var ws=weekStartTs(),we=ws+7*864e5,n=0;
+  (DB.logs||[]).forEach(function(L){
+    if(!L||L.day!==id||!L.sealed||L.unsealed)return;
+    if(L.wk!==from)return;                    // '*' and the unstamped stay as they are
+    var t=new Date(L.date+'T12:00:00').getTime();
+    if(isNaN(t)||t<ws||t>=we)return;
+    L.wk=to;n++;
+  });
+  return n;
+}
+// The same correction, for a week that was already left in that state before this shipped.
+function bonusHeal(){
+  try{
+    if(TUTON||SANDBOX||twoOff())return 0;
+    var ws=weekStartTs(),we=ws+7*864e5,n=0;
+    (DB.logs||[]).forEach(function(L){
+      if(!L||!L.sealed||L.unsealed||L.marked||!L.wk||L.wk==='*')return;
+      var t=new Date(L.date+'T12:00:00').getTime();
+      if(isNaN(t)||t<ws||t>=we)return;
+      if((DB.days[L.wk]||[]).indexOf(L.day)>=0)return;      // its own day still plans it
+      // where it stands now: exactly one day, or this is not a move
+      var home=null,count=0;
+      DAYS.forEach(function(d){if((DB.days[d.k]||[]).indexOf(L.day)>=0){home=d.k;count++;}});
+      if(count!==1)return;
+      // and that day must not already hold a session of its own, or this one is a real extra
+      var busy=(DB.logs||[]).some(function(X){
+        if(X===L||!X||X.day!==L.day||!X.sealed||X.unsealed||X.wk!==home)return false;
+        var xt=new Date(X.date+'T12:00:00').getTime();
+        return !isNaN(xt)&&xt>=ws&&xt<we;
+      });
+      if(busy)return;
+      L.wk=home;n++;
+    });
+    if(n)saveDB();
+    return n;
+  }catch(e){return 0;}
 }
 function planDropSilent(id){
   dayMap();
@@ -20536,9 +20580,11 @@ function cardEnd(){
     }else if(!here&&(DB.days[key]||[]).length>=DAY_MAX){
       mkNote(daysName(key)+' already holds '+DAY_MAX+' workouts.');
     }else{
+      var wasOn=d.from||null;                 // the day it is leaving, for its session (v5.240)
       planDropSilent(d.id);
       DB.days[key]=DB.days[key]||[];
       DB.days[key].splice(Math.min(idx,DB.days[key].length),0,d.id);
+      moveWeekLogs(d.id,wasOn,key);
       saveDB();mergeCustom();try{sfxLog();}catch(e){}
     }
   }
@@ -22460,6 +22506,8 @@ function sbEnd(){
   // And the targets check (v5.225). It runs on its own, says nothing at all when every target is
   // reachable, and asks only once for any given list.
   setTimeout(function(){try{easeNotice();}catch(e){}},8000);
+  // A week left with a session stranded on the day a workout used to stand on (v5.240).
+  try{if(bonusHeal())renderHome();}catch(e){}
   // A first run is asked how it wants to start, and that hands over to the tour offer itself.
   // Everyone else goes straight to the offer as before.
   setTimeout(function(){if(STARTPEND)offerStart();else tutOffer();},1600);

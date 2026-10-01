@@ -170,6 +170,11 @@ main constraint on how to work in it. See **Traps** below before editing.
   LEAVE THEM which settles that list), and the sheet walks ONE LIFT at a time with USE <best> and
   KEEP <target>, never a bulk fix: the owner asked for control and for nothing that interrupts a
   lifter mid-session. Accepting writes every copy that lift stands in.
+- **A moved workout takes this week's session with it** (v5.240). `moveWeekLogs(id,from,to)` on
+  every path that moves an id between days (the drag's `CDRAG.from`, `planAdd`); `bonusHeal()`
+  at launch repairs a week already stranded. Without it the old day sprouts a BONUS card and the
+  new day reads undone, which looks exactly like the app duplicating the workout. Moving a
+  workout OFF the board leaves its session where it happened, on purpose.
 - **A bonus workout shows where it happened** (v5.222). A session finished on a day that was not
   carrying that workout draws a dimmed, dashed card with a violet BONUS pill on that day (bonusOn,
   bonusCard, bonusTap opens it in Workouts finished). It has no grip on purpose: a record is not a
