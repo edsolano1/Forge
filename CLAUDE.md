@@ -239,6 +239,17 @@ main constraint on how to work in it. See **Traps** below before editing.
   never moves, Motion Off strikes at once, and `dismissSplash` holds until the blow has had 820ms
   (4.6s ceiling). The gold BEFORE the blow is the hearth and is deliberate. The preview pane cannot
   test any of this: it draws no frames, so only the backstop ever fires there.
+- **The rest notification's bar is flowing lava, and only one layer of it may move**
+  (APK 1.3, 1 Oct, owner picked Glide). A notification cannot run our code: the only thing
+  Android animates by itself in the shade is the drawable on an **indeterminate** ProgressBar,
+  and an indeterminate bar has no position. So `rtFlow` is full width and system driven, and
+  the fill is carried by `rtHeat` (a `<scale>`, so the white hot mouth lands on the FRONT of
+  the lava rather than at the end of the bar) and `rtTrack` (a right side `<clip>` that paints
+  the unburned length back out). Never measure the bar in pixels to position anything: that is
+  what a `<scale>` exists to avoid, and it is the only reason this survives a folding screen.
+  The eraser is an opaque trough, never the shade's own colour, because a OneUI card is
+  translucent over the wallpaper. Details and the three failed attempts are in
+  Arcanum-Android/HANDOFF.md.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
   strength and underfills "move"; longer would only add rest.
 - The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated
