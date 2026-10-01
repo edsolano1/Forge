@@ -174,6 +174,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   `walkRowHtml`, `WALKI` (the walking mark), `emberPill`. The streak is the ember and nothing
   else: nothing at zero, lit at seven, never a headline figure. Never put a streak back in the
   totals, and never let a missed day say anything at all.
+- **TUNEUP is temporary** (v5.247). Three blocks marked `TUNEUP` (the Settings row, `tuneUp()`
+  with `TUNE_PLAN`, and the `tuneRow()` call in `openSettings`) exist to apply one agreed set of
+  changes to the owner's own week while he is away from the phone. Delete all three once he says
+  it has run; `DB.tuneUp1` is the stamp that already hides the row.
 - **A builder row opens collapsed unless it has something to show** (v5.246, owner picked C).
   `mkExpNeed(lines,rest)` decides `exp` at load and on add: differing lines or differing rests
   only. One line reading `All 4`, a quiet `Set them one at a time` link, the measure and the
