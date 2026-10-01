@@ -174,6 +174,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   `walkRowHtml`, `WALKI` (the walking mark), `emberPill`. The streak is the ember and nothing
   else: nothing at zero, lit at seven, never a headline figure. Never put a streak back in the
   totals, and never let a missed day say anything at all.
+- **A card in the air never shrinks the board** (v5.242). `cardStart` pins the source
+  container's height inline and adds `cdragging` to `#weekCards` (every daybox floors at 62px);
+  `cardEnd` clears both. The slot IS a day's body during a drag, so without this the day you
+  lifted from collapses and stops being a drop target.
 - **A moved workout takes this week's session with it** (v5.240). `moveWeekLogs(id,from,to)` on
   every path that moves an id between days (the drag's `CDRAG.from`, `planAdd`); `bonusHeal()`
   at launch repairs a week already stranded. Without it the old day sprouts a BONUS card and the

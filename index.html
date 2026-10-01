@@ -402,6 +402,11 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .carddrag:active{opacity:1;color:var(--go);}
 .carddrag svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;pointer-events:none;}
 .card.cdrag{z-index:60;opacity:.96;transition:none;box-shadow:0 20px 44px -14px rgba(0,0,0,.6);pointer-events:none;}
+/* While a card is in the air (v5.242): the day it came from holds its own height, set inline at
+   the start, and every other day keeps a band deep enough to drop onto. Without the first the
+   board lurches upward the instant the slot leaves; without the second an empty day is a 30px
+   sliver. */
+#weekCards.cdragging .daybox{min-height:62px;}
 /* The space the card will drop into. It is a real element in the list, so everything below it
    moves down to make room - which is the animation, without animating anything. */
 .dropslot{border:1px dashed color-mix(in srgb,var(--go) 60%,var(--line));border-radius:var(--r);
@@ -9990,7 +9995,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.241';
+var APPV='v5.242';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20575,8 +20580,17 @@ function cardStart(el,sx,sy){
   // Out of the flow, so the slot alone represents where it will land.
   el.style.position='fixed';el.style.left=r.left+'px';el.style.top=r.top+'px';
   el.style.width=r.width+'px';el.style.margin='0';
-  CDRAG={el:el,id:id,slot:slot,from:dayKeyOf(id),
+  CDRAG={el:el,id:id,slot:slot,from:dayKeyOf(id),src:null,
          dx:sx-r.left,dy:sy-r.top,cx:sx,cy:sy,mv:false,zone:null};
+  // The day it is leaving keeps the height it has right now, so the board under the finger does
+  // not move when the slot follows it somewhere else (v5.242).
+  var src=slot.parentNode;
+  if(src&&src.getBoundingClientRect){
+    CDRAG.src=src;
+    src.style.minHeight=Math.round(src.getBoundingClientRect().height)+'px';
+  }
+  var wc=document.getElementById('weekCards');
+  if(wc)wc.classList.add('cdragging');
   el.classList.add('cdrag');
   try{if(navigator.vibrate)navigator.vibrate(12);}catch(e){}
   cardApply();
@@ -20635,6 +20649,9 @@ function cardEnd(){
     }
   }
   [].forEach.call(document.querySelectorAll('.dropok,.dropfull'),function(x){x.classList.remove('dropok','dropfull');});
+  if(d.src)d.src.style.minHeight='';
+  var wc2=document.getElementById('weekCards');
+  if(wc2)wc2.classList.remove('cdragging');
   if(d.slot.parentNode)d.slot.parentNode.removeChild(d.slot);
   d.el.classList.remove('cdrag');
   d.el.style.position='';d.el.style.left='';d.el.style.top='';d.el.style.width='';d.el.style.margin='';
