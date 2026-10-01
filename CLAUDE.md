@@ -109,8 +109,9 @@ main constraint on how to work in it. See **Traps** below before editing.
   be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
 - **The watch rest is a ring round the bezel, not a bar** (watch 1.13, 1 Oct, owner picked it
   from three). `RimView` over the ScrollView, ember the whole way down and hot in the last ten
-  seconds, lit means left. The countdown is 32sp, not 60, and the word REST is hidden while one
-  runs. Two rules learned on the wrist: the ring has to be hard against the bezel or it cuts
+  seconds, lit means left. The countdown is 19sp and sits at the TOP above the exercise name
+  (1.14), not 60sp in the middle, and the word REST is hidden while one runs: once the ring
+  carries the time, a big number in the middle is the same fact twice. Two rules learned on the wrist: the ring has to be hard against the bezel or it cuts
   through the exercise name, and the 34dp top padding is not slack for the same reason. Anything
   reclaimed on that screen comes out of the middle. SKIP REST is still below the fold and that is
   known, not forgotten.
