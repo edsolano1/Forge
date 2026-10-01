@@ -239,6 +239,20 @@ main constraint on how to work in it. See **Traps** below before editing.
   never moves, Motion Off strikes at once, and `dismissSplash` holds until the blow has had 820ms
   (4.6s ceiling). The gold BEFORE the blow is the hearth and is deliberate. The preview pane cannot
   test any of this: it draws no frames, so only the backstop ever fires there.
+- **Nothing an app supplies animates in the notification shade** (measured on the Fold,
+  1 Oct). An AnimatedVectorDrawable from our APK draws perfectly and never moves, while the
+  framework's own indeterminate drawable moves in the same ProgressBar; a frame by frame
+  `<animation-list>` is the one thing that does run. So the lava in the rest notification is a
+  STILL image, `lava_flow.xml` is a plain `<vector>`, and the claim in the 1.3 notes that it was
+  animating was wrong: the pixels that changed were the heat ramp re-stretching on every repost,
+  not the waves. Do not add an animated-vector to a notification expecting it to run.
+- **An animation in the shade carries rhythm, never position** (1 Oct). The shade stops and
+  restarts a drawable every time it is opened, which a loop does not mind and a fill cannot
+  survive. The rest bar's LENGTH is therefore reposted by the plugin and always will be:
+  `tickFor` aims at 120 steps across whatever the rest is (700 ms floor, 2 s cap), and
+  `lava_track` is a `<scale>` carrying a fixed 14 dp fade at its leading edge so the step lands
+  inside the fade. Never go back to a `<clip>`: a hard line is a landmark the eye follows, and
+  that is what made the fill read as stepping.
 - **The rest notification's bar is flowing lava, and only one layer of it may move**
   (APK 1.3, 1 Oct, owner picked Glide). A notification cannot run our code: the only thing
   Android animates by itself in the shade is the drawable on an **indeterminate** ProgressBar,
