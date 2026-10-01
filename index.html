@@ -10006,7 +10006,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.243';
+var APPV='v5.244';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12344,7 +12344,11 @@ function logoSvgParts(cls,size){
   var sp=document.getElementById('splash');
   var hm=L&&L.querySelector('.lx-hammer');
   if(!sp)return;
-  function strike(){if(!sp||sp.classList.contains('struck'))return;sp.__struckAt=Date.now();sp.classList.add('struck');}
+  function strike(){
+    if(!sp||sp.classList.contains('struck'))return;
+    sp.__struckAt=Date.now();sp.classList.add('struck');
+    try{splashBlow();}catch(e){}
+  }
   var off=false;try{off=document.documentElement.classList.contains('mo-off');}catch(e){}
   if(!hm||off||!window.requestAnimationFrame||!window.getComputedStyle){strike();return;}
   // A backstop, so a launch never loses its word to a hammer that never moved.
@@ -17565,10 +17569,11 @@ function playClip(buf,at,opt){
   var s=actx.createBufferSource(),g=actx.createGain();
   s.buffer=buf;
   if(opt.rate)s.playbackRate.value=opt.rate;
-  var t0=at,end=opt.dur||(buf.duration/(opt.rate||1));
+  var t0=at,off=opt.off||0,end=opt.dur||((buf.duration-off)/(opt.rate||1));
   g.gain.setValueAtTime(opt.vol===undefined?1:opt.vol,t0);
   s.connect(g);g.connect(opt.bus||mbus);
-  s.start(t0);                                  // must precede stop() or it throws
+  // off starts the buffer partway in: one blow out of a clip that holds two (v5.244)
+  s.start(t0,off);                              // must precede stop() or it throws
   if(opt.dur){                                  // fade the cut so it does not click
     g.gain.setValueAtTime(opt.vol===undefined?1:opt.vol,t0+end-0.09);
     g.gain.linearRampToValueAtTime(0.0001,t0+end);
@@ -18343,6 +18348,23 @@ function restKill(g){
 // cadence. The earlier version cut both blows short and pitched the second pair up,
 // which is what made it sound rushed and repeat awkwardly.
 var HAM_S=0.68,HAM_3=1.36,HAM_3D=0.72,HAM_GAP=2900;
+// Where the clip's second blow begins, less 40ms so its attack is whole (v5.244). Measured off
+// the decoded buffer: onsets at 0.12 and 0.80 in a 1.62s recording.
+var HAM_ONE=0.76,SPLASH_VOL=0.55;
+// The launch strike. Everything about it is a refusal to be clever: one real blow, on the frame
+// the hammer lands, at a volume the sound switch and the volume slider both still own, and
+// nothing at all when the phone has not let us make a sound yet.
+function splashBlow(){
+  try{
+    if(!SFX_ON||!sfxAllowed('splash'))return;
+    if(typeof FG==='function'&&!FG())return;    // the clip is the forge's own
+    if(typeof SANDBOX!=='undefined'&&SANDBOX)return;
+    initAudio();
+    if(!actx||!hamBuf)return;
+    if(actx.state!=='running')return;           // blocked, so let it go: never resumed, never queued
+    playClip(hamBuf,actx.currentTime+0.01,{off:HAM_ONE,vol:SPLASH_VOL});
+  }catch(e){}
+}
 var restSrcs=[];
 function stopRestSrcs(){
   for(var i=0;i<restSrcs.length;i++){try{restSrcs[i].stop();}catch(e){}}
@@ -22630,6 +22652,10 @@ function sbEnd(){
   // is on screen and the reason is obvious (v5.216).
   // Walks catch up quietly on every launch - a no-op until Health Connect is connected
   // from Settings, and throttled inside hcSync so it never becomes chatter.
+  // The hammer lands about a second into the launch and the clip has to be decoded by then, so
+  // the audio is built as soon as the script has finished setting its own globals (v5.244). The
+  // context starts suspended until the phone allows it, which costs nothing.
+  setTimeout(function(){try{initAudio();}catch(e){}},0);
   setTimeout(function(){try{hcSync(false);}catch(e){}},3000);
   try{wearBind();}catch(e){}
   // Say where things stand as soon as there is anything to say. The watch holds whatever

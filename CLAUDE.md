@@ -205,6 +205,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   the last log's date plus the targets). `levelPlan(wk,true)` returns declined rows, `lvlHidden(wk)`
   says a workout is sitting on one, and the card's hold menu carries SHOW THE LEVEL UP. Never make a
   no silent again: the owner lost a raise on 12 Sep and had no way back to it.
+- **The splash sound is one real blow off the rest alert's clip** (v5.244). `splashBlow` in
+  `strike()`, `HAM_ONE` 0.76 (the clip's second onset, less its attack), `SPLASH_VOL` 0.55,
+  `playClip(...,{off})`. Never synthesise this one, and never let a blocked context queue it:
+  not running means skipped. `sfxAllowed('splash')` is the key if it ever needs a switch.
 - **The splash blow is fired by the hammer, never by a delay** (v5.229). Nothing about the impact is
   scheduled: a rAF loop beside `logoSvgParts` reads the hammer's real rotation every drawn frame and
   adds `.struck` to #splash when it crosses the anvil, and every part of the blow (flare and sparks
