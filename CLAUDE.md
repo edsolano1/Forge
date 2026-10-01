@@ -166,6 +166,9 @@ main constraint on how to work in it. See **Traps** below before editing.
   the check earns its warnings from there (v5.235). A stale target is not lost: train it, fall short,
   and it comes back with a real attempt behind it. `easeNotice()` asks once per distinct list at
   launch (`DB.stSeen`), and the card's hold menu carries TARGETS OUT OF REACH.
+  **Near is not out of reach** (v5.250): `bestScoreFor` judges the best set he has DONE against
+  the score the target asks for, and anything at or above `EASE_NEAR` (0.90) is silent, because
+  140 for 16 is not a man who cannot do 145 for 15. Cardio and bodyweight rows are never judged.
   The question has three answers (SHOW ME, LATER which records nothing and comes back next launch,
   LEAVE THEM which settles that list), and the sheet walks ONE LIFT at a time with USE <best> and
   KEEP <target>, never a bulk fix: the owner asked for control and for nothing that interrupts a

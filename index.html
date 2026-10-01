@@ -10033,7 +10033,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.249';
+var APPV='v5.250';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10845,6 +10845,28 @@ function attemptsFor(exId){
 }
 // Two sessions is the floor: one bad day is not evidence that a number is wrong.
 var EASE_TRIES=2;
+// And how close counts as close (v5.250). Below this share of what the target asks, measured as
+// strength rather than as a number on a pin, the target really is beyond him; at or above it he
+// is one notch away and the app should say nothing. Set from his own file, where everything the
+// check was flagging sat between 92% and 112%.
+var EASE_NEAR=0.90;
+// The best he has ever done on this lift, as a score rather than a weight: 140 for 16 is a
+// stronger set than 145 for 12, and a check that only reads the pin cannot tell.
+function bestScoreFor(exId){
+  var best=0;
+  (DB.logs||[]).forEach(function(L){
+    if(!L.entries)return;
+    for(var k in L.entries){
+      if(exOfKey(L,k)!==exId)continue;
+      (L.entries[k]||[]).forEach(function(e){
+        if(!e)return;
+        var sc=0;try{sc=setScore(exId,e);}catch(err){}
+        if(sc>best)best=sc;
+      });
+    }
+  });
+  return best;
+}
 // Noon on the day a moment falls in, which is how every log's date is read. Comparing a raise's
 // real timestamp against a session read as noon made a morning session look like an attempt at an
 // afternoon raise, which is how the warning came back the instant he took one.
@@ -10858,6 +10880,10 @@ function easePlan(wk){
       var rf=rowFor(A&&A.swaps,row,wk);
       var id=rf.exId,lines=String(rf.data.sets||'').split('\n'),t0=parseTarget(lines[0]);
       if(!t0||t0.type!=='wr'||!t0.w)return;          // only a loaded target can be out of reach
+      // A bike has no weight to be short of. One carries 2.5x20 from an old import, and the
+      // check spent two of its eleven warnings on it (v5.250).
+      var EXD=EX[id]||{};
+      if(EXD.cardio||EXD.bw)return;
       var at=attemptsFor(id);
       if(at.n<EASE_TRIES||at.best===null)return;
       // A raise taken five minutes ago asks for a weight never lifted BY DESIGN. Only a target
@@ -10867,6 +10893,13 @@ function easePlan(wk){
       if(stamp&&at.last<=dayNoon(stamp))return;
       var inv=!!invEx(id);
       if(inv?(at.best<=t0.w):(at.best>=t0.w))return; // it has been reached at least once
+      // Never pinned is not the same as cannot. Judge the best he has DONE against what the
+      // target asks for, and stay quiet when he is within EASE_NEAR of it (v5.250).
+      if(!inv){
+        var ask=0,got=0;
+        try{ask=setScore(id,{w:t0.w,r:t0.r||1});got=bestScoreFor(id);}catch(e2){}
+        if(ask>0&&got>=ask*EASE_NEAR)return;
+      }
       var to=lines.map(function(ln){
         var t=parseTarget(ln);
         return t.type==='wr'?(at.best+'x'+t.r):ln;   // the reps stay; only the load comes back
