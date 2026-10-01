@@ -10046,7 +10046,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.247';
+var APPV='v5.248';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -18166,11 +18166,28 @@ function ptOn(ctx,dest,t,f,dur,vol,type,bend){
   o.start(t);o.stop(t+dur+0.02);
 }
 function pt(t,f,dur,vol,type,bend){ptOn(actx,BUS||mbus,t,f,dur,vol,type,bend);}
+// Is the audio clock actually running? A suspended context does not refuse work, it REMEMBERS it,
+// which is how sounds arrived minutes late (v5.248).
+function audioLive(){
+  try{return !!(actx&&actx.state==='running');}catch(e){return false;}
+}
+function pageUp(){
+  try{return document.visibilityState!=='hidden';}catch(e){return true;}
+}
 function sfx(fn){
   if(!SFX_ON)return;
   initAudio();
   if(!actx)return;
-  try{fn(actx.currentTime+0.01);}catch(e){}
+  if(audioLive()){try{fn(actx.currentTime+0.01);}catch(e){}return;}
+  // Not running. In front of you that is the first tap after a launch, so resume and play on the
+  // other side of it; in a pocket it is a sound nobody asked to hear four sets later, so drop it.
+  if(!pageUp())return;
+  try{
+    var pr=actx.resume();
+    if(pr&&pr.then)pr.then(function(){
+      if(audioLive()&&pageUp()){try{fn(actx.currentTime+0.01);}catch(e){}}
+    })['catch'](function(){});
+  }catch(e){}
 }
 function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
 // set logged - low struck weight in a stone room
@@ -18221,7 +18238,7 @@ function sfxPR(){
   // Turned down twice now, both times from the gym rather than the desk: 0.95 dwarfed the
   // hammer outright, and 0.58 still startled with music up. Half again - 0.29 - keeps the
   // blades as the brightest moment of the day without making anyone flinch mid-set.
-  if(FG()&&swdBuf&&SFX_ON){initAudio();if(actx){playClip(swdBuf,actx.currentTime+0.02,{vol:0.29});return;}}
+  if(FG()&&swdBuf&&SFX_ON){initAudio();if(audioLive()){playClip(swdBuf,actx.currentTime+0.02,{vol:0.29});return;}}
   // Records live an octave and a half above everything else in Moonwell - same glass,
   // far higher, and a second voice a fifth over it once the first has bloomed.
   if(MW())return sfx(function(t){
@@ -18461,7 +18478,7 @@ function splashBlow(){
     if(typeof SANDBOX!=='undefined'&&SANDBOX)return;
     initAudio();
     if(!actx||!hamBuf)return;
-    if(actx.state!=='running')return;           // blocked, so let it go: never resumed, never queued
+    if(!audioLive())return;                     // blocked, so let it go: never resumed, never queued
     playClip(hamBuf,actx.currentTime+0.01,{off:HAM_ONE,vol:SPLASH_VOL});
   }catch(e){}
 }
@@ -18479,6 +18496,7 @@ function sfxRest(){
   // then a second voice starts far enough in that its first blow lands one interval
   // after the clip's second, and is cut before its own second blow.
   if(FG()&&hamBuf&&SFX_ON){
+    if(!audioLive())return;                      // suspended: the native alarm is the alert (v5.248)
     stopRestSrcs();
     var ht=actx.currentTime+0.02;
     var ab=abus||mbus;
@@ -18699,7 +18717,7 @@ function sfxRiffle(){
     initAudio();
     if(actx){
       whenRunning(function(){
-        playClip(whoBuf,actx.currentTime+0.02,{vol:0.95});
+        if(audioLive())playClip(whoBuf,actx.currentTime+0.02,{vol:0.95});
         nz(actx.currentTime+0.48,2100,2.4,0.05,0.10);     // the plate coming off its rail
       });
       return;
@@ -18804,7 +18822,7 @@ function sfxUnseal(){
     initAudio();
     if(actx){
       var wt=actx.currentTime+0.02;
-      playClip(whoBuf,wt,{vol:0.9});
+      if(audioLive())playClip(whoBuf,wt,{vol:0.9});
       sfx(function(t){flameRun(t+0.44,1.15,0.20);});
       return;
     }

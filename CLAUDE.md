@@ -217,6 +217,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   the last log's date plus the targets). `levelPlan(wk,true)` returns declined rows, `lvlHidden(wk)`
   says a workout is sitting on one, and the card's hold menu carries SHOW THE LEVEL UP. Never make a
   no silent again: the owner lost a raise on 12 Sep and had no way back to it.
+- **Nothing is ever scheduled into a suspended audio context** (v5.248). `audioLive()` gates
+  `sfx()` and every direct `playClip`. A suspended context does not refuse work, it remembers it:
+  that is how a set logged on the watch clanged on the next launch. Visible and suspended means
+  resume then play; hidden means drop it.
 - **The splash sound is one real blow off the rest alert's clip** (v5.244). `splashBlow` in
   `strike()`, `HAM_ONE` 0.76 (the clip's second onset, less its attack), `SPLASH_VOL` 0.55,
   `playClip(...,{off})`. Never synthesise this one, and never let a blocked context queue it:
