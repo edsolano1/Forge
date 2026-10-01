@@ -170,6 +170,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   LEAVE THEM which settles that list), and the sheet walks ONE LIFT at a time with USE <best> and
   KEEP <target>, never a bulk fix: the owner asked for control and for nothing that interrupts a
   lifter mid-session. Accepting writes every copy that lift stands in.
+- **The walks screen is one number and a list** (v5.241, owner picked 1A). `walksHtml`,
+  `walkRowHtml`, `WALKI` (the walking mark), `emberPill`. The streak is the ember and nothing
+  else: nothing at zero, lit at seven, never a headline figure. Never put a streak back in the
+  totals, and never let a missed day say anything at all.
 - **A moved workout takes this week's session with it** (v5.240). `moveWeekLogs(id,from,to)` on
   every path that moves an id between days (the drag's `CDRAG.from`, `planAdd`); `bonusHeal()`
   at launch repairs a week already stranded. Without it the old day sprouts a BONUS card and the
