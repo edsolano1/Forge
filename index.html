@@ -1148,6 +1148,19 @@ body.light .dayact.del{--bad:#b1332c;}
    summary above dims because the lines are what gets saved from then on. */
 /* What the set is counted in, asked first because it decides what the rest of the row means.
    Full width and on its own line - it is the question the others hang off, not a peer of them. */
+/* The quiet version (v5.246): no label, no box, the measure and the state of the sets on one
+   line that sits under the name instead of competing with it. */
+.mk-meas.quiet{gap:7px;margin:4px 0 2px;}
+.mk-meas.quiet .mk-sel{border-color:transparent;background:transparent;padding-left:0;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);}
+.mk-same{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);}
+/* The one line that opens or closes the per-set view. Faint, under the sets, so it reads as an
+   offer rather than a control competing with the numbers. */
+.mk-ps-link{display:flex;align-items:center;gap:6px;width:100%;margin:2px 0 0;padding:9px 2px;
+  border:0;background:none;cursor:pointer;color:var(--txt3);
+  font-family:var(--sans);font-size:12.5px;text-align:left;}
+.mk-ps-link span{font-family:var(--mono);font-size:13px;}
+@media (hover:hover){.mk-ps-link:hover{color:var(--gold);}}
 .mk-meas{display:flex;align-items:center;gap:10px;margin:9px 0 2px;}
 .mk-meas > span{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;
   color:var(--txt3);flex-shrink:0;}
@@ -2526,6 +2539,9 @@ body.forge .mk-row .mk-grip svg{width:12px;height:12px;}
 body.forge .mk-meas{display:flex;align-items:center;gap:8px;}
 body.forge .mk-meas > span:first-child{font-family:var(--mono);font-weight:600;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
 body.forge .mk-row .mk-sel{border-radius:999px;background:#0e0806;border:1px solid #3a2214;color:var(--txt2);font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;}
+/* and the quiet one keeps the type but loses the pill (v5.246): it is a line about the
+   exercise, not a control to aim at. */
+body.forge .mk-row .mk-meas.quiet .mk-sel{border-color:transparent;background:transparent;padding:4px 0;}
 body.forge .mk-ps-h{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.12em;border-radius:999px;padding:5px 10px;border:1px solid #3a2214;background:#0e0806;color:var(--txt3);}
 body.forge .mk-ps-h.on{color:var(--gold);border-color:#6a3f26;background:rgba(255,138,31,.08);}
 body.forge .mk-ps-list{gap:6px;align-items:stretch;}
@@ -10017,7 +10033,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.245';
+var APPV='v5.246';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14325,9 +14341,10 @@ function openMake(base,editId,blank,want){
             // first, and 55x12/55x12/55x10 came back as three twelves. Silent, and on a tenth of
             // the library. Held here and re-emitted untouched unless the numbers are edited.
             var raw=String(ov.sets||base2.sets||"").split("\n");
-            out.push({id:id,n:p.n,w:p.w,r:p.r,hold:p.hold,unit:p.unit,exp:1,
+            var rst=(ov.rest!==undefined?ov.rest:base2.rest)||'';
+            out.push({id:id,n:p.n,w:p.w,r:p.r,hold:p.hold,unit:p.unit,exp:mkExpNeed(raw,rst),
                       lines:raw,base:{n:p.n,w:p.w,r:p.r,hold:p.hold},
-                      rest:(ov.rest!==undefined?ov.rest:base2.rest)||'',g:g});
+                      rest:rst,g:g});
           });
         });
         return out;
@@ -14646,12 +14663,17 @@ function mkMeasureUI(r,i){
   // The select used to stretch across the whole card for a two-word value, so the row was mostly
   // empty space with a label stranded at one end. It fits its contents now, and the room that
   // frees up carries the one other fact about how this exercise counts: whether it runs backwards.
-  return '<div class="mk-meas"><span>Counted in</span>'+
+  // The label went (v5.246): "Counted in" in front of a dropdown that says WEIGHT AND REPS was
+  // one row spent on a word. The state of the sets rides along instead, so the line says what
+  // this exercise counts AND whether its sets are alike, which is what the switch used to.
+  var sameTxt=(mkVaries(r)||r.exp)?'set by set':'same every set';
+  return '<div class="mk-meas quiet">'+
     '<select class="mk-sel auto" onchange="mkSetUnit('+i+',this.value)">'+
       opts.map(function(m){
         return '<option value="'+m[0]+'"'+(u===m[0]?' selected':'')+'>'+m[1]+'</option>';
       }).join('')+
     '</select>'+
+    '<span class="mk-same">&middot; '+sameTxt+'</span>'+
     (invEx(r.id)
       ? '<span class="mk-inv" title="An assisted machine: the number is how much help you are taking, so less of it means you did more of the work">assisted &middot; less is more</span>'
       : '')+
@@ -14697,7 +14719,9 @@ function mkSets(i,d){
 // ordinary thing to want on a top set. Stored parallel to the sets: one line and it applies to
 // all of them, one line each and they differ. Old workouts carry a single value and keep working
 // without being touched.
-var MK_GLASS='<svg viewBox="0 0 20 20"><path d="M6 3h8M6 17h8M6.5 3c0 3.5 3.5 4.5 3.5 7s-3.5 3.5-3.5 7M13.5 3c0 3.5-3.5 4.5-3.5 7s3.5 3.5 3.5 7"/></svg>';
+// A clock (v5.246). The hourglass read as two triangles at this size, and the session's own rest
+// line wears a clock now, so the two places that talk about rest finally say it the same way.
+var MK_GLASS='<svg viewBox="0 0 20 20"><circle cx="10" cy="11" r="6.2"/><path d="M10 7.6V11l2.3 1.7"/><path d="M7.6 2.8h4.8"/></svg>';
 function mkRestsFor(r){
   var n=r.n||1,parts=String(r.rest||'').split('\n');
   var out=[],k;
@@ -14733,14 +14757,10 @@ function mkSetsUI(r,i){
   // Both halves on screen with the slash between them, because a switch that shows only the
   // state you are NOT in is a button, and you have to press it to find out what it does. Naming
   // both and lighting one says where you are and where you can go in the same glance.
+  // One line instead of a pair of half-lit buttons (v5.246). It names what tapping it does, which
+  // is the whole reason both halves used to be on screen, and costs a row rather than three.
   var h='<div class="mk-perset'+(open?' open':'')+'">'+
-        '<div class="mk-ps-head">'+
-          '<span class="mk-ps-sw">'+
-            '<button class="mk-ps-h'+(open?'':' on')+'" onclick="mkSetExp('+i+',0)">ONE FOR ALL</button>'+
-            '<i>/</i>'+
-            '<button class="mk-ps-h'+(open?' on':'')+'" onclick="mkSetExp('+i+',1)">SET EACH ONE</button>'+
-          '</span>'+
-        '</div><div class="mk-ps-list">';
+        '<div class="mk-ps-list">';
   L.forEach(function(ln,k){
     var c=mkLineVal(ln,u);
     var wIn=open?('mkSetLine('+i+','+k+',&#39;w&#39;,this.value)'):('mkSet('+i+',&#39;w&#39;,this.value)');
@@ -14749,7 +14769,7 @@ function mkSetsUI(r,i){
     h+='<div class="mk-ps-row">'+
        // The word, not a bare digit. There is a reps column an inch away, so a lone 3 at the
        // start of the line is a number among numbers - it has to say which kind it is.
-       '<span class="mk-ps-n">'+(open?'Set '+(k+1):'All sets')+'</span>'+
+       '<span class="mk-ps-n">'+(open?'Set '+(k+1):'All '+(r.n||1))+'</span>'+
        // Weight-and-reps rows drop their unit words: COUNTED IN says it once an inch above,
        // the session grid already writes the same set as a bare "145 x 8", and the width the
        // words took is exactly what the rest chip needed to sit on its own set's line instead
@@ -14777,6 +14797,9 @@ function mkSetsUI(r,i){
   // A word rides with the icon - at the card's foot a bare chain has nothing to borrow meaning
   // from, where at the head it sat next to the name it acted on. Only on a row not already in
   // a run, exactly as before.
+  h+='<button class="mk-ps-link" onclick="mkSetExp('+i+','+(open?0:1)+')">'+
+     (open?'Make every set the same':'Set them one at a time')+
+     '<span>'+(open?'\u2039':'\u203a')+'</span></button>';
   h+='<div class="mk-foot"><div class="mk-setadj">'+
      '<button class="mk-adj'+((r.n||1)<2?' off':'')+'" '+((r.n||1)<2?'disabled':'onclick="mkSets('+i+',-1)"')+' title="One fewer set">&minus;</button>'+
      '<span>'+(r.n||1)+' set'+((r.n||1)===1?'':'s')+'</span>'+
@@ -14804,6 +14827,16 @@ function mkVaries(r){
   if(!r.lines||r.lines.length<2)return false;
   for(var k=1;k<r.lines.length;k++)if(r.lines[k]!==r.lines[0])return true;
   return false;
+}
+// Does this row need the set-by-set view the moment it loads? Only if it would otherwise hide
+// something: lines that differ, or a rest that differs between sets (v5.246). Everything else
+// opens as one line, which is what the collapsed view was built for and almost never showed.
+function mkExpNeed(lines,rest){
+  var L=(lines||[]).filter(function(x){return String(x).length;});
+  for(var i=1;i<L.length;i++)if(L[i]!==L[0])return 1;
+  var R=String(rest||'').split('\n');
+  for(var j=1;j<R.length;j++)if(R[j]!==R[0])return 1;
+  return 0;
 }
 // Each half of the switch says what it does rather than toggling blind. Asking for ONE FOR ALL on
 // a row that varies IS the flatten - same act as the old MATCH ALL, now named by where it takes
@@ -15069,9 +15102,10 @@ function mkAddEx(id){
   var p=mkParse(EX[id].sets);
   // Same as the load path: an exercise whose library entry varies between sets keeps that when it
   // is added, rather than being flattened on the way in.
-  MK.rows.push({id:id,n:p.n,w:p.w,r:p.r,hold:p.hold,unit:p.unit,exp:1,
-    lines:String(EX[id].sets||"").split("\n"),base:{n:p.n,w:p.w,r:p.r,hold:p.hold},
-    rest:EX[id].rest||'',g:null});
+  var addLines=String(EX[id].sets||"").split("\n"),addRest=EX[id].rest||'';
+  MK.rows.push({id:id,n:p.n,w:p.w,r:p.r,hold:p.hold,unit:p.unit,exp:mkExpNeed(addLines,addRest),
+    lines:addLines,base:{n:p.n,w:p.w,r:p.r,hold:p.hold},
+    rest:addRest,g:null});
   closeOvl('mkPickOvl');mkTouch();mkRender();
 }
 var mkCexId=null;
