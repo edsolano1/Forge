@@ -155,6 +155,11 @@ main constraint on how to work in it. See **Traps** below before editing.
   the speed of the arithmetic, replaced by `estRatio()` (the median of the last eight sessions'
   actual minutes over their planned minutes, clamped 1 to 2) once two sessions carry a length. The
   owner's first measured session was +18%, so never present the raw plan as the time.
+- **The targets check only ever looks at imported numbers** (v5.251). `easeArm()` from
+  `doRestore` and `weekAdd` only; `easeArmed()` gates `easeNotice` AND `easePlan`, so the hold
+  menu is dormant too; answering sleeps it until the next import. It had six builds of false
+  alarms on the owner's own data and never once a true one, because a target he reached himself
+  is reachable by definition. Never arm it from anything a lifter does to their own week.
 - **Targets can come back down** (v5.225). `easePlan(wk)` flags a row whose target WEIGHT has never
   been reached in two or more logged sessions (inverted for assisted); reps are never judged, because
   falling short on the last set is training and judging reps flagged 58 of the owner's 104 rows. The

@@ -10033,7 +10033,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.250';
+var APPV='v5.251';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10873,7 +10873,7 @@ function bestScoreFor(exId){
 function dayNoon(ms){var d=new Date(ms);return new Date(d.getFullYear(),d.getMonth(),d.getDate(),12,0,0,0).getTime();}
 function easePlan(wk){
   var w=W[wk],out=[];
-  if(!w)return out;
+  if(!w||!easeArmed())return out;   // dormant unless a file brought these numbers in (v5.251)
   try{
     var A=DB.active[wk];
     edAllRows(wk).forEach(function(row){
@@ -11246,34 +11246,23 @@ function easeEnd(){
 // Stopping halfway is not an answer: whatever was not looked at is offered again next launch. Only
 // walking to the end of the list, or saying LEAVE THEM to the question itself, settles it.
 function easeLeave(){closeOvl('easeOvl');}
-function easeNoteDone(){DB.stSeen=easeSig(easeAll());saveDB();}
-// The amnesty (v5.235). Runs once, before the first notice: everything out of reach right now is
-// treated as having been set today, so the check starts from evidence gathered from here rather
-// than from a history it cannot read the intent of.
-function easeAmnesty(){
-  try{
-    if(DB.stAmnesty)return;
-    var n=0;
-    DB.upAt=DB.upAt||{};
-    easeAll().forEach(function(g){g.rows.forEach(function(r){
-      var k=r.sk||r.id;
-      if(!DB.upAt[k]){DB.upAt[k]=Date.now();n++;}
-    });});
-    DB.stAmnesty=1;
-    saveDB();
-    return n;
-  }catch(e){}
+// Reviewed, or left as imported: either way it sleeps until the next file arrives (v5.251).
+function easeNoteDone(){DB.impSeen=1;delete DB.impCheck;saveDB();}
+// An import arms it. Nothing else does, and nothing a lifter does to their own numbers can.
+function easeArm(){
+  try{DB.impCheck=1;delete DB.impSeen;saveDB();}catch(e){}
+}
+function easeArmed(){
+  try{return !!(DB&&DB.impCheck);}catch(e){return false;}
 }
 // One notice, at the start, only when there is something to say. Never during the tour, never in
 // the sandbox, and never twice for the same list.
 function easeNotice(){
   try{
     if(TUTON||SANDBOX)return;
-    easeAmnesty();                 // once, and it silences everything that predates the check
+    if(!easeArmed())return;        // only after something was imported (v5.251)
     var all=easeAll();
     if(!all.length)return;
-    var sig=easeSig(all);
-    if(DB.stSeen===sig)return;
     // Counted by LIFT, not by row: the same leg press standing in three saved copies is one
     // problem, and saying eleven made it sound like the app had lost its mind.
     var lifts={},worst=null,first=all[0];
@@ -11290,12 +11279,14 @@ function easeNotice(){
     // Three answers, because the wrong moment for this is the moment somebody is about to lift
     // (owner, 23 Sep). LATER records nothing at all and the question comes back next launch;
     // LEAVE THEM settles it until the list itself changes.
-    ask((n===1?'One lift asks for more weight than you have ever lifted.'
-             :n+' lifts ask for more weight than you have ever lifted.')+eg+
-        ' They can be set to your best, one at a time, keeping the same reps.',
-        function(){openEase(null);},
-        n===1?'A weight is set too high':'Some weights are set too high','SHOW ME',
-        function(){easeNoteDone();},{label:'LATER',fn:function(){}},'LEAVE THEM');
+    // It is about the file, not about the lifter: these numbers arrived, nobody here has lifted
+    // them, and the only question is whether to keep them (v5.251).
+    ask((n===1?'One lift that came in with the file asks for more weight than has ever been logged here.'
+             :n+' lifts that came in with the file ask for more weight than has ever been logged here.')+eg+
+        ' They can be set to the best in your history, one at a time, keeping the same reps.',
+        function(){easeNoteDone();openEase(null);},
+        'Worth a look after the import','SHOW ME',
+        function(){easeNoteDone();},{label:'LATER',fn:function(){}},'LEAVE AS IMPORTED');
   }catch(e){}
 }
 // The hard no. Pinned to this session and these targets, so logging the lift again brings it back
@@ -15962,7 +15953,9 @@ function doRestore(input){
           if(k===TKEY||s[k]===undefined)return;
           try{localStorage.setItem(k,String(s[k]));}catch(e){}
         });
-        mergeCustom();persistNow();
+        mergeCustom();
+        easeArm();                 // numbers from a file: worth a look once (v5.251)
+        persistNow();
         // A restore answers the welcome question: this phone is carrying somebody's history now,
         // so the next launch is an ordinary one (v5.214, restoring from the welcome card).
         ownChosen();
@@ -16180,6 +16173,7 @@ function weekAdd(d){
     DB.extra.push(nid);
     added++;
   }
+  easeArm();                       // same for a week somebody sent (v5.251)
   mergeCustom();dayMap();saveDB();renderHome();
   ask(added+' workout'+(added===1?' is':'s are')+' in your saved workouts, under the week. Hold one to put it on a day.',null,'Added');
 }
