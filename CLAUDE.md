@@ -104,9 +104,21 @@ main constraint on how to work in it. See **Traps** below before editing.
   terms.html sits beside privacy.html, linked from the safety screen and Settings (v5.172).
 - **The watch wears the Plates look (1.7, 16 Sep)**: Marcellus and IBM Plex Mono as font files under
   wear/src/main/res/font, plate drawables row_bg / row_bg_done / row_bg_cur / row_bg_match /
-  row_bg_under / plate_num, anvil_gold and anvil_match. 1.9 (versionCode 209, installed 20 Sep) adds the wrist hold timer and stops the ongoing chip counting past zero; 1.8 restyled the
+  row_bg_under / plate_num, anvil_gold and anvil_match. 1.12 (versionCode 212, installed 1 Oct) fixes the chip timebase; 1.9 added the wrist hold timer and stops the ongoing chip counting past zero; 1.8 restyled the
   ongoing chip (ic_anvil, the coming set with its weight) and lets a set picked from the ladder mid-rest
   be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
+- **Anything on Wear that takes a time and animates it wants `elapsedRealtime`, never the
+  wall clock** (watch 1.12, 1 Oct). `restEnd` crosses from the phone as `Date.now()`, and
+  `Status.TimerPart` reads against `SystemClock.elapsedRealtime()`; feeding it the wall clock
+  made the face chip read **497428:51** on the owner's wrist. Convert at the boundary:
+  `elapsedRealtime() + (end - now)`. The two earlier sightings, minus fourteen hours and minus
+  five days, were the same bug patched around twice without anyone finding it.
+- **The wrist chip has an expiry** (watch 1.12). `setTimeoutAfter` six hours, re-set on every
+  state update. An ongoing chip cannot be swiped away and only the phone can clear it, so a
+  session left open used to hold the watch face slot against Spotify and every timer forever.
+  A stuck chip is usually TELLING THE TRUTH: look for an open session on the phone before
+  suspecting the watch, and fix it there, because force stopping the watch app only hides it
+  until the next data event.
 - **The tour is a sealed space** (owner, 20 Sep). Nothing from the live app reaches into it: no level-up
   arrow, no finish-screen raise, no alarms, pushes or prompts while TUTON. The seed data trips isReady;
   the finish screen's raise is fenced off with TUTON since v5.212, and the seed itself gets fixed with the
