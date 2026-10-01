@@ -107,6 +107,13 @@ main constraint on how to work in it. See **Traps** below before editing.
   row_bg_under / plate_num, anvil_gold and anvil_match. 1.12 (versionCode 212, installed 1 Oct) fixes the chip timebase; 1.9 added the wrist hold timer and stops the ongoing chip counting past zero; 1.8 restyled the
   ongoing chip (ic_anvil, the coming set with its weight) and lets a set picked from the ladder mid-rest
   be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
+- **The watch rest is a ring round the bezel, not a bar** (watch 1.13, 1 Oct, owner picked it
+  from three). `RimView` over the ScrollView, ember the whole way down and hot in the last ten
+  seconds, lit means left. The countdown is 32sp, not 60, and the word REST is hidden while one
+  runs. Two rules learned on the wrist: the ring has to be hard against the bezel or it cuts
+  through the exercise name, and the 34dp top padding is not slack for the same reason. Anything
+  reclaimed on that screen comes out of the middle. SKIP REST is still below the fold and that is
+  known, not forgotten.
 - **Anything on Wear that takes a time and animates it wants `elapsedRealtime`, never the
   wall clock** (watch 1.12, 1 Oct). `restEnd` crosses from the phone as `Date.now()`, and
   `Status.TimerPart` reads against `SystemClock.elapsedRealtime()`; feeding it the wall clock
@@ -395,6 +402,12 @@ loses to it; positioning anything inside #bg needs the id in the selector (v5.14
 currentTime 0, and an entrance that starts at opacity 0 never becomes visible. Verify names and
 pivots there, never timing; and never write an entrance from opacity 0 (the level-up plates start
 at .3 for this reason).
+
+**10. `saveDB()` is debounced, so a write from the console can simply never land.** An open
+session was deleted over CDP, read back as gone in the same call, and was still there after the
+app restarted: the in-memory object had changed and the write had not been flushed. Follow any
+scripted change to `DB` with `persistNow()`, and prove it by force-stopping the app and reading
+it back, not by reading the variable you just set.
 
 **9. On Wear, a layer-list item with a negative inset paints the whole frame.** The superset rail in
 watch 1.7 came out as a solid violet block; pin a 3dp item with android:gravity instead.
