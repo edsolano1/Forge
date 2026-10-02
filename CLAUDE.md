@@ -107,8 +107,7 @@ main constraint on how to work in it. See **Traps** below before editing.
   row_bg_under / plate_num, anvil_gold and anvil_match. 1.12 (versionCode 212, installed 1 Oct) fixes the chip timebase; 1.9 added the wrist hold timer and stops the ongoing chip counting past zero; 1.8 restyled the
   ongoing chip (ic_anvil, the coming set with its weight) and lets a set picked from the ladder mid-rest
   be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
-- **A glanceable gauge never rescales itself mid-run** (watch 1.16, built 1 Oct, NOT yet
-  installed). The ring divides by `restSpan`, the longest this rest has ever been, not by the
+- **A glanceable gauge never rescales itself mid-run** (watch 1.16, 1 Oct). The ring divides by `restSpan`, the longest this rest has ever been, not by the
   length it has left: `restLen` is `end - startedAt`, so cutting a rest short shrank both
   halves of the fraction and the ring crept instead of jumping. Jump the needle, never the
   units, or a glance cannot tell whether time passed or the scale moved.
