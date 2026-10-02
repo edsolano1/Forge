@@ -221,6 +221,14 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **A fold opens, it does not appear** (v5.245). `svFold` animates height in pixels and returns
   it to auto when the transition ends; the first pass after a launch is instant. Any new fold
   gets the same treatment: `hidden` alone is a redraw, not an opening.
+- **A press and hold is a grab, and the board holds still for it** (v5.253). `CDRAG_SLOP` 16px:
+  nothing rearranges until the finger has travelled that far, and `d.mv` is the flag, so a hold
+  and release commits nothing either. `cardStart` calls `cardApply` straight away, which used to
+  resolve a zone and call `slotTo` on the very first frame with no movement at all: the owner
+  held Friday and was thrown to Wednesday, and his words were that it shoved him instead of
+  giving him options. The old check was dead code comparing against a `cy0` nothing ever set.
+  The slot transition is .26s, not .17s, and the ghost removal in `slotTo` is 330ms to outlast
+  it; 170ms read as a snap.
 - **A card in the air moves the board, never jumps it** (v5.243). `slotTo` closes the gap it
   leaves with a ghost while the new gap opens from zero, both 170ms; the slot copies the card's
   computed margin; `cdPick` answers the grab. Motion Off keeps the instant path. Never go back

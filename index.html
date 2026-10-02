@@ -417,9 +417,12 @@ html.mo-off .card.cdrag{animation:none;}
 .dropslot{border:1px dashed color-mix(in srgb,var(--go) 60%,var(--line));border-radius:var(--r);
   background:color-mix(in srgb,var(--go) 12%,transparent);margin-bottom:9px;
   box-sizing:border-box;overflow:hidden;
-  transition:height .17s cubic-bezier(.2,.7,.2,1),margin .17s cubic-bezier(.2,.7,.2,1),opacity .14s linear;}
+  transition:height .26s cubic-bezier(.2,.7,.2,1),margin .26s cubic-bezier(.2,.7,.2,1),opacity .2s linear;}
 /* The space it is leaving, closing as the new one opens, so the two days trade height over the
-   same 170ms and everything between them slides (v5.243). */
+   same curve and everything between them slides (v5.243). 170ms was quick enough to read as a
+   snap rather than a move: the owner said the days expanded really quickly and it felt like
+   being shoved. 260ms at the same easing (v5.253). The ghost removal in slotTo has to outlast
+   this, so it moved with it. */
 .dropslot.shut{opacity:0;}
 /* Saved workouts opens (v5.245). It was hidden, which happens between two frames and reads as
    a redraw rather than as a thing opening. Height is animated in pixels, because auto does not
@@ -10042,7 +10045,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.252';
+var APPV='v5.253';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20693,6 +20696,9 @@ function exAddWrite(id,keep){
 // and the card lands in it. A day already holding two refuses and says so rather than silently
 // bouncing back.
 var CDRAG=null;
+// How far the finger travels before the board is allowed to rearrange itself (v5.253). A long
+// press plants a finger and a planted finger wobbles; under this it is still a grab.
+var CDRAG_SLOP=16;
 function cardBind(){
   [].forEach.call(document.querySelectorAll('#weekCards .carddrag,#extraCards .carddrag'),function(hd){
     hd.addEventListener('pointerdown',function(ev){
@@ -20760,7 +20766,7 @@ function cardStart(el,sx,sy){
   el.style.width=r.width+'px';el.style.margin='0';
   CDRAG={el:el,id:id,slot:slot,from:dayKeyOf(id),src:null,h:Math.round(r.height),
          mb:slot.style.marginBottom,ghost:null,
-         dx:sx-r.left,dy:sy-r.top,cx:sx,cy:sy,mv:false,zone:null};
+         dx:sx-r.left,dy:sy-r.top,cx:sx,cy:sy,cx0:sx,cy0:sy,mv:false,zone:null};
   // The day it is leaving keeps the height it has right now, so the board under the finger does
   // not move when the slot follows it somewhere else (v5.242).
   var src=slot.parentNode;
@@ -20779,8 +20785,20 @@ function cardStart(el,sx,sy){
 }
 function cardApply(){
   var d=CDRAG;if(!d)return;
+  // The card follows the finger from the first pixel. The BOARD does not (v5.253).
   d.el.style.left=(d.cx-d.dx)+'px';
   d.el.style.top=(d.cy-d.dy)+'px';
+  // A press and hold is a grab, not a move. cardStart calls this straight away, so the slot used
+  // to be sent to whatever day the finger resolved to on the very first frame, with no movement
+  // at all: the owner held Friday and was thrown up to Wednesday (2 Oct). It read as being
+  // shoved rather than offered a choice. Nothing on the board moves until the finger has
+  // travelled CDRAG_SLOP, which is more than a planted finger's own wobble and less than a
+  // deliberate drag. The flag is d.mv because cardEnd already refuses to commit a drop without
+  // it, so a hold and release is now properly a no-op as well.
+  if(!d.mv){
+    if(Math.abs(d.cx-d.cx0)<CDRAG_SLOP&&Math.abs(d.cy-d.cy0)<CDRAG_SLOP)return;
+    d.mv=true;
+  }
   var z=zoneAt(d.cy);
   if(d.zone&&(!z||z.el!==d.zone.el))d.zone.el.classList.remove('dropok','dropfull');
   d.zone=z;
@@ -20824,7 +20842,7 @@ function slotTo(parent,before){
     setTimeout(function(){
       if(g.parentNode)g.parentNode.removeChild(g);
       if(d.ghost===g)d.ghost=null;
-    },220);
+    },330);   // must outlast the .26s slot transition above, or the closing gap is cut off
   }
   d.slot.style.height='0px';d.slot.style.marginBottom='0px';
   if(before)parent.insertBefore(d.slot,before);else parent.appendChild(d.slot);
@@ -20835,8 +20853,9 @@ function slotTo(parent,before){
 function cardMove(ev){
   if(!CDRAG)return;
   CDRAG.cx=ev.clientX;CDRAG.cy=ev.clientY;
-  if(Math.abs(ev.clientY-CDRAG.cy0||0)>0)CDRAG.mv=true;
-  CDRAG.mv=true;
+  // The two lines that used to live here were dead: one compared against a cy0 nothing ever
+  // set, so it read NaN and never fired, and the one under it set mv on any move at all.
+  // cardApply owns that decision now.
   cardApply();
 }
 function cardEnd(){
