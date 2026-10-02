@@ -113,8 +113,9 @@ main constraint on how to work in it. See **Traps** below before editing.
   (1.14), not 60sp in the middle, and the word REST is hidden while one runs: once the ring
   carries the time, a big number in the middle is the same fact twice. Two rules learned on the wrist: the ring has to be hard against the bezel or it cuts
   through the exercise name, and the 34dp top padding is not slack for the same reason. Anything
-  reclaimed on that screen comes out of the middle. SKIP REST is still below the fold and that is
-  known, not forgotten.
+  reclaimed on that screen comes out of the middle. SKIP REST sits ABOVE the set list (1.15, owner picked the
+  reorder): mid rest the action belongs on the face and the list is what you scroll to. Order
+  during a rest: countdown, exercise, set line, UP NEXT, target, SKIP REST, ladder.
 - **Anything on Wear that takes a time and animates it wants `elapsedRealtime`, never the
   wall clock** (watch 1.12, 1 Oct). `restEnd` crosses from the phone as `Date.now()`, and
   `Status.TimerPart` reads against `SystemClock.elapsedRealtime()`; feeding it the wall clock
