@@ -129,6 +129,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   seconds: 56.7 years, the age of the unix epoch less the watch's uptime. The older minus
   fourteen hours and minus five days sightings are NOT this bug and remain unexplained,
   because this one can only ever read huge and positive.
+- **Backing out of the watch app clears its chip** (watch 1.17). `onDestroy` when
+  `isFinishing`. Owner's rule, and the right one: going back all the way is a clear enough
+  statement, the phone republishes on the next state change, and reopening is one tap. An
+  ongoing notification nobody can dismiss is a bug however correct its contents are.
 - **The wrist chip has an expiry** (watch 1.12). `setTimeoutAfter` six hours, re-set on every
   state update. An ongoing chip cannot be swiped away and only the phone can clear it, so a
   session left open used to hold the watch face slot against Spotify and every timer forever.
