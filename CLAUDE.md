@@ -107,6 +107,11 @@ main constraint on how to work in it. See **Traps** below before editing.
   row_bg_under / plate_num, anvil_gold and anvil_match. 1.12 (versionCode 212, installed 1 Oct) fixes the chip timebase; 1.9 added the wrist hold timer and stops the ongoing chip counting past zero; 1.8 restyled the
   ongoing chip (ic_anvil, the coming set with its weight) and lets a set picked from the ladder mid-rest
   be corrected through the countdown (draw(), redoNow). See Arcanum-Android/HANDOFF.md.
+- **A glanceable gauge never rescales itself mid-run** (watch 1.16, built 1 Oct, NOT yet
+  installed). The ring divides by `restSpan`, the longest this rest has ever been, not by the
+  length it has left: `restLen` is `end - startedAt`, so cutting a rest short shrank both
+  halves of the fraction and the ring crept instead of jumping. Jump the needle, never the
+  units, or a glance cannot tell whether time passed or the scale moved.
 - **The watch rest is a ring round the bezel, not a bar** (watch 1.13, 1 Oct, owner picked it
   from three). `RimView` over the ScrollView, ember the whole way down and hot in the last ten
   seconds, lit means left. The countdown is 19sp and sits at the TOP above the exercise name
@@ -404,6 +409,12 @@ loses to it; positioning anything inside #bg needs the id in the selector (v5.14
 currentTime 0, and an entrance that starts at opacity 0 never becomes visible. Verify names and
 pivots there, never timing; and never write an entrance from opacity 0 (the level-up plates start
 at .3 for this reason).
+
+**Trap 1 bit again on 1 Oct, in a form worth naming: the duplicate did not fight over the same
+property.** `body.forge .timer-pill.ring2 .tbtn` set only `color`; `body.forge .timer-pill .tbtn`,
+further down the file, set `background`. The first won the colour, the second won the fill, and
+the GO pill came out as three black ovals. **Grepping for the class you are editing is not
+enough: grep for the class you are editing INSIDE every state it can be in.**
 
 **10. `saveDB()` is debounced, so a write from the console can simply never land.** An open
 session was deleted over CDP, read back as gone in the same call, and was still there after the
