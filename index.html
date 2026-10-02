@@ -1474,7 +1474,6 @@ body.light .pill-live{color:#fff;}
 body.light .timer-pill{box-shadow:0 10px 30px rgba(16,20,24,.16);}
 body.light .timer-pill.ring2{color:#fff;}
 body.forge .timer-pill.ring2{background:var(--gold);border-color:var(--gold);color:#1b0f06;}
-body.forge .timer-pill.ring2 .tbtn{color:#1b0f06;}
 body.light .timer-pill.ring2 .tbtn{color:#fff;background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.24);}
 body.light .ovl{background:rgba(20,24,30,.5);}
 @media(max-width:400px){.inp{width:58px;font-size:18px;}.ex-stats{gap:10px;}}
@@ -2635,6 +2634,16 @@ body.forge .timer-pill .ttime{font-size:22px;color:#fff6e6;text-shadow:0 0 14px 
 body.forge .timer-pill .tbtn{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);
   font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;}
 body.forge .timer-pill .tskip{border-color:#6a3f26;color:var(--gold);}
+/* The GO state, after the three rules above and not before them (v5.252). The pill turns gold
+   when a rest ends, and the forge restyle three lines up gives every button a near black fill
+   and the SKIP button gold text. Both are right on the dark pill and both vanish on the gold
+   one: the owner saw "three black ovals" where minus 15, plus 15 and SKIP should be, and GO
+   itself washed out to near white on gold. The ring2 rules up at line 1477 only ever set the
+   TEXT colour, so the black fill from here won on specificity and nothing said what it was.
+   Anything added to .timer-pill .tbtn from now on needs its answer here too. */
+body.forge .timer-pill.ring2 .tbtn{background:rgba(27,15,6,.16);border-color:rgba(27,15,6,.34);color:#1b0f06;}
+body.forge .timer-pill.ring2 .tskip{background:rgba(27,15,6,.3);border-color:rgba(27,15,6,.5);color:#140a03;}
+body.forge .timer-pill.ring2 .ttime{color:#1b0f06;text-shadow:none;}
 /* S4: the wizard's cards get the plate and its rail. The drawings are untouched. */
 body.forge .ez-card{position:relative;overflow:hidden;background:#130c09;border:1px solid #4a2c1c;border-top-color:#6a3f26;border-radius:14px;
   padding-left:17px;box-shadow:inset 0 1px 0 rgba(255,215,170,.1),0 10px 22px -12px rgba(0,0,0,.95);}
@@ -10033,7 +10042,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.251';
+var APPV='v5.252';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
