@@ -15,9 +15,10 @@ Ships as two halves:
 - **Web** — GitHub Pages serves `main`. This is the half that gets tested.
 - **Android** — a Capacitor wrapper (`com.edsolano.arcanum`) loading the same URL. Not in this repo:
   it is its own git repo at `Desktop/Arcanum-Android`, started 2 Oct 2026 at phone 1.5 / watch 1.17
-  (first commit `64425d1`). It has no remote, so it is one PC's history until one is added.
-  **Commit the Android and watch source there whenever a build ships**, the same way web builds are
-  pushed here. Its `.gitignore` keeps out the signing keys (`*.jks`, `keystore.properties`, which
+  (first commit `64425d1`), pushed to the PRIVATE repo `edsolano1/Forge-Android`. Private on
+  purpose and it stays that way: the release notes put the Play upload key in that folder.
+  **Commit AND push the Android and watch source there whenever a build ships**, the same way web
+  builds are pushed here. Its `.gitignore` keeps out the signing keys (`*.jks`, `keystore.properties`, which
   PLAY-RELEASE.md tells you to put in that very folder), `local.properties`, 158MB of gradle
   output and `node_modules`.
 
