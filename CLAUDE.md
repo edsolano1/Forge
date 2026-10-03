@@ -233,6 +233,13 @@ main constraint on how to work in it. See **Traps** below before editing.
   leaves with a ghost while the new gap opens from zero, both 170ms; the slot copies the card's
   computed margin; `cdPick` answers the grab. Motion Off keeps the instant path. Never go back
   to inserting the slot straight into a new parent: that is one frame, and it reads as a jerk.
+- **Nothing on the board moves on the GRAB** (v5.254). The 62px floor that `cdragging` puts on
+  every daybox is added when the drag goes LIVE, not in `cardStart`, and `.daybox` carries a
+  `min-height` transition so the days OPEN to receive the card. Measured before the fix on a
+  seeded board: every empty day gained 28px at once, the board gained 166px, and the day under
+  the finger dropped 120px in a single frame while the card itself was position:fixed and stayed
+  put. That, not the dragging, was what the owner meant by the whole thing jerking one direction
+  on press and hold. After: 0px on grab, 0px on a wobble.
 - **A card in the air never shrinks the board** (v5.242). `cardStart` pins the source
   container's height inline and adds `cdragging` to `#weekCards` (every daybox floors at 62px);
   `cardEnd` clears both. The slot IS a day's body during a drag, so without this the day you

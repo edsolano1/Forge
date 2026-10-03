@@ -410,8 +410,14 @@ html.mo-off .card.cdrag{animation:none;}
 /* While a card is in the air (v5.242): the day it came from holds its own height, set inline at
    the start, and every other day keeps a band deep enough to drop onto. Without the first the
    board lurches upward the instant the slot leaves; without the second an empty day is a 30px
-   sliver. */
+   sliver.
+   This used to be applied on the GRAB, and it is why press and hold jerked (v5.254). Measured
+   on a seeded board: every empty day gains 28px at once, the board gains 166px, and the day
+   under the finger drops 120px in a single frame while the card itself is position:fixed and
+   stays put. It is added when the drag goes LIVE now, past CDRAG_SLOP, and the daybox carries a
+   min-height transition so the board OPENS to receive the card rather than snapping open. */
 #weekCards.cdragging .daybox{min-height:62px;}
+html.mo-off .daybox{transition:border-color .15s,background .15s;}
 /* The space the card will drop into. It is a real element in the list, so everything below it
    moves down to make room - which is the animation, without animating anything. */
 .dropslot{border:1px dashed color-mix(in srgb,var(--go) 60%,var(--line));border-radius:var(--r);
@@ -435,7 +441,8 @@ html.mo-off .dropslot{transition:none;}
    one keeps its header and offers somewhere to drop, because empty is a real answer - it is a
    rest day - not an absence. */
 .daybox{border:1px solid color-mix(in srgb,var(--line) 78%,#8a5a3a);border-radius:14px;padding:7px 8px 1px;margin-bottom:7px;
-  background:color-mix(in srgb,var(--surface) 82%,var(--bg));transition:border-color .15s,background .15s;}
+  background:color-mix(in srgb,var(--surface) 82%,var(--bg));
+  transition:border-color .15s,background .15s,min-height .24s cubic-bezier(.2,.7,.2,1);}
 /* A day holding a workout is solid (v5.120); only an empty day is clear. Done days keep their own quenched look. */
 .daybox.empty{padding-bottom:7px;background:transparent;border-style:dashed;}
 .dayhead{display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -10045,7 +10052,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.253';
+var APPV='v5.254';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -20774,8 +20781,9 @@ function cardStart(el,sx,sy){
     CDRAG.src=src;
     src.style.minHeight=Math.round(src.getBoundingClientRect().height)+'px';
   }
-  var wc=document.getElementById('weekCards');
-  if(wc)wc.classList.add('cdragging');
+  // The 62px floor on every day is NOT applied here any more (v5.254): it moved the board 166px
+  // and the finger's own day 120px in one frame, which is the jerk the owner felt on the press
+  // and hold. cardApply adds it when the drag actually goes live.
   el.classList.add('cdrag');
   try{if(navigator.vibrate)navigator.vibrate(12);}catch(e){}
   cardApply();
@@ -20798,6 +20806,9 @@ function cardApply(){
   if(!d.mv){
     if(Math.abs(d.cx-d.cx0)<CDRAG_SLOP&&Math.abs(d.cy-d.cy0)<CDRAG_SLOP)return;
     d.mv=true;
+    // Only now do the days open up to receive it, on a transition rather than in one frame.
+    var wcl=document.getElementById('weekCards');
+    if(wcl)wcl.classList.add('cdragging');
   }
   var z=zoneAt(d.cy);
   if(d.zone&&(!z||z.el!==d.zone.el))d.zone.el.classList.remove('dropok','dropfull');
