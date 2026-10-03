@@ -2438,7 +2438,7 @@ body.forge .daybox.quenched .dh-d{color:#84827f;}
    that story is per lift, one tap in. */
 #histOvl .sheet{background:#0a0605;border-color:#4a2c1c;}
 body.forge .hsegb.on{background:#3a1d0c;color:#ffd9b5;}
-body.forge .hwk{gap:5px;margin-bottom:10px;}
+body.forge .hwk{gap:5px;margin-bottom:17px;}
 body.forge .hwk-c{aspect-ratio:1;border-radius:50%;border:1.5px solid #3a2214;background:#0e0806;padding:0;justify-content:center;gap:0;transition:transform .2s;}
 body.forge .hwk-c i{font-size:8.5px;letter-spacing:.08em;color:var(--txt3);}
 body.forge .hwk-c b{font-size:12px;font-weight:600;color:var(--txt2);}
@@ -2450,10 +2450,23 @@ body.forge .hwk-c.pr{border-color:#ffd08a;box-shadow:0 0 14px -3px rgba(255,208,
 body.forge .hwk-c.walk{border-style:dashed;border-color:#6a3f26;}
 body.forge .hwk-c.now{border-color:#a0521c;border-style:dashed;}
 body.forge .hwk-c.now.has{border-style:solid;}
-/* v5.185 (owner picked B): the selected day read the same as any finished day, so it wears a second
-   bright ring, sits straight and a touch larger. */
-body.forge .hwk-c.sel{transform:scale(1.12);box-shadow:0 0 0 3px var(--surface),0 0 0 5px #ffd9b5;}
+/* v5.257 (owner picked C from three). The v5.185 ring was drawn 5px OUTSIDE the circle and the
+   gap between days is 5px, so it always landed on the neighbours, and the day to its right is
+   painted afterwards and covered it: a ring whole on one side and eaten on the other. The mark
+   is off the circle now. The day you chose keeps the face every finished day has, and a lit bar
+   sits under it, in the space below the strip where nothing competes. Nothing in this strip may
+   draw outside its own cell again: 5px is the entire budget and the ring wanted 5. */
 body.forge .hwk-c.sel b{color:#fff;}
+/* The box is inset -9px top AND bottom, so it is centred on the CELL and not on the bar it
+   draws. That is the whole trick: a finished day is tilted 8 degrees, and turning the bar back
+   level only lands it under the middle of the circle if it pivots about the circle's centre.
+   Pinned at the bottom alone it pivoted about itself and came out 3.6px to the right at phone
+   width and 7px on the unfolded screen, because the error grows with the cell. Measured 0px at
+   375 and at 904 this way. Never pin this to one edge. */
+body.forge .hwk-c.sel::before{content:'';display:block;position:absolute;left:12%;right:12%;
+  top:-9px;bottom:-9px;border-bottom:2px solid #ffd9b5;border-radius:0 0 2px 2px;
+  filter:drop-shadow(0 0 5px rgba(255,217,181,.9));pointer-events:none;}
+body.forge .hwk-c.sel.has::before{transform:rotate(8deg);}
 body.forge .hwk-c.fut{opacity:.4;}
 .hline{text-align:center;font-size:12.5px;color:var(--txt2);margin:0 0 12px;}
 .hrow-min{font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--txt3);margin-left:8px;align-self:baseline;}
@@ -2691,7 +2704,7 @@ body.forge .hset.pr{border-color:#6a3f26;color:var(--gold);background:rgba(255,1
 body.forge .hset.mt{border-color:#4a3a6a;color:var(--violet);background:rgba(143,111,190,.08);}
 body.forge .hrow-rec{border-radius:9px;}
 body.forge .hex-n{font-family:'Marcellus',serif;font-weight:400;font-size:14px;color:#fff6e6;}
-body.forge .hnote,body.forge .hsub{border-radius:10px;}
+body.forge .hnote{border-radius:10px;}
 /* D2: the set cells match the anvil beside them. */
 body.forge .srow .inp{border-radius:999px;border-color:#3a2214;}   /* D1 round: the cells follow the pills */
 body.forge .srow .hold,body.forge .srow .chk{border-radius:999px;}
@@ -2925,7 +2938,6 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hwk-c.now i{color:var(--go);}
 .hwk-c.sel{background:color-mix(in srgb,var(--go) 16%,transparent);border-color:var(--go);}
 .hnav.off{opacity:.25;pointer-events:none;}
-.hsub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);margin:2px 0 10px;}
 .hnone{color:var(--txt3);font-size:13.5px;padding:14px 4px 18px;text-align:center;}
 .hdow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--txt3);text-align:center;padding:2px 0 4px;}
 .hcell{position:relative;aspect-ratio:1;border-radius:9px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;
@@ -10076,7 +10088,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.256';
+var APPV='v5.257';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -17345,7 +17357,9 @@ function histWeekHtml(){
     '<div class="hwk">'+strip+'</div>';
   if(HIST.day){
     var dl=byIso[HIST.day]||[];
-    h+='<div class="hsub">'+pretty(HIST.day)+'</div>';
+    // No date line here (v5.257, owner). The circle above it already says W and 30, and every
+    // row below carries the full date in its own header, so this was the same day said three
+    // times. Never reintroduce a heading that repeats what the thing it sits over already shows.
     h+='<div class="hscroll">'+(dl.length?dl.map(histRowHtml).join(''):'<div class="hnone">Nothing logged this day.</div>')+'</div>';
     return h;
   }
