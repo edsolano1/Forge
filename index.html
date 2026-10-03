@@ -2235,7 +2235,12 @@ body.light .srow.done .chk,body.light .srow.ispr .chk,body.light .finishbtn{box-
 .iconbtn{border-radius:10px;}
 .iconbtn svg,.ex-swap svg,.hold svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
 .hold svg{width:15px;height:15px;}
-.ex-links a svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.7;}
+/* Round ends on all four marks (v5.258b, owner picked B of three). Flat ends are what made the
+   dot of the How To i vanish: it was a stroke a tenth of a unit long, which with a butt cap drew
+   0.095px tall on the phone. The dot is a real filled circle now and does not depend on this, but
+   the rounding is what the four marks were picked WITH, so it stays. */
+.ex-links a svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;}
 .ex-links a{border-radius:8px;}
 .chk,.hold{border-radius:11px;}
 .srow{border-radius:10px;}
@@ -10107,7 +10112,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.258';
+var APPV='v5.259';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13064,8 +13069,11 @@ function renderSession(){
         if(m1)plw=parseFloat(m1[1])||0;
       }
       html+='<div class="ex-links">'+
-            (hasIns?'<a onclick="event.stopPropagation();openInstr(\x27'+insEx+'\x27)"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> How to</a>'
-             :(rl?'<a href="'+esc(rl)+'" target="_blank" rel="noopener"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.2v.1"/></svg> How to</a>':''))+
+            // The dot of the i is a filled circle, not a stroke pretending to be one (v5.258b).
+            // It used to be "M10 6.2v.1", a tenth of a unit of line, which is a hairline at any
+            // size this is drawn and read as a bare stem in a ring. Never draw a dot as a path.
+            (hasIns?'<a onclick="event.stopPropagation();openInstr(\x27'+insEx+'\x27)">'+HOWI+' How to</a>'
+             :(rl?'<a href="'+esc(rl)+'" target="_blank" rel="noopener">'+HOWI+' How to</a>':''))+
             '<a class="unote-btn'+(un?' has':'')+'" onclick="event.stopPropagation();openExNote(\''+rf.exId+'\')">'+
               '<svg viewBox="0 0 20 20"><path d="M4 3.5h9l3 3v10h-12z"/><path d="M7 8.5h6M7 12h4"/></svg> Note</a>'+
             // HISTORY earns its place only once there is one; on a lift you have never logged it
@@ -17441,6 +17449,11 @@ function walkRowHtml(it){
     (meta.length?'<span class="m">'+meta.join(' \u00b7 ')+'</span>':'')+'</span></div>';
 }
 // A person mid stride (owner picked 1 of three marks).
+// The How To mark on the exercise card (v5.258b). The dot is a FILLED CIRCLE: fill is set on the
+// circle itself, which beats the fill:none inherited from the svg, because that rule matches the
+// svg element and not its children.
+var HOWI='<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 8.8v5.4"/>'+
+  '<circle cx="10" cy="6.1" r="1" fill="currentColor" stroke="none"/></svg>';
 var WALKI='<svg viewBox="0 0 20 20"><circle cx="11.6" cy="3.6" r="1.7"/><path d="M11.2 5.8L9.4 10.6"/>'+
   '<path d="M9.4 10.6l2.4 2.6.4 4"/><path d="M9.4 10.6L7 13.4l-1.4 3.2"/>'+
   '<path d="M10.6 7.2l3.2 2.2M10.4 7.4L7.2 8.8"/></svg>';

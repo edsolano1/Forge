@@ -84,6 +84,13 @@ main constraint on how to work in it. See **Traps** below before editing.
   head. The coaching line, your note and Last each have a switch in their own sheet, worded
   **Show this on the exercise** every time (`exShowTick`, `exShowBox`), stored per exercise in
   `DB.exShow` where **absent means shown**. Never make one of these default to hidden.
+- **Never draw a dot as a path** (v5.259, owner picked B of three). The dot of the How To i was
+  `M10 6.2v.1`, a tenth of a unit of line, and `.ex-links a svg` set no `stroke-linecap`, so a
+  butt cap drew it **0.095px tall** on the phone: a hairline, and the mark read as a bare stem in
+  a ring. It is a filled `<circle r="1">` now (`HOWI`), which measures 1.9px, and the fill goes on
+  the circle itself because the `fill:none` rule matches the svg element and not its children.
+  All four marks also gained `stroke-linecap:round;stroke-linejoin:round`, which is what the
+  owner picked them with. Anything this small is a shape, never a stroke with no length.
 - **A question can carry its long half behind an i** (v5.238). `askAlso(text)` on the line before
   `ask()` puts an i beside the title; the queue carries it at index 8. The new week notice is the
   first user: one sentence, the rest behind the i.
