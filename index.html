@@ -1371,6 +1371,9 @@ body.tut .dayhead-add{display:none;}
 .pl-total small{font-size:15px;font-weight:600;color:var(--txt3);margin-left:3px;}
 .pl-read{text-align:center;font-size:12.5px;color:var(--txt2);margin:0 2px 6px;line-height:1.5;}
 .pl-read b{color:var(--txt);font-weight:600;}
+.pl-read i{font-style:normal;color:var(--txt3);padding:0 5px;}
+.pl-read em{font-style:normal;color:var(--txt3);}
+.pl-read em::before{content:" · ";color:var(--txt3);}
 .pl-read .pl-warn{color:var(--gold);}
 .pl-lbl{font-size:10px;letter-spacing:.1em;color:var(--txt3);margin:12px 0 6px;}
 .pl-typerow{display:flex;align-items:center;gap:8px;}
@@ -1379,25 +1382,41 @@ body.tut .dayhead-add{display:none;}
 /* A plate and its own pair of buttons. Nothing else on the chip is tappable: with a minus
    sitting right there, letting the body add too meant a near-miss on the minus silently
    put a plate ON. Explicit controls only. */
-.pl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.pl-chip{position:relative;text-align:center;border:1px solid var(--line);background:transparent;border-radius:12px;color:var(--txt);padding:9px 0 0;font-variant-numeric:tabular-nums;overflow:hidden;}
-.pl-chip .pl-n{font-size:20px;font-weight:700;line-height:1;}
-.pl-chip .pl-cnt{display:block;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--txt3);margin:3px 0 7px;min-height:12px;}
-.pl-chip.has{border-color:var(--go);}
-.pl-chip.has .pl-cnt{color:var(--go);}
-.pl-chip .pl-dot{position:absolute;right:7px;top:7px;width:10px;height:10px;border-radius:50%;}
-.pl-pm{display:flex;border-top:1px solid var(--line);}
-.pl-pm button{flex:1;height:36px;border:0;background:transparent;color:var(--txt2);font-size:20px;line-height:1;cursor:pointer;padding:0;}
-.pl-pm button:first-child{border-right:1px solid var(--line);}
-.pl-pm button:active{background:rgba(255,255,255,.09);}
-.pl-pm button:disabled{opacity:.25;cursor:default;}
-.pl-acts{display:flex;gap:8px;margin-top:9px;}
-.pl-act{flex:1;height:40px;border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:10px;font-size:11px;letter-spacing:.08em;cursor:pointer;}
-.pl-act:active{background:rgba(255,255,255,.06);}
-.pl-bars{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
-.pl-bar{font-size:12px;padding:9px 11px;border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:8px;cursor:pointer;text-align:left;}
-.pl-bar.on{border-color:var(--go);color:var(--txt);}
-.pl-bar small{display:block;font-size:10px;color:var(--txt3);margin-top:1px;}
+/* The plates ARE the buttons (v5.256, owner picked version two). A plate seen face on is a
+   ring, so a ring is what you tap: sized against its neighbours, coloured like the one on the
+   bar, and carrying its own number. The old three-wide grid of chips with a coloured dot in the
+   corner is gone, and so are the labels over it, because a row of plates needs no caption. */
+.pl-donuts{display:flex;align-items:center;justify-content:center;gap:7px;margin:15px 0 5px;
+  overflow-x:auto;padding:11px 2px;}
+.pl-dnt{position:relative;background:none;border:0;padding:0;line-height:0;flex:none;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;}
+.pl-dnt:active{transform:scale(.94);}
+.pl-dnt svg{display:block;}
+.pl-dnt text{font-family:var(--mono,inherit);font-weight:600;}
+/* The plus and the minus sit ON the plate, so the control is the thing it controls. The minus
+   only exists on a plate that is actually loaded: nothing to take off, nothing to press. */
+.pl-badge{position:absolute;left:50%;transform:translateX(-50%);width:21px;height:21px;
+  border-radius:999px;border:1px solid var(--line);background:var(--surface2,var(--surface));
+  color:var(--txt2);font-size:14px;line-height:19px;text-align:center;cursor:pointer;padding:0;}
+.pl-badge.up{top:-10px;border-color:var(--go);color:var(--go);}
+.pl-badge.dn{bottom:-10px;}
+.pl-badge:active{background:rgba(255,255,255,.1);}
+/* One scrolling row, not six tiles. Which bar you are on still never leaves the sheet, which is
+   the rule that killed hiding it behind a CHANGE BAR button; it just costs one row now. */
+.pl-bars{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px;margin-top:10px;}
+.pl-bar{flex:none;white-space:nowrap;font-size:11px;letter-spacing:.06em;padding:8px 13px;
+  border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:999px;cursor:pointer;}
+.pl-bar.on{border-color:var(--go);color:var(--go);}
+/* The head: the calculator's own mark, the name, and the way out. */
+.pl-head{display:flex;align-items:center;gap:10px;margin:0 0 4px;}
+.pl-head h3{flex:1;margin:0;}
+.pl-glyph{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);flex:none;
+  display:grid;grid-template-columns:1fr 1fr;place-items:center;padding:3px;
+  font-size:10px;line-height:1;color:var(--go);}
+.pl-glyph i{font-style:normal;}
+.pl-x{width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:transparent;
+  color:var(--txt2);font-size:16px;line-height:1;flex:none;cursor:pointer;padding:0;}
+.pl-x:active{background:rgba(255,255,255,.08);}
 .pg-sec{font-size:10px;letter-spacing:.1em;color:var(--txt3);margin:14px 0 6px;}
 .pg-row{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;margin-bottom:5px;background:var(--surface);cursor:pointer;transition:border-color .15s;}
 .pg-row:hover{border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
@@ -2626,12 +2645,12 @@ body.forge .pl-stick{background:#1d120c;}
 body.forge .pl-wrap{background:#0e0806;border:1px solid #3a2214;border-radius:12px;}
 body.forge .pl-total{font-family:var(--mono);font-weight:700;color:#fff6e6;}
 body.forge .pl-lbl{font-family:var(--mono);font-weight:600;letter-spacing:.16em;}
-body.forge .pl-chip{background:#0e0806;border:1px solid #3a2214;border-radius:12px;}
-body.forge .pl-chip.has{border-color:var(--gold);background:rgba(255,138,31,.08);}
-body.forge .pl-chip.has .pl-cnt{color:var(--gold);}
-body.forge .pl-chip .pl-n{font-family:var(--mono);font-weight:600;}
-body.forge .pl-pm,body.forge .pl-pm button:first-child{border-color:#2a1810;}
-body.forge .pl-act{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;letter-spacing:.14em;}
+body.forge .pl-badge{background:#130c09;border-color:#4a2c1c;font-family:var(--mono);}
+body.forge .pl-badge.up{border-color:#8a5433;}
+body.forge .pl-bar{border-color:#4a2c1c;background:#130c09;font-family:var(--mono);}
+body.forge .pl-bar.on{border-color:#8a5433;background:#1d1209;}
+body.forge .pl-glyph,body.forge .pl-x{border-color:#4a2c1c;background:#130c09;}
+body.forge .pl-glyph{font-family:var(--mono);}
 body.forge .pl-bar{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:var(--txt2);}
 body.forge .pl-bar.on{border-color:var(--gold);color:#fff6e6;background:rgba(255,138,31,.08);}
 body.forge .pl-bar small{color:var(--txt3);}
@@ -4245,7 +4264,13 @@ body.wcon{overflow:hidden;}
      would actually slide on, one side of it, in the order they load. -->
 <div class="ovl" id="plateOvl" style="z-index:300">
   <div class="sheet" style="max-width:440px">
-    <h3 id="plTitle">Plate calculator</h3>
+    <div class="pl-head">
+      <span class="pl-glyph" aria-hidden="true"><i>+</i><i>&minus;</i><i>&times;</i><i>=</i></span>
+      <h3 id="plTitle">Plate calculator</h3>
+      <!-- The way out is the X now, and it is still a plain undo of the whole visit: nothing on
+           this sheet touches stored data until CONFIRM. -->
+      <button class="pl-x" onclick="plCancel()" aria-label="Close">&times;</button>
+    </div>
     <!-- Both ends drawn, always. Halving a number, doubling it back and remembering to add
          the bar is the actual hard part in a gym; seeing the whole bar removes all three.
          Pinned to the top while the rest scrolls: the bar list lives at the foot of this
@@ -4255,28 +4280,27 @@ body.wcon{overflow:hidden;}
       <div class="pl-total" id="plTotal"></div>
     </div>
     <div class="pl-read" id="plRead"></div>
-    <!-- Two ways in, because both are natural: name the weight you want and let it load
-         the bar, or build it plate by plate. -->
-    <div class="pl-lbl">TYPE A WEIGHT AND IT LOADS THE BAR</div>
+    <!-- Two ways in, because both are natural: name the weight you want and let it load the bar,
+         or build it plate by plate. Neither is labelled any more: a number box with a unit beside
+         it and a row of plates under it do not need telling. -->
     <div class="pl-typerow">
       <input class="mk-in pl-type" id="plType" type="number" inputmode="decimal"
              placeholder="e.g. 145" oninput="plTypeLoad(this.value)">
       <span class="pl-tu" id="plTypeUnit">lb</span>
     </div>
-    <div class="pl-lbl" id="plTapLbl">OR ADD AND TAKE OFF</div>
-    <div class="pl-grid" id="plGrid"></div>
-    <div class="pl-acts">
-      <button class="pl-act" onclick="plClear()">REMOVE ALL PLATES</button>
-    </div>
+    <!-- Carries nothing for an ordinary bar. It only speaks when the arrangement is unusual:
+         one horn counts each plate once, loose plates are not doubled. -->
+    <div class="pl-lbl" id="plTapLbl"></div>
+    <div class="pl-donuts" id="plGrid"></div>
     <!-- Always on the sheet, never behind a button. Which bar you are on is half the answer
-         to what goes on it, so hiding it behind CHANGE BAR hid half the calculator. -->
-    <div class="pl-lbl">BAR OR MACHINE</div>
+         to what goes on it, so hiding it behind CHANGE BAR hid half the calculator. It is one
+         scrolling row rather than six tiles now, which buys the height without hiding it. -->
     <div class="pl-bars" id="plBars"></div>
     <!-- Nothing here is written until SAVE, which is what lets CANCEL be a plain undo
          of the whole visit rather than one step of it. -->
     <div class="sheet-btns">
-      <div class="btn" onclick="plCancel()">CANCEL</div>
-      <div class="btn btn-prime" onclick="plSave()">SAVE</div>
+      <div class="btn" onclick="plClear()">STRIP</div>
+      <div class="btn btn-prime" onclick="plSave()">CONFIRM</div>
     </div>
   </div>
 </div>
@@ -10052,7 +10076,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.255';
+var APPV='v5.256';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16479,6 +16503,16 @@ function plBarDef(k){for(var i=0;i<PL_BARS.length;i++)if(PL_BARS[i].k===k)return
 function plBarW(k){var b=plBarDef(k);return UNIT_KG?b.kg:b.lb;}
 function plPlates(k){var b=plBarDef(k);var s=b.std?PL_SET_STD:PL_SET;return UNIT_KG?s.kg:s.lb;}
 function plNum(v){return String(Math.round(v*100)/100).replace(/\.00$/,'');}
+// A plate, face on. Stroked only, so the hole is the sheet showing through and the ring reads
+// as a plate rather than a filled counter whatever the theme is doing behind it.
+function plDonut(p,r){
+  var k=plNum(p),c=PL_COL[k]||'#7a828d',sw=Math.max(3.2,r*0.30),d=r*2+4;
+  return '<svg width="'+d.toFixed(0)+'" height="'+d.toFixed(0)+'" viewBox="0 0 '+d.toFixed(0)+' '+d.toFixed(0)+'" aria-hidden="true">'+
+    '<circle cx="'+(d/2).toFixed(1)+'" cy="'+(d/2).toFixed(1)+'" r="'+(r-sw/2).toFixed(1)+
+      '" fill="none" stroke="'+c+'" stroke-width="'+sw.toFixed(1)+'"/>'+
+    '<text x="'+(d/2).toFixed(1)+'" y="'+(d/2+4).toFixed(1)+'" text-anchor="middle" fill="'+c+
+      '" font-size="'+(r>20?12:10)+'">'+k+'</text></svg>';
+}
 function plSolo(){return !!plBarDef(PL.bar).solo;}
 function plPerSide(){var t=0;PL.on.forEach(function(p){t+=p;});return Math.round(t*100)/100;}
 // A bar and a machine are both loaded on BOTH ends, so what you tap counts twice. Loose
@@ -16695,6 +16729,12 @@ function plRun(items){
 function plFly(before,mode){
   var host=document.getElementById('plArt');
   if(!host||MOTION==='off')return;
+  // ONLY a plate going on or coming off is worth animating, and only that is safe to animate.
+  // The first draw has no previous state, so every plate counted as new, every plate started at
+  // opacity 0 waiting to fly in, and anything that stopped the frame loop before it ran left a
+  // bar with no plates on it at all. Opening the sheet, typing a weight and changing the bar all
+  // just draw.
+  if(mode!=='add'&&mode!=='sub')return;
   var svg=host.querySelector('svg');if(!svg)return;
   // Any ghost still hanging about belongs to a run that was interrupted, and its own clean-up
   // died with that run's rAF. Clear them here, where we know a new run is starting.
@@ -16756,13 +16796,13 @@ function plDraw(){
     PL.on.slice().sort(function(a,b){return b-a;}).forEach(function(p){
       var k=plNum(p);if(!c[k]){c[k]=0;order.push(k);}c[k]++;
     });
-    var list='<b>'+order.map(function(k){return c[k]+'×'+k;}).join(', ')+'</b>';
-    r=solo
-      ? list+' = <b>'+plNum(tot)+' '+u+'</b>'
-      : list+' on each end'+
-        (bw?'<br>'+plNum(bw)+' '+u+' bar + '+plNum(per)+' + '+plNum(per)
-           :'<br>'+plNum(per)+' + '+plNum(per))+
-        ' = <b>'+plNum(tot)+' '+u+'</b>';
+    // What is on, in the plates' own colours, and nothing else. The total is already the
+    // biggest thing on the sheet; saying "= 205 lb" under it was the third time of asking
+    // (v5.256). No "on each end" either: the picture shows both ends.
+    r=order.map(function(k){
+        return '<b style="color:'+(PL_COL[k]||'var(--txt)')+'">'+(c[k]>1?c[k]+'&times;':'')+k+'</b>';
+      }).join('<i>+</i>')
+      +(bw&&!solo?'<em>'+plNum(bw)+' '+u+' bar</em>':'');
   }
   // Own up when what is on hand cannot make the number that was typed.
   if(PL.want!=null&&Math.abs(PL.want-tot)>0.001){
@@ -16772,29 +16812,34 @@ function plDraw(){
   }
   document.getElementById('plRead').innerHTML=r;
   document.getElementById('plTypeUnit').textContent=u;
+  // Silent for an ordinary bar: a row of plates under a drawing of a bar explains itself. It
+  // speaks only where the arrangement would otherwise mislead.
   var tl=document.getElementById('plTapLbl');
-  if(tl)tl.textContent=horn?'OR ADD AND TAKE OFF · ALL ON THE ONE HORN':solo?'OR SET WHAT YOU ARE HOLDING':'OR ADD AND TAKE OFF · ONE ON EACH END';
+  if(tl){
+    tl.textContent=horn?'ALL ON THE ONE HORN':solo?'WHAT YOU ARE HOLDING':'';
+    tl.style.display=tl.textContent?'':'none';
+  }
   // the plate buttons, each showing how many of it are already on
   var cnt={};PL.on.forEach(function(p){var k=plNum(p);cnt[k]=(cnt[k]||0)+1;});
-  document.getElementById('plGrid').innerHTML=plPlates(PL.bar).map(function(p){
+  var set=plPlates(PL.bar);
+  document.getElementById('plGrid').innerHTML=set.map(function(p,i){
     var k=plNum(p),n=cnt[k]||0;
-    return '<div class="pl-chip'+(n?' has':'')+'">'+
-      '<span class="pl-dot" style="background:'+(PL_COL[k]||'#7a828d')+'"></span>'+
-      '<div class="pl-n">'+k+'</div>'+
-      '<span class="pl-cnt">'+(n?n+' on':'&nbsp;')+'</span>'+
-      '<div class="pl-pm">'+
-        '<button onclick="plSub('+p+')"'+(n?'':' disabled')+' aria-label="one less '+k+'">&minus;</button>'+
-        '<button onclick="plAdd('+p+')" aria-label="one more '+k+'">+</button>'+
-      '</div>'+
-    '</div>';
+    // Sized against the others in THIS set, not against a hard coded 45: a kilo bar and a
+    // standard bar carry different plates and the big one should still look like the big one.
+    var rr=24-(i*(11/Math.max(1,set.length-1)));   // the whole set has to fit a phone without scrolling
+    return '<button class="pl-dnt" onclick="plAdd('+p+')" aria-label="add a '+k+'">'+
+      plDonut(p,rr)+
+      '<span class="pl-badge up" aria-hidden="true">+</span>'+
+      (n?'<span class="pl-badge dn" onclick="event.stopPropagation();plSub('+p+')" aria-label="take off a '+k+'">&minus;</span>':'')+
+    '</button>';
   }).join('');
   plBarBtns();   // the list is on the sheet permanently, so it redraws with everything else
 }
 function plBarBtns(){
   document.getElementById('plBars').innerHTML=PL_BARS.map(function(b){
     var bw=UNIT_KG?b.kg:b.lb;
-    return '<button class="pl-bar'+(b.k===PL.bar?' on':'')+'" onclick="plPickBar(\''+b.k+'\')">'+
-      b.n+(bw?' · '+bw+wUnitName():'')+'<small>'+b.s+'</small></button>';
+    return '<button class="pl-bar'+(b.k===PL.bar?' on':'')+'" title="'+esc(b.s)+'" onclick="plPickBar(\''+b.k+'\')">'+
+      esc(b.n)+(bw?' '+bw+wUnitName():'')+'</button>';
   }).join('');
 }
 // Changing the bar carries the WEIGHT across (owner, 16 Sep): the number you wanted is the

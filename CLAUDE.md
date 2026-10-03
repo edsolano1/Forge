@@ -331,6 +331,16 @@ main constraint on how to work in it. See **Traps** below before editing.
   with its own rAF, so `plFly` clears any survivors before starting. `getBBox` returns 0 while
   the sheet is closed, which is harmless but makes any test of this meaningless unless the
   overlay is actually open.
+- **The plates ARE the buttons** (v5.256, the rest of version two). A row of donuts sized
+  against each other and coloured like the plate they put on, number in the ring, PLUS on top
+  and a MINUS underneath that only exists on a plate that is loaded. No count badge: how many
+  are on is read off the bar, which is what the picture is for. The three wide chip grid, the
+  coloured dots, REMOVE ALL PLATES and every label above the controls are gone; the bar list is
+  one scrolling row, still never behind a button. CANCEL became the X at the top right and SAVE
+  became CONFIRM, and  still guards the sheet because the X runs the same
+  . ** only animates on add and sub.** On a first draw there is no previous
+  state, so every plate counted as new, every plate started at opacity 0 waiting to fly in, and
+  anything that stalled the frame loop left a bar with no plates on it.
 - **The plate numbers wear their plate's colour, and the bar has no caption** (v5.255, owner).
   The plates were colour coded and the numbers were grey, which threw the whole trick away.
   "both ends shown, this is the whole bar" described the picture you were already looking at
