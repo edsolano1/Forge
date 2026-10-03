@@ -316,6 +316,27 @@ main constraint on how to work in it. See **Traps** below before editing.
   The eraser is an opaque trough, never the shade's own colour, because a OneUI card is
   translucent over the wallpaper. Details and the three failed attempts are in
   Arcanum-Android/HANDOFF.md.
+- **The bar loads the way a person loads it** (v5.255, owner picked version two of three).
+  A plate cannot be threaded into the middle of a stack: everything lighter comes off, the new
+  one hangs, they go back. `plFly` builds that as explicit keyframes and `plRun` drives every
+  plate from ONE requestAnimationFrame loop. **Never give a plate its own animation per leg.**
+  The mockup did, with a timeout that cancelled the element's animations when the first leg
+  ended, so the second leg died before it ran and the tidy-up jumped the plate to its final
+  spot: that is what "teleporting plates" was. One loop also means an interruption just
+  re-measures and rebuilds, so a second tap mid flight is smooth.
+  Each plate is a `g.plg` keyed `side|weight|nth` so it survives the `innerHTML` redraw, and
+  a plate coming OFF is a ghost clone that leaves after the ones outside it have cleared.
+  Two things that bit: a ghost is a CLONE with the same class and key, so `plSnap` must skip
+  `[data-ghost]` or it reads the ghost's position as the plate's; and a ghost's clean-up dies
+  with its own rAF, so `plFly` clears any survivors before starting. `getBBox` returns 0 while
+  the sheet is closed, which is harmless but makes any test of this meaningless unless the
+  overlay is actually open.
+- **The plate numbers wear their plate's colour, and the bar has no caption** (v5.255, owner).
+  The plates were colour coded and the numbers were grey, which threw the whole trick away.
+  "both ends shown, this is the whole bar" described the picture you were already looking at
+  and is gone. The other three captions STAY, because each says something the drawing cannot:
+  a horn counts its plates once, loose plates are not doubled, and a machine wants the same
+  load on its other peg.
 - **Session length stays 30/45/60.** The generator audit (900 weeks) showed 60 already overfills
   strength and underfills "move"; longer would only add rest.
 - The owner's own notes (PERSONAL_NOTES, W stock days d1-d4/opt5/opt6) reach only migrated
