@@ -240,6 +240,17 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 @media (hover:hover){.ask-i:hover{color:var(--gold);border-color:#6a3f26;}}
 .ask-more{font-size:13px;line-height:1.6;color:var(--txt3);margin:0 0 14px;}
 .ask-more[hidden]{display:none;}
+/* The banner a question can borrow from the sheet it came off (v5.258). It bleeds PAST the
+   sheet's sides, the way the level-up beam does, so the sheet's rounded corners never have to
+   clip it. [hidden] needs its own line here or the display rule beats it (Trap 5). */
+.ask-beam{position:relative;margin:-22px -34px 16px;padding:9px 20px 10px;text-align:center;
+  transform:skewY(-2deg);background:linear-gradient(90deg,transparent,var(--go) 18%,var(--gold) 50%,var(--go) 82%,transparent);}
+.ask-beam b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;
+  letter-spacing:.22em;text-transform:uppercase;color:#1b0f06;line-height:1;}
+.ask-beam[hidden]{display:none;}
+/* An empty message is a question that needs none. Without this the paragraph still spends its
+   16px bottom margin and the buttons sit in a hole. */
+#askMsg:empty{display:none;}
 /* Your data, and Bring one in (v5.237). A row can hold a name, a line saying what it does and
    the state, which is exactly what a backup screen has to say and what a tile cannot. */
 .ydg{border:1px solid var(--line);border-radius:14px;background:var(--surface2);overflow:hidden;margin-top:8px;}
@@ -2705,6 +2716,10 @@ body.forge .hset.mt{border-color:#4a3a6a;color:var(--violet);background:rgba(143
 body.forge .hrow-rec{border-radius:9px;}
 body.forge .hex-n{font-family:'Marcellus',serif;font-weight:400;font-size:14px;color:#fff6e6;}
 body.forge .hnote{border-radius:10px;}
+/* the forge beam: the same gradient and glow the level-up sheet's own banner is made of */
+body.forge .ask-beam{
+  background:linear-gradient(90deg,transparent,rgba(255,138,31,.85) 18%,rgba(255,208,138,.95) 50%,rgba(255,138,31,.85) 82%,transparent);
+  box-shadow:0 0 34px rgba(255,150,50,.45);}
 /* D2: the set cells match the anvil beside them. */
 body.forge .srow .inp{border-radius:999px;border-color:#3a2214;}   /* D1 round: the cells follow the pills */
 body.forge .srow .hold,body.forge .srow .chk{border-radius:999px;}
@@ -3889,6 +3904,10 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="askOvl">
   <div class="sheet" style="max-width:400px">
+    <!-- A question that came off a decorated sheet can wear that sheet's banner, so it reads as
+         the same object rather than a bare box that appeared (v5.258). askCrest() on the line
+         before the ask, the way askAlso() works. -->
+    <div class="ask-beam" id="askBeam" hidden><b id="askBeamT"></b></div>
     <div class="ask-h"><h3 id="askTitle">Are you sure?</h3>
       <button class="ask-i" id="askInfo" hidden onclick="askMore()" aria-label="What this means">i</button></div>
     <p id="askMsg"></p>
@@ -10088,7 +10107,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.257';
+var APPV='v5.258';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11217,12 +11236,13 @@ function lvlAbort(){
 }
 // Turning a raise down is a question now, with two honest answers (v5.218, owner: a silent no is
 // how one gets lost). Backing out or tapping outside still records nothing at all.
+// v5.258, owner: the beam off option C with no explanation at all. The paragraph said in five
+// lines what the two buttons already say in two, and this is a question asked by somebody who
+// has just read a sheet. The title and the answers are the whole dialog now.
 function skipLevel(){
   lvlAbort();
-  ask('Remind me next time leaves the arrow on the card, so you can take the raise whenever you want it. '+
-      'Stop suggesting it hides the arrow until you log the lift again. Either way, holding the workout '+
-      'always brings the offer back.',
-      function(){skipLevelSoft();},
+  askCrest('Level up');
+  ask('',function(){skipLevelSoft();},
       'Not this time?','REMIND ME NEXT TIME',
       function(){skipLevelHard();},null,'STOP SUGGESTING IT');
 }
@@ -17604,12 +17624,12 @@ function ask(msg,onYes,title,yesLabel,onNo,alt,noLabel){
     var sig=String(title)+' '+String(msg);
     if(ASKCUR===sig)return;
     for(var i=0;i<ASKQ.length;i++)if(ASKQ[i][7]===sig)return;
-    ASKQ.push([msg,onYes,title,yesLabel,onNo,alt,noLabel,sig,ASKI]);
-    ASKI=null;
+    ASKQ.push([msg,onYes,title,yesLabel,onNo,alt,noLabel,sig,ASKI,ASKB]);
+    ASKI=null;ASKB=null;
     return;
   }
-  var info=ASKI;ASKI=null;
-  askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info);
+  var info=ASKI,crest=ASKB;ASKI=null;ASKB=null;
+  askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info,crest);
 }
 // Every exit from the sheet comes through closeOvl, which calls this. The short delay lets the
 // sheet finish closing so the next question reads as a new question rather than a flicker.
@@ -17617,21 +17637,27 @@ function askDrain(){
   ASKCUR=null;
   if(!ASKQ.length)return;
   var a=ASKQ.shift();
-  setTimeout(function(){askNow(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[8]);},120);
+  setTimeout(function(){askNow(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[8],a[9]);},120);
 }
 // The long version of a short question, behind an i beside the title. Set it on the line before
 // the ask and it belongs to that question alone (v5.238).
 var ASKI=null;
 function askAlso(t){ASKI=t;}
+// The banner the next question wears, set on the line before the ask the same way (v5.258).
+// It names the sheet the question came off, so the question looks like part of it.
+var ASKB=null;
+function askCrest(t){ASKB=t;}
 function askMore(){
   var m=document.getElementById('askMore'),b=document.getElementById('askInfo');
   if(m)m.hidden=false;
   if(b)b.hidden=true;
 }
-function askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info){
+function askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info,crest){
   ASKCUR=String(title)+' '+String(msg);   // what is on screen, so a repeat of it is not queued
   document.getElementById('askTitle').textContent=title||'Are you sure?';
-  document.getElementById('askMsg').textContent=msg;
+  document.getElementById('askMsg').textContent=msg||'';
+  var bm=document.getElementById('askBeam'),bt=document.getElementById('askBeamT');
+  if(bm){bm.hidden=!crest;if(bt)bt.textContent=crest||'';}
   var im=document.getElementById('askMore'),ib=document.getElementById('askInfo');
   if(im){im.textContent=info||'';im.hidden=true;}
   if(ib)ib.hidden=!info;

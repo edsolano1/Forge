@@ -87,6 +87,16 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **A question can carry its long half behind an i** (v5.238). `askAlso(text)` on the line before
   `ask()` puts an i beside the title; the queue carries it at index 8. The new week notice is the
   first user: one sentence, the rest behind the i.
+- **A question can wear the banner of the sheet it came off, and then it needs no paragraph**
+  (v5.258, owner). `askCrest(text)` on the line before `ask()` puts a beam across the top of the
+  dialog, the same gradient the level-up sheet's own banner is made of, bleeding past the sheet's
+  sides so the rounded corners never clip it; the queue carries it at index 9. Turning a raise
+  down is the first user and is now the TITLE AND THE TWO ANSWERS, nothing else: the five line
+  explanation said what REMIND ME NEXT TIME and STOP SUGGESTING IT already say, to somebody who
+  has just read a whole sheet. Owner's words: we do not need to give them the whole explanation.
+  `#askMsg:empty{display:none}` is what makes an empty message cost no space, because `.sheet p`
+  still spends its 16px bottom margin otherwise. Checked: the crest does not leak into the next
+  dialog, and it survives the queue.
 - **The walks screen is scoped to the week it was opened from** (v5.239). `HIST.wk0` is the
   cursor; `HIST.wkAll` is the deliberate escape to every walk. A list reached from inside a week
   view shows that week, always: the row that opened it carried that week's count.
