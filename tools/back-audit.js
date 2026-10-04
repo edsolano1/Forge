@@ -49,8 +49,10 @@
                        out:()=>!on('make')||on('askOvl')},
     {n:'a night in the history',open:async()=>{if(!(DB.logs||[]).length)return false;showHistory();await wait(250);histOpen(0);await wait(250);return on('histOvl')&&HIST.sel!==null;},
                        out:()=>HIST.sel===null&&on('histOvl')},
-    {n:'the saved fold',open:async()=>{savedOpen();await wait(200);return !!SAVED_OPEN;},
-                       out:()=>!SAVED_OPEN}
+    // 'the saved fold' used to be listed here. v5.260 made Saved workouts a real sheet, so
+    // SAVED_OPEN no longer exists and this entry reported FAILED on every run, which made the
+    // whole audit read as failing. Part 1 already covers #savedOvl, because it enumerates every
+    // .ovl on the page, so the entry is gone rather than rewritten.
   ];
   for(const s of SCREENS){
     await home();

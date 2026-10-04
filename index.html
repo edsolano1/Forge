@@ -10167,7 +10167,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.266';
+var APPV='v5.267';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15567,7 +15567,10 @@ function renderSummary(s){
   // What you never got to, said once (v5.261). No count, no colour, no tap: the wrist stopped
   // putting you back on a machine somebody else was using, and this is the whole of the
   // bookkeeping that replaces it.
-  var ms=document.getElementById('finMiss'),miss=s.miss||[];
+  // TUTON, like the level-up line below (v5.267). The tour's sample day is DESIGNED to be left
+  // unfinished, so this told a first time user they had failed three lifts nobody asked them to
+  // do. "The tour is a sealed space" is the rule and this walked straight through it.
+  var ms=document.getElementById('finMiss'),miss=TUTON?[]:(s.miss||[]);
   if(ms){
     ms.hidden=!miss.length;
     if(miss.length){
@@ -17473,7 +17476,11 @@ function histMissed(iso){
   var done={};
   (DB.logs||[]).forEach(function(L){if(L.date===iso)done[L.day]=1;});
   (liveDays()[dObj.k]||[]).forEach(function(id){
-    if(wkVar(id)==='rest'||!W[id]||done[id])return;
+    // Any variant, not just rest (v5.267). An OPTIONAL day is not owed, and every other counter
+    // in the app agrees: waitingCount, the week summary and weekHello all test wkVar(id) itself.
+    // Testing only for 'rest' had the same sheet say "1 of 2 workouts" for the week and then
+    // list the optional third one as Not done on its day.
+    if(wkVar(id)||!W[id]||done[id])return;
     if(!wasThere(id,dObj.k,js))return;
     out.push(W[id].name.replace('Optional: ',''));
   });
@@ -17770,8 +17777,11 @@ function ask(msg,onYes,title,yesLabel,onNo,alt,noLabel){
     // made you dismiss it six times. A question already on screen, or already waiting, is not
     // asked twice - the answer to the copy was always going to be the answer to the original.
     var sig=String(title)+' '+String(msg);
-    if(ASKCUR===sig)return;
-    for(var i=0;i<ASKQ.length;i++)if(ASKQ[i][7]===sig)return;
+    // Clear the one shot extras BEFORE the dedupe returns (v5.267). Both guards below bail out,
+    // and an askAlso or askCrest set for a question that then gets suppressed as a duplicate
+    // would have survived and landed on whatever dialog opened next.
+    if(ASKCUR===sig){ASKI=null;ASKB=null;return;}
+    for(var i=0;i<ASKQ.length;i++)if(ASKQ[i][7]===sig){ASKI=null;ASKB=null;return;}
     ASKQ.push([msg,onYes,title,yesLabel,onNo,alt,noLabel,sig,ASKI,ASKB]);
     ASKI=null;ASKB=null;
     return;
@@ -19495,7 +19505,7 @@ function wearNext(){
   var hw=-1;
   all.forEach(function(p,ix){if(p.m.ent[p.s])hw=ix;});
   // Where each lift first comes up, and whether it has a single set on it.
-  var firstIx={},any={};
+  var firstIx={},any={},back=null;
   all.forEach(function(p,ix){
     if(firstIx[p.m.id]===undefined)firstIx[p.m.id]=ix;
     if(p.m.ent[p.s])any[p.m.id]=true;
@@ -19513,6 +19523,12 @@ function wearNext(){
     // what you never got to is named once on the finish screen.
     var dropped=(!any[m.id]&&hw>firstIx[m.id]&&!tapped);
     if(dropped)return;
+    // A lift you STARTED and then left behind is not a lift you walked past, so it is owed and
+    // it comes back once everything ahead of it is done (v5.267). Without this the wrist fell
+    // off a cliff: log one set of the bench, go and finish everything else because the bench is
+    // busy, and nothing is left after the mark, so wearNext returned null and wearPush told the
+    // watch the session was CLOSED while three sets were still owed. Reproduced before fixing.
+    if(!back)back=c;
     if(!out&&ix>hw)out=c;
     // A tapped lift becomes the aim; a tapped unlogged set becomes the current one. Sets may be
     // done out of order, the phone always allowed that. An aim on either half of a superset
@@ -19526,7 +19542,10 @@ function wearNext(){
   });
   // the lift you jumped to is finished: stop aiming and rejoin the running order
   if(WEARFOCUS&&!aimed){WEARFOCUS=null;WEARSET=null;}
-  return aimed||out;
+  // Nothing after the mark, but something is still owed behind it. Returning null here is what
+  // tells the watch there is no session at all, so it must only ever happen when the workout
+  // really is done.
+  return aimed||out||back;
 }
 // Every set of one lift as the wrist draws it: done sets carry what was logged and how it
 // graded (gold beat, violet matched), the rest their targets, all in the display unit.

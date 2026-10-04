@@ -116,6 +116,19 @@ main constraint on how to work in it. See **Traps** below before editing.
   three). Owner's words: the app should be smart and know that if we skipped it there is a
   reason, it should just keep trucking on. A superset still alternates normally when both halves
   are being done, which is the regression to check if this is ever touched.
+  **A lift you STARTED and left behind is owed, and `back` is what returns it** (v5.267, found
+  by an audit hours after shipping). Walking past a lift you never began is a choice; leaving
+  one half done is not. Without that fallback the wrist fell off a cliff: one set of the bench,
+  then everything else finished because the bench was busy, and nothing remained after the mark,
+  so `wearNext` returned null and `wearPush` told the watch the session was CLOSED with three
+  sets still owed. **`wearNext` returning null is how the watch is told there is no session at
+  all**, so it may only ever happen when the workout really is finished. Reproduced before it
+  was fixed and re-checked after, along with the skip behaviour above.
+  The finish screen's list is fenced with `TUTON` like every other live feature, because the
+  tour's sample day is designed to be left unfinished and this told a first time user they had
+  failed three lifts nobody asked them to do. And `histMissed` tests `wkVar(id)` itself, not
+  just `'rest'`: an OPTIONAL day is never owed, which is what `waitingCount`, the week summary
+  and `weekHello` have always said.
 - **Workouts finished opens on the DAY** (v5.261, owner). `histLastDay()` is the latest day of
   the week on show carrying anything, which straight after a session is today; a week with
   nothing in it still opens on the week, because there is no day to open.
@@ -210,8 +223,11 @@ main constraint on how to work in it. See **Traps** below before editing.
   (PUMP_KINDS). The choice lives in DB.pumpNow and pumpApply writes it into W.pump. Pump exercises stay p_ ids,
   each a twin of a library lift so How To and the animation resolve, and their numbers stay out of real
   progression. Choosing a focus is allowed here: Pump Day is a bonus you pick on purpose, not the balanced week.
-- **Saved workouts is a fold** (SAVED_OPEN, savedApply). Pump day is a built-in card at its head,
-  not in DB.extra. The level-up offer at the finish is finLvl → finRaise → openLevel.
+- **Saved workouts is a SHEET** (`#savedOvl`, `savedShow`, `savedApply`), not the fold it was
+  until v5.260: `SAVED_OPEN` and `savedToggle` are gone, and so is its line in `BACK_RULES`,
+  because a real sheet is answered by the sheet-on-top rule. Pump day is a built-in card at its
+  head, not in DB.extra. The level-up offer at the finish is finLvl → finRaise → openLevel.
+  `svFold` survives with no caller: the rule below still tells any NEW fold to use it.
 - **Lift animations keep one even tempo** (owner, 22 Sep: follow the standard only if there is no debate).
   ACSM 2009 advised 1 s up, 2 s down for novices, but the 2026 ACSM position stand sets no tempo and the
   evidence finds 0.5 to 8 s reps equivalent, so there is no settled standard. Continuous activities
