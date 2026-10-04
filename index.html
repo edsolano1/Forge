@@ -538,13 +538,13 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
   border:1px dashed color-mix(in srgb,var(--go) 30%,var(--line));
   background:color-mix(in srgb,var(--go) 3%,transparent);min-height:16px;}
 .bank-empty{font-size:12px;color:var(--txt3);text-align:center;padding:13px 10px;line-height:1.55;margin-bottom:6px;}
-/* the Saved fold header (v5.138) */
-.sv-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 10px;}
-.sv-tog{display:flex;align-items:center;gap:8px;background:none;border:0;padding:6px 4px 6px 0;margin:0;color:inherit;cursor:pointer;font:inherit;}
-.sv-head .sec-label{margin:0;}
-.sv-chev{width:16px;height:16px;fill:none;stroke:var(--txt3);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;transform:rotate(-90deg);}
-.sv-head.open .sv-chev{transform:rotate(0deg);}
+/* the Saved sheet's header (v5.260). The chevron and the fold it opened are gone. */
+.sv-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;}
+.sv-head h3{flex:1;min-width:0;margin:0;}
 .sv-acts{display:flex;gap:8px;align-items:center;}
+/* What a hold does in here, said once and quietly, because the gesture has no other home now
+   that the shelf is not sitting next to the days it drops onto. */
+.sv-tip{margin-top:13px;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--txt3);}
 .sv-btn{height:32px;min-width:32px;padding:0 8px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--txt2);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;transition:.15s;}
 .sv-btn:hover{color:var(--txt);border-color:#33373d;}
 .sv-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;}
@@ -3624,21 +3624,6 @@ body.wcon{overflow:hidden;}
   <div class="mk-hint" id="weekHint"></div>
   <div id="weekCards"></div>
   <!-- label, hint and cards are one thing to look at, so the tour can light them as one -->
-  <div id="extraWrap">
-    <!-- Saved is folded by default (v5.138): one line under the week, the shelf one tap away and still
-         on the same page so drag and hold keep working. The plus and Forge me a week sit on the line. -->
-    <div class="sv-head" id="extraLabel">
-      <button class="sv-tog" onclick="savedToggle()" aria-expanded="false"><svg class="sv-chev" viewBox="0 0 20 20"><path d="M6 8l4 4 4-4"/></svg><span class="sec-label" id="extraLabelTxt">Saved workouts</span></button>
-      <span class="sv-acts"><button class="sv-btn" onclick="svAdd()" title="Add a workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></span>
-    </div>
-    <!-- Forge me a week moved off that line and into the fold (v5.192, R4): a forged week lands in
-         Saved, so the button belongs where its result does, and the line under the board is two
-         controls instead of three. -->
-    <div class="mk-hint" id="extraHint" hidden>Not part of the week. Open one whenever you want it.</div>
-    <div id="extraCards" hidden></div>
-    <!-- The scrap heap sits with the workouts, and only when it holds something (v5.236). -->
-    <div id="scrapLine" hidden><button class="sv-btn" onclick="openScrap()"><svg viewBox="0 0 20 20"><path d="M4.5 6.5h11M8.5 6.5V5h3v1.5M6 6.5l.7 9h6.6l.7-9"/></svg><span id="scrapLineTxt">Scrap heap</span></button></div>
-  </div>
   <div class="sides" id="sides"></div>
   <div class="foot" id="foot"></div>
 </div>
@@ -3904,6 +3889,31 @@ body.wcon{overflow:hidden;}
     <span class="tut-wait" id="tutWait" style="display:none"></span>
     <div class="btn" id="tutSfx" onclick="tutSample()" style="display:none">HEAR IT</div>
     <div class="btn btn-go" id="tutNext" onclick="tutAdvance()">NEXT</div>
+  </div>
+</div>
+
+<!-- Saved workouts is a SHEET (v5.260, owner picked A of three). It used to be a fold under the
+     board with its own chevron AND a plate in the footer: two controls for one shelf, and neither
+     admitted the other existed. The plate is the only way in now.
+     The shelf is still a drop target, which is why #extraCards keeps its dashed bank styling: a
+     card grabbed in here is handed to the board and the sheet falls away under it, and letting go
+     without moving puts it straight back. -->
+<div class="ovl" id="savedOvl">
+  <div class="sheet" style="max-width:520px">
+    <div class="sv-head" id="extraLabel">
+      <h3 id="extraLabelTxt">Saved workouts</h3>
+      <span class="sv-acts">
+        <button class="sv-btn" onclick="svAdd()" title="Add a workout" aria-label="Add a workout"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button>
+        <button class="sv-btn sv-x" onclick="closeOvl('savedOvl')" title="Close" aria-label="Close"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+      </span>
+    </div>
+    <div id="extraWrap">
+      <div class="mk-hint" id="extraHint" hidden>Not part of the week. Open one whenever you want it.</div>
+      <div id="extraCards"></div>
+      <!-- The scrap heap sits with the workouts, and only when it holds something (v5.236). -->
+      <div id="scrapLine" hidden><button class="sv-btn" onclick="openScrap()"><svg viewBox="0 0 20 20"><path d="M4.5 6.5h11M8.5 6.5V5h3v1.5M6 6.5l.7 9h6.6l.7-9"/></svg><span id="scrapLineTxt">Scrap heap</span></button></div>
+    </div>
+    <div class="sv-tip">HOLD ONE TO PLACE IT ON A DAY</div>
   </div>
 </div>
 
@@ -10112,7 +10122,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.259';
+var APPV='v5.260';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13870,29 +13880,25 @@ function openNewDayNow(k){
   MK.shellOpen=true;mkRender();
 }
 // The + inside Saved workouts: same minimal making screen, destination the bank.
-// The Saved fold (v5.138). Shut by default; remembered. Anything that puts a workout INTO Saved
-// opens it, so the thing you just moved is never out of sight.
-var SAVED_OPEN=(function(){try{return localStorage.getItem('arc_savedopen')==='1';}catch(e){return false;}})();
-// The footer plate opens the shelf, and then puts it in front of you: the fold lives under the
-// board so that a saved workout can still be dragged onto a day, which is above the button that
-// opened it (v5.195).
-function savedTap(){
-  savedToggle();
-  if(!SAVED_OPEN)return;
-  var el=document.getElementById('extraWrap');if(!el)return;
-  setTimeout(function(){try{el.scrollIntoView({behavior:'smooth',block:'end'});}catch(e){}},60);
+// Saved workouts is a SHEET (v5.260, owner picked A of three). The fold under the board had its
+// own chevron and the footer plate had another, two controls for one shelf. The plate is the only
+// way in now, and SAVED_OPEN, savedToggle and the remembered open state are gone with the fold.
+function savedShow(){
+  var o=document.getElementById('savedOvl');if(!o)return;
+  savedApply();
+  o.classList.add('on');
+  try{sfxTick&&sfxTick();}catch(e){}
 }
-function savedToggle(){SAVED_OPEN=!SAVED_OPEN;try{localStorage.setItem('arc_savedopen',SAVED_OPEN?'1':'0');}catch(e){}savedApply();try{sfxTick&&sfxTick();}catch(e){}}
-function savedOpen(){if(!SAVED_OPEN){SAVED_OPEN=true;try{localStorage.setItem('arc_savedopen','1');}catch(e){}}savedApply();}
+function savedTap(){savedShow();}
+// Everything that MOVES a workout into Saved calls this. It used to open the fold so the thing
+// you just moved was never out of sight; a sheet cannot do that without throwing a full screen
+// over you every time you take a workout off a day, so it only refreshes the shelf. The button
+// that did it already names the destination.
+function savedOpen(){savedApply();}
 function savedApply(n){
-  var h=document.getElementById('extraLabel'),c=document.getElementById('extraCards'),t=document.getElementById('extraHint');
-  if(!h||!c)return;
+  var t=document.getElementById('extraHint');
   if(n===undefined)n=extraIds().length;
-  h.classList.toggle('open',SAVED_OPEN);
-  var b=h.querySelector('.sv-tog');if(b)b.setAttribute('aria-expanded',SAVED_OPEN?'true':'false');
-  svFold(c,SAVED_OPEN);
-  h.hidden=!SAVED_OPEN;   // the line under the board is the fold's own header now (v5.195)
-  if(t)t.hidden=!(SAVED_OPEN&&n>0);
+  if(t)t.hidden=!(n>0);
   scrapApply();
 }
 // The plus offers the three ways a workout appears, in the wizard's own cards (v5.237). Bring one
@@ -14281,7 +14287,7 @@ function scrapWhen(ms){
 function scrapApply(){
   var n=scrapCount();
   var L=document.getElementById('scrapLine'),T=document.getElementById('scrapLineTxt');
-  if(L)L.hidden=!(SAVED_OPEN&&n>0);
+  if(L)L.hidden=!(n>0);   // it lives inside the Saved sheet now, so only the count decides
   if(T)T.textContent='Scrap heap ('+n+')';
   var S=document.getElementById('scrapSet');if(S)S.hidden=!n;
   var B=document.getElementById('scrapSetBtn');
@@ -17802,12 +17808,12 @@ var BACK_RULES=[
   {n:'a night in the history',when:function(){return tops('histOvl')&&HIST.sel!==null;},act:function(){histBack();}},
   {n:'the sheet on top',when:function(){return !!topOvl();},                            act:function(){backCloses(topOvl().id);}},
   {n:'a session',    when:function(){return sessionOpen();},                            act:function(){leaveSession();}},
-  {n:'the builder',  when:function(){return onScr('make');},                            act:function(){mkBack();}},
-  // Not a screen and not a sheet, which is exactly how it was missed: the fold under the week
-  // opens over half the board, and back left it standing and asked whether to quit instead.
+  {n:'the builder',  when:function(){return onScr('make');},                            act:function(){mkBack();}}
+  // The saved fold had its own rule here, because it was neither a screen nor a sheet and back
+  // used to ask whether to quit while half the board was covered. It is a real sheet now
+  // (v5.260), so 'the sheet on top' above answers for it and the rule is gone.
   // The home screen carries no class of its own: it is what is left when nothing is over it,
   // which every rule above has already ruled out by the time this one is asked.
-  {n:'the saved fold',when:function(){return !!SAVED_OPEN;},                              act:function(){savedToggle();}}
 ];
 function onScr(id){var e=document.getElementById(id);return !!(e&&e.classList.contains('on'));}
 function tops(id){var o=topOvl();return !!(o&&o.id===id);}
@@ -20957,7 +20963,7 @@ function cardBind(){
       document.addEventListener('pointermove',moved);
       document.addEventListener('pointerup',cancel);
       document.addEventListener('pointercancel',cancel);
-      hd._dt=setTimeout(function(){hd._dt=null;off();cardStart(el,ev.clientX,sy);},420);
+      hd._dt=setTimeout(function(){hd._dt=null;off();cardGrab(el,ev.clientX,sy);},420);
     });
   });
 }
@@ -20976,12 +20982,32 @@ function zoneAt(y){
   });
   if(!z){
     var lbl=document.getElementById('extraLabel'),cards=document.getElementById('extraCards');
-    if(lbl&&cards){
+    // Only while the Saved sheet is actually up (v5.260). A closed overlay still has these
+    // elements, and a hidden element measures as a zero box at the top of the screen, so
+    // without this gate every drag near the top of the board resolved to the bank.
+    var sv=document.getElementById('savedOvl');
+    if(lbl&&cards&&sv&&sv.classList.contains('on')){
       var a=lbl.getBoundingClientRect(),c=cards.getBoundingClientRect();
       if(y>=a.top&&y<=Math.max(c.bottom,a.bottom+70))z={el:cards,key:null,bank:true};
     }
   }
   return z;
+}
+// Handing a card out of the Saved sheet and onto the board (v5.260). The order is the whole
+// trick and it is all one task, so no frame is ever drawn mid handoff:
+//   1. cardStart measures the card WHERE IT STANDS, which means the sheet has to still be up.
+//   2. the card moves to the body, because position:fixed inside a display:none overlay is
+//      display:none too, and the sheet is about to become exactly that.
+//   3. the sheet falls away, leaving the card under the finger over the board.
+// The slot stays behind in #extraCards, so letting go without moving puts the card straight
+// back in Saved, which is what cardEnd already does with a slot that never left the bank.
+function cardGrab(el,sx,sy){
+  var inSheet=!!(el.closest&&el.closest('#savedOvl'));
+  cardStart(el,sx,sy);
+  if(!inSheet||!CDRAG||!CDRAG.el)return;
+  document.body.appendChild(CDRAG.el);
+  CDRAG.orphan=true;    // cardEnd has to bin it: nothing puts a body child back in the flow
+  closeOvl('savedOvl');
 }
 function cardStart(el,sx,sy){
   var id=el.getAttribute('data-base')||el.getAttribute('data-extra');
@@ -21106,7 +21132,9 @@ function cardEnd(){
   var d=CDRAG;if(!d)return;CDRAG=null;
   var box=d.slot.parentNode,key=null,bank=false;
   if(box){
-    if(box.id==='extraCards'){bank=true;savedOpen();}
+    // Back in the bank, which now means the card was grabbed in the Saved sheet and let go
+    // without reaching a day. Put the sheet back up: that is where it came from (v5.260).
+    if(box.id==='extraCards'){bank=true;savedShow();}
     else key=box.getAttribute&&box.getAttribute('data-day');
   }
   // Index is read off the slot's own position, so it is exactly what was on screen.
@@ -21126,6 +21154,11 @@ function cardEnd(){
   if(d.slot.parentNode)d.slot.parentNode.removeChild(d.slot);
   d.el.classList.remove('cdrag');
   d.el.style.position='';d.el.style.left='';d.el.style.top='';d.el.style.width='';d.el.style.margin='';
+  // A card handed over from the Saved sheet was moved to the body to survive the sheet closing,
+  // and nothing downstream puts a body child back into a list. Clearing its drag styles just
+  // dropped it into the page as a full width duplicate at the bottom, which is what it did on
+  // the first run of this. renderHome redraws the real one from the data, so bin this one.
+  if(d.orphan&&d.el.parentNode===document.body)document.body.removeChild(d.el);
   if(d.mv&&(key||bank)){
     var here=(key&&key===d.from);
     if(bank){
