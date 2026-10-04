@@ -2841,6 +2841,14 @@ body.forge .sheet .fin-name,.sheet .fin-name{text-transform:none;letter-spacing:
   background:linear-gradient(180deg,#fff0c8 0%,#ffd06a 26%,#e8a020 62%,#c27a10 100%);border:1px solid #fff2cf;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -2px 0 rgba(120,60,0,.35),0 0 22px rgba(255,190,60,.55),0 6px 14px -6px rgba(0,0,0,.6);}
 .fin-lvl:active{transform:scale(.99);}
+/* What you did not get to (v5.261). Deliberately the quietest thing on the screen: no colour
+   that reads as a warning, no count of sets, no tap target. It is a note, not a verdict. */
+.fin-miss{margin-top:12px;border-radius:12px;padding:11px 15px;border:1px dashed var(--line);
+  background:transparent;}
+.fin-miss b{display:block;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--txt3);}
+.fin-miss small{display:block;font-size:12.5px;color:var(--txt2);margin-top:5px;line-height:1.5;}
+.fin-miss[hidden]{display:none;}
 .fin-lvl b{display:block;font-size:16px;font-weight:800;letter-spacing:.04em;color:#2a1608;}
 .fin-lvl .fin-x{display:inline;font-family:var(--mono);font-weight:700;color:#5a2e08;text-shadow:none;margin-left:2px;}
 .fin-lvl small{display:block;font-size:11.5px;color:#5a3a14;margin-top:1px;}
@@ -3696,6 +3704,10 @@ body.wcon{overflow:hidden;}
       <div class="fin-rec" id="finRec" hidden onclick="finRecs()"><b id="finRecN">0</b><span id="finRecL">new records</span><small id="finRecNames"></small><i class="fin-rec-chev">&rsaquo;</i></div>
       <div class="fin-recs" id="finRecList" hidden></div>
       <div class="fin-lvl" id="finLvl" hidden onclick="finRaise()"><div><b id="finLvlT"></b><small>Tap to raise now, or later from the board</small></div><span class="fin-go">&rsaquo;</span></div>
+      <!-- What you never got to (v5.261). The wrist stopped nagging about a lift you walked
+           past, so this is where it is said instead, once, plainly, with no scolding: a lift
+           you skipped was skipped for a reason and the app does not ask what it was. -->
+      <div class="fin-miss" id="finMiss" hidden><b id="finMissT"></b><small id="finMissN"></small></div>
     </div>
     <p class="fin-note" id="sumNote" hidden></p>
     <div class="sheet-btns"><div class="btn btn-go fin-done" onclick="closeOvl('exportOvl');offerReopen()">DONE</div></div>
@@ -10122,7 +10134,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.260';
+var APPV='v5.261';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15477,7 +15489,28 @@ function summarize(wk,A){
     });
   }
   var mins=sessMins(A);
-  return {sets:sets,vol:Math.round(vol),prs:prs,reps:reps,held:held,mins:mins,prNames:prNames,prList:prList,planned:totalSets(wk),name:(W[wk]||{}).name||'',date:A.date,wk:wk};
+  return {sets:sets,vol:Math.round(vol),prs:prs,reps:reps,held:held,mins:mins,prNames:prNames,prList:prList,
+          miss:missedLifts(wk,A),planned:totalSets(wk),name:(W[wk]||{}).name||'',date:A.date,wk:wk};
+}
+// The lifts you did not log a single set of (v5.261). Whole lifts only: falling short on the
+// last set of something is training, and a screen that counted part finished rows would be
+// scolding somebody who just trained. Named in the workout's own order.
+function missedLifts(wk,A){
+  var out=[];
+  try{
+    // Same walk the wrist uses, so the two always agree about what was left: edBlocks for the
+    // shape, rowFor so a swapped lift is named as the lift you actually stood at.
+    edBlocks(wk).forEach(function(b){
+      (b.rows||[]).forEach(function(row){
+        var rf=rowFor(A.swaps,row,wk);
+        var ent=(A.entries||{})[rf.id]||[];
+        if(ent.some(function(e){return !!e;}))return;
+        var nm=(rf.data&&rf.data.name)||'';
+        if(nm&&out.indexOf(nm)<0)out.push(nm);
+      });
+    });
+  }catch(e){return [];}
+  return out;
 }
 var FINWK=null;
 function renderSummary(s){
@@ -15496,6 +15529,20 @@ function renderSummary(s){
     var fmt=function(x){if(!x)return '\u2014';if(x.unit&&String(x.unit).indexOf('sec')>-1)return x.r+' sec';if(x.unit&&String(x.unit).indexOf('min')>-1)return x.r+' min';return x.w?fmtW(x.w)+' '+wUnitName()+' \u00d7 '+x.r:x.r+' reps';};
     document.getElementById('finRecList').innerHTML=(s.prList||[]).map(function(p){return '<div class="fin-rr"><span class="fin-rr-n">'+esc(p.name)+'</span><span class="fin-rr-now">'+fmt(p.now)+'</span><span class="fin-rr-was">was '+fmt(p.was)+'</span></div>';}).join('');
     document.getElementById('finRecList').hidden=true;rec.classList.remove('open');}
+  // What you never got to, said once (v5.261). No count, no colour, no tap: the wrist stopped
+  // putting you back on a machine somebody else was using, and this is the whole of the
+  // bookkeeping that replaces it.
+  var ms=document.getElementById('finMiss'),miss=s.miss||[];
+  if(ms){
+    ms.hidden=!miss.length;
+    if(miss.length){
+      document.getElementById('finMissT').textContent='You did not get to';
+      // Capped at three. Somebody who stopped a third of the way in does not need the whole
+      // list read back to them on the screen that is supposed to say well done.
+      var show=miss.slice(0,3),extra=miss.length-show.length;
+      document.getElementById('finMissN').textContent=show.join(', ')+(extra?' and '+extra+' more':'');
+    }
+  }
   // The raise you earned, offered right here (v5.150). Later is DONE; the arrow waits on the board.
   var lv=document.getElementById('finLvl'),n=0;
   // v5.212: never inside the tour, which is a sealed space; its seed data trips isReady
@@ -17303,6 +17350,11 @@ function showHistory(){
   if(!DB.logs.length){ask('Finish a session and it will show up here.',null,'No history yet');return;}
   HIST.sel=null;HIST.mon=null;HIST.wk0=null;HIST.day=null;HIST.wkAll=false;
   if(HIST.mode==='walks')HIST.mode='week';
+  // Open on the DAY, not the week (v5.261, owner). You come in here straight off a session to
+  // look at what you just did, and the week summary made that two taps away. The latest day
+  // this week that has anything on it, which right after finishing is today. A week with
+  // nothing in it still opens on the week, because there is no day to show.
+  HIST.day=histLastDay();
   try{hcSyncProbe();}catch(e){}
   renderHist();
   document.getElementById('histOvl').classList.add('on');
@@ -17367,6 +17419,18 @@ function histWeekName(wk0){
     (MO[new Date(wk0).getMonth()]+' '+new Date(wk0).getDate()+' to '+MO[new Date(wk1-day).getMonth()]+' '+new Date(wk1-day).getDate());
 }
 // The week: seven days across the top, what you did under them.
+// The latest day of the week on show that has anything logged or walked, or null when the week
+// is empty (v5.261). Null leaves the week summary up, which is the only honest thing to show
+// when there is no day to open.
+function histLastDay(){
+  var day=86400000,wk0=HIST.wk0||weekStartTs();
+  var items=histItems(wk0,wk0+7*day),best=null;
+  items.forEach(function(it){
+    var iso=isoOf(it.t);
+    if(!best||iso>best)best=iso;
+  });
+  return best;
+}
 function histWeekHtml(){
   var day=86400000,ws=weekStartTs(),wk0=HIST.wk0||ws,wk1=wk0+7*day,todayIso=isoOf(Date.now());
   var items=histItems(wk0,wk1);
@@ -19340,6 +19404,9 @@ function wearNext(){
   }
   // Inside a superset the members alternate - A1, B1, A2, B2 - which is how the phone runs
   // them. Walking row by row sent the wrist through all of A before any of B (v5.104).
+  // One running order for the whole workout, blocks in order, a superset alternating inside
+  // its own block.
+  var all=[];
   blocks.forEach(function(b){
     var order=[];
     if(b.ss){
@@ -19349,18 +19416,45 @@ function wearNext(){
     // An aim on either half of a superset aims the whole pair, so the wrist keeps alternating
     // instead of running one half to the end.
     var blockAimed=!!(WEARFOCUS&&b.ss&&b.mem.some(function(m){return m.id===WEARFOCUS;}));
-    order.forEach(function(p){
-      var m=p[0],s=p[1];
-      if(m.ent[s])return;
-      var c=cand(m,s);
-      if(!out)out=c;
-      // A tapped lift becomes the aim; a tapped unlogged set becomes the current one. Sets
-      // may be done out of order, the phone always allowed that.
-      if(WEARFOCUS&&!aimed){
-        if(WEARSET!=null){if(m.id===WEARFOCUS&&WEARSET===s)aimed=c;}
-        else if(blockAimed||m.id===WEARFOCUS)aimed=c;
-      }
-    });
+    order.forEach(function(p){all.push({m:p[0],s:p[1],ba:blockAimed});});
+  });
+  // The high water mark: the furthest point in that order anything has actually been logged at.
+  // Nothing BEFORE it is offered again (v5.261, owner's rule). A lift you walked past was walked
+  // past for a reason, usually somebody else on the machine, and the wrist used to put you back
+  // on it after every single set of the row you COULD do, which is what sent him to his phone in
+  // the gym. The app does not ask why and does not nag: what you never got to is named on the
+  // finish screen instead.
+  var hw=-1;
+  all.forEach(function(p,ix){if(p.m.ent[p.s])hw=ix;});
+  // Where each lift first comes up, and whether it has a single set on it.
+  var firstIx={},any={};
+  all.forEach(function(p,ix){
+    if(firstIx[p.m.id]===undefined)firstIx[p.m.id]=ix;
+    if(p.m.ent[p.s])any[p.m.id]=true;
+  });
+  all.forEach(function(p,ix){
+    var m=p.m,s=p.s;
+    if(m.ent[s])return;
+    var c=cand(m,s);
+    var tapped=(WEARFOCUS===m.id)&&(WEARSET==null||WEARSET===s);
+    // A lift with NOTHING on it that the session has already moved past is a lift you are not
+    // doing today, and the WHOLE lift drops out, not just the set you stepped over. Advancing
+    // set by set was not enough: it still put him on the taken machine once per round, which
+    // is the thing he described. Nothing is asked and nothing is deleted. Tapping it yourself
+    // always brings it back, which is how you pick a machine up when somebody gets off it, and
+    // what you never got to is named once on the finish screen.
+    var dropped=(!any[m.id]&&hw>firstIx[m.id]&&!tapped);
+    if(dropped)return;
+    if(!out&&ix>hw)out=c;
+    // A tapped lift becomes the aim; a tapped unlogged set becomes the current one. Sets may be
+    // done out of order, the phone always allowed that. An aim on either half of a superset
+    // aims the pair, but only forward: aiming the half you CAN do used to send the pair
+    // straight back at the half you cannot.
+    if(WEARFOCUS&&!aimed){
+      if(WEARSET!=null){if(m.id===WEARFOCUS&&WEARSET===s)aimed=c;}
+      else if(m.id===WEARFOCUS)aimed=c;
+      else if(p.ba&&ix>hw)aimed=c;
+    }
   });
   // the lift you jumped to is finished: stop aiming and rejoin the running order
   if(WEARFOCUS&&!aimed){WEARFOCUS=null;WEARSET=null;}

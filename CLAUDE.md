@@ -104,6 +104,21 @@ main constraint on how to work in it. See **Traps** below before editing.
   `#askMsg:empty{display:none}` is what makes an empty message cost no space, because `.sheet p`
   still spends its 16px bottom margin otherwise. Checked: the crest does not leak into the next
   dialog, and it survives the queue.
+- **A lift you walked past is a lift you are not doing today** (v5.261, owner, after a session
+  in the gym). `wearNext` keeps a high water mark, the furthest point in the running order
+  anything has been logged at, and never offers anything before it. A lift with NO sets on it
+  that the session has moved past drops out ENTIRELY, not one set at a time: he could not get on
+  a machine in a superset, and the wrist put him back on it after every single set of the row he
+  COULD do, until he got his phone out in the gym. Advancing set by set was not enough, because
+  it still bounced him once per round. Nothing is asked and nothing is deleted: tapping the lift
+  or one of its sets always brings it back when the machine frees up, and what he never got to
+  is named ONCE on the finish screen (`missedLifts`, `#finMiss`, whole lifts only, capped at
+  three). Owner's words: the app should be smart and know that if we skipped it there is a
+  reason, it should just keep trucking on. A superset still alternates normally when both halves
+  are being done, which is the regression to check if this is ever touched.
+- **Workouts finished opens on the DAY** (v5.261, owner). `histLastDay()` is the latest day of
+  the week on show carrying anything, which straight after a session is today; a week with
+  nothing in it still opens on the week, because there is no day to open.
 - **The walks screen is scoped to the week it was opened from** (v5.239). `HIST.wk0` is the
   cursor; `HIST.wkAll` is the deliberate escape to every walk. A list reached from inside a week
   view shows that week, always: the row that opened it carried that week's count.
