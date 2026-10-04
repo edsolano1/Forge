@@ -2967,6 +2967,12 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hwk-c.sel{background:color-mix(in srgb,var(--go) 16%,transparent);border-color:var(--go);}
 .hnav.off{opacity:.25;pointer-events:none;}
 .hnone{color:var(--txt3);font-size:13.5px;padding:14px 4px 18px;text-align:center;}
+/* What a day was carrying and never got (v5.264). Dashed and grey on purpose: it is a record,
+   not a telling off, and it must never compete with the sessions above it. */
+.hmiss{margin-top:9px;padding:11px 14px;border:1px dashed var(--line);border-radius:11px;}
+.hmiss b{display:block;font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--txt3);}
+.hmiss span{display:block;font-size:12.5px;color:var(--txt2);margin-top:5px;line-height:1.5;}
 .hdow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--txt3);text-align:center;padding:2px 0 4px;}
 .hcell{position:relative;aspect-ratio:1;border-radius:9px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:11px;color:var(--txt3);}
@@ -10161,7 +10167,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.263';
+var APPV='v5.264';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -17446,6 +17452,31 @@ function histWeekName(wk0){
     (MO[new Date(wk0).getMonth()]+' '+new Date(wk0).getDate()+' to '+MO[new Date(wk1-day).getMonth()]+' '+new Date(wk1-day).getDate());
 }
 // The week: seven days across the top, what you did under them.
+// What was on a day and never got done (v5.264, owner). Workouts finished used to show a
+// selected day's sessions and say nothing at all about the one you planned and did not do, so
+// an empty Tuesday and a Tuesday you walked away from looked identical.
+// Only THIS week, and only a day that has already finished: today's workout is not missed, it
+// is pending, and a past week's board is not the board that week actually ran. Same wasThere
+// test the board's own pill uses, so a workout dragged onto a day after that day had passed
+// never counts against it.
+function histMissed(iso){
+  var out=[];
+  if(!iso||twoOff())return out;
+  var d=new Date(iso+'T12:00:00'),t=d.getTime(),js=d.getDay();
+  var ws=weekStartTs();
+  if(t<ws||t>=ws+7*86400000)return out;           // not this week
+  if(js>=new Date().getDay())return out;          // today and ahead are not missed
+  var dObj=null;DAYS.forEach(function(x){if(x.js===js)dObj=x;});
+  if(!dObj)return out;
+  var done={};
+  (DB.logs||[]).forEach(function(L){if(L.date===iso)done[L.day]=1;});
+  (liveDays()[dObj.k]||[]).forEach(function(id){
+    if(wkVar(id)==='rest'||!W[id]||done[id])return;
+    if(!wasThere(id,dObj.k,js))return;
+    out.push(W[id].name.replace('Optional: ',''));
+  });
+  return out;
+}
 // The latest day of the week on show that has anything logged or walked, or null when the week
 // is empty (v5.261). Null leaves the week summary up, which is the only honest thing to show
 // when there is no day to open.
@@ -17485,7 +17516,12 @@ function histWeekHtml(){
     // No date line here (v5.257, owner). The circle above it already says W and 30, and every
     // row below carries the full date in its own header, so this was the same day said three
     // times. Never reintroduce a heading that repeats what the thing it sits over already shows.
-    h+='<div class="hscroll">'+(dl.length?dl.map(histRowHtml).join(''):'<div class="hnone">Nothing logged this day.</div>')+'</div>';
+    // What you planned and did not do, under what you did. The board's own Skipped pill STAYS:
+    // that one is a nudge while the week is still running and you can still catch it up, this
+    // one is the record of a day that has gone. They answer different questions (v5.264).
+    var ms=histMissed(HIST.day);
+    h+='<div class="hscroll">'+(dl.length?dl.map(histRowHtml).join(''):(ms.length?'':'<div class="hnone">Nothing logged this day.</div>'))+
+      (ms.length?'<div class="hmiss"><b>Not done</b><span>'+ms.map(esc).join(', ')+'</span></div>':'')+'</div>';
     return h;
   }
   // what the week added up to
