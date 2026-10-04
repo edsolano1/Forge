@@ -1453,6 +1453,10 @@ body.tut .dayhead-add{display:none;}
 .preset{padding:17px 6px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-family:var(--mono);font-size:14px;cursor:pointer;transition:.15s;}
 .preset:hover{border-color:var(--go);color:var(--go);}
 .preset.sm{padding:12px 6px;font-size:12px;font-family:inherit;letter-spacing:.02em;}
+/* A quiet tail on a preset keeps its own case. body.forge .preset uppercases the whole button,
+   so "nothing is saved" was shouting NOTHING IS SAVED at the one person it is reassuring. Same
+   trick .mk-adv small already uses. */
+.preset small{font-weight:400;letter-spacing:.02em;text-transform:none;color:var(--txt3);}
 /* the chosen one in a row of presets - same lit treatment the sfx toggle uses when it is on */
 .preset.on{border-color:var(--go);color:var(--go);background:color-mix(in srgb,var(--go) 12%,var(--surface2));}
 /* The muscle row in the exercise picker. One line that scrolls sideways rather than wrapping
@@ -3676,7 +3680,7 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="pumpOvl">
   <div class="sheet" style="max-width:400px">
-    <h3>Pump day</h3>
+    <h3>Pump Day</h3>
     <p>High reps, light weight, short rests. Its numbers stay separate, so nothing here touches your real progression.</p>
     <div class="pk-kinds" id="pkKinds"></div>
     <div class="pk-lbl">What do you have today?</div>
@@ -3738,7 +3742,6 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="exHistOvl">
   <div class="sheet" style="max-width:430px">
     <h3 id="xhName">Exercise</h3>
-    <div class="footnote" style="margin:0 2px 12px">Every session you have logged it in, newest first.</div>
     <div id="xhBody"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('exHistOvl')">CLOSE</div></div>
   </div>
@@ -3790,7 +3793,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="exNoteOvl">
   <div class="sheet" style="max-width:420px">
     <h3 id="exNoteName">Note</h3>
-    <div class="footnote" style="margin:0 2px 8px">Yours, not the app's. Seat heights, pin numbers, a reminder that keeps your technique right. It stays on this exercise every time it comes round.</div>
+    <div class="footnote" style="margin:0 2px 8px">Yours, not the app's. It stays on this exercise every time it comes round.</div>
     <textarea id="exNoteBox" rows="5" placeholder="Seat 4, back pad 2. Keep elbows tucked." oninput="exNoteAuto()"></textarea>
     <!-- The one fact about an exercise the app cannot work out for itself, now settable on
          EVERY exercise rather than only at custom creation: on an assisted machine the
@@ -3868,7 +3871,7 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="exAddOvl">
   <div class="sheet">
-    <h3>Add to this day</h3>
+    <h3>Add an exercise</h3>
     <input class="mk-in" id="exAddSearch" placeholder="Search the library" oninput="exAddList()" autocomplete="off">
     <div class="swaplist" id="exAddList" style="margin-top:12px"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('exAddOvl')">CANCEL</div></div>
@@ -4161,7 +4164,7 @@ body.wcon{overflow:hidden;}
          generated week - in a copy where nothing is saved, and leaving throws it all away. -->
     <div class="sfx-lbl"><span>Practice run</span></div>
     <div class="presets" style="grid-template-columns:1fr">
-      <button class="preset sm" onclick="sbStart()">REPLAY THE FIRST RUN &middot; nothing is saved</button>
+      <button class="preset sm" onclick="sbStart()">REPLAY THE FIRST RUN &middot; <small>nothing is saved</small></button>
     </div>
     </div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('settingsOvl')">CLOSE</div></div>
@@ -4286,7 +4289,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="swapOvl">
   <div class="sheet">
     <h3>Swap exercise</h3>
-    <p>Machine taken? Similar exercises are listed first. This swap is for today only.</p>
+    <p>This swap is for today only.</p>
     <input class="mk-in" id="swapSearch" placeholder="Search exercises" autocomplete="off" oninput="swapList()" style="margin-bottom:10px">
     <div class="swaplist" id="swapList"></div>
     <div class="sheet-btns">
@@ -4314,7 +4317,7 @@ body.wcon{overflow:hidden;}
 <div class="ovl" id="walkAddOvl" style="z-index:300">
   <div class="sheet" style="max-width:400px">
     <h3>Add a walk</h3>
-    <p>For a walk the phone did not record. Steps are optional.</p>
+    <p>For a walk the phone did not record.</p>
     <input class="mk-in" id="waDate" type="date">
     <input class="mk-in" id="waMin" type="number" inputmode="numeric" placeholder="Minutes" style="margin-top:9px">
     <input class="mk-in" id="waSteps" type="number" inputmode="numeric" placeholder="Steps (optional)" style="margin-top:9px">
@@ -10167,7 +10170,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.267';
+var APPV='v5.268';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11739,7 +11742,7 @@ function twoFlip(){
 // The switch itself, asked before it acts either way.
 function twoToggle(){
   if(!twoOn()){
-    ask('You are switching to a two week program. This board becomes Week 1, and a second board, Week 2, opens behind it. The two take turns: the calendar decides which one is this week, and you can flip over to see or build the other one any time.',
+    ask('This board becomes Week 1. A second board opens behind it.',
       function(){
         DB.two={on:1,anchor:weekStartTs(),live:0,view:0,other:{}};
         DAYS.forEach(function(d){DB.two.other[d.k]=[];});
@@ -12244,7 +12247,7 @@ function offerReopen(){
   try{seen=localStorage.getItem(REOPENKEY)||'';}catch(e){}
   if(seen===wk)return;
   try{localStorage.setItem(REOPENKEY,wk);}catch(e){}
-  ask('Every day on your week is locked in. Unlock them all to go round again, or leave it and the week starts fresh on its own when it turns over.',
+  ask('Unlock them all to go round again, or leave it and the week starts fresh when it turns over.',
       function(){sfxUnseal();runWipe(doUnseal);},
       'The whole week, locked in',TXT('unsealYes'));
 }
@@ -12737,7 +12740,7 @@ function renderSides(){
   el.innerHTML='';return;   // Pump day moved into Saved (v5.144); the bar is retired
   el.innerHTML=
     '<div class="side" id="sidePump" onclick="openPump()">'+
-      '<span class="side-i" style="color:var(--gold)">'+pumpIconSvg()+'</span><b>Pump day</b>'+
+      '<span class="side-i" style="color:var(--gold)">'+pumpIconSvg()+'</span><b>Pump Day</b>'+
       '<small>'+(open?'OPEN \u00b7 '+open+'/'+totalSets('pump'):'Bonus \u00b7 35-45 min')+'</small></div>';
 }
 function renderPumpIcon(){renderSides();
@@ -12854,7 +12857,7 @@ function renderHome(){
     '<div class="card-meta">'+(po?'Still open. Pick up where you left off':'Bonus, 35 to 45 minutes. Any day')+'</div></div>';
   var fi=document.getElementById('svForgeIco');if(fi&&!fi.innerHTML)fi.innerHTML=anvilAt(59,'fill="currentColor"');
   document.getElementById('extraCards').innerHTML=pumpCard+(xs.length?xs.map(xcard).join('')
-    :'<div class="bank-empty">Your own saved workouts sit here too. Drag one down, or hold one and choose MOVE TO SAVED WORKOUTS.</div>');
+    :'<div class="bank-empty">Your own Saved workouts sit here too. Drag one down, or hold one and choose MOVE TO SAVED WORKOUTS.</div>');
   document.getElementById('extraLabelTxt').textContent=MKTXT().xl;
   savedApply(xs.length+1);
   mkBindCards();
@@ -13647,15 +13650,13 @@ function stRow(id){return [id,{sets:ST_SETS,rest:ST_REST}];}
 var STARTER={
   s1:{name:'Push',tag:'Gym',color:'#c8794a',time:'40 min',
       sections:[{title:'Chest, shoulders and triceps',
-        tip:'Pick a weight you can finish all three sets with, and write it in as you go. The numbers are yours to set.',
+        tip:'Pick a weight you can finish all three sets with.',
         ss:false,rows:['dbbench','dbfly','dblat','rope'].map(stRow)}]},
   s2:{name:'Pull',tag:'Gym',color:'#5b8fb9',time:'40 min',
       sections:[{title:'Back and biceps',
-        tip:'Same idea: the first session is where your numbers come from.',
         ss:false,rows:['latpd','machrow','facepull','bbcurl'].map(stRow)}]},
   s3:{name:'Legs',tag:'Gym',color:'#7a9a5b',time:'40 min',
       sections:[{title:'Legs',
-        tip:'Leave a rep or two in the tank on the first go.',
         ss:false,rows:['lpress','lext','slegcurl','stcalf'].map(stRow)}]}
 };
 // An empty week that dayMap will not quietly refill. Present-but-empty is the distinction:
@@ -14188,11 +14189,11 @@ function dsActions(id,dk){
   var h='<div class="dsrow">';
   if(locked)h+=dsBtn('unlock','Unlock','unsealOne(\''+id+'\')');
   if(raise)h+=dsBtn('up','Level up','closeOvl(\'dayOvl\');openLevel(\''+id+'\',true)');
-  if(far)h+=dsBtn('down','Targets','closeOvl(\'dayOvl\');openEase(\''+id+'\')');
+  if(far)h+=dsBtn('down','Lower targets','closeOvl(\'dayOvl\');openEase(\''+id+'\')');
   h+=dsBtn('edit','Edit','closeOvl(\'dayOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')');
   h+=dsBtn('copy','Duplicate','closeOvl(\'dayOvl\');mkDuplicate(\''+id+'\')');
   h+=dsBtn('send','Send','closeOvl(\'dayOvl\');shareOne(\''+id+'\')');
-  h+=dsBtn('shelf',mine?'To saved':'Off the week','closeOvl(\'dayOvl\');savedOpen();planDropDay(\''+id+'\',\''+dk+'\')');
+  h+=dsBtn('shelf',mine?'Save it':'Off the week','closeOvl(\'dayOvl\');savedOpen();planDropDay(\''+id+'\',\''+dk+'\')');
   if(mine)h+=dsBtn('bin','Delete','dsDelete(\''+id+'\')','bad');
   return h+'</div>';
 }
@@ -14403,7 +14404,7 @@ function mkDeleteX(id){
     DB.extra=(DB.extra||[]).filter(function(x){return x!==id;});
     if(DB.custom)delete DB.custom[id];
     saveDB();mergeCustom();renderHome();
-  },'Delete this day','DELETE');
+  },'Delete this workout','DELETE');
 }
 function mkRestore(id){
   if(openHere(id)){closeOvl('mkActOvl');mkNote(MOVE_BUSY);return;}
@@ -15598,7 +15599,7 @@ function finRaise(){closeOvl('exportOvl');if(FINWK)openLevel(FINWK);}
 function finishSession(){
   var wk=CUR;
   if(loggedCount(wk)===0){
-    ask('No sets are checked off on this day, so there is nothing to export yet. Tap a set row to log it.',null,'Nothing logged yet');
+    ask('Log a set first.',null,'Nothing logged yet');
     return;
   }
   // Finishing seals the day until the week turns over, so a mis-tap here used to cost the
@@ -15621,7 +15622,7 @@ function finishGate(){
   var wk=CUR;
   if(SESSEDIT&&SESSEDIT.wk===wk&&!TUTON&&JSON.stringify(DB.custom[wk]||null)!==SESSEDIT.snap){
     var snap=SESSEDIT.snap;
-    ask('You changed this workout during the session. Today counts either way. Keep the change for next time?',
+    ask('You changed this workout during the session. Today counts either way.',
       function(){SESSEDIT=null;finishNow();},
       'Keep the changes?','SAVE PERMANENTLY',null,
       {label:'JUST TODAY',fn:function(){
@@ -16103,7 +16104,7 @@ function doRestore(input){
   rd.onload=function(){
     var d=null;
     try{d=JSON.parse(String(rd.result));}catch(e){}
-    if(!d||!d.db||!Array.isArray(d.db.logs)){ask('That file is not a Forge backup. The one RESTORE needs is the forge-backup file ending in .json, made by BACKUP FILE.',null,'Could not read it');return;}
+    if(!d||!d.db||!Array.isArray(d.db.logs)){ask('That file is not a Forge backup. The one Put a copy back needs is the forge-backup file ending in .json, made by Save a copy now.',null,'Could not read it');return;}
     var inN=d.db.logs.length,haveN=(DB.logs||[]).length;
     ask('The backup holds '+inN+' logged session'+(inN===1?'':'s')+', from '+bkWhen(d.at)+
         '. Restoring replaces everything currently in this app'+
@@ -16291,7 +16292,7 @@ function weekConsider(d){
   for(var k in d.workouts){cnt++;if(names.length<4)names.push(d.workouts[k].name||'a workout');}
   if(!cnt){ask('That week has no workouts in it.',null,'Nothing to add',"OK",false);return;}
   ask(cnt+' workout'+(cnt===1?'':'s')+': '+names.join(', ')+(cnt>names.length?' and more':'')+
-      (cnt===1?'. It goes':'. They go')+' to your saved workouts, ready to place on any day you like. Nothing you already have is changed or replaced.',
+      (cnt===1?'. It goes':'. They go')+' to Saved workouts, ready to place on any day you like. Nothing you already have is changed or replaced.',
     function(){weekAdd(d);},
     'Add '+cnt+' workout'+(cnt===1?'':'s')+'?','ADD THEM');
 }
@@ -16349,7 +16350,7 @@ function weekAdd(d){
   }
   easeArm();                       // same for a week somebody sent (v5.251)
   mergeCustom();dayMap();saveDB();renderHome();
-  ask(added+' workout'+(added===1?' is':'s are')+' in your saved workouts, under the week. Hold one to put it on a day.',null,'Added');
+  ask(added+' workout'+(added===1?' is':'s are')+' in Saved workouts, under the week. Hold one to put it on a day.',null,'Added');
 }
 function historyText(){
   return APPNAME()+' \u00b7 full history\n'+DB.logs.length+' session'+(DB.logs.length===1?'':'s')+'\n\n'+
@@ -16482,7 +16483,7 @@ function bkNudge(){
     localStorage.setItem('arc_bknudge','1');
   }catch(e){return;}
   if(autoBkAvail()){
-    ask('Everything you have logged lives only on this phone. Turn on the automatic safety copy? A backup file will quietly refresh itself after every finished workout. Your data, in Settings, is always there too.',
+    ask('Everything you have logged lives only on this phone. A backup file can refresh itself after every finished workout.',
       function(){try{localStorage.setItem('arc_autobk','1');}catch(e){}autoBk(true);},
       'Guard your history?','TURN IT ON');
   }else{
@@ -16919,9 +16920,9 @@ function plDraw(){
   document.getElementById('plTotal').innerHTML=plNum(tot)+'<small>'+u+'</small>';
   var r,solo=plSolo(),horn=!!plBarDef(PL.bar).horn;
   if(!PL.on.length){
-    r=horn?'Nothing on the horn yet. Tap a plate.':solo?'No plates yet. Tap what you are holding.'
-      :bw?'Just the '+plNum(bw)+' '+u+' bar. Tap a plate to load it.'
-         :'Nothing loaded yet. Tap a plate.';
+    r=horn?'Nothing on the horn yet.':solo?'No plates yet.'
+      :bw?'Just the '+plNum(bw)+' '+u+' bar.'
+         :'Nothing loaded yet.';
   }else{
     var c={},order=[];
     PL.on.slice().sort(function(a,b){return b-a;}).forEach(function(p){
@@ -20062,7 +20063,7 @@ function hcSync(manual){
       if(full)localStorage.setItem(KEY+':hcfull',String(Date.now()));
       if(manual){
         hcDraw();
-        ask(add?('Brought in '+add+' walk'+(add===1?'':'s')+' from Health Connect. They show under WORKOUTS FINISHED.')
+        ask(add?('Brought in '+add+' walk'+(add===1?'':'s')+' from Health Connect. They show under Workouts finished.')
                :fill?'Checked Health Connect: no new walks, but existing ones picked up fresher numbers.'
                :'Checked Health Connect: no new walks since last time.',null,'Walks synced');
       }
@@ -21759,7 +21760,7 @@ function tutW(){var e=document.getElementById('w-dbbench-0');return e?parseFloat
 var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   msg:'A quick walk through the real screens, using sample data.',
   yes:'SHOW ME',no:'NOT NOW',steps:[
-  {t:'Your week',b:'Seven days, Sunday to Saturday. A day can hold a workout or stay empty. An empty day is just a day off. The + on any day adds a workout to it.'},
+  {t:'Your week',b:'Seven days, Sunday to Saturday. The + on any day adds a workout to it.'},
   {t:'Open a workout',b:'Tap Push Day, on Tuesday.'},
   {t:'The set grid',b:'Every row is one set: a weight, the reps, and a small anvil mark at the end. Tapping the anvil logs the set. Tap the weight on the first row.'},
   {t:'Set the number',b:'Type 25 or more, then tap DONE.'},
@@ -21768,7 +21769,7 @@ var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
   {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the highlight.'},
   {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
   {t:'How many sets',b:'Add or drop a set. The targets underneath follow along.'},
-  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Those two buttons are how a change is saved. Nothing changed just now, so NEXT closes the sheet.</p>'},
+  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Nothing changed just now, so NEXT closes the sheet.</p>'},
   {t:'Your own notes',b:'Tap Add note on the bench.'},
   {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a reminder that keeps your technique right. It shows up on that exercise every time it comes around.'},
   {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is fine for the tour.'},
@@ -22718,7 +22719,7 @@ var EZ_STEPS=[
     [0,'Not training right now','Starting fresh, or coming back',WZ.xp3[0]],
     [1,'On and off','Some weeks yes, some weeks no',WZ.xp3[1]],
     [2,'Twice a week or more','Nearly every week, showing up',WZ.xp3[2]]];}},
-  {t:'How many days a week?',s:'Only count days you will actually show up. Fewer days done beats more days planned.',
+  {t:'How many days a week?',s:'Only count days you will actually show up.',
    k:'days',opts:function(){return ezDays().map(function(d){return [d[0],d[1],d[2],d[3]];});}},
   // Still a constraint, not a preference: how the person's weeks RUN. Most repeat; the classic
   // beginner barbell programs alternate two workouts across three days, A B A then B A B,
@@ -22735,7 +22736,7 @@ var EZ_STEPS=[
   // A CONSTRAINT, not a preference - see the rule in CLAUDE.md. What you own changes which lift
   // fills a slot; it never changes which muscles the week trains. Asking "what do you want to
   // work" would; asking "what have you got" does not.
-  {t:'What do you train with?',s:'The week is built from what you actually have. Nothing here is a compromise. It picks the right lift for the room you are standing in.',
+  {t:'What do you train with?',s:'It picks the right lift for the room you are standing in.',
    k:'kit',opts:function(){return [
     ['gym','A gym','Machines, bars, cables: the full room',WZ.kit[0]],
     ['home','A barbell at home','Bar, plates, a rack and a bench',WZ.kit[1]],

@@ -1,5 +1,5 @@
 // Arcanum offline shell
-var CACHE = 'arcanum-v612';
+var CACHE = 'arcanum-v613';
 var SHELL = [
   './',
   './index.html',
