@@ -2,7 +2,7 @@
 
 *An offline workout logger. One file, no account, no server — your data lives on your phone and nowhere else.*
 
-**Current build: v5.262** · Android app 1.5 (versionCode 204, installed 1 Oct) · watch 1.17 (versionCode 217, installed 1 Oct) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
+**Current build: v5.263** · Android app 1.5 (versionCode 204, installed 1 Oct) · watch 1.17 (versionCode 217, installed 1 Oct) · Web (GitHub Pages) + Android wrapper · formerly "Arcanum," renamed in v4.145
 
 ---
 

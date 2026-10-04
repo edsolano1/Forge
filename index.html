@@ -7609,8 +7609,11 @@ var ANIM=(function(){
     seg(x,[376,44],[408,44],6,LINE);
     x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(386,58,9,0,7);x.stroke();
     var p=saPullPose(k),hip=SAP.hip;
-    seg(x,hip,[hip[0]+5,344],10);seg(x,[hip[0]+5,344],[hip[0]-2,424],10);
-    seg(x,[hip[0]-16,424],[hip[0]+16,424],9);
+    // the approved anatomical foot (footPose, v5.205), not a stub centred on the ankle: heel
+    // behind, ball planted, toes past it, pointing the way he faces
+    var f=footPose([161,424],0,0,1);
+    seg(x,hip,[hip[0]+5,344],10);seg(x,[hip[0]+5,344],f.ankle,10);
+    footSide(x,f);
     seg(x,hip,p.sho,11);
     seg(x,p.sho,P(p.sho,-90+SAP.lean,26),8);
     dot(x,P(p.sho,-90+SAP.lean,46),19);
@@ -7623,7 +7626,15 @@ var ANIM=(function(){
     var k=reduce?1:cycle(t,2800,0.12);
     var cx=240,by=saPullPose(k).hand[1];    // THE SAME HEIGHT THE SIDE JUST COMPUTED
     seg(x,[cx,36],[cx,by],4,LINE);          // the cable follows the bar down, every frame
-    trunkF(x,cx,146,250,26);
+    // trunkF's own feet are stubs on the floor. Drawn out here instead so the legs can end at
+    // the ANKLE and the proper end on foot (footFront) sits under them, same as every other
+    // standing figure that shows its feet.
+    seg(x,[cx,250],[cx,146],11);
+    seg(x,[cx-26,410],[cx,250],10);seg(x,[cx+26,410],[cx,250],10);
+    footFront(x,cx-26,410,cx-28,424);footFront(x,cx+26,410,cx+28,424);
+    seg(x,[cx-42,150],[cx+42,150],10);
+    seg(x,[cx,146],[cx,120],8);
+    dot(x,[cx,98],19);
     var hx=lerp(52,34,k);
     seg(x,[cx-42,150],[cx-hx,by],9);
     seg(x,[cx+42,150],[cx+hx,by],9);
@@ -10150,7 +10161,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.262';
+var APPV='v5.263';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
