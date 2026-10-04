@@ -398,6 +398,20 @@ something not listed there adds it to the list in the same commit.
 
 Rendering claims cannot be verified in a desktop browser.
 
+**A push is not a deploy. Check that the new build is actually being SERVED** (3 Oct). v5.259
+was pushed, verified on a local server, and reported as shipped, and the GitHub Pages build for
+it failed on a `Net::ReadTimeout` inside GitHub's own `jekyll-github-metadata` step. The owner
+sat on v5.258 looking at the very icon that had just been fixed. One line closes it:
+
+```bash
+curl -s "https://edsolano1.github.io/Forge/index.html?cb=$(date +%s%N)" | grep -o "var APPV='[^']*'"
+```
+
+A cache-busting query is required or you read your own cached copy. When it fails: a re-run
+through the API can sit QUEUED for ten minutes and never pick up a runner, so do not wait on
+it. Push an empty commit instead (`git commit --allow-empty`) and watch the live APPV, which
+took about 40 seconds. The failure is transient and is not caused by anything in the repo.
+
 **Restarting the Browser-pane preview server hands the tab FRESH storage.** An empty app after
 a restart is the pane, not the build. Prove persistence with create → reload → check. Both are Chromium, so the numbers always
 look right and have been wrong three separate times.
