@@ -294,6 +294,25 @@ main constraint on how to work in it. See **Traps** below before editing.
   plan item. It never enters DB.days, so nothing that counts the week counts it. Which day it lands
   on comes from bonusDay: the weekday the session recorded, or the date it carries, because a Pump
   Day opened from its own button records no weekday (v5.223, caught on the live phone).
+- **The straight arm pulldown leans 30 degrees, and one pose function feeds both planes**
+  (v5.262, owner picked version three of three, and spotted the fault himself). What shipped
+  before was wrong three ways: bolt upright, arms never above horizontal, and a side view whose
+  pulley sat level with the shoulder while the front view's cable came from the ceiling, which
+  is two different machines in the two planes. `SAP` holds the numbers and `saPullPose(k)` is
+  called by BOTH `drawSaPullS` and `drawSaPullF`, so the hands cannot drift apart again; the
+  front view reads its bar height straight off the side view's hand every frame and the cable
+  is drawn TO the bar, not to a height of its own.
+  **Thirty degrees is evidence, not taste.** Every source says not upright, because an upright
+  torso turns this into a front raise and the load leaves the back; the published spread runs 10
+  to 45, and 30 is both the middle of it and the trunk inclination used in pulldown EMG work.
+  The arm angles are in SPACE but what buys the stretch is the angle against the TORSO: at the
+  top the arm is 142 degrees from the body while the hands are only at head height, which is
+  what the lift really looks like. **Never raise the hands above the pulley** to show more
+  reach: a cable cannot push, and the frame has no room above the stack anyway. Measured at
+  both ends: hand below the pulley, clear of the stack, clear of the head, at the thigh at the
+  bottom, 102 degrees of shoulder extension across the rep.
+  The card gained the kneeling note, because a pulley that does not go high enough is the one
+  real reason a tall lifter cannot do this properly and kneeling is the standard answer.
 - **Do not redraw the sumo squat's side view** (owner, 22 Sep). Three directions were drawn: turned
   out feet only, a foreshortened thigh with the hips dropping between the feet, and that plus an
   opened stance. The last two are anatomically defensible and look like a body that cannot exist;

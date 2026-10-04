@@ -7581,38 +7581,54 @@ var ANIM=(function(){
 
 
   // ---------- STRAIGHT-ARM PULLDOWN: the arc from shoulders to thighs ----------
+  // STRAIGHT ARM PULLDOWN (redrawn v5.262, owner picked version three of three).
+  // What was here was wrong three ways and he spotted it: the figure stood bolt upright, the
+  // arms never rose above horizontal, and the side view's pulley sat level with his shoulder
+  // while the front view's cable came from the ceiling. Two planes, two different machines.
+  // The lean is 30 degrees, which is where the evidence lands: every source says not upright,
+  // because an upright torso turns this into a front raise and the load leaves the back. The
+  // spread runs 10 to 45 and the middle of it, and the figure used as the tested trunk
+  // inclination in pulldown EMG work, is 30.
+  // ONE pose function feeds BOTH views, so the hands cannot end up at different heights in the
+  // two planes again. The arm's angle is in SPACE; what matters for the stretch is the angle
+  // against the TORSO, and the lean is what buys that: at the top the arm is 142 degrees from
+  // the body and the hands are still only at head height, which is what the lift really looks
+  // like. Reaching higher in the picture would put the hands above the pulley, which cannot
+  // happen with a cable.
+  var SAP={hip:[140,250],lean:30,top:-22,bot:80,pulley:[382,64]};
+  function saPullPose(k){
+    var sho=P(SAP.hip,-90+SAP.lean,146);
+    var ang=lerp(SAP.top,SAP.bot,k);
+    var e=P(sho,ang-7,56);                  // the slight bend, locked in and HELD all the way
+    return {sho:sho,e:e,hand:P(e,ang+7,63)};
+  }
   function drawSaPullS(x,t){
-    x.clearRect(0,0,480,480);ground(x,110,390,432);
+    x.clearRect(0,0,480,480);ground(x,100,420,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    seg(x,[366,120],[366,430],6,LINE);
-    seg(x,[352,120],[380,120],6,LINE);
-    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(362,146,8,0,7);x.stroke();
-    var hip=[204,244], sho=[208,146];
-    seg(x,hip,sho,11);
-    seg(x,hip,[204,424],10);
-    seg(x,[196,424],[230,424],9);
-    seg(x,sho,[208,120],8);
-    dot(x,[208,98],19);
-    // SOFT ELBOWS: a slight bend, locked in and held for the whole rep - the arm
-    // sweeps as one piece. Bar heights still MATCH the front: y=150 top, y=250 thighs.
-    var ang=lerp(2,62,k);
-    var e=P(sho,ang-8,56);
-    var hand=P(e,ang+7,63);
-    seg(x,sho,e,9);seg(x,e,hand,9);
-    seg(x,[358,152],[hand[0]+8,hand[1]-6],4,LINE);   // the cable
-    seg(x,[hand[0]-4,hand[1]-11],[hand[0]-4,hand[1]+11],7,GO);   // the bar, end-on
+    seg(x,[392,44],[392,430],6,LINE);                 // the stack, tall enough to be a HIGH pulley
+    seg(x,[376,44],[408,44],6,LINE);
+    x.strokeStyle=LINE;x.lineWidth=5;x.beginPath();x.arc(386,58,9,0,7);x.stroke();
+    var p=saPullPose(k),hip=SAP.hip;
+    seg(x,hip,[hip[0]+5,344],10);seg(x,[hip[0]+5,344],[hip[0]-2,424],10);
+    seg(x,[hip[0]-16,424],[hip[0]+16,424],9);
+    seg(x,hip,p.sho,11);
+    seg(x,p.sho,P(p.sho,-90+SAP.lean,26),8);
+    dot(x,P(p.sho,-90+SAP.lean,46),19);
+    seg(x,p.sho,p.e,9);seg(x,p.e,p.hand,9);
+    seg(x,SAP.pulley,[p.hand[0]+6,p.hand[1]-5],4,LINE);          // the cable, always TO the hand
+    seg(x,[p.hand[0]-4,p.hand[1]-11],[p.hand[0]-4,p.hand[1]+11],7,GO);   // the bar, end-on
   }
   function drawSaPullF(x,t){
     x.clearRect(0,0,480,480);ground(x,110,370,432);
     var k=reduce?1:cycle(t,2800,0.12);
-    var cx=240;
-    seg(x,[cx,36],[cx,lerp(160,120,k)],4,LINE);      // the cable from the high pulley
-    trunkF(x,cx,146,244,26);
-    var hy=lerp(150,250,k), hx=lerp(46,34,k);      // the same bar heights the side computes
-    seg(x,[cx-42,150],[cx-hx,hy],9);
-    seg(x,[cx+42,150],[cx+hx,hy],9);
-    seg(x,[cx-56,hy],[cx+56,hy],8,GO);               // the straight bar sweeping down
-    dot(x,[cx-56,hy],5,GO);dot(x,[cx+56,hy],5,GO);
+    var cx=240,by=saPullPose(k).hand[1];    // THE SAME HEIGHT THE SIDE JUST COMPUTED
+    seg(x,[cx,36],[cx,by],4,LINE);          // the cable follows the bar down, every frame
+    trunkF(x,cx,146,250,26);
+    var hx=lerp(52,34,k);
+    seg(x,[cx-42,150],[cx-hx,by],9);
+    seg(x,[cx+42,150],[cx+hx,by],9);
+    seg(x,[cx-56,by],[cx+56,by],8,GO);      // the straight bar sweeping down
+    dot(x,[cx-56,by],5,GO);dot(x,[cx+56,by],5,GO);
   }
 
   // ---------- REAR DELT FLY: hinged, arms sweep OUT ----------
@@ -10134,7 +10150,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.261';
+var APPV='v5.262';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10483,7 +10499,7 @@ dip:{s:"Knees on the assist pad, set so the last rep is hard. Stand tall.",c:["L
 xover:{s:"Pulleys set high, one handle in each hand, one foot a step ahead, slight forward lean.",c:["Bring the hands down and together in a wide arc","Cross slightly at the bottom and squeeze","Fixed elbow bend the whole way"],m:"Pressing instead of sweeping. The arms arc; they do not push."},
 lowchest:{s:"Pulleys set low, handles at the sides, one foot a step in front.",c:["Sweep low-to-high, hands finishing at shoulder height","Arms nearly straight, only a slight bend at the elbow","Squeeze the upper chest where the hands meet"],m:"Curling the weight up with the biceps. The arc comes from the shoulder."},
 facepull:{s:"Rope at upper chest height, palms facing in, step back until the weight lifts off the stack.",c:["Pull toward the bridge of the nose, elbows high and wide","Finish with knuckles beside the ears","Squeeze between the shoulder blades"],m:"Pulling to the chest with elbows low. That is a row; here the elbows lead high."},
-sapd:{s:"Bar or rope on the high pulley, lean forward a little, arms straight.",c:["Sweep the bar down to the thighs with straight arms","Feel the upper back, not the arms","Let the arms rise fully for the stretch"],m:"Bending the elbows as it travels. It quietly becomes an arm exercise."},
+sapd:{s:"Bar or rope on the high pulley. Push your hips back so your chest comes forward, arms straight.",c:["Sweep the bar down to the thighs with straight arms","Feel the upper back, not the arms","Let the arms rise until you feel the stretch","If the pulley is too low to reach up to, do it kneeling"],m:"Standing straight up. The work slides off the back and onto the front of the shoulders."},
 wcurl:{s:"Forearms on the thighs or a bench, wrists hanging past the edge, palms up.",c:["Curl the wrists up as far as they go","Lower until the fingers almost open","Small movement, full range, no hurry"],m:"Lifting the forearms off the support to cheat the range."},
 bdip:{s:"Hands on the bench edge behind you, legs out in front, hips a little off the bench.",c:["Lower until the upper arms are horizontal","Elbows point straight back","Push up to straight arms without shrugging"],m:"Elbows drifting wide. They point straight back, always."},
 rwcurl:{s:"Forearms supported, wrists past the edge, palms down.",c:["Raise the knuckles as high as they go","Lower slow and full","Lighter than you think. This muscle is small"],m:"Using too heavy a dumbbell and moving it two inches."}
