@@ -10170,7 +10170,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.268';
+var APPV='v5.269';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12815,7 +12815,11 @@ function renderHome(){
   // A week with nothing on it, nothing logged and nothing saved gets one line of direction, the
   // thing "I know what I'm building" used to land on without (v5.101).
   var bare=!DAYS.some(function(d){return (DB.days[d.k]||[]).length;})&&!(DB.logs||[]).length&&!(DB.extra||[]).length&&!TUTON&&!SANDBOX;
-  var hint=bare?'<div class="footnote" style="margin:0 2px 12px">Tap + on any day to build a workout, or use Forge me a week further down to have one built for you.</div>':'';
+  // The only direction an empty board gives, so it has to point at something real (v5.269).
+  // It used to say "Forge me a week further down" and there has been nothing further down
+  // since v5.260 turned the fold into a sheet. A whole week is forged from Saved workouts;
+  // the + on a day only ever fills that one day.
+  var hint=bare?'<div class="footnote" style="margin:0 2px 12px">Tap + on any day to fill it. Saved workouts, at the bottom, can forge you a whole week.</div>':'';
   // A rough week gets one calm line, not a board full of Waiting pills (v5.111).
   var wc=waitingCount();
   if(!bare&&wc>=3)hint+='<div class="footnote" style="margin:0 2px 12px">'+(wc===3?'Three':wc===4?'Four':wc===5?'Five':wc===6?'Six':wc)+' workouts from earlier this week are still open. Any of them, any day.</div>';
@@ -17475,7 +17479,14 @@ function histMissed(iso){
   var dObj=null;DAYS.forEach(function(x){if(x.js===js)dObj=x;});
   if(!dObj)return out;
   var done={};
-  (DB.logs||[]).forEach(function(L){if(L.date===iso)done[L.day]=1;});
+  // Done ANYWHERE this week, not just on this date (v5.269, owner). Monday's workout caught up
+  // on Wednesday is recorded on Wednesday, which is the day it happened, and Monday stops
+  // saying anything. Owner's words: why would it call it Monday if I did it on Wednesday. This
+  // also makes the sheet agree with the board, whose Waiting pill clears the same way.
+  (DB.logs||[]).forEach(function(L){
+    var lt=new Date(L.date+'T12:00:00').getTime();
+    if(lt>=ws&&lt<ws+7*86400000)done[L.day]=1;
+  });
   (liveDays()[dObj.k]||[]).forEach(function(id){
     // Any variant, not just rest (v5.267). An OPTIONAL day is not owed, and every other counter
     // in the app agrees: waitingCount, the week summary and weekHello all test wkVar(id) itself.

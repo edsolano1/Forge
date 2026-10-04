@@ -132,6 +132,11 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **Workouts finished opens on the DAY** (v5.261, owner). `histLastDay()` is the latest day of
   the week on show carrying anything, which straight after a session is today; a week with
   nothing in it still opens on the week, because there is no day to open.
+  **A workout counts as done ANYWHERE in the week, not on one date** (v5.269, owner). Monday's
+  workout caught up on Wednesday is recorded on Wednesday, because that is the day it happened,
+  and Monday stops saying anything at all. His words: why would it call it Monday if I did it on
+  Wednesday. This is also what makes the sheet agree with the board, whose Waiting pill clears
+  the same way; keying the test on `L.date===iso` had the two surfaces contradicting each other.
 - **The walks screen is scoped to the week it was opened from** (v5.239). `HIST.wk0` is the
   cursor; `HIST.wkAll` is the deliberate escape to every walk. A list reached from inside a week
   view shows that week, always: the row that opened it carried that week's count.
