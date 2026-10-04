@@ -10167,7 +10167,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.264';
+var APPV='v5.265';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13250,8 +13250,11 @@ function openEdit(id,i,which){
   edCtx={id:id,i:i,which:which,val:cur,open:cur,isSec:isSec};
   document.getElementById('edEx').textContent=r.name;
   document.getElementById('edSet').textContent='Set '+(i+1)+' \u00b7 '+(which==='w'?'Weight':(isSec?'Seconds':'Reps'));
-  // The other two branches are whole words, so this one is too - and "kgs" was never a unit.
-  document.getElementById('edUnit').textContent=which==='w'?(UNIT_KG?'kilograms':'pounds'):(isSec?'seconds':'reps');
+  // Short forms (v5.265, owner), so this label matches the Settings buttons and the unit beside
+  // every number in the app. It used to spell the weight out because the other two branches are
+  // whole words, and because kgs is not strictly a unit: kg is. Owner's call either way, and the
+  // one thing that must not happen is Settings saying one thing and this saying another.
+  document.getElementById('edUnit').textContent=which==='w'?(UNIT_KG?'kgs':'lbs'):(isSec?'seconds':'reps');
   edPad();
   var tgt=fmtLine((r.sets.split('\n')[i]||'').trim());
   document.getElementById('edHint').textContent='Target for this set: '+tgt;
@@ -18271,7 +18274,7 @@ function drawTwoRow(){
 function twoPick(want){if(!!want===twoOn())return;closeOvl('settingsOvl');twoToggle();}
 function drawDistRow(){
   var e=document.getElementById('distRow');if(!e)return;
-  e.innerHTML=[['0','Miles'],['1','Kilometres']].map(function(u){
+  e.innerHTML=[['0','mi'],['1','km']].map(function(u){
     var on=(DIST_KM?'1':'0')===u[0];
     return '<button class="preset sm'+(on?' on':'')+'" onclick="distSet('+u[0]+')">'+u[1]+'</button>';
   }).join('');
@@ -18289,7 +18292,9 @@ function kgSet(on){
 }
 function drawUnitRow(){
   var e=document.getElementById('unitRow');if(!e)return;
-  e.innerHTML=[['0','Pounds'],['1','Kilograms']].map(function(u){
+  // Short forms (v5.265, owner). The row above already says Weight, so the buttons only have
+  // to carry the unit, and Kilograms was the widest word on the sheet.
+  e.innerHTML=[['0','lbs'],['1','kgs']].map(function(u){
     var on=(UNIT_KG?'1':'0')===u[0];
     return '<button class="preset sm'+(on?' on':'')+'" onclick="kgSet('+u[0]+')">'+u[1]+'</button>';
   }).join('');
