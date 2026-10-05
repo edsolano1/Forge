@@ -3011,6 +3011,29 @@ body.forge .side{border-radius:5px;
   box-shadow:inset 0 1px 0 rgba(255,183,120,.14),inset 0 -1px 0 rgba(0,0,0,.45);}
 
 /* ---------- sandbox ---------- */
+/* A hint (v5.273). Bottom of the screen so it never covers what it is pointing at, below every
+   sheet so it cannot talk over one, and it does not block a single tap. Slides up once and is
+   gone for good. */
+#hintBar{display:none;position:fixed;left:10px;right:10px;z-index:140;
+  bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  align-items:center;gap:9px;padding:11px 12px 11px 15px;border-radius:14px;
+  background:linear-gradient(#241307,#170d07);border:1px solid #6a3f26;
+  box-shadow:0 14px 34px -14px #000,0 0 26px -14px var(--go);
+  font-size:12.5px;line-height:1.45;color:var(--cream);
+  transform:translateY(14px);opacity:0;transition:transform .22s cubic-bezier(.2,.7,.2,1),opacity .22s;}
+#hintBar.on{display:flex;transform:none;opacity:1;}
+/* The rest timer pill is also fixed to the bottom, at 22px and z-index 120, and the bar is at
+   10px and 140. They overlapped by 38px, and the bar is on top, so the countdown, the plus and
+   minus and SKIP REST were covered AND unclickable, which is the one thing an interruption may
+   never do. A gold set fires both on the same tick, so this was the common case. */
+body:has(.timer-pill.on) #hintBar{bottom:calc(86px + env(safe-area-inset-bottom,0px));}
+#hintBar span{flex:1;min-width:0;}
+#hintBar button{flex:none;border-radius:999px;border:1px solid #6a3f26;background:#130c09;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:7px 11px;cursor:pointer;color:var(--gold);}
+#hintBar .hint-no{color:var(--txt3);border-color:#3a2214;}
+#hintBar .hint-no[hidden]{display:none;}
+html.mo-off #hintBar{transition:none;}
+@media (prefers-reduced-motion:reduce){#hintBar{transition:none;}}
 #sbxBar{display:none;position:fixed;left:0;right:0;top:0;z-index:150;
   align-items:center;gap:9px;padding:calc(7px + env(safe-area-inset-top,0px)) 14px 7px;
   background:color-mix(in srgb,var(--gold) 16%,#120a05);
@@ -3583,6 +3606,14 @@ body.wcon{overflow:hidden;}
 </div>
 <!-- Nothing in the sandbox is real, so it says so on the screen the entire time it is open.
      A demo you can mistake for your own data is worse than no demo. -->
+<!-- One hint, at the bottom, where it cannot cover the thing it is talking about (v5.273).
+     It is not a sheet and it does not block: you can ignore it entirely and carry on, which is
+     the whole difference between this and the tour it replaces. -->
+<div id="hintBar">
+  <span id="hintTxt"></span>
+  <button class="hint-no" id="hintNo" onclick="hintsStop()" hidden>NO HINTS</button>
+  <button class="hint-ok" onclick="hintGot()">GOT IT</button>
+</div>
 <div id="sbxBar">
   <span class="sbx-dot"></span>
   <span class="sbx-txt">SANDBOX &middot; nothing here is saved</span>
@@ -4115,11 +4146,13 @@ body.wcon{overflow:hidden;}
     </div>
     <div class="set-card">
     <div class="set-sec">Learn</div>
-    <div class="sfx-lbl"><span>Tutorial</span></div>
-    <div class="presets" style="grid-template-columns:1fr 1fr">
-      <button class="preset sm" id="tutBtnShort" onclick="tutStart(1)">Quick</button>
-      <button class="preset sm" id="tutBtn" onclick="tutStart()">Full</button>
-    </div>
+    <!-- The sixteen step tour was retired in v5.273. What is left is three hints that appear at
+         the moment they matter, and this row is the way back to them. Reset and skip are the
+         same switch: this turns them on and forgets what has been shown, the first hint's own
+         NO HINTS turns them off. -->
+    <div class="sfx-lbl"><span>Hints</span></div>
+    <div class="presets" style="grid-template-columns:1fr" id="hintRow"></div>
+    <div class="footnote" style="margin:6px 2px 0">They appear once each, as you go.</div>
     <!-- The sandbox came off this sheet at release (Aug 23) as a dev tool, and came back
          (v5.41) as a user feature: it replays the whole first run - welcome, ritual,
          generated week - in a copy where nothing is saved, and leaving throws it all away. -->
@@ -10124,7 +10157,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.272';
+var APPV='v5.273';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12812,7 +12845,10 @@ function renderHome(){
       (pumpRdy?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\'pump\')">'+ARROW+'</span>':''))+'</span></div>'+
     '<div class="card-meta">'+(po?'Still open. Pick up where you left off':'Bonus, 35 to 45 minutes. Any day')+'</div></div>';
   document.getElementById('extraCards').innerHTML=pumpCard+(xs.length?xs.map(xcard).join('')
-    :'<div class="bank-empty">Your own Saved workouts sit here too. Drag one down, or hold one and choose MOVE TO SAVED WORKOUTS.</div>');
+    :'<button class="ez-card" style="--i:0;width:100%;margin-bottom:6px" onclick="closeOvl(\'savedOvl\');ezOpen(\'saved\')">'+
+       '<span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Forge me a week</b>'+
+       '<small>A balanced week, built for you</small></span></button>'+
+     '<div class="bank-empty">Your own workouts sit here too, once you build one.</div>');
   document.getElementById('extraLabelTxt').textContent=MKTXT().xl;
   savedApply(xs.length+1);
   mkBindCards();
@@ -12821,6 +12857,15 @@ function renderHome(){
   // The "hold a workout to edit it" hint retired (Aug 22): the tutorial teaches the hold,
   // and a permanent instruction on the week screen was furniture, not help.
   document.getElementById('weekHint').style.display='none';
+  // The hold is the one gesture in the app that cannot be seen, so it is taught the first time
+  // there is something to hold. An empty board gets nothing: a hint about holding a workout you
+  // do not have is exactly the noise he asked me to avoid (v5.273).
+  // Not sessionOpen(): that is true whenever an UNFINISHED session exists anywhere, so a
+  // lifter mid week never saw this at all. What matters is whether the session SCREEN is over
+  // the board right now, because the bar is fixed and would otherwise sit on top of it.
+  try{var ss=document.getElementById('session');
+    hintLeave('home');
+    if(!bare&&!(ss&&ss.classList.contains('on')))showHint('grip','home');}catch(e){}
   var fg=FG();
   // The footer's icons stay with the world; its WORDS go through the generic gate like every
   // other string. These were the last place still saying "Pieces finished" and "Work measured"
@@ -13003,8 +13048,110 @@ var CARDGRIP='<span class="carddrag" title="Drag to reorder"><svg viewBox="0 0 2
 // two links of chain: the mark of a pair that runs back to back on one rest
 var CHAIN='<svg class="sslink" viewBox="0 0 20 20"><path d="M8.4 11.6a3.4 3.4 0 0 0 5 .3l2.2-2.2a3.4 3.4 0 0 0-4.8-4.8l-1.2 1.2"/>'+
   '<path d="M11.6 8.4a3.4 3.4 0 0 0-5-.3L4.4 10.3a3.4 3.4 0 0 0 4.8 4.8l1.2-1.2"/></svg>';
+// ---------- HINTS (v5.273, owner picked B of three) ----------
+// The sixteen step tour is gone. What replaces it fires at the MOMENT it matters and never
+// again, and there are only three, because his rule is the whole design: do not overteach, do
+// not teach the obvious, assume the user has brain power.
+// So a hint only exists for something INVISIBLE. Everything tappable in Forge already looks
+// like a button and says what it is; a hold gesture and the meaning of a colour do not.
+//   log     the anvil is the ONE control in the app that is an icon with no word, no title and
+//           no aria-label, and it is the thing the whole app is for. The ghost numbers make the
+//           row look finished, so the failure is not confusion, it is finishing a day with
+//           nothing logged.
+//   grip    the hamburger says DRAG ME and does nothing until it has been held 420ms, so the
+//           affordance actively lies. Dragging is also the only way to move a workout between
+//           days: no menu anywhere offers it.
+//   exhold  holding an exercise is the ONLY route to its sets and rest. Every visible control
+//           on that card is carved out of the handler, so the gesture lives on dead space.
+// Three rejected after review, and why they are worth keeping out:
+//   "hold a workout to move it or change it" was WRONG. Holding the card body opens the day
+//     sheet; the grip is what rearranges. And the same sheet is one tap on the day column.
+//   the grade colours are a legend, and the colour key was deleted by the owner on 26 Aug for
+//     being exactly that. It also cannot be said truthfully in one sentence: gold covers never
+//     done it, beat last time and all time best, and a beginner's whole first session is gold.
+//   tapping the anvil again to un-log is carried by the checkbox mental model.
+// Anything else a person can work out by looking at it, and they do.
+var HINTS={
+  log:   'Tap the anvil to log a set.',
+  grip:  'Hold the lines on a workout, then drag it to another day.',
+  exhold:'Hold an exercise to change its sets or rest.'
+};
+function hintsOff(){try{return localStorage.getItem('arc_hints')==='0';}catch(e){return false;}}
+function hintSeen(k){try{return (JSON.parse(localStorage.getItem('arc_hintseen')||'{}')||{})[k];}catch(e){return false;}}
+function hintMark(k){
+  try{var o=JSON.parse(localStorage.getItem('arc_hintseen')||'{}')||{};o[k]=1;
+    localStorage.setItem('arc_hintseen',JSON.stringify(o));}catch(e){}
+}
+// Reset and skip are the same switch seen from two ends: Settings turns them back on and
+// forgets what was shown, the first hint's own NO HINTS turns them off.
+function hintsReset(){
+  try{localStorage.setItem('arc_hints','1');localStorage.removeItem('arc_hintseen');}catch(e){}
+  drawHintRow();mkNote('Hints are back. They appear as you go, one at a time.','Hints on');
+}
+function hintsStop(){
+  try{localStorage.setItem('arc_hints','0');}catch(e){}
+  drawHintRow();
+  // The one line he asked for, said in the bar itself and then gone. Answering "stop
+  // interrupting me" with a modal dialog would be the most intrusive thing in the app.
+  var e=document.getElementById('hintBar');
+  if(!e){hintHide();return;}
+  HINTNOW=null;HINTSCR=null;
+  document.getElementById('hintTxt').textContent='They are in Settings if you change your mind.';
+  var no=document.getElementById('hintNo');if(no)no.hidden=true;
+  var ok=e.querySelector('.hint-ok');if(ok)ok.hidden=true;
+  e.classList.add('on');
+  setTimeout(function(){if(ok)ok.hidden=false;hintHide();},3200);
+}
+var HINTNOW=null,HINTSCR=null;
+// A hint raised on the week board used to follow you into a session and sit there describing a
+// gesture for a screen you had left. It belongs to the screen that raised it: leaving takes it
+// down WITHOUT marking it seen, so it says its piece next time you are actually there.
+function hintLeave(scr){if(HINTNOW&&HINTSCR!==scr)hintHide();}
+function hintHide(){
+  var e=document.getElementById('hintBar');if(!e)return;
+  e.classList.remove('on');HINTNOW=null;HINTSCR=null;
+}
+// The session screen owes two hints. Never both in one sitting: the anvil on the first visit,
+// and the hold only once a session has actually been finished, so a first timer is taught the
+// one thing they cannot do without and nothing else.
+function hintSession(){
+  if(!hintSeen('log')){showHint('log','session');return;}
+  if((DB.logs||[]).length)showHint('exhold','session');
+}
+function hintGot(){
+  if(HINTNOW)hintMark(HINTNOW);
+  hintHide();drawHintRow();
+  // One hint at a time means a second can be owed the moment the first clears. Without this the
+  // anvil hint waited for the next incidental redraw and landed several sets in, which is worse
+  // than never showing it.
+  var ss=document.getElementById('session');
+  if(ss&&ss.classList.contains('on'))hintSession();
+}
+// Show one, if it has never been shown and hints are on. The FIRST one ever shown carries the
+// way out, because that is the honest moment to offer it: he has seen what a hint is.
+// NOT called hint(): renderHome has a local `var hint=` for the empty board's footnote,
+// which shadowed this and made the call throw silently into its own catch (v5.273).
+function showHint(k,scr){
+  if(hintsOff()||TUTON||SANDBOX||!HINTS[k]||hintSeen(k)||HINTNOW)return;
+  // Not during the arrival. renderHome runs behind the splash and behind the welcome, so the
+  // very first hint appeared over a man who had not answered the safety questions yet. Nothing
+  // is taught until he is actually looking at his own week (v5.273).
+  if(!splashGone||document.body.classList.contains('wcon'))return;
+  // Not under a sheet either. renderHome runs behind "Your week is forged", so the bar was
+  // already sitting there when the dialog was dismissed, on a screen never yet looked at.
+  if(document.querySelector('.ovl.on'))return;
+  var wc=document.getElementById('welcome');
+  if(wc&&wc.classList.contains('on'))return;
+  var e=document.getElementById('hintBar');if(!e)return;
+  var first=true;try{first=!Object.keys(JSON.parse(localStorage.getItem('arc_hintseen')||'{}')||{}).length;}catch(x){}
+  HINTNOW=k;HINTSCR=scr||null;
+  document.getElementById('hintTxt').textContent=HINTS[k];
+  var no=document.getElementById('hintNo');if(no)no.hidden=!first;
+  e.classList.add('on');
+}
 function renderSession(){
   stopHold();resetHoldState();
+  try{hintLeave('session');hintSession();}catch(e){}
   var wk=CUR,w=W[wk],A=DB.active[wk],html='';
   // Leaving a day you never logged into deletes its session on the way out, but pageTurn holds
   // the .on class for another 230ms - so for that window sessionOpen() is still true while the
@@ -13127,7 +13274,7 @@ function renderSession(){
                 '<span class="unit">'+(t.unit||(r.bw?'reps':''))+'</span><input type="hidden" id="w-'+id+'-'+i+'" value="0">';
           if(t.unit==='sec')html+='<button class="hold" id="hb-'+id+'-'+i+'" title="Time this hold" data-ic onclick="toggleHold(\''+id+'\','+i+','+(t.r||0)+',\''+(ssMid?'':restAt(r.rest,i).replace(/'/g,''))+'\')"><svg viewBox="0 0 20 20"><path d="M6 3.5l10 6.5-10 6.5z"/></svg></button>';
         }
-        html+='<button class="chk" onclick="toggleSet(\''+id+'\','+i+',\''+(ssMid?'':restAt(r.rest,i).replace(/'/g,''))+'\',\''+(t.unit||'')+'\')">'+chkSvg()+'</button></div>';
+        html+='<button class="chk" aria-label="Log this set" onclick="toggleSet(\''+id+'\','+i+',\''+(ssMid?'':restAt(r.rest,i).replace(/'/g,''))+'\',\''+(t.unit||'')+'\')">'+chkSvg()+'</button></div>';
       });
       html+='</div>';
       // Mid-group rows say where the rest went instead of printing one they will not take.
@@ -13361,6 +13508,8 @@ function toggleSet(id,i,rest,unit){
     A.last=Date.now();   // v5.182: the session's length runs to its last logged set
     var cb=row.querySelector('.chk'),gr=setGrade(exId,e);
     e.g=gr;
+    // No hint here. A grade hint was built and cut in review: the colour key was deleted by the
+    // owner on 26 Aug for being a legend, and this was the same legend as a popup.
     if(gr==='pr')e.pr=1;
     // Save and mark done FIRST. Nothing decorative may stand between a tapped set
     // and it being logged - a throw in the flare/sound path used to eat the whole set.
@@ -18209,6 +18358,18 @@ function drawTwoRow(){
 }
 // The switch still asks before it acts (twoToggle); the row just redraws once the answer lands.
 function twoPick(want){if(!!want===twoOn())return;closeOvl('settingsOvl');twoToggle();}
+// The hints row says what it will DO, not what state it is in, because the state is only ever
+// one of two things and the button already implies it (v5.273).
+function drawHintRow(){
+  var e=document.getElementById('hintRow');if(!e)return;
+  var off=hintsOff(),seen=0;
+  try{seen=Object.keys(JSON.parse(localStorage.getItem('arc_hintseen')||'{}')||{}).length;}catch(x){}
+  // Both, always. Showing only "Show them again" once a single hint had been seen put the off
+  // switch behind the on switch: you had to turn hints back on to turn them off.
+  e.style.gridTemplateColumns=off?'1fr':'1fr 1fr';
+  e.innerHTML='<button class="preset sm" onclick="hintsReset()">Show them again</button>'+
+    (off?'':'<button class="preset sm" onclick="hintsStop()">Turn them off</button>');
+}
 function drawDistRow(){
   var e=document.getElementById('distRow');if(!e)return;
   e.innerHTML=[['0','mi'],['1','km']].map(function(u){
@@ -20816,7 +20977,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();ntDraw();hcDraw();autoBkDraw();
+  drawAlertLvl();drawThemePick();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();drawHintRow();ntDraw();hcDraw();autoBkDraw();
   scrapApply();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
@@ -22411,13 +22572,13 @@ function tutScroll(instant,ms){
 // these two, opening it once would tick the tour off for good on the actual install.
 function tutSeen(){if(SANDBOX)return;try{localStorage.setItem(KEY+':tut','1');}catch(e){}}
 function tutWasSeen(){if(SANDBOX)return false;try{return !!localStorage.getItem(KEY+':tut');}catch(e){return true;}}
-function tutOffer(){
-  if(TUTON||tutWasSeen())return;
-  if(DB.logs.length||Object.keys(DB.active||{}).length)return;
-  tutSeen();
-  var C=TUTC();
-  ask(C.msg,function(){tutStart(1);},C.ttl,C.yes,null,null,C.no||'NOT NOW');   // first run gets the short one
-}
+// RETIRED in v5.273. The sixteen step tour is replaced by three hints that fire at the moment
+// they matter, so a first run is no longer offered one. tutSeen() still runs, so a phone that
+// upgrades is never asked either. The tour's own 873 lines and the 35 TUTON guards scattered
+// through the live app come out in their own build: a behaviour change and a deletion that size
+// do not belong in the same commit, and the guards are harmless meanwhile because TUTON can no
+// longer become true.
+function tutOffer(){ try{tutSeen();}catch(e){} }
 // The one question a first run gets before anything else: does it want a week to start from, or
 // an empty one to build. Asked once, on the launch after ownProgram found nothing to preserve,
 // and it always hands over to the tour offer afterwards - whichever way it is answered, that is
@@ -23130,8 +23291,9 @@ function ezForge(){
       // No CANCEL: the week is already written, so a cancel promised an undo that did not exist.
       // The tour offer used to follow as a SECOND dialog; it is the second button here now, so a
       // first run meets one box, not two (v5.100). The Quick and Full tours stay in Settings.
-      ask(lead+EZ_WHY[goal],function(){tutSeen();},'Your week is forged','SHOW ME THE WEEK',false,
-        {label:'TAKE THE QUICK TOUR',fn:function(){tutSeen();setTimeout(function(){tutStart(1);},350);}});
+      // The second button was TAKE THE QUICK TOUR. The tour was retired in v5.273, so the
+      // forged week hands straight over to the week itself and the hints do the teaching.
+      ask(lead+EZ_WHY[goal],function(){tutSeen();},'Your week is forged','SHOW ME THE WEEK',false);
     },900);
   }else setTimeout(tutOffer,650);
 }
