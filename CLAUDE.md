@@ -268,6 +268,21 @@ main constraint on how to work in it. See **Traps** below before editing.
   picks the weights and the pace only picks how many rungs. Verified by running old and new side
   by side against his 34 real logs over CDP: exactly those 10 lifts moved, bench, hip thrust,
   preacher curl, rows, every dumbbell and the assisted pullup all unchanged, and no plan threw.
+  **The pace is read from the last `PACE_WIN` (8) sessions of that lift, the lattice from all of
+  them** (v5.276, owner's question the same day: what about the man adding ten a week for a year
+  who now needs two and a half?). A lifetime mode cannot slow down - thirty jumps of ten need
+  thirty-one of five to outvote them, which is a year of being asked for a weight he has already
+  said he cannot make. Eight sessions is about two months on a weekly lift, and because ties go
+  to the smaller jump a real plateau is heard in four. Never window the LATTICE with it: a
+  machine does not change its increments, only the lifter changes pace, and an old weight is
+  still proof of a rung that exists. Measured: zero change across all 40 lifts in his 1 Oct
+  backup, and a synthetic year of +10 followed by four weeks of +5 comes down from 10 to 5.
+  **The app can only offer a notch it has SEEN.** On a stack where every logged weight is a
+  multiple of ten it will never propose 115, because nothing in the history says 115 exists.
+  Typing it once is what teaches it, permanently and for every future offer, since `stackStep`
+  is recomputed from every weight ever logged and no learned value is stored anywhere. This is
+  deliberate and is the safe side of the trade: guessing a finer rung is how the app came to
+  offer 265 on a leg press that goes up in twenties.
 - **The targets check only ever looks at imported numbers** (v5.251). `easeArm()` from
   `doRestore` and `weekAdd` only; `easeArmed()` gates `easeNotice` AND `easePlan`, so the hold
   menu is dormant too; answering sleeps it until the next import. It had six builds of false

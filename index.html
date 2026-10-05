@@ -10158,7 +10158,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.275';
+var APPV='v5.276';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10842,6 +10842,16 @@ function gcdOf(a){
 // bigger jump, and the next offer follows it, with nothing asked and no setting to find.
 // Ties go to the SMALLER jump: an offer that is too small gets edited, an offer that is too big
 // gets declined, and a declined raise is the thing that goes missing.
+// And it is read from the RECENT sessions, not from all of them (v5.276, owner's question: what
+// about the man who has been adding ten a week for a year and now needs two and a half?). A
+// lifetime mode cannot slow down - thirty jumps of ten would need thirty-one of five to outvote
+// them, which is a year of being asked for a weight he has already said he cannot make. Eight
+// sessions is about two months on a weekly lift: long enough that one cautious week is not a
+// verdict, short enough that a real plateau is heard inside a month. The window falls back to
+// the whole history when it holds no jump at all, so a lift trained rarely still has a pace.
+// The LATTICE above is deliberately not windowed. A machine does not change its increments;
+// only the lifter changes pace, and an old weight is still proof of a rung that exists.
+var PACE_WIN=8;
 function stackPace(id){
   var s=stackStep(id);if(!s)return 0;
   var down=!!invEx(id),s10=Math.round(s*10),tops=[];
@@ -10856,14 +10866,18 @@ function stackPace(id){
     }
     if(t>0)tops.push(Math.round(t*10));
   });
-  var c={},best=0,bn=0;
-  for(var i=1;i<tops.length;i++){
-    var d=down?(tops[i-1]-tops[i]):(tops[i]-tops[i-1]);
-    if(d<=0)continue;                        // a deload is a decision, not a pace
-    d=Math.floor(d/s10)*s10;if(d<s10)continue;
-    c[d]=(c[d]||0)+1;
+  function modeOf(a){
+    var c={},best=0,bn=0;
+    for(var i=1;i<a.length;i++){
+      var d=down?(a[i-1]-a[i]):(a[i]-a[i-1]);
+      if(d<=0)continue;                      // a deload is a decision, not a pace
+      d=Math.floor(d/s10)*s10;if(d<s10)continue;
+      c[d]=(c[d]||0)+1;
+    }
+    for(var key in c){var dv=Number(key);if(c[dv]>bn||(c[dv]===bn&&dv<best)){bn=c[dv];best=dv;}}
+    return best;
   }
-  for(var key in c){var dv=Number(key);if(c[dv]>bn||(c[dv]===bn&&dv<best)){bn=c[dv];best=dv;}}
+  var best=modeOf(tops.length>PACE_WIN?tops.slice(-PACE_WIN):tops)||modeOf(tops);
   return best?best/10:s;
 }
 // The pace, measured against the weight it is moving FROM. Capped at a tenth of that weight:
