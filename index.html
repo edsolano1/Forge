@@ -2758,6 +2758,20 @@ body.forge .inp::placeholder{color:#7a5c46;}
 .pk-kind .pk-ic svg{width:100%;height:100%;display:block;overflow:visible;}
 .pk-kind b{font-family:var(--mono);font-weight:400;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;}
 .pk-kind:not(.on) .pk-ic{opacity:.55;}
+/* A kind you have not earned yet (v5.272). Dimmed and dead to the touch, but it carries its own
+   bar, because the point of earning it is being able to see how close you are. */
+.pk-kind.lk{opacity:.5;cursor:default;border-style:dashed;}
+.pk-kind.lk .pk-ic{opacity:.3;}
+.pk-bar{display:block;width:80%;height:3px;border-radius:2px;background:#22150e;margin-top:7px;overflow:hidden;}
+.pk-bar u{display:block;height:100%;text-decoration:none;border-radius:2px;
+  background:linear-gradient(90deg,#8a4a16,var(--go));transition:width .4s cubic-bezier(.2,.7,.2,1);}
+.pk-kind.lk s{text-decoration:none;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:var(--txt3);margin-top:4px;}
+/* the same bar on the shelf's own card, where it is the only thing to look at */
+.pumpcard.pumplk{opacity:.72;border-style:dashed;}
+.pump-bar{display:block;height:4px;border-radius:3px;background:#22150e;margin:9px 0 0;overflow:hidden;}
+.pump-bar u{display:block;height:100%;text-decoration:none;border-radius:3px;
+  background:linear-gradient(90deg,#8a4a16,var(--go));transition:width .4s cubic-bezier(.2,.7,.2,1);}
+.card-meta.pump-n{margin-top:5px;}
 .pk-kind.on{border-color:var(--gold);background:#1f1109;box-shadow:0 0 14px -5px rgba(255,138,31,.8),inset 0 1px 0 rgba(255,190,130,.2);color:#ffd9b5;}
 .pk-lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);text-align:center;margin:14px 0 8px;}
 .pk-kits{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
@@ -10110,7 +10124,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.271';
+var APPV='v5.272';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12783,7 +12797,17 @@ function renderHome(){
   // it was ready was to finish a session and be offered the raise afterwards (owner, 20 Sep). Same
   // arrow, same rule, same sheet as everywhere else (v5.200).
   var pumpRdy=!po&&levelPlan('pump').length;
-  var pumpCard='<div class="card pumpcard" style="--c:'+dayC('pump')+'" onclick="openPump()"><div class="card-top"><span class="card-name">'+esc(W.pump.name)+'</span>'+
+  // Locked until the first kind is earned (v5.272). The card stays on the shelf rather than
+  // vanishing: a thing you can see is something to aim at, and a thing that is simply absent
+  // teaches nobody anything. The bar is the nearest kind's progress.
+  var pu=pumpUnlock(),plock=!pu.any&&!po;
+  var pumpCard=plock
+    ?'<div class="card pumpcard pumplk" onclick="openPump()"><div class="card-top"><span class="card-name">'+esc(W.pump.name)+'</span>'+
+      '<span class="card-r"><span class="pill">LOCKED</span></span></div>'+
+      '<div class="card-meta">'+esc(PUMP_LBL[pu.next.k])+' opens after '+pu.next.need+' workouts, built from your own lifts</div>'+
+      '<i class="pump-bar"><u style="width:'+Math.round(pu.next.have/pu.next.need*100)+'%"></u></i>'+
+      '<div class="card-meta pump-n">'+pu.next.have+' of '+pu.next.need+'</div></div>'
+    :'<div class="card pumpcard" style="--c:'+dayC('pump')+'" onclick="openPump()"><div class="card-top"><span class="card-name">'+esc(W.pump.name)+'</span>'+
     '<span class="card-r">'+(po?'<span class="pill pill-live">Resume '+po+'/'+totalSets('pump')+'</span>':
       (pumpRdy?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\'pump\')">'+ARROW+'</span>':''))+'</span></div>'+
     '<div class="card-meta">'+(po?'Still open. Pick up where you left off':'Bonus, 35 to 45 minutes. Any day')+'</div></div>';
@@ -20660,22 +20684,115 @@ function pumpApply(){
   var base=W.pump||{};
   // a copy, so a migrated phone's own stored Pump Day is never rewritten underneath it
   W.pump={};for(var k in base)W.pump[k]=base[k];
-  W.pump.sections=spec.map(function(x){return {title:x[0],ss:!!x[1],rows:x[2].filter(function(id){return !!EX[id];})};}).filter(function(x){return x.rows.length;});
+  W.pump.sections=spec.map(function(x){return {title:x[0],ss:!!x[1],
+    rows:x[2].filter(function(id){return !!EX[id];}).map(pumpRow)};}).filter(function(x){return x.rows.length;});
+}
+// A pump row at YOUR weight (v5.272, owner's idea and the reason the unlock makes sense). The
+// shipped numbers are starter numbers nobody chose, and a man benching 185 does not want a ten
+// pound crossover. The REP SCHEME stays, because that is what makes it a pump day; only the
+// weight is yours. A lift you have never logged keeps its starter number, so a half known Pump
+// Day is still a whole workout.
+function pumpRow(id){
+  var base=PUMPBASE[id]||id.replace(/^p_/,'');
+  var last=null;try{last=lastFor(base);}catch(e){}
+  if(!last||!last.sets.length)return id;
+  var w=0;last.sets.forEach(function(s){if(s&&s.w>w)w=s.w;});
+  if(!(w>0))return id;
+  var lines=String((EX[id]||{}).sets||'').split('\n').filter(function(l){return l;});
+  if(!lines.length)return id;
+  var out=lines.map(function(l){
+    var m=l.match(/^([\d.]+)x(\d+)/);
+    return m?(w+'x'+m[2]):l;     // a reps-only or timed line is left exactly as it is
+  });
+  return [id,{sets:out.join('\n')}];
 }
 function pumpKitDefault(){
   var k=(DB.ez&&DB.ez.kit)||'gym';
   return (k==='dbb'||k==='dbo')?'db':(k==='none'?'none':'gym');
 }
 var PK={kind:'upper',kit:'gym'};
+// ---------- Pump Day is EARNED, one kind at a time (v5.272, owner picked B of three) ----------
+// It used to sit at the head of Saved workouts from the moment you installed, on starter numbers
+// nobody chose: ten pound crossovers for a man benching 185. There are three kinds and they are
+// now earned by the training they are made of, because that is also what makes them buildable
+// from your own records. The gym, dumbbells and nothing variants are NOT earned: they are the
+// room you are standing in, not an achievement.
+//   Upper   four sessions whose logged work was mostly push or pull
+//   Lower   four sessions whose logged work was mostly legs
+//   Full    twelve finished sessions of any kind, so it lands last
+var PUMP_NEED={upper:4,lower:4,full:12};
+// Which half of the body a finished session actually WAS, from the lifts logged in it, using the
+// same push/pull/legs map the week forge uses. A session with no classifiable lift counts for
+// nothing rather than guessing.
+function pumpHalf(L){
+  var M={'chest-press':1,'chest-fly':1,'delt-press':1,'delt-side':1,'triceps':1,
+    'back-vertical':1,'back-horizontal':1,'back-straight':1,'biceps':1,'delt-rear':1,'traps':1},
+    LO={quad:1,glute:1,hamstring:1,calf:1,posterior:1};
+  var up=0,lo=0;
+  for(var k in (L.entries||{})){
+    if(!(L.entries[k]||[]).some(function(x){return !!x;}))continue;
+    var g=grpOf(exOfKey(L,k));
+    if(M[g])up++;else if(LO[g])lo++;
+  }
+  if(!up&&!lo)return null;
+  return up>=lo?'upper':'lower';
+}
+// Where each kind stands: how many it has, how many it needs, and whether it is open.
+function pumpUnlock(){
+  var n={upper:0,lower:0,full:0};
+  (DB.logs||[]).forEach(function(L){
+    if(L.marked)return;
+    n.full++;
+    var h=pumpHalf(L);if(h)n[h]++;
+  });
+  var out={};
+  ['upper','lower','full'].forEach(function(k){
+    out[k]={have:Math.min(n[k],PUMP_NEED[k]),need:PUMP_NEED[k],open:n[k]>=PUMP_NEED[k]};
+  });
+  out.any=out.upper.open||out.lower.open||out.full.open;
+  // the one closest to opening, for the bar on the locked card
+  var best=null;
+  ['upper','lower','full'].forEach(function(k){
+    if(out[k].open)return;
+    var p=out[k].have/out[k].need;
+    if(!best||p>best.p)best={k:k,p:p,have:out[k].have,need:out[k].need};
+  });
+  out.next=best;
+  return out;
+}
+var PUMP_LBL={upper:'Upper',lower:'Lower',full:'Full body'};
+function pumpLockLine(){
+  var u=pumpUnlock();
+  if(u.any)return '';
+  var b=u.next;
+  return b?PUMP_LBL[b.k]+' opens after '+b.need+' workouts. '+b.have+' of '+b.need:'';
+}
 function openPump(){
+  var u=pumpUnlock();
+  if(!u.any&&loggedCount('pump')===0){
+    // Nothing to choose from yet. Say what opens the first one and leave it there: the card
+    // already carries the bar, so this is the same fact and does not need repeating twice.
+    mkNote(pumpLockLine(),'Not yet');
+    return;
+  }
   if(loggedCount('pump')>0){openW('pump');return;}
-  PK={kind:(DB.pumpNow&&DB.pumpNow.kind)||'upper',kit:(DB.pumpNow&&DB.pumpNow.kit)||pumpKitDefault()};
+  // never land on a kind that is still locked
+  var k0=(DB.pumpNow&&DB.pumpNow.kind)||'upper';
+  if(!u[k0]||!u[k0].open){['upper','lower','full'].forEach(function(k){if(u[k].open&&(!u[k0]||!u[k0].open))k0=k;});}
+  PK={kind:k0,kit:(DB.pumpNow&&DB.pumpNow.kit)||pumpKitDefault()};
   pumpDraw();
   document.getElementById('pumpOvl').classList.add('on');
 }
 function pumpDraw(){
   var K=[['upper','Upper',WZ.pump[0]],['lower','Lower',WZ.pump[1]],['full','Full body',WZ.pump[2]]];
+  var U=pumpUnlock();
   document.getElementById('pkKinds').innerHTML=K.map(function(k){
+    var st=U[k[0]];
+    // A locked kind still shows, with how far along it is. Hiding it would make Pump Day look
+    // like one thing instead of three, and the bar is the whole point of earning it (v5.272).
+    if(!st.open)return '<button class="pk-kind lk" disabled aria-disabled="true"><span class="pk-ic">'+k[2]+'</span><b>'+k[1]+'</b>'+
+      '<i class="pk-bar"><u style="width:'+Math.round(st.have/st.need*100)+'%"></u></i>'+
+      '<s>'+st.have+' of '+st.need+'</s></button>';
     return '<button class="pk-kind'+(PK.kind===k[0]?' on':'')+'" onclick="PK.kind=\''+k[0]+'\';pumpDraw();sfxTick&&sfxTick()"><span class="pk-ic">'+k[2]+'</span><b>'+k[1]+'</b></button>';
   }).join('');
   var T=[['gym','Gym'],['db','Dumbbells'],['none','Nothing']];
