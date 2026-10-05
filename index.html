@@ -1305,8 +1305,9 @@ body.tut .dayhead-add{display:none;}
 .mk-num{width:56px;padding:9px 4px;text-align:center;border-radius:9px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-family:var(--mono);font-size:13px;}
 .mk-num:focus{outline:none;border-color:var(--go);}
 .mk-sel{padding:9px 8px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);color:var(--txt2);font-family:inherit;font-size:12px;}
-.mk-x:hover{color:var(--txt);border-color:#3d434a;}
-.mk-x svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;}
+/* .mk-x:hover and .mk-x svg were declared a SECOND time here, 20 lines below the real ones,
+   and won. The delete control hovered plain grey instead of red and drew 13px instead of 15,
+   which is the exact opposite of the intent stated above it. Found by the trap sweep. */
 .mk-add{margin:2px 0 10px;padding:12px;border-radius:10px;border:1px dashed var(--line);text-align:center;font-size:12.5px;letter-spacing:.05em;color:var(--txt3);cursor:pointer;transition:.15s;}
 .mk-add:hover{color:var(--go);border-color:color-mix(in srgb,var(--go) 45%,var(--line));}
 .mk-empty{padding:14px 2px 4px;font-size:12.5px;color:var(--txt3);}
@@ -10157,7 +10158,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.273';
+var APPV='v5.274';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
