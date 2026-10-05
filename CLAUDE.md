@@ -246,6 +246,28 @@ main constraint on how to work in it. See **Traps** below before editing.
   the speed of the arithmetic, replaced by `estRatio()` (the median of the last eight sessions'
   actual minutes over their planned minutes, clamped 1 to 2) once two sessions carry a length. The
   owner's first measured session was +18%, so never present the raw plan as the time.
+- **Which weights exist and how far to move are two different questions** (v5.275, owner, from
+  the gym: *a lot of the exercises haven't been suggesting the next plate up even after I have
+  updated the multiple times*). One number used to answer both, and it was only believed when
+  plate math could not express it: a gcd of 3 or 4 was a cable stack, a gcd of 10 was dismissed
+  as "plate math walked twice" in case trusting it turned a user's pace into a demand. Measured
+  on his own phone, that dismissal fired on **10 of his 28 lifts** and offered a weight that is
+  not on the machine: 115 on a pulldown logged at 100 and 110, 85 on a leg curl logged at 70 and
+  80, 265 on a leg press logged at 240 and 260. **`stackStep` is now always believed** (it is the
+  LATTICE, a fact about the machine), and **`stackPace` is read separately**: the working weight
+  of each session in order, and the most common jump between them, which is also the whole of the
+  override learner he asked for, because a weight he enters above what was offered IS a bigger
+  jump and the next offer follows it. Nothing is asked and there is no setting. Ties go to the
+  smaller jump, a decrease is a deload and never a pace, and `paceFor` caps the result at 10% of
+  the weight it moves from with a floor of one notch, so a rebound off a deload cannot become a
+  habit. Two things this depends on: the outlier guard in `stackStep` now only runs when the gcd
+  is **under 2.5lb**, because on his bench (145/150/155/165) it was dropping the 150 and calling
+  the step 10, which was harmless while the step was being thrown away and offers 185 the moment
+  it is trusted; and a **dumbbell's ladder is never learned** (`dbWalk`), because a rack that runs
+  in fives past the light end does not grow a 32.5 just because a gcd says 2.5, so there the rack
+  picks the weights and the pace only picks how many rungs. Verified by running old and new side
+  by side against his 34 real logs over CDP: exactly those 10 lifts moved, bench, hip thrust,
+  preacher curl, rows, every dumbbell and the assisted pullup all unchanged, and no plan threw.
 - **The targets check only ever looks at imported numbers** (v5.251). `easeArm()` from
   `doRestore` and `weekAdd` only; `easeArmed()` gates `easeNotice` AND `easePlan`, so the hold
   menu is dormant too; answering sleeps it until the next import. It had six builds of false

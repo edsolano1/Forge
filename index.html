@@ -10158,7 +10158,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.274';
+var APPV='v5.275';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10803,7 +10803,13 @@ function stackStep(id){
   // to be witnessed by more than one weight: with four or more distinct weights, if leaving
   // out exactly ONE of them lifts the gcd to a multiple of itself, that one is the outlier and
   // it is dropped. Three weights cannot tell an outlier from a real step, so they are left alone.
-  if(a.length>=4){
+  // And only when the gcd itself looks like NOISE. A gcd of 2.5lb or more already IS a lattice
+  // and needs no rescuing: on the owner's own bench, logged 145/150/155/165, dropping the 150
+  // lifted the gcd from 5 to 10 and the guard called a perfectly good weight an outlier. That
+  // cost nothing while the step was being thrown away downstream - the moment the step is
+  // trusted it offers him 185 off a 165 bench. 2.5lb is the smallest increment that exists
+  // anywhere in this app, so a gcd under it is the only thing worth second-guessing.
+  if(g<25&&a.length>=4){
     var sole=-1,n=0;
     for(var j=0;j<a.length;j++){
       var g2=gcdOf(a.slice(0,j).concat(a.slice(j+1)));
@@ -10821,15 +10827,57 @@ function gcdOf(a){
   }
   return g;
 }
+// ---- HOW FAR A RAISE MOVES (v5.275) ----
+// stackStep says which weights the machine HAS. This says how many of them a session is worth,
+// and they are not the same question. Until now they were answered by one number, and that
+// number was only trusted when plate math could not express it: a gcd of 3 or 4 was a cable
+// stack, a gcd of 10 was dismissed as "plate math walked twice". On the owner's own phone that
+// dismissal fired on 9 of his 28 lifts and handed him a weight that is not on the machine - 115
+// on a pulldown logged at 100 and 110, 85 on a leg curl logged at 70 and 80, 265 on a leg press
+// logged at 240 and 260. His words, from the gym: a lot of the exercises have not been
+// suggesting the next plate up even after I have updated them multiple times.
+// So the step is now always believed, and the PACE is read separately off his own sessions: the
+// working weight of each one, in order, and the most common jump between them. That is also the
+// whole of the override learner he asked for - a weight he puts in above what was offered IS a
+// bigger jump, and the next offer follows it, with nothing asked and no setting to find.
+// Ties go to the SMALLER jump: an offer that is too small gets edited, an offer that is too big
+// gets declined, and a declined raise is the thing that goes missing.
+function stackPace(id){
+  var s=stackStep(id);if(!s)return 0;
+  var down=!!invEx(id),s10=Math.round(s*10),tops=[];
+  (DB.logs||[]).forEach(function(L){
+    var t=0;
+    for(var k in L.entries){
+      if(exOfKey(L,k)!==id)continue;
+      L.entries[k].forEach(function(x){
+        if(!x||!(x.w>0))return;
+        t=t?(down?Math.min(t,x.w):Math.max(t,x.w)):x.w;
+      });
+    }
+    if(t>0)tops.push(Math.round(t*10));
+  });
+  var c={},best=0,bn=0;
+  for(var i=1;i<tops.length;i++){
+    var d=down?(tops[i-1]-tops[i]):(tops[i]-tops[i-1]);
+    if(d<=0)continue;                        // a deload is a decision, not a pace
+    d=Math.floor(d/s10)*s10;if(d<s10)continue;
+    c[d]=(c[d]||0)+1;
+  }
+  for(var key in c){var dv=Number(key);if(c[dv]>bn||(c[dv]===bn&&dv<best)){bn=c[dv];best=dv;}}
+  return best?best/10:s;
+}
+// The pace, measured against the weight it is moving FROM. Capped at a tenth of that weight:
+// past 10% in one session the mode has caught a rebound off a deload, not a habit. The floor is
+// one notch of the machine, because on a stack that steps by ten there is nothing smaller to
+// offer - which is the entire bug this replaces.
+function paceFor(id,w){
+  var s=stackStep(id);if(!s)return 0;
+  var s10=Math.round(s*10),p10=Math.round((stackPace(id)||s)*10),cap=Math.round(w*10)*0.10;
+  if(p10>cap)p10=Math.max(s10,Math.floor(cap/s10)*s10);
+  return p10/10;
+}
 function stepFor(id,w){
-  var plate=w>=40?5:2.5;
-  var s=stackStep(id);
-  // The inferred step is only trusted when plate math CANNOT express it - a gcd of 3 or
-  // 1.5 is the signature of a stack with its own lattice. A gcd of 10 on a barbell lift
-  // (weights logged 145/155/165) is just plate math walked twice, and offering +10 off it
-  // would turn a user's past pace into a demand. Checked in tenths, like the gcd itself.
-  if(s&&Math.round(s*10)%Math.round(plate*10)!==0)return s;
-  return plate;
+  return paceFor(id,w)||(w>=40?5:2.5);
 }
 // The next weight that actually EXISTS on this exercise's stack, above (or below, for
 // assisted work) the given one. Null when no trusted lattice is known - plate math stands
@@ -10838,8 +10886,8 @@ function stepFor(id,w){
 // of walking 22.5, 25.5, 28.5 forever. Anchored on a logged weight, because logged weights
 // sit on the lattice by definition; integer tenths throughout, floats stay out of it.
 function latticeNext(id,w,down){
-  var s=stackStep(id),plate=w>=40?5:2.5;
-  if(!s||Math.round(s*10)%Math.round(plate*10)===0)return null;   // same trust rule as stepFor
+  var s=stackStep(id);if(!s)return null;
+  var p=paceFor(id,w);if(!p)return null;
   var a=0;
   (DB.logs||[]).forEach(function(L){
     for(var k in L.entries){
@@ -10848,10 +10896,13 @@ function latticeNext(id,w,down){
     }
   });
   if(!a)return null;
-  var s10=Math.round(s*10),w10=Math.round(w*10),a10=Math.round(a*10),k;
-  if(down){k=Math.ceil((w10-a10)/s10)-1;}
-  else{k=Math.floor((w10-a10)/s10)+1;}
-  var n=(a10+k*s10)/10;
+  // Snap onto the lattice first, THEN move by the pace. Snapping is what pulls an off-lattice
+  // target back: a 115 accepted before the stack was learned lands on 110 and goes to 120,
+  // instead of walking 120, 125, 130 off a rung that was never there.
+  var s10=Math.round(s*10),p10=Math.round(p*10),w10=Math.round(w*10),a10=Math.round(a*10),k;
+  if(down){k=Math.ceil((w10-a10)/s10);}
+  else{k=Math.floor((w10-a10)/s10);}
+  var n=(a10+k*s10+(down?-p10:p10))/10;
   return n<0?0:n;
 }
 // Every lift that met all its targets last time, with the numbers it would move to. Nothing
@@ -10909,17 +10960,21 @@ function levelPlan(wk,showAll){
       var down=!!invEx(id);
       var lw=(ls&&typeof ls.w==='number')?ls.w:t.w;
       var base=down?Math.min(t.w,lw):Math.max(t.w,lw);
-      var ln=latticeNext(id,base,down);
+      // A dumbbell's ladder is known before anything is logged, and no amount of logging
+      // widens it: a rack that runs in fives past the light end does not grow a 32.5
+      // because the gcd of three sessions says 2.5. So on a dumbbell the RACK decides which
+      // weights exist and the learned pace only decides how many rungs - that is dbWalk, and
+      // on an untrained lift it asks for one rung and so is exactly dbNext.
+      var isdb=isDb(id,rf.data.name);
+      var ln=isdb?null:latticeNext(id,base,down);
       var nw;
       if(ln!=null)nw=ln;
       else{
         // A learned machine lattice is unit-agnostic and steps by itself; plain plate
         // math steps in the display unit's own plates (2.5/5 lb, or 2.5/5 kg in kg mode).
         var st=stepFor(id,base),plate=(base>=40?5:2.5);
-        if(st!==plate)nw=down?Math.max(0,base-st):base+st;
-        // A dumbbell has its own lattice and it is not the plate one - see dbNext. A LEARNED
-        // lattice still outranks it above: if the logs say this rack has 22.5s, the rack wins.
-        else if(isDb(id,rf.data.name))nw=dbNext(base,down);
+        if(isdb)nw=dbWalk(base,down,st);
+        else if(st!==plate)nw=down?Math.max(0,base-st):base+st;
         else nw=plateNext(base,down);
         // Only a lift with NO usable history is an estimate. A barbell whose logged
         // weights already sit on plate steps has confirmed plate math - marking it ~
@@ -18316,6 +18371,15 @@ function dbNext(w,down){
   if(UNIT_KG)return plateNext(w,down);
   if(down)return Math.max(0, w>20?w-5:w-2.5);
   return w>=20?w+5:w+2.5;
+}
+// The rack, walked. dbNext is one rung; this takes as many rungs as the learned pace asks for,
+// so a man who has gone 25, 35, 45 on the goblet squat is offered 55 and not 50, while a lift
+// with nothing learned asks for one rung and gets precisely what dbNext always gave.
+function dbWalk(w,down,want){
+  var n=w,g=0;
+  do{ var p=dbNext(n,down); if(p===n)break; n=p; g++; }
+  while(g<20&&Math.abs(n-w)<want-0.001);
+  return n;
 }
 // a target line like "145x8" with its weight spoken in the current unit
 function fmtLine(s){
