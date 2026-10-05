@@ -283,6 +283,27 @@ main constraint on how to work in it. See **Traps** below before editing.
   is recomputed from every weight ever logged and no learned value is stored anywhere. This is
   deliberate and is the safe side of the trade: guessing a finer rung is how the app came to
   offer 265 on a leg press that goes up in twenties.
+- **A raise the app made is the OTHER thing the targets check may judge** (v5.277, owner, right
+  after the lattice work: the app offers a bigger jump now, so it had better notice when the
+  jump was too big). v5.251 is unchanged and still the rule for everything else, because a
+  target somebody typed and reached is reachable by definition. What makes a raise different is
+  that NOBODY CHOSE IT. `DB.upAt` already records exactly which slots `lvlWrite` wrote, so the
+  scope needed no new bookkeeping: `easePlan` now lets a row through when a file armed it OR
+  when it carries a stamp, and tags it `raised`. Three guards keep it quiet: the existing
+  "tried since it was set" day comparison, `EASE_NEAR` (0.90, so near is not out of reach), and
+  a new one, **two sessions short AFTER the raise, never one** (`attemptsFor(id,since).nSince`),
+  which is the owner's own instruction: double check what they put the next time, and the time
+  after that. One short day is a bad night's sleep.
+  It has its own question (`A raise that has not stuck`, SHOW ME / LATER / LEAVE THEM) because
+  none of the import wording is true of it, and its own memory (`DB.hvySeen`, a signature of
+  slot plus weight asked) because raises keep happening and there is no next file to wake it.
+  SHOW ME deliberately records NOTHING: `easeEnd` records when the list is walked to the end, so
+  stopping halfway really does bring the rest back, which the import path only claims to do.
+  The sheet itself needed no change, being about two numbers and not about where they came from.
+  Verified against his 1 Oct backup: 8 raises stamped, **zero flagged**, because he made all
+  eight. Then one was forced too high and the whole round trip was walked: it flags, the notice
+  names the lift and both numbers, answering silences it, a SECOND shortfall wakes it again, and
+  USE rewrites every row the lift stands in while keeping the reps.
 - **The targets check only ever looks at imported numbers** (v5.251). `easeArm()` from
   `doRestore` and `weekAdd` only; `easeArmed()` gates `easeNotice` AND `easePlan`, so the hold
   menu is dormant too; answering sleeps it until the next import. It had six builds of false

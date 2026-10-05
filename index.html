@@ -10158,7 +10158,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.276';
+var APPV='v5.277';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11016,8 +11016,11 @@ function levelPlan(wk,showAll){
 // What counts as wrong is narrow on purpose. Falling a rep short on the last set is training, and
 // judging on reps flagged 58 of his 104 rows. A WEIGHT never once lifted is a different thing: it
 // is a number no session can satisfy. That fires on 11 rows, and every one of them is real.
-function attemptsFor(exId){
-  var n=0,best=null,last=0,inv=!!invEx(exId);
+// sinceMs is optional and adds nSince: how many of those sessions happened AFTER that moment.
+// A raise is judged on what came after it and on nothing before, which is the whole difference
+// between a number the app proposed and a number that was always there.
+function attemptsFor(exId,sinceMs){
+  var n=0,ns=0,best=null,last=0,inv=!!invEx(exId);
   (DB.logs||[]).forEach(function(L){
     if(!L.entries)return;
     var got=false;
@@ -11033,9 +11036,10 @@ function attemptsFor(exId){
       n++;
       var t=new Date(L.date+'T12:00:00').getTime();
       if(!isNaN(t)&&t>last)last=t;
+      if(sinceMs&&!isNaN(t)&&t>dayNoon(sinceMs))ns++;
     }
   });
-  return {n:n,best:best,last:last};
+  return {n:n,nSince:ns,best:best,last:last};
 }
 // Two sessions is the floor: one bad day is not evidence that a number is wrong.
 var EASE_TRIES=2;
@@ -11065,9 +11069,16 @@ function bestScoreFor(exId){
 // real timestamp against a session read as noon made a morning session look like an attempt at an
 // afternoon raise, which is how the warning came back the instant he took one.
 function dayNoon(ms){var d=new Date(ms);return new Date(d.getFullYear(),d.getMonth(),d.getDate(),12,0,0,0).getTime();}
+// Two sources, and only two. A FILE brought the number in (v5.251, armed by easeArm), or THIS
+// APP wrote it as a raise and the lifter has fallen short of it since (v5.277, owner: the app
+// offers a bigger jump now, so it had better notice when the jump was too big). Everything else
+// is still left alone, which is the rule v5.251 settled after six builds of false alarms: a
+// target somebody typed and reached is reachable by definition. What makes a raise different is
+// that nobody chose it. DB.upAt already records exactly which slots the app wrote, so there is
+// no new bookkeeping and no new setting.
 function easePlan(wk){
-  var w=W[wk],out=[];
-  if(!w||!easeArmed())return out;   // dormant unless a file brought these numbers in (v5.251)
+  var w=W[wk],out=[],armed=easeArmed();
+  if(!w)return out;
   try{
     var A=DB.active[wk];
     edAllRows(wk).forEach(function(row){
@@ -11078,13 +11089,18 @@ function easePlan(wk){
       // check spent two of its eleven warnings on it (v5.250).
       var EXD=EX[id]||{};
       if(EXD.cardio||EXD.bw)return;
-      var at=attemptsFor(id);
+      var stamp=(DB.upAt||{})[(String(rf.id).indexOf('~')>=0)?rf.id:id];
+      if(!armed&&!stamp)return;                     // neither imported nor raised by the app
+      var at=attemptsFor(id,stamp);
       if(at.n<EASE_TRIES||at.best===null)return;
       // A raise taken five minutes ago asks for a weight never lifted BY DESIGN. Only a target
       // that has survived a session since it was set can be called out of reach (v5.232), and the
       // comparison is by DAY, because a log carries a date and nothing finer (v5.233).
-      var stamp=(DB.upAt||{})[(String(rf.id).indexOf('~')>=0)?rf.id:id];
       if(stamp&&at.last<=dayNoon(stamp))return;
+      // And a raise is judged on TWO sessions after it, never one. The owner asked for exactly
+      // this: double check what they put the next time, and the time after that. One day short
+      // of a new weight is a bad night's sleep, not a number that is wrong.
+      if(stamp&&at.nSince<EASE_TRIES)return;
       var inv=!!invEx(id);
       if(inv?(at.best<=t0.w):(at.best>=t0.w))return; // it has been reached at least once
       // Never pinned is not the same as cannot. Judge the best he has DONE against what the
@@ -11101,7 +11117,7 @@ function easePlan(wk){
       if(to.join('\n')===lines.join('\n'))return;
       out.push({id:id,name:rf.data.name,from:lines,to:to,slot:rf.id,baseId:rf.baseId,
                 swapped:!!rf.swapId,sk:(String(rf.id).indexOf('~')>=0)?rf.id:id,
-                ask:t0.w,best:at.best,tries:at.n});
+                ask:t0.w,best:at.best,tries:at.n,raised:!!stamp});
     });
   }catch(e){}
   return out;
@@ -11430,7 +11446,22 @@ function easeEnd(){
 // walking to the end of the list, or saying LEAVE THEM to the question itself, settles it.
 function easeLeave(){closeOvl('easeOvl');}
 // Reviewed, or left as imported: either way it sleeps until the next file arrives (v5.251).
-function easeNoteDone(){DB.impSeen=1;delete DB.impCheck;saveDB();}
+// A raise that was looked at sleeps the same way, but keyed to the LIST rather than to a flag,
+// because raises keep happening and there is no next file to wake it (v5.277). Walking the sheet
+// to the end answers for whatever was in it; one more lift falling short changes the signature
+// and the question comes back on its own.
+function easeNoteDone(){DB.impSeen=1;delete DB.impCheck;DB.hvySeen=hvySig();saveDB();}
+// Which raises are currently short, as one string. Keyed by slot and by the weight asked for, so
+// the same lift coming back at a NEW target is a new question and the same one is not.
+function hvySig(){
+  var a=[];
+  try{
+    easeAll().forEach(function(g){g.rows.forEach(function(r){
+      if(r.raised)a.push((r.sk||r.id)+':'+r.ask);
+    });});
+  }catch(e){}
+  return a.sort().join(',');
+}
 // An import arms it. Nothing else does, and nothing a lifter does to their own numbers can.
 function easeArm(){
   try{DB.impCheck=1;delete DB.impSeen;saveDB();}catch(e){}
@@ -11443,9 +11474,40 @@ function easeArmed(){
 function easeNotice(){
   try{
     if(TUTON||SANDBOX)return;
-    if(!easeArmed())return;        // only after something was imported (v5.251)
     var all=easeAll();
     if(!all.length)return;
+    // Not imported, so whatever is here is a raise this app made and the lifter has been short
+    // of twice since. Its own question, because none of the import wording is true of it, and
+    // its own memory, because there is no next file to wake it (v5.277).
+    if(!easeArmed()){
+      var sig=hvySig();
+      if(!sig||DB.hvySeen===sig)return;
+      var hl={},hw=null;
+      all.forEach(function(g){g.rows.forEach(function(r){
+        if(!r.raised)return;
+        hl[r.id]=1;
+        var gp=Math.abs(r.ask-r.best);
+        if(!hw||gp>hw.gap)hw={name:r.name,ask:r.ask,best:r.best,gap:gp};
+      });});
+      var hn=Object.keys(hl).length;
+      if(!hn)return;
+      // Named, with its two numbers, the same way the import question does it: a person checks
+      // that against their memory of the gym in a second. No apology and no explanation of how
+      // the raise was arrived at, which is the app talking about itself.
+      var heg=hw?(' Your '+String(hw.name).toLowerCase()+' asks for '+fmtW(hw.ask)+
+                  ' and your best is '+fmtW(hw.best)+'.'):'';
+      ask((hn===1?'One lift was raised to a weight you have not made since.'
+                :hn+' lifts were raised to weights you have not made since.')+heg+
+          (hn===1?' It can come back down to your best, keeping the same reps.'
+                 :' They can come back down to your best, one at a time, keeping the same reps.'),
+          // SHOW ME records nothing by itself: easeEnd records when the list is walked to the
+          // end, so stopping halfway really does bring the rest back, which is what the import
+          // path only claims to do.
+          function(){openEase(null);},
+          (hn===1?'A raise that has not stuck':'Raises that have not stuck'),'SHOW ME',
+          function(){easeNoteDone();},{label:'LATER',fn:function(){}},'LEAVE THEM');
+      return;
+    }
     // Counted by LIFT, not by row: the same leg press standing in three saved copies is one
     // problem, and saying eleven made it sound like the app had lost its mind.
     var lifts={},worst=null,first=all[0];
