@@ -1368,15 +1368,18 @@ body.tut .dayhead-add{display:none;}
   border:1px solid var(--line);background:transparent;color:var(--txt3);border-radius:999px;cursor:pointer;}
 .pl-bar.on{border-color:var(--go);color:var(--go);}
 /* The head: the calculator's own mark, the name, and the way out. */
-.pl-head{display:flex;align-items:center;gap:10px;margin:0 0 4px;}
-.pl-head h3{flex:1;margin:0;}
+/* A sheet's own header: title on the left, the way out on the right. The X was picked for the
+   plate calculator in v5.256 and generalised here in v5.271, so every sheet whose only footer
+   button was CANCEL uses the same one rather than inventing a third. */
+.sheet-head{display:flex;align-items:center;gap:10px;margin:0 0 4px;}
+.sheet-head h3{flex:1;min-width:0;margin:0;}
 .pl-glyph{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);flex:none;
   display:grid;grid-template-columns:1fr 1fr;place-items:center;padding:3px;
   font-size:10px;line-height:1;color:var(--go);}
 .pl-glyph i{font-style:normal;}
-.pl-x{width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:transparent;
+.sheet-x{width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:transparent;
   color:var(--txt2);font-size:16px;line-height:1;flex:none;cursor:pointer;padding:0;}
-.pl-x:active{background:rgba(255,255,255,.08);}
+.sheet-x:active{background:rgba(255,255,255,.08);}
 .pg-sec{font-size:10px;letter-spacing:.1em;color:var(--txt3);margin:14px 0 6px;}
 .pg-row{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;margin-bottom:5px;background:var(--surface);cursor:pointer;transition:border-color .15s;}
 .pg-row:hover{border-color:color-mix(in srgb,var(--go) 40%,var(--line));}
@@ -2629,7 +2632,7 @@ body.forge .pl-badge{background:#130c09;border-color:#4a2c1c;font-family:var(--m
 body.forge .pl-badge.up{border-color:#8a5433;}
 body.forge .pl-bar{border-color:#4a2c1c;background:#130c09;font-family:var(--mono);}
 body.forge .pl-bar.on{border-color:#8a5433;background:#1d1209;}
-body.forge .pl-glyph,body.forge .pl-x{border-color:#4a2c1c;background:#130c09;}
+body.forge .pl-glyph,body.forge .sheet-x{border-color:#4a2c1c;background:#130c09;}
 body.forge .pl-glyph{font-family:var(--mono);}
 body.forge .pl-bar{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:var(--txt2);}
 body.forge .pl-bar.on{border-color:var(--gold);color:#fff6e6;background:rgba(255,138,31,.08);}
@@ -3809,19 +3812,17 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="exJoinOvl">
   <div class="sheet">
-    <h3>Superset it with</h3>
+    <div class="sheet-head"><h3>Superset it with</h3><button class="sheet-x" onclick="closeOvl('exJoinOvl')" aria-label="Close">&times;</button></div>
     <p>The two run back to back, sharing one rest. It lands straight after the exercise you held.</p>
     <div class="swaplist" id="exJoinList" style="margin-top:12px"></div>
-    <div class="sheet-btns"><div class="btn" onclick="closeOvl('exJoinOvl')">CANCEL</div></div>
   </div>
 </div>
 
 <div class="ovl" id="exAddOvl">
   <div class="sheet">
-    <h3>Add an exercise</h3>
+    <div class="sheet-head"><h3>Add an exercise</h3><button class="sheet-x" onclick="closeOvl('exAddOvl')" aria-label="Close">&times;</button></div>
     <input class="mk-in" id="exAddSearch" placeholder="Search the library" oninput="exAddList()" autocomplete="off">
     <div class="swaplist" id="exAddList" style="margin-top:12px"></div>
-    <div class="sheet-btns"><div class="btn" onclick="closeOvl('exAddOvl')">CANCEL</div></div>
   </div>
 </div>
 
@@ -4154,22 +4155,20 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="mkActOvl">
   <div class="sheet" style="max-width:400px">
-    <h3 id="mkActTtl">Reshape this workout</h3>
+    <div class="sheet-head"><h3 id="mkActTtl">Reshape this workout</h3><button class="sheet-x" onclick="closeOvl('mkActOvl')" aria-label="Close">&times;</button></div>
     <p id="mkActSub"></p>
     <div class="mk-acts" id="mkActBody"></div>
-    <div class="sheet-btns"><div class="btn" onclick="closeOvl('mkActOvl')">CANCEL</div></div>
   </div>
 </div>
 
 
 <div class="ovl" id="mkPickOvl">
   <div class="sheet">
-    <h3>Add an exercise</h3>
+    <div class="sheet-head"><h3>Add an exercise</h3><button class="sheet-x" onclick="closeOvl('mkPickOvl')" aria-label="Close">&times;</button></div>
     <input class="mk-in" id="mkSearch" placeholder="Search the library" oninput="mkPickList()" autocomplete="off">
     <div class="mfilt" id="mkFilt"></div>
     <div class="swaplist" id="mkList" style="margin-top:12px"></div>
     <div class="sheet-btns">
-      <div class="btn" onclick="closeOvl('mkPickOvl')">CANCEL</div>
       <div class="btn btn-go" onclick="mkNewEx()">NEW EXERCISE</div>
     </div>
   </div>
@@ -4234,13 +4233,10 @@ body.wcon{overflow:hidden;}
 
 <div class="ovl" id="swapOvl">
   <div class="sheet">
-    <h3>Swap exercise</h3>
+    <div class="sheet-head"><h3>Swap exercise</h3><button class="sheet-x" onclick="closeOvl('swapOvl')" aria-label="Close">&times;</button></div>
     <p>This swap is for today only.</p>
     <input class="mk-in" id="swapSearch" placeholder="Search exercises" autocomplete="off" oninput="swapList()" style="margin-bottom:10px">
     <div class="swaplist" id="swapList"></div>
-    <div class="sheet-btns">
-      <div class="btn" onclick="closeOvl('swapOvl')">CANCEL</div>
-    </div>
   </div>
 </div>
 
@@ -4277,12 +4273,12 @@ body.wcon{overflow:hidden;}
      would actually slide on, one side of it, in the order they load. -->
 <div class="ovl" id="plateOvl" style="z-index:300">
   <div class="sheet" style="max-width:440px">
-    <div class="pl-head">
+    <div class="sheet-head">
       <span class="pl-glyph" aria-hidden="true"><i>+</i><i>&minus;</i><i>&times;</i><i>=</i></span>
       <h3 id="plTitle">Plate calculator</h3>
       <!-- The way out is the X now, and it is still a plain undo of the whole visit: nothing on
            this sheet touches stored data until CONFIRM. -->
-      <button class="pl-x" onclick="plCancel()" aria-label="Close">&times;</button>
+      <button class="sheet-x" onclick="plCancel()" aria-label="Close">&times;</button>
     </div>
     <!-- Both ends drawn, always. Halving a number, doubling it back and remembering to add
          the bar is the actual hard part in a gym; seeing the whole bar removes all three.
@@ -4349,10 +4345,9 @@ body.wcon{overflow:hidden;}
      cards the welcome uses to ask the same question about a whole week. -->
 <div class="ovl" id="dfOvl">
   <div class="sheet" style="max-width:420px">
-    <h3 id="dfTtl">This day</h3>
+    <div class="sheet-head"><h3 id="dfTtl">This day</h3><button class="sheet-x" onclick="closeOvl('dfOvl')" aria-label="Close">&times;</button></div>
     <p id="dfSub">What goes on it?</p>
     <div id="dfPicks" style="display:grid;gap:10px;margin-top:6px"></div>
-    <div class="sheet-btns"><div class="btn" onclick="closeOvl('dfOvl')">CANCEL</div></div>
   </div>
 </div>
 
@@ -10115,7 +10110,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.270';
+var APPV='v5.271';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
