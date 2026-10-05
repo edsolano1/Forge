@@ -351,48 +351,19 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .lvl-list{max-height:calc(var(--usablevh) * .46);overflow-y:auto;overflow-x:hidden;margin:8px 0 4px;display:flex;flex-direction:column;gap:9px;}
 .lvl-row{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--surface2);}
 .lvl-n{font-size:13.5px;font-weight:600;color:var(--txt);margin-bottom:6px;}
-.lvl-d{display:flex;flex-wrap:wrap;gap:5px 15px;white-space:nowrap;font-size:12.5px;color:var(--txt3);font-variant-numeric:tabular-nums;}
-.lvl-d b{font-weight:600;color:var(--txt2);}
-/* The offer is a BUTTON and wears it: chip border, tint, and a pencil. A bare colored
-   number said "result"; nobody presses a result. Reported from the device the day it
-   shipped bare. */
-.lvl-d b.up{color:var(--go);cursor:pointer;display:inline-flex;align-items:center;gap:5px;
-  padding:3px 8px;margin:-3px 0;border-radius:7px;
-  border:1px solid color-mix(in srgb,var(--go) 45%,var(--line));
-  background:color-mix(in srgb,var(--go) 10%,transparent);}
-.lvl-d b.up:hover{background:color-mix(in srgb,var(--go) 18%,transparent);}
-.lvl-d b.up svg{width:11px;height:11px;stroke:currentColor;stroke-width:1.8;fill:none;
-  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:.8;}
-.lvl-d .mk-sr.open{margin:-2px 0;}
-.lvl-d .mk-num.sm{font-size:13px;}
-/* Raising targets: the old number gives up its charge, a spark crosses the arrow, the new
-   number takes it. Staggered down the list so it reads as one wave rather than a flash. */
-.lvl-d span{position:relative;}
-.lvl-d b{display:inline-block;transition:none;}
-.lvl-row.xfer .lvl-d b:not(.up){animation:drain .5s ease-in forwards;animation-delay:var(--sd);}
-.lvl-row.xfer .lvl-d b.up{animation:charge .62s cubic-bezier(.3,1.5,.4,1) forwards;animation-delay:calc(var(--sd) + .26s);}
+/* .lvl-d and its drain/spark/charge animation lived here and were cleared in v5.270: the
+   level-up rows have built lvl-row / lvl-n / lvl-nums / lvl-gain / lvl-ok since the banner
+   sheet rewrite, so none of it had rendered in a long time. The two rules below are live,
+   because xfer really is added. */
 .lvl-row.xfer .lvl-n{animation:namelift .7s ease forwards;animation-delay:var(--sd);}
 .lvl-row.xfer{animation:rowlift .7s ease forwards;animation-delay:var(--sd);}
-.lvl-spark{position:absolute;top:50%;left:0;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;
-  background:var(--go);box-shadow:0 0 9px 2px var(--go);opacity:0;pointer-events:none;}
-.lvl-row.xfer .lvl-spark{animation:sparkgo .56s cubic-bezier(.45,0,.3,1) forwards;animation-delay:calc(var(--sd) + .1s);}
-@keyframes drain{to{color:var(--txt3);opacity:.34;transform:scale(.9);}}
-@keyframes charge{
-  0%{transform:scale(1);text-shadow:none;}
-  45%{transform:scale(1.34);text-shadow:0 0 16px var(--go),0 0 34px color-mix(in srgb,var(--go) 60%,transparent);}
-  100%{transform:scale(1.08);text-shadow:0 0 11px color-mix(in srgb,var(--go) 55%,transparent);}}
-@keyframes sparkgo{
-  0%{opacity:0;transform:translateX(var(--x0)) scale(.5);}
-  18%{opacity:1;}
-  75%{opacity:1;}
-  100%{opacity:0;transform:translateX(var(--x1)) scale(1.5);}}
 @keyframes rowlift{
   0%{border-color:var(--line);}
   40%{border-color:color-mix(in srgb,var(--go) 60%,transparent);box-shadow:0 0 22px -6px var(--go);}
   100%{border-color:color-mix(in srgb,var(--go) 34%,transparent);box-shadow:none;}}
 @keyframes namelift{0%,100%{color:var(--txt);}45%{color:var(--go);}}
 @media(prefers-reduced-motion:reduce){
-  .lvl-row.xfer .lvl-d b:not(.up),.lvl-row.xfer .lvl-d b.up,.lvl-row.xfer,.lvl-row.xfer .lvl-n,.lvl-spark{animation-duration:.01s;}}
+  .lvl-row.xfer,.lvl-row.xfer .lvl-n{animation-duration:.01s;}}
 .foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--txt3);line-height:1.75;}
 .foot a{color:var(--txt2);cursor:pointer;text-decoration:none;border-bottom:1px solid var(--line);}
 .foot a:hover{color:var(--txt);}
@@ -548,8 +519,6 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .sv-btn{height:32px;min-width:32px;padding:0 8px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--txt2);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font:inherit;font-size:11px;letter-spacing:.06em;text-transform:uppercase;transition:.15s;}
 .sv-btn:hover{color:var(--txt);border-color:#33373d;}
 .sv-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;}
-.sv-forge{color:var(--go);border-color:color-mix(in srgb,var(--go) 34%,var(--line));}
-#svForgeIco{width:19px;height:19px;fill:currentColor;stroke:none;}
 #extraCards[hidden],#extraHint[hidden],#extraForge[hidden]{display:none;}
 /* Forge me a week moved into the fold in v5.192 and landed on top of the line under it: .mk-hint
    carries a -6px top margin, which is right when it tucks under a heading and wrong under a
@@ -843,7 +812,6 @@ body.tut #askOvl{z-index:402;}
 .ex-stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;}
 .ex-stat{display:flex;align-items:center;gap:5px;color:var(--txt3);}
 .ex-stat b{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:-.01em;}
-.st-tgt b{color:var(--txt2);}
 .st-last b{color:var(--txt2);}
 .ex-links{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;}
 .ex-links a{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;color:var(--txt3);text-decoration:none;padding:8px 11px;border:1px solid var(--line);border-radius:8px;transition:.15s;}
@@ -1210,7 +1178,6 @@ body.light .dayact.del{--bad:#b1332c;}
   width:auto;min-width:44px;flex-shrink:0;text-align:left;}
 .mk-ps-row{flex-wrap:wrap;}
 .mk-perset{margin-top:8px;}
-.mk-ps-head{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
 .mk-rest-ok{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--go);
   background:transparent;border:1px solid color-mix(in srgb,var(--go) 45%,var(--line));
   border-radius:6px;padding:5px 8px;cursor:pointer;}
@@ -1288,16 +1255,6 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-ic:hover{color:var(--go);border-color:color-mix(in srgb,var(--go) 40%,transparent);
   background:color-mix(in srgb,var(--go) 10%,transparent);}
 /* rest, as a glass and a time */
-.mk-rest{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
-  padding:7px 12px 7px 10px;border-radius:9px;border:1px solid var(--line);
-  background:var(--surface2);color:var(--txt2);cursor:pointer;transition:.14s;
-  font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;}
-.mk-rest svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;
-  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
-.mk-rest:hover{color:var(--go);border-color:color-mix(in srgb,var(--go) 45%,var(--line));}
-.mk-rest.open{cursor:default;gap:6px;padding:7px 10px;}
-.mk-rest.open .mk-num{width:52px;flex:0 0 52px;}
-.mk-rest em{font-family:var(--mono);font-size:10px;font-style:normal;color:var(--txt3);}
 /* the end of the set list, faint enough to read as a boundary rather than a fifth control.
    mk-foot seats it beside the superset chain on one line; the stepper keeps the left half. */
 .mk-foot{display:flex;align-items:center;gap:8px;margin-top:9px;}
@@ -1334,14 +1291,6 @@ body.light .dayact.del{--bad:#b1332c;}
    its own replacement in this file. Worth checking for before styling anything that already
    exists. */
 /* both halves named, one lit */
-.mk-ps-sw{display:inline-flex;align-items:center;gap:5px;}
-.mk-ps-sw i{font-style:normal;color:var(--txt3);font-size:10px;}
-.mk-ps-h{font-family:var(--mono);font-size:12px;letter-spacing:.09em;cursor:pointer;
-  padding:4px 8px;border-radius:6px;transition:.14s;background:transparent;
-  color:var(--txt3);border:1px solid transparent;}
-.mk-ps-h:hover{color:var(--txt2);}
-.mk-ps-h.on{color:var(--go);border-color:color-mix(in srgb,var(--go) 50%,var(--line));
-  background:color-mix(in srgb,var(--go) 14%,transparent);}
 /* Adding a second workout to a day that already has one. Deliberately quieter than the empty-day
    offer: that one is an invitation to start, this one is a way to add, and a full-width dashed
    panel under a card you can already see would compete with the card. */
@@ -2603,8 +2552,6 @@ body.forge .mk-row .mk-sel{border-radius:999px;background:#0e0806;border:1px sol
 /* and the quiet one keeps the type but loses the pill (v5.246): it is a line about the
    exercise, not a control to aim at. */
 body.forge .mk-row .mk-meas.quiet .mk-sel{border-color:transparent;background:transparent;padding:4px 0;}
-body.forge .mk-ps-h{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.12em;border-radius:999px;padding:5px 10px;border:1px solid #3a2214;background:#0e0806;color:var(--txt3);}
-body.forge .mk-ps-h.on{color:var(--gold);border-color:#6a3f26;background:rgba(255,138,31,.08);}
 body.forge .mk-ps-list{gap:6px;align-items:stretch;}
 body.forge .mk-ps-row{flex-wrap:nowrap;border:1px solid #3a2214;border-radius:999px;background:#0e0806;padding:4px 5px 4px 12px;gap:4px;}
 body.forge .mk-ps-n{font-family:var(--mono);font-weight:600;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);min-width:44px;}
@@ -3974,7 +3921,6 @@ body.wcon{overflow:hidden;}
          landing one at a time beneath with their numbers counting up. One button. -->
     <i class="lvl-glow"></i><i class="lvl-rays"></i>
     <div class="lvl-beam"><b>Level up</b><small id="lvlTitle"></small></div>
-    <p id="lvlSub" hidden></p>
     <div id="lvlList" class="lvl-list"></div>
     <div class="lvl-foot">
       <div class="btn btn-go lvl-go" id="lvlGo" onclick="applyLevel()">RAISE ALL</div>
@@ -4025,7 +3971,7 @@ body.wcon{overflow:hidden;}
      title are the same arrival the launch just showed; the subtitle and the picks turn like
      pages underneath them: how to start, then whether to tour. The basic week is the starter
      that waited behind the pinned wizard: push, pull and legs, numbers left for the owner.
-     The picks are written by script (showFirstRun / frStart) so each question can replay the
+     The picks are written by script so each question can replay the
      rise; the wizard's old pair lives in offerStart's EZ branch, whole, for v5. -->
 <div id="welcome" aria-hidden="true">
   <div class="wc-in">
@@ -5285,7 +5231,6 @@ var ANIM=(function(){
   var reduce=false;
   try{reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
 
-  function ctx2(id){var c=document.getElementById(id);var x=c.getContext("2d");return x;}
   function seg(x,a,b,w,col){
     w=w||9;
     if(!col&&w>=8)w+=2;                            // ink limbs and torsos run thicker - a stockier build
@@ -10170,7 +10115,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.269';
+var APPV='v5.270';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11067,11 +11012,6 @@ function easeAll(){
   return out;
 }
 // What the notice has already been shown for. It asks again only when the list itself changes.
-function easeSig(all){
-  return all.map(function(g){
-    return g.wk+':'+g.rows.map(function(r){return r.id+'@'+r.ask+'>'+r.best;}).join(',');
-  }).join('|');
-}
 function skipSig(exId,lines){
   var L=lastFor(exId);
   return (L&&L.date||'')+'|'+lines.join(',');
@@ -11254,13 +11194,6 @@ function lvlStrike(items,after){
     var r=document.querySelector('#lvlList .lvl-row[data-pi="'+LVLPLAN.indexOf(p)+'"]');if(!r)return;
     var d=n*0.11;n++;
     r.style.setProperty('--sd',d+'s');
-    [].forEach.call(r.querySelectorAll('.lvl-d .lvl-g'),function(sp){
-      var a0=sp.querySelector('.lvl-from'),b0=sp.querySelector('.lvl-to'),k=sp.querySelector('.lvl-spark');
-      if(!k||!a0||!b0)return;
-      var o=sp.getBoundingClientRect(),a=a0.getBoundingClientRect(),b=b0.getBoundingClientRect();
-      k.style.setProperty('--x0',(a.right-o.left)+'px');
-      k.style.setProperty('--x1',(b.left-o.left+b.width*0.5)+'px');
-    });
     r.classList.add('xfer');
     last=d;
   });
@@ -11824,7 +11757,7 @@ function planCard(id,i,nx,dk){
   // the size of the day. The ADD-ON tag went because the meta already says Optional, and YOURS
   // because whose day it is has never been something you needed telling twice.
   // DB.restLabel first: what the rest day is FOR is the user's own, not the app's to state.
-  var ts=totalSets(id),tsw=ts+(ts===1?' set':' sets');
+  
   var meta=v==='rest'?(DB.restLabel||(e&&e.label)||'Rest'):(v==='opt'?'Optional':'');
   // "Rest Day" over "Rest day" said the same thing twice on the slim rest row (v5.192).
   if(v==='rest'&&meta&&meta.trim().toLowerCase()===String(w.name||'').trim().toLowerCase())meta='';
@@ -12859,7 +12792,6 @@ function renderHome(){
     '<span class="card-r">'+(po?'<span class="pill pill-live">Resume '+po+'/'+totalSets('pump')+'</span>':
       (pumpRdy?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\'pump\')">'+ARROW+'</span>':''))+'</span></div>'+
     '<div class="card-meta">'+(po?'Still open. Pick up where you left off':'Bonus, 35 to 45 minutes. Any day')+'</div></div>';
-  var fi=document.getElementById('svForgeIco');if(fi&&!fi.innerHTML)fi.innerHTML=anvilAt(59,'fill="currentColor"');
   document.getElementById('extraCards').innerHTML=pumpCard+(xs.length?xs.map(xcard).join('')
     :'<div class="bank-empty">Your own Saved workouts sit here too. Drag one down, or hold one and choose MOVE TO SAVED WORKOUTS.</div>');
   document.getElementById('extraLabelTxt').textContent=MKTXT().xl;
@@ -14095,27 +14027,6 @@ function planDrop(id){
 }
 // A day with a session open cannot move: the workout is anchored to the day it was started on.
 var MOVE_BUSY='This workout has a session open, so it cannot move. Finish it first.';
-function mkRestPart(i,part,v){
-  var r=MK.rows[i];if(!r)return;
-  var t=parseRest(r.rest),m=Math.floor(t/60),s=t%60;
-  if(part==='m')m=Math.max(0,Math.min(30,parseInt(v,10)||0));
-  else s=Math.max(0,Math.min(59,parseInt(v,10)||0));
-  var tot=m*60+s;
-  r.rest=tot?(tot+' sec'):'';
-  mkTouch();
-}
-function mkRestDone(i){var r=MK.rows[i];if(r)r.restEdit=0;mkRender();}
-function mkShell(open){MK.shellOpen=!!open;mkRender();document.getElementById('make').scrollTop=0;}
-// Making the day is now its own step, and it ends by writing an EMPTY day. An empty day is a
-// legitimate state under this flow - it is what a day is for the seconds between naming it and
-// filling it - so mkSave's "add at least one exercise" no longer applies at this point.
-function mkCreate(){
-  if(!MK.name.trim()){mkNote('Name the workout first. It goes on the card.');return;}
-  mkCommit(true);
-  MK.shellOpen=false;
-  mkRender();
-  document.getElementById('make').scrollTop=0;
-}
 // Every change from here is an edit to a day that exists, so it is written straight through.
 // Debounced, because this fires on every keystroke in a weight field; persistNow is a full
 // serialise and doing it per character would be felt.
@@ -14341,9 +14252,6 @@ function scrapApply(){
   var L=document.getElementById('scrapLine'),T=document.getElementById('scrapLineTxt');
   if(L)L.hidden=!(n>0);   // it lives inside the Saved sheet now, so only the count decides
   if(T)T.textContent='Scrap heap ('+n+')';
-  var S=document.getElementById('scrapSet');if(S)S.hidden=!n;
-  var B=document.getElementById('scrapSetBtn');
-  if(B)B.textContent=n===1?'ONE DELETED WORKOUT':(n+' DELETED WORKOUTS');
   var C=document.getElementById('scrapN');if(C)C.textContent=n;
 }
 function openScrap(){
@@ -14783,8 +14691,6 @@ function mkSet(i,k,v){
 // was lifts then a Stairmaster becomes two entries on the same day, in the order they are done.
 // The shipped program had already arrived at this on its own: d4's last section is called
 // "Cardio finisher", and the Power Walk is the rest day rather than a row inside a lifting day.
-var MK_KINDS=[['lift','Lifting','Weight, reps or a hold'],
-              ['cardio','Cardio','Minutes or calories']];
 var MK_MEASURE_SETS={
   lift:  [['wr','Weight and reps'],['reps','Reps only'],['sec','Seconds']],
   cardio:[['min','Minutes'],['cal','Calories'],['sec','Seconds']]
@@ -14862,11 +14768,6 @@ function mkSetUnit(i,v,quiet){
 function mkLinesUniform(r){
   var L=[],k;for(k=0;k<(r.n||1);k++)L.push(mkLine(r));return L;
 }
-function mkRestOpen(i){
-  var r=MK.rows[i];if(!r)return;
-  if(!parseRest(r.rest))r.rest='90 sec';
-  r.restEdit=1;mkRender();
-}
 // Sets are added and taken away at the end of the list, where the last set is - not typed into a
 // box at the top that then reshapes everything underneath it. Minus takes the last one; plus
 // copies it, because the set you are adding is nearly always another of the one before.
@@ -14916,7 +14817,6 @@ function mkSetRestOpen(i,k){
 function mkSetsUI(r,i){
   var u=mkUnitOf(r),varies=mkVaries(r),open=r.exp||varies;
   var unitTxt=u==='sec'?'sec':u==='min'?'min':u==='cal'?'cal':'reps';
-  var wUnit=u==='wr'?'lb':'';
   var L=open?mkLinesFor(r):[mkLine(r)];
   var RS=mkRestsFor(r);
   // Both halves on screen with the slash between them, because a switch that shows only the
@@ -18129,9 +18029,6 @@ var SFX_ON=1;
 // a quiet gym, the tick on every logged set, the fanfare on every record.
 // There is no MUTE ALL here on purpose. Alert volume already goes to zero, and a second control
 // that silences everything would be two switches for one decision.
-var SFX_KEYS=[['rest','Alert when rest ends','When a rest runs out'],
-              ['log','Set logged','The tick when a set is kept'],
-              ['pr','Record','The flourish when you beat one']];
 var SFX_OFF=(function(){
   try{return JSON.parse(localStorage.getItem('arc_sfxoff')||'{}')||{};}catch(e){return {};}
 })();
@@ -19319,12 +19216,6 @@ function notifBlocked(){
 }
 // Shows the state that actually decides whether a notice fires, not the stored wish. A switch
 // reading ON while Android has granted nothing is exactly what wasted a test.
-function drawNotifTog(){
-  var e=document.getElementById('notifTog');if(!e)return;
-  var b=notifBlocked(),live=notifLive();
-  e.textContent=b?'BLOCKED':(live?'ON':'OFF');
-  e.className='sfx-tog'+(live?' on':'');
-}
 var notifT=null;
 function notifOk(){return isNative()||typeof Notification!=='undefined';}
 // installed apps post through the service worker; a plain tab falls back to a page notification
@@ -20813,7 +20704,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawNotifTog();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();ntDraw();hcDraw();autoBkDraw();
+  drawAlertLvl();drawThemePick();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();ntDraw();hcDraw();autoBkDraw();
   scrapApply();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
@@ -22422,7 +22313,6 @@ function tutOffer(){
 // Unpinned in v5.0 (Aug 26): the v5 cycle opens with the full first-run experience live -
 // the "build one for me?" question and the forging ritual behind it. The pinned fallback
 // (basic-week/empty question, no ritual) stays reachable by flipping this back off.
-var EZ_ON=true;
 // The two questions, each a full page of the welcome screen. Swapping stages drops .on,
 // forces a reflow and puts it back, so the mark, rule, title and new picks all rise again:
 // the second question arrives the way the first did. Motion Off skips the rise (CSS).
@@ -22438,45 +22328,11 @@ function wcStage(sub,picks,intro){
   w.classList.add('on');
   document.body.classList.add('wcon');
 }
-function wcHide(){
-  var w=document.getElementById('welcome');
-  if(w){w.classList.remove('on');w.setAttribute('aria-hidden','true');}
-  document.body.classList.remove('wcon');
-}
-function showFirstRun(){
-  // The same mark the launch just showed, from the same definition - the welcome is the
-  // second half of one arrival, not a different screen that happens to follow.
-  var m=document.getElementById('wcMark');
-  if(m)m.innerHTML=logoSvg('wc-logo',68);
-  wcStage('How do you want to start?',
-    '<button class="wc-pick" onclick="frStart(true)"><b>A basic week</b>'+
-    '<small>Push, pull and legs on three days. The weights are yours to write in.</small></button>'+
-    '<button class="wc-pick" onclick="frStart(false)"><b>An empty week</b>'+
-    '<small>Build your own from nothing.</small></button>',
-    'A workout log that works offline, with no account and no server. Everything you write stays on your phone.');
-}
-function frStart(basic){
-  if(basic){installStarter();renderHome();}
-  wcStage('Take the tour?',
-    '<button class="wc-pick" onclick="frTour(1)"><b>Quick tour</b>'+
-    '<small>Seven short steps. A couple of minutes.</small></button>'+
-    '<button class="wc-pick" onclick="frTour(2)"><b>Full tour</b>'+
-    '<small>Everything, in sixteen steps.</small></button>'+
-    '<button class="wc-pick" onclick="frTour(0)"><b>Skip</b>'+
-    '<small>Head straight in. Both tours wait in Settings.</small></button>');
-}
-function frTour(kind){
-  tutSeen();
-  wcHide();
-  if(kind===1)tutStart(1);
-  else if(kind===2)tutStart();
-  else{renderHome();window.scrollTo(0,0);}
-}
+// showFirstRun, frStart, frTour and wcHide lived here: the pre-wizard first run, reachable
+// only through `if(!EZ_ON)` in offerStart, and EZ_ON has been a pinned true since v5.0.
+// Cleared in v5.270 along with that dead guard.
 function offerStart(){
   STARTPEND=false;
-  // With the wizard pinned, a first run gets the welcome's two questions: basic week or
-  // empty, then quick tour, full tour or skip.
-  if(!EZ_ON){renderHome();window.scrollTo(0,0);setTimeout(showFirstRun,650);return;}
   var w=document.getElementById('welcome');
   if(!w){installStarter();renderHome();setTimeout(tutOffer,600);return;}   // never strand a first run
   var m=document.getElementById('wcMark');
