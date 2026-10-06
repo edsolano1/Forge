@@ -570,197 +570,10 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
 .exed-sub{font-size:11.5px;color:var(--txt3);margin-top:7px;line-height:1.5;text-wrap:pretty;}
 .exed-off{opacity:.4;pointer-events:none;}
 
-/* ---------- TUTORIAL ---------- */
-/* The scrim was one box with a 9999px spread shadow, which asks Chrome to paint a box some
-   twenty thousand pixels across and repaint it every time the spotlight moves - the flicker
-   on opening the tour and on every step. It is four plain rectangles around the hole
-   instead: same picture, nothing oversized, and each one a flat fill. They are fixed, so
-   they sit against the viewport regardless of the hole's own size, and they inherit the
-   hole's fade. Nothing here may take a transform or a filter or they would stop doing that. */
-#tutHole{position:fixed;top:0;left:0;width:0;height:0;z-index:400;pointer-events:none;border-radius:14px;
-  border:1.5px solid var(--go);opacity:0;transition:opacity .25s;}
-/* Lighter than it was. At .78 the surroundings went practically black, which is fine when the
-   step points at one control and wrong when it points at one SECTION of a sheet you are meant to
-   be reading the rest of. The ring does the pointing; the scrim only has to say "not this bit". */
-#tutHole > i{position:fixed;display:block;background:rgba(4,5,7,.58);pointer-events:none;}
-/* One step (the rest pill) asks for deeper dark: the pill floats over the session's own
-   rows, and the normal scrim left them loud enough to fight it. */
-#tutHole.deep > i{background:rgba(4,5,7,.82);}
-#tutHole.on{opacity:1;}
-/* A one-shot entrance: the highlight is planted around the whole viewport and closes onto the
-   step's target, so the week is taken in whole before any one day is singled out. Geometry
-   and deliberately not transform - the scrim rectangles are position:fixed children of the
-   hole, and a transform here would make it their containing block and tear them off the
-   viewport, which is the same reason nothing else on this element may take one. It is the
-   identical write the tour already makes on every frame a target moves, so it asks nothing
-   new of the screen, and the class comes off the moment it lands. */
-#tutHole.sweep,#tutHole.sweep > i{transition:top .62s cubic-bezier(.32,.86,.36,1),
-  left .62s cubic-bezier(.32,.86,.36,1),width .62s cubic-bezier(.32,.86,.36,1),
-  height .62s cubic-bezier(.32,.86,.36,1);}
-/* Measured on the phone: the highlight moved between steps as a single-frame cut, up to 639px at
-   once - three quarters of the closed screen, instantly. Nothing was dropped and nothing was slow;
-   the tour held a flat 8.3ms frame the whole way. It was a cut where the eye expects a move, and
-   that is what reads as a skip.
-   Glide is armed for the length of a step change and taken straight off again, because the same
-   geometry is rewritten on EVERY frame that a target moves - a transition left on permanently
-   would make the ring lag behind anything it tracks through a scroll. Shorter than the sweep:
-   this is the ring following the step, not the tour announcing a journey. */
-#tutHole.glide,#tutHole.glide > i{transition:top .28s cubic-bezier(.32,.86,.36,1),
-  left .28s cubic-bezier(.32,.86,.36,1),width .28s cubic-bezier(.32,.86,.36,1),
-  height .28s cubic-bezier(.32,.86,.36,1);}
-@media(prefers-reduced-motion:reduce){#tutHole.sweep,#tutHole.sweep > i,
-  #tutHole.glide,#tutHole.glide > i{transition:none;}}
-/* The pulsing ring sits on the one control the step wants tapped, so a lit panel still
-   points at something specific. The pulse is a scaling pseudo-ring rather than an animated
-   box-shadow: a shadow is a paint property, so that ring was repainting every frame it was
-   on screen for the whole length of the tour. */
-#tutPing{position:fixed;top:0;left:0;width:0;height:0;z-index:400;pointer-events:none;border-radius:12px;
-  border:2px solid var(--go);opacity:0;}
-#tutPing::after{content:'';position:absolute;inset:-4px;border-radius:15px;pointer-events:none;
-  border:3px solid color-mix(in srgb,var(--go) 30%,transparent);}
-/* The pulse is armed with the ring rather than declared on it. Unarmed, #tutPing is a 0x0 box
-   at opacity 0 that nothing can see - but the animation on its pseudo-element ran anyway, from
-   load until close, on every screen in the app, for a tour that was not running. Invisible is
-   not the same as absent: an animation on a hidden element still ticks. */
-#tutPing.on::after{animation:tutping 1.5s ease-in-out infinite;}
-#tutPing.on{opacity:1;}
-@keyframes tutping{0%,100%{transform:scale(1);opacity:.95;}
-  50%{transform:scale(1.07);opacity:.2;}}
-/* The card must not read as another layer of the surface it is explaining, so it takes a
-   tint of the live colour and a brighter rim than any sheet in the app. */
-/* The card is capped and scrolls inside itself. A step whose card is pinned to the top of the
-   screen to clear the sheet it is describing - the exercise sheet is the tall one - could grow
-   past the top of the viewport and lose its first lines with no way to get them back. It can be
-   as long as it likes now; past this it scrolls, and the insets keep it clear of the system bars
-   at both ends rather than only the notch. */
-/* The card is ANCHORED, not placed: bottom edge pinned to the foot of the screen in CSS,
-   and no script ever writes its position. Every attempt to move it gracefully - fades,
-   settle gates, seat rules - still read as "the window keeps moving" on the device,
-   because it kept moving. Now it cannot. Content changes grow it upward from a fixed
-   bottom edge, and the SCENE arranges itself around the card instead: targets scroll to
-   the upper part, the rest pill docks at the top for the tour, and the tall sheets wear
-   a tour scale. */
-#tutCard{position:fixed;z-index:401;left:50%;transform:translateX(-50%);
-  bottom:calc(14px + env(safe-area-inset-bottom,0px));
-  transition:opacity .16s ease;
-  width:min(430px,calc(100vw - 26px));border-radius:var(--r);padding:16px 17px 14px;display:none;
-  max-height:calc(100vh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
-  overflow-y:auto;overscroll-behavior:contain;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--go) 15%,var(--surface2)),color-mix(in srgb,var(--go) 7%,var(--surface2)));
-  border:1px solid color-mix(in srgb,var(--go) 45%,var(--line));
-  box-shadow:0 22px 50px -14px rgba(0,0,0,.8),0 0 0 1px rgba(0,0,0,.35);}
-#tutCard.on{display:block;}
-#tutCard.shake{animation:tutshake .46s;}
-@keyframes tutshake{
-  15%{transform:translateX(calc(-50% - 8px))}35%{transform:translateX(calc(-50% + 7px))}
-  55%{transform:translateX(calc(-50% - 5px))}75%{transform:translateX(calc(-50% + 3px))}
-  100%{transform:translateX(-50%)}}
-.tut-step{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--go);margin-bottom:8px;}
-.tut-t{font-size:18px;margin-bottom:7px;color:var(--txt);}
-.tut-b{font-size:13.5px;line-height:1.62;color:var(--txt);opacity:.88;text-wrap:pretty;}
-.tut-b ul{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;}
-.tut-b li{display:flex;gap:9px;align-items:flex-start;}
-.tut-b li::before{content:'';flex:0 0 4px;width:4px;height:4px;border-radius:50%;background:var(--go);margin-top:8px;}
-.tut-b p{margin:9px 0 0;}
-.tut-g{display:flex;flex-direction:column;gap:7px;margin:3px 0 10px;}
-.tut-g div{display:flex;gap:10px;align-items:center;}
-.tut-g i{flex:0 0 13px;width:13px;height:13px;border-radius:4px;}
-.tut-g b{font-weight:500;color:var(--txt);}
-.tut-back{background:transparent!important;color:var(--txt2)!important;padding-left:9px!important;padding-right:9px!important;}
-/* The week is the one screen the tour has to show whole - and it grew. This was written when the
-   week was seven flat cards; it is seven day CONTAINERS now, each with a header and a card inside
-   it, and half again as tall. At .76 the last two days sat behind the tour card while the step
-   was telling you to take all seven in.
-   Shrinking the type further was the wrong answer - it was already at 13px. The week drops to an
-   OVERVIEW for the length of the tour instead: the size line goes, the padding tightens, and what
-   is left is a day and what is on it, which is all these steps are pointing at. That buys enough
-   back to sit at a scale where the names are still readable. */
-body.tut #weekCards{transform:scale(.8);transform-origin:50% 0;}
-body.tut #weekCards .daybox{padding:6px 8px 1px;margin-bottom:4px;}
-body.tut #weekCards .daybox.empty{padding-bottom:6px;}
-body.tut #weekCards .dayhead{font-size:10px;padding:1px 3px 5px;}
-body.tut #weekCards .card{padding:7px 11px;margin-bottom:5px;}
-body.tut #weekCards .card-name{font-size:15px;}
-body.tut #weekCards .card-meta{display:none;}
-body.tut #weekCards .dayempty{padding:3px 4px 2px;font-size:11.5px;}
-/* the tagline is the first thing to go: it is the one line up there that says nothing the tour
-   has not already said, and it is holding the whole week down the screen */
-body.tut #tagline{display:none;}
-/* The Forge embers used to have a second home here, six hundred lines above the rules that
-   actually draw them, and it was doing nothing at all. A later @keyframes of the same name
-   replaces an earlier one outright, and the later box-shadow won on document order, so the
-   rewrite of the rise curve and the halo that was written here never reached the screen - the
-   embers went on running the original way while two builds in a row reported them changed.
-   Nothing lives here now. The motes are described once, beside the other three grounds. */
 /* The rest pill belongs to a session. On the week board it was a clock floating over a screen
    with nothing to time, and leaving a day mid-rest is not a reason to keep it hovering there.
    The countdown is in the notification shade the whole time, so nothing is lost by it going. */
 body:not(:has(#session.on)) #timerPill{display:none;}
-/* The export is the tallest thing the tour stops on: tiles, then the whole session written out.
-   At full size the step was a scroll rather than a look, and a step you have to scroll through
-   is one you skim. Scaled down for the length of the tour it fits in a screen, which is all this
-   step needs - it is showing you that the thing exists and what is in it, not asking you to read
-   the text of a session you just did. */
-/* .76, down from .84 (user note, Aug 23): at .84 the sheet's last rows tucked behind the
-   anchored card, cutting off the caption and the COPY and CLOSE buttons. At .76 the whole
-   sheet stands clear above the card. */
-body.tut #exportOvl .sheet{transform:scale(.76);transform-origin:50% 0;}
-/* The exercise sheet gets the same treatment for the same reason: it must fit in the
-   space above the anchored card, save row included. */
-body.tut #exEditOvl .sheet{transform:scale(.82);transform-origin:50% 0;}
-/* Scroll room, measured not generous (user note, Aug 23: 44vh floated the finish button to
-   the middle of the screen over a gulf of nothing). 90px was tuned LIVE on the device: the
-   scroll runs out with the button resting 40px above the anchored card - it reads as the
-   page scrolling down to it, because that is all that happens. */
-body.tut #home{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:250px;}
-body.tut #sBody{padding-bottom:90px;}
-/* The rest pill normally floats at the very foot of the screen - the anchored card's seat.
-   For the tour it sits directly ABOVE the card instead (--tutch is the card's live height,
-   written by tutPlace): same corner of the world it always lives in, just lifted clear. */
-/* The opaque ring seals the SLIVER (user note, Aug 23): the spotlight opening is a few
-   pixels wider than the pill, and that undimmed fringe let the graded row behind peek
-   through at the pill's edge. The ring fills the gap with solid dark, corner curves and
-   all, so the opening reads as one finished piece. */
-/* The anvil step starts the rest clock, but its pill arriving mid-step got cut by the card
-   and the opening (user note, Aug 23). The step that STARTS the timer hides it; the step
-   ABOUT the timer is where it appears, whole. */
-body.tut-nopill .timer-pill{display:none!important;}
-body.tut .timer-pill{bottom:calc(26px + env(safe-area-inset-bottom,0px) + var(--tutch,200px));
-  box-shadow:0 0 0 9px rgb(4,5,7),0 10px 34px rgba(0,0,0,.55);}
-/* The alert control, borrowed into the card. Narrower than the Settings one because it shares a
-   row with its own label and value rather than sitting under a heading. */
-.tut-fine{margin-top:7px;font-size:11.5px;line-height:1.5;color:var(--txt3);}
-.tut-vol{margin-top:12px;gap:10px;}
-.tut-vol .tut-vol-l{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);flex-shrink:0;}
-.tut-vol .slider-num{min-width:44px;font-size:12px;}
-/* NEXT was the same weight as End tour and HEAR IT, so the one button that always moves you on
-   looked like one of three equal choices. It is the primary action of every step it appears on
-   and it now says so - and it says what it DOES, which is how you tell a page turn from the
-   thing itself. */
-.tut-btns .btn-go{padding:13px 20px;font-size:13px;letter-spacing:.1em;font-weight:600;
-  box-shadow:0 0 22px -8px color-mix(in srgb,var(--go) 85%,transparent);}
-.tut-nudge{display:none;margin-top:10px;font-size:12px;line-height:1.5;color:var(--gold);
-  border-top:1px solid color-mix(in srgb,var(--gold) 30%,transparent);padding-top:9px;}
-.tut-nudge.on{display:block;}
-.tut-btns{display:flex;gap:9px;margin-top:15px;align-items:center;justify-content:flex-end;}
-.tut-btns .btn{padding:10px 13px;background:var(--surface);white-space:nowrap;}
-/* BACK reads left-to-right as "go left": leftmost seat, arrow first. margin-right:auto pushes
-   everything else to the right edge whether or not the waiting pill is between them. */
-.tut-back{margin-right:auto;display:flex;align-items:center;gap:6px;}
-.tut-back svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
-/* The way out. It was grey underlined text sitting next to a lit NEXT button, which made leaving
-   look like a footnote - and someone who wants out of a tour wants to SEE the way out. It takes
-   the same red the app already uses for anything that undoes or removes, per theme, so it reads
-   as the exit without shouting over NEXT. Each world's value is the one its own .btn-bad uses. */
-.tut-x{position:absolute;top:8px;right:8px;width:32px;height:32px;display:flex;align-items:center;
-  justify-content:center;border-radius:9px;color:var(--txt3);cursor:pointer;transition:.14s;}
-.tut-x:hover{color:#e0736b;background:color-mix(in srgb,#e0736b 10%,transparent);}
-.tut-x svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;}
-/* The exit confirm has to stand over the tour's own chrome, which lives at 400+. */
-body.tut #askOvl{z-index:402;}
-.tut-wait{font-size:11.5px;color:var(--go);letter-spacing:.04em;display:flex;align-items:center;gap:8px;}
-.tut-wait::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--go);animation:tutp 1.25s infinite;}
-@keyframes tutp{0%,100%{opacity:.25;transform:scale(.75)}50%{opacity:1;transform:scale(1.2)}}
 
 /* ---------- SESSION ---------- */
 /* These are full-screen and fixed, so in the app build they run under both system bars: the
@@ -1061,10 +874,6 @@ body:has(#session.on) .card-day::after,body:has(#session.on) .dayglow::before,bo
 body:has(#make.on) .bg-light,body:has(#make.on) .bg-motes i,body:has(#make.on) .bg-ripple i,
 body:has(#make.on) .bg-rules,body:has(#make.on) .bg-rules > i,body:has(#make.on) .bg-wm svg,
 body:has(#make.on) .card-day::after,body:has(#make.on) .dayglow::before,body:has(#make.on) .dayglow::after{animation-play-state:paused;}
-/* The tour is a scrim over the whole screen, so it gets the same treatment as an open
-   sheet: the ground behind it is not visible and does not need to keep moving. */
-body.tut .bg-light,body.tut .bg-motes i,body.tut .bg-ripple i,
-body.tut .bg-rules,body.tut .bg-rules > i,body.tut .bg-wm svg{animation-play-state:paused;}
 /* A confirm has to clear any sheet that is already open. Every .ovl shares z-index 200,
    so #askOvl lost on DOM order - which is what hid the blocked-notifications message
    behind the timer sheet, leaving only a dimmed window. */
@@ -1301,7 +1110,6 @@ body.light .dayact.del{--bad:#b1332c;}
   margin:-8px -6px;border-radius:8px;cursor:pointer;color:var(--txt3);transition:.15s;}
 .dayhead-add:hover{color:var(--go);background:color-mix(in srgb,var(--go) 10%,transparent);}
 .dayhead-add svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;}
-body.tut .dayhead-add{display:none;}
 .mk-num{width:56px;padding:9px 4px;text-align:center;border-radius:9px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-family:var(--mono);font-size:13px;}
 .mk-num:focus{outline:none;border-color:var(--go);}
 .mk-sel{padding:9px 8px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);color:var(--txt2);font-family:inherit;font-size:12px;}
@@ -1603,7 +1411,7 @@ body.forge{font-family:'Barlow',system-ui,sans-serif;}
 body.forge .wordmark,body.forge .sp-word{
   font-family:'Big Shoulders Display','Barlow Condensed',sans-serif;font-weight:700;}
 body.forge .card-name,body.forge .s-title,body.forge .ex-n,body.forge .sheet h3,
-body.forge .ed-ex,body.forge .tut-t{font-family:'Marcellus',serif;font-weight:400;}
+body.forge .ed-ex{font-family:'Marcellus',serif;font-weight:400;}
 body.forge .sec-label,body.forge .sect-t,body.forge .swaphead,body.forge .finishbtn{
   font-family:var(--mono);font-weight:600;}
 body.forge .num,body.forge .ttime,body.forge .inp,body.forge .sp-tag,
@@ -1703,7 +1511,7 @@ body.moon .sheet p{font-weight:600;font-size:14.5px;line-height:1.6;}
 body.moon .ex-rest{font-weight:600;font-size:13px;}
 body.moon .notebox textarea{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-weight:500;}
 body.moon .wordmark,body.moon .sec-label,body.moon .card-name,body.moon .s-title,
-body.moon .ex-n,body.moon .sect-t,body.moon .sheet h3,body.moon .finishbtn,body.moon .tut-t,
+body.moon .ex-n,body.moon .sect-t,body.moon .sheet h3,body.moon .finishbtn,
 body.moon .ed-ex,body.moon .swaphead,body.moon .sp-word{
   font-family:'Marcellus',Georgia,serif;font-weight:400;}
 body.moon .num,body.moon .ttime,body.moon .inp,body.moon .sp-tag,
@@ -1720,7 +1528,7 @@ body.moon .pill{font-size:10px;letter-spacing:.05em;}
 body.moon .sp-word{font-size:25px;letter-spacing:.42em;}
 
 /* ===== ARCANUM ===== cold glass, classical serif, arcane cyan */
-.wordmark,.sec-label,.card-name,.s-title,.ex-n,.sect-t,.sheet h3,.finishbtn,.ed-ex,.swaphead,.tut-t{font-family:'Marcellus',serif;font-weight:400;}
+.wordmark,.sec-label,.card-name,.s-title,.ex-n,.sect-t,.sheet h3,.finishbtn,.ed-ex,.swaphead{font-family:'Marcellus',serif;font-weight:400;}
 .wordmark{font-size:24px;letter-spacing:.15em;text-transform:uppercase;}
 @media(max-width:400px){.wordmark{font-size:21px;letter-spacing:.12em;}}
 .sec-label{letter-spacing:.2em;text-transform:uppercase;font-size:12px;color:var(--txt2);}
@@ -2138,20 +1946,10 @@ body.moon .card-day::after{animation-duration:7.8s;}
    sitting in an open day repaints its row - and whatever is composited with it - for as long
    as the day is open. Ordinarily there is budget for that; with the tour's scrim, spotlight
    and scaled deck already on the bill there is not, which is why the cards flickered from
-   the step that opens a day onward and not before it. Off for the tour too. */
-.card.sealed .card-day::after,body.light .card-day::after,body.booting .card-day::after,
-body.tut .card-day::after,body.tut .dayglow{display:none;}
-/* The tour logs a set on the bench - it has to, that is the step - and from that moment the
-   week behind it is entitled to offer a level up, because readiness is exactly "you beat the
-   target you were given". So the arrows arrive halfway through somebody's first two minutes in
-   the app, pointing at a feature no step explains and the short tour never reaches.
-   The sandbox made it plainest: the one screen meant to show a stranger's first run was showing
-   progression prompts before the stranger had trained once. Off for the length of the tour. The
-   step list already blocks taps on .lvl, so this is that intent finished rather than a new one -
-   and nothing is lost, since the sandbox DB goes back to empty the moment the tour ends. */
-body.tut .lvl{display:none;}
+   the step that opens a day onward and not before it. */
+.card.sealed .card-day::after,body.light .card-day::after,body.booting .card-day::after{display:none;}
 .card.sealed .card-day,body.light .card-day,body.light .srow.ispr .inp,
-body.booting .card-day,body.tut .card-day,body.tut .srow.ispr .inp{animation:none;}
+body.booting .card-day{animation:none;}
 /* the mark keeps the same breath as the runes - and now by the same means.
    This used to animate the filter itself, which is a re-raster of the glyph on the main
    thread every single frame, forever, for as long as the app is open. body.booting held it
@@ -2357,10 +2155,6 @@ body.forge .bg-vig{background:radial-gradient(130% 100% at 50% 30%,transparent 4
    Today's column turns to embers. Empty days shrink to one thin row with a slim slot, still a
    place to tap or drop. A four-workout week fits one phone screen. */
 body.forge .daybox{display:block;position:relative;padding:0 0 0 54px;margin:0 0 8px;}
-/* v5.210: the tour's compact board (body.tut, written before this layout) reset the padding that
-   makes room for the day column, so the cards slid over SUN 20, MON 21 and the rest */
-body.forge.tut #weekCards .daybox{padding:0 0 0 54px;margin:0 0 8px;}
-body.forge.tut #weekCards .dayhead{padding:0;}
 body.forge .dayhead{position:absolute;left:0;top:0;bottom:0;width:46px;display:flex;flex-direction:column;align-items:stretch;padding:0;margin:0;box-sizing:border-box;
   border:1px solid #4a2c1c;border-radius:9px;background:#1a100b;}
 body.forge .dayhead > span:first-child{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;margin:0;top:0;
@@ -2601,7 +2395,7 @@ body.forge .preset{border-radius:999px;border:1px solid #4a2c1c;background:#130c
 body.forge .preset.sm{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;}
 body.forge .preset.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
 body.forge .mfilt .preset{min-height:38px;}
-/* rows: the picker, the swap list, the tour list */
+/* rows: the picker and the swap list */
 body.forge .swapitem{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:#fff6e6;}
 body.forge .swapitem.sel{border-color:var(--gold);background:rgba(255,138,31,.08);}
 body.forge .swaphead{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.18em;color:var(--gold);}
@@ -2698,19 +2492,6 @@ body.forge .hrow.hseal::after,body.forge .ez-card::after,body.forge .fbtn::after
   content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.45;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");}
 html.mo-off body.forge .sheet::after{display:none;}
-
-/* S3b (v5.180, owner's pick): the tour card is the finish screen's warm stamped plate, the step count as a
-   seal in the corner, the heading in Marcellus, NEXT as the ember pill. */
-body.forge #tutCard{background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;border-radius:14px;padding:16px 17px 14px;
-  box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 22px 50px -14px rgba(0,0,0,.85);}
-body.forge .tut-seal{position:absolute;right:46px;top:12px;width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg);
-  font-family:var(--mono);font-size:11px;color:var(--gold);box-shadow:0 0 14px -4px rgba(255,138,31,.7),inset 0 0 0 2px #120b08,inset 0 0 0 3px #6a3f26;}
-body.forge .tut-step{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--gold);}
-body.forge .tut-t{font-family:'Marcellus',serif;font-weight:400;font-size:18px;color:#fff6e6;margin-right:92px;}
-body.forge .tut-b{color:var(--txt2);opacity:1;}
-body.forge .tut-btns .btn{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;}
-body.forge .tut-btns .btn-go{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;font-weight:400;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
-body.forge .tut-x{color:var(--txt3);}
 
 /* ---- Cold iron, v5.191 (owner picked A). Two weeks that look identical are two weeks you cannot
    tell apart, so the week that is NOT this one is drawn cold: the forge is banked. One hue turn on
@@ -3637,7 +3418,6 @@ body.wcon{overflow:hidden;}
   <div class="sec-row"><div class="sec-label" id="weekLabel">Your Week</div><div class="wk-flip" id="weekFlip" onclick="twoFlip()" hidden></div></div>
   <div class="mk-hint" id="weekHint"></div>
   <div id="weekCards"></div>
-  <!-- label, hint and cards are one thing to look at, so the tour can light them as one -->
   <div class="sides" id="sides"></div>
   <div class="foot" id="foot"></div>
 </div>
@@ -3869,41 +3649,6 @@ body.wcon{overflow:hidden;}
     <div class="sheet-head"><h3>Add an exercise</h3><button class="sheet-x" onclick="closeOvl('exAddOvl')" aria-label="Close">&times;</button></div>
     <input class="mk-in" id="exAddSearch" placeholder="Search the library" oninput="exAddList()" autocomplete="off">
     <div class="swaplist" id="exAddList" style="margin-top:12px"></div>
-  </div>
-</div>
-
-<div id="tutHole"><i></i><i></i><i></i><i></i></div>
-<div id="tutPing"></div>
-<div id="tutCard">
-  <!-- The way out is the pattern every app uses: a quiet X in the top corner, there from
-       the first frame. It asks before it acts (tutAskEnd) - one accidental tap must not
-       throw the tour away. -->
-  <div class="tut-x" id="tutX" onclick="tutAskEnd()" title="End the tour"><svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15"/></svg></div>
-  <div class="tut-seal" id="tutSeal" aria-hidden="true"></div>
-  <div class="tut-step" id="tutStep"></div>
-  <div class="tut-t" id="tutT"></div>
-  <div class="tut-b" id="tutB"></div>
-  <div class="tut-nudge" id="tutNudge"></div>
-  <!-- The rest alert is the one setting worth meeting before you need it: the first time it goes
-       off you are in a gym with headphones in, and that is the wrong moment to find out it is
-       too loud. It is the real control - setAlertLvl, the same one Settings calls - so moving it
-       here sticks, and the copy says where to find it again. -->
-  <div class="tut-vol slider-row" id="tutVol" style="display:none">
-    <span class="tut-vol-l">Volume</span>
-    <input type="range" id="tutVolRange" min="0" max="10" step="1"
-      oninput="setAlertLvl(this.value,true)" onchange="setAlertLvl(this.value)">
-    <span class="slider-num num" id="tutVolNum"></span>
-  </div>
-  <!-- BACK sits on the left with an arrow, where a back control is expected and scanned for;
-       NEXT keeps the right edge. End tour lives INSIDE the card, on its own centred row
-       beneath the buttons - it tried standing outside (v4.165) and its seat had to dodge
-       the card and the spotlight, which put it somewhere different on nearly every step.
-       One fixed seat beats a clever moving one. -->
-  <div class="tut-btns">
-    <div class="btn tut-back" id="tutBack" onclick="tutBack()" style="display:none"><svg viewBox="0 0 20 20"><path d="M12 4l-6 6 6 6"/></svg>BACK</div>
-    <span class="tut-wait" id="tutWait" style="display:none"></span>
-    <div class="btn" id="tutSfx" onclick="tutSample()" style="display:none">HEAR IT</div>
-    <div class="btn btn-go" id="tutNext" onclick="tutAdvance()">NEXT</div>
   </div>
 </div>
 
@@ -10158,7 +9903,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.277';
+var APPV='v5.278';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10187,7 +9932,7 @@ var saveT=null;
 // the session came back empty and reconcileActive then deleted the stub outright.
 function persistNow(){
   clearTimeout(saveT);saveT=null;
-  if(TUTON||SANDBOX)return;   // both run on a swapped-in DB; nothing they do may reach storage
+  if(SANDBOX)return;   // both run on a swapped-in DB; nothing they do may reach storage
   try{Store.set(KEY,DB);}catch(e){}
   try{localStorage.setItem(KEY+':bak',JSON.stringify({t:Date.now(),db:DB}));}catch(e){}
 }
@@ -10203,7 +9948,7 @@ function saveDB(){persistNow();}
 var VERCHK=0;
 // v5.182: busy means something is really in the way right now, not that a day was ever opened.
 function verBusy(){
-  if(TUTON||SANDBOX||sessionOpen()||document.querySelector('.ovl.on'))return true;
+  if(SANDBOX||sessionOpen()||document.querySelector('.ovl.on'))return true;
   if(typeof timerInt!=='undefined'&&timerInt)return true;      // a rest is counting on the week
   if(typeof SESSEDIT!=='undefined'&&SESSEDIT)return true;      // a just-today edit lives only in memory
   return ['make','ez','welcome'].some(function(id){var e=document.getElementById(id);return !!(e&&e.classList.contains('on'));});
@@ -11469,11 +11214,11 @@ function easeArm(){
 function easeArmed(){
   try{return !!(DB&&DB.impCheck);}catch(e){return false;}
 }
-// One notice, at the start, only when there is something to say. Never during the tour, never in
-// the sandbox, and never twice for the same list.
+// One notice, at the start, only when there is something to say. Never in the sandbox, and
+// never twice for the same list.
 function easeNotice(){
   try{
-    if(TUTON||SANDBOX)return;
+    if(SANDBOX)return;
     var all=easeAll();
     if(!all.length)return;
     // Not imported, so whatever is here is a raise this app made and the lifter has been short
@@ -12302,7 +12047,7 @@ function weekAllDone(){
 // turnover, and without a word that quiet reset could read as lost work. Said once per
 // week, and only when last week actually ended with locked days.
 function weekHello(){
-  if(TUTON||SANDBOX)return;
+  if(SANDBOX)return;
   if(document.querySelector('.ovl.on'))return;
   var ws=String(weekStartTs()),seen='';
   try{seen=localStorage.getItem('arc_wkhello')||'';}catch(e){}
@@ -12347,7 +12092,7 @@ function weekHello(){
 // the week itself, so next week's finish asks again.
 var REOPENKEY='arc_reopenasked';
 function offerReopen(){
-  if(TUTON||SANDBOX)return;                      // both run on a swapped-in DB
+  if(SANDBOX)return;                      // both run on a swapped-in DB
   if(document.querySelector('.ovl.on'))return;   // never on top of something already open
   if(!weekAllDone())return;
   var wk=String(weekStartTs()),seen='';
@@ -12921,7 +12666,7 @@ function renderHome(){
   var pnx=nextUpDay(),n0=0;
   // A week with nothing on it, nothing logged and nothing saved gets one line of direction, the
   // thing "I know what I'm building" used to land on without (v5.101).
-  var bare=!DAYS.some(function(d){return (DB.days[d.k]||[]).length;})&&!(DB.logs||[]).length&&!(DB.extra||[]).length&&!TUTON&&!SANDBOX;
+  var bare=!DAYS.some(function(d){return (DB.days[d.k]||[]).length;})&&!(DB.logs||[]).length&&!(DB.extra||[]).length&&!SANDBOX;
   // The only direction an empty board gives, so it has to point at something real (v5.269).
   // It used to say "Forge me a week further down" and there has been nothing further down
   // since v5.260 turned the fold into a sheet. A whole week is forged from Saved workouts;
@@ -12986,8 +12731,8 @@ function renderHome(){
   mkBindCards();
   cardBind();
   syncPumpBtn();
-  // The "hold a workout to edit it" hint retired (Aug 22): the tutorial teaches the hold,
-  // and a permanent instruction on the week screen was furniture, not help.
+  // The "hold a workout to edit it" hint retired (Aug 22): a permanent instruction on the
+  // week screen was furniture, not help. The just in time hint below teaches it instead.
   document.getElementById('weekHint').style.display='none';
   // The hold is the one gesture in the app that cannot be seen, so it is taught the first time
   // there is something to hold. An empty board gets nothing: a hint about holding a workout you
@@ -13264,7 +13009,7 @@ function hintGot(){
 // NOT called hint(): renderHome has a local `var hint=` for the empty board's footnote,
 // which shadowed this and made the call throw silently into its own catch (v5.273).
 function showHint(k,scr){
-  if(hintsOff()||TUTON||SANDBOX||!HINTS[k]||hintSeen(k)||HINTNOW)return;
+  if(hintsOff()||SANDBOX||!HINTS[k]||hintSeen(k)||HINTNOW)return;
   // Not during the arrival. renderHome runs behind the splash and behind the welcome, so the
   // very first hint appeared over a man who had not answered the safety questions yet. Nothing
   // is taught until he is actually looking at his own week (v5.273).
@@ -13321,7 +13066,7 @@ function renderSession(){
       var L=lastFor(rf.exId),ready=isReady(rf.exId,tg,rf.id),bst=bestEver(rf.exId);
       html+='<div class="exc'+(allDone?' alldone':'')+'" id="exc-'+id+'">';
       // ex-body groups everything a press-and-hold actually acts on - the name and the
-      // target/last/best under it - so the tour has one box to ring. Ringing the name alone read
+      // target/last/best under it - as one box. Ringing the name alone read
       // as "rename this"; the hold changes the exercise, not what it is called. It stops short of
       // the links row below on purpose: Instructions and Add note are not part of what a hold does.
       html+='<div class="ex-h"><div class="ex-body"><div class="ex-nrow">'+DRAGSVG+'<div class="ex-n">'+esc(r.name)+(rf.swapId?' <span style="color:var(--gold);font-size:11px;font-weight:500">SWAPPED</span>':'')+'</div>'+
@@ -13671,15 +13416,10 @@ function toggleSet(id,i,rest,unit){
       // gold and flared, because it is the best you have done it; what it stops doing is
       // sounding like one. A fanfare for turning up is a fanfare that means nothing by the
       // third exercise of a new program, which is when it fires most.
-      // The tour keeps the ordinary sound. A record fanfare is the reward for beating something,
-      // and in the tour you have beaten nothing - the sample data just happens to grade that way.
-      // Hearing it as your FIRST completion sound teaches the wrong thing twice over: it sets the
-      // fanfare as the normal noise, and it spends the moment before there is anything to spend
-      // it on. The flare still shows; only the sound is held back.
       // Gold always sounds like gold (owner, 12 Sep 2026): beating last session earns the same
       // fanfare as a lifetime best. Two golds that sounded different were one gold too many.
       // A first-ever set stays quiet, as above.
-      if((gr==='pr'||gr==='up')&&!TUTON){sfxPR();vib([40,60,40,60,140]);}
+      if(gr==='pr'||gr==='up'){sfxPR();vib([40,60,40,60,140]);}
       else{sfxLog();vib(35);}
       if(cb){
         cb.classList.remove('flare','pr');void cb.offsetWidth;
@@ -14003,11 +13743,6 @@ function mkBindCards(){
       }
       LP.fired=false;LP.x=ev.clientX;LP.y=ev.clientY;
       clearTimeout(LP.t);
-      // The tour hands the whole Tuesday card to the fence so it can be tapped open, and a
-      // press held on it was reaching the reshape sheet through that same opening. No step
-      // asks to reshape a week card, so the gesture is not armed at all while the tour runs.
-      // The exercise hold in bindExHold is left alone - one step does ask for that one.
-      if(TUTON)return;
       LP.t=setTimeout(function(){
         LP.fired=true;
         try{if(navigator.vibrate)navigator.vibrate(14);}catch(e){}
@@ -14047,7 +13782,7 @@ var DFDAY=null,DFKIT=null;
 function openNewDay(k){
   // Any day, not just an empty one (v5.231). A day that already holds a workout can take a second,
   // and there is no reason the app cannot build that one too.
-  if(k&&!TUTON&&!SANDBOX)  {dfAsk(k);return;}
+  if(k&&!SANDBOX){dfAsk(k);return;}
   openNewDayNow(k);
 }
 function dfAsk(k){
@@ -14289,7 +14024,7 @@ function moveWeekLogs(id,from,to){
 // The same correction, for a week that was already left in that state before this shipped.
 function bonusHeal(){
   try{
-    if(TUTON||SANDBOX||twoOff())return 0;
+    if(SANDBOX||twoOff())return 0;
     var ws=weekStartTs(),we=ws+7*864e5,n=0;
     (DB.logs||[]).forEach(function(L){
       if(!L||!L.sealed||L.unsealed||L.marked||!L.wk||L.wk==='*')return;
@@ -14425,7 +14160,7 @@ function dsCard(id,dk){
     '<span class="card-r">'+pill+'</span></div></div>';
 }
 function openDay(k){
-  if(!k||TUTON)return;
+  if(!k)return;
   DSDAY=k;
   var d=null;DAYS.forEach(function(x){if(x.k===k)d=x;});
   if(!d)return;
@@ -15772,10 +15507,7 @@ function renderSummary(s){
   // What you never got to, said once (v5.261). No count, no colour, no tap: the wrist stopped
   // putting you back on a machine somebody else was using, and this is the whole of the
   // bookkeeping that replaces it.
-  // TUTON, like the level-up line below (v5.267). The tour's sample day is DESIGNED to be left
-  // unfinished, so this told a first time user they had failed three lifts nobody asked them to
-  // do. "The tour is a sealed space" is the rule and this walked straight through it.
-  var ms=document.getElementById('finMiss'),miss=TUTON?[]:(s.miss||[]);
+  var ms=document.getElementById('finMiss'),miss=(s.miss||[]);
   if(ms){
     ms.hidden=!miss.length;
     if(miss.length){
@@ -15788,8 +15520,7 @@ function renderSummary(s){
   }
   // The raise you earned, offered right here (v5.150). Later is DONE; the arrow waits on the board.
   var lv=document.getElementById('finLvl'),n=0;
-  // v5.212: never inside the tour, which is a sealed space; its seed data trips isReady
-  try{n=TUTON?0:levelPlan(FINWK).length;}catch(e){}
+  try{n=levelPlan(FINWK).length;}catch(e){}
   lv.hidden=!n;
   if(n)document.getElementById('finLvlT').innerHTML='Level up <b class="fin-x">× '+n+'</b>';
   // The first real session gets the one place the colours are explained (v5.99).
@@ -15808,11 +15539,8 @@ function finishSession(){
   }
   // Finishing seals the day until the week turns over, so a mis-tap here used to cost the
   // rest of the workout with no way back. Zero logged already had a guard; partway now asks.
-  // Not during the tour: its sample day always has sets left, the step explicitly says to
-  // finish, and tutStray sweeps askOvl shut on the next tick anyway - the question would
-  // flash away unanswered and strand the step. Caught exactly that way on the device.
   var left=totalSets(wk)-loggedCount(wk);
-  if(left>0&&!TUTON){
+  if(left>0){
     ask(left+' set'+(left===1?' is':'s are')+' still unlogged. Finish now and this day is locked in as it stands until the week turns over.',
       finishGate,'Finish with '+left+' left?','FINISH');
     return;
@@ -15824,7 +15552,7 @@ function finishSession(){
 // putting the plan back afterwards - today already ran the new shape either way.
 function finishGate(){
   var wk=CUR;
-  if(SESSEDIT&&SESSEDIT.wk===wk&&!TUTON&&JSON.stringify(DB.custom[wk]||null)!==SESSEDIT.snap){
+  if(SESSEDIT&&SESSEDIT.wk===wk&&JSON.stringify(DB.custom[wk]||null)!==SESSEDIT.snap){
     var snap=SESSEDIT.snap;
     ask('You changed this workout during the session. Today counts either way.',
       function(){SESSEDIT=null;finishNow();},
@@ -16649,7 +16377,7 @@ function autoBkToggle(){
   if(on)autoBk(true);
 }
 function autoBk(first){
-  if(SANDBOX||TUTON)return;   // never write borrowed data over a real safety copy
+  if(SANDBOX)return;   // never write borrowed data over a real safety copy
   if(!autoBkOn()||!autoBkAvail())return;
   var slot='a';
   try{slot=localStorage.getItem('arc_autobk_slot')==='a'?'b':'a';localStorage.setItem('arc_autobk_slot',slot);}catch(e){}
@@ -16679,7 +16407,7 @@ function autoBk(first){
 // One nudge, once ever: real history, no backup of any kind, and this phone the only place
 // it exists. Whatever is answered, it never comes back - Settings holds the door open.
 function bkNudge(){
-  if(SANDBOX||TUTON)return;
+  if(SANDBOX)return;
   try{
     if(localStorage.getItem('arc_bknudge'))return;
     if(autoBkOn()||localStorage.getItem('arc_lastbk'))return;
@@ -17331,7 +17059,7 @@ function ntFix(){
 // answered already never sees it again, and whoever refused gets ntNudge instead, which offers
 // the way back through the phone's settings.
 function notifGate(){
-  if(SANDBOX||TUTON)return;
+  if(SANDBOX)return;
   if(!isNative()){ntNudge();return;}
   var ln=LN();
   if(!ln){ntNudge();return;}
@@ -17346,7 +17074,7 @@ function notifGate(){
   }catch(e){ntNudge();}
 }
 function ntNudge(){
-  if(SANDBOX||TUTON)return;
+  if(SANDBOX)return;
   try{if(localStorage.getItem('arc_ntnudge'))return;}catch(e){}
   var ra=RA();
   if(!ra||!ra.notifState)return;
@@ -18142,7 +17870,7 @@ function leaveSession(){
   stopHold();resetHoldState();
   // a browsed day that was never touched leaves nothing behind - no ghost half-open session
   var A=CUR&&DB.active&&DB.active[CUR];
-  if(!TUTON&&A&&loggedCount(CUR)===0&&!A.note&&!A.start&&!A.edit&&Object.keys(A.swaps||{}).length===0){
+  if(A&&loggedCount(CUR)===0&&!A.note&&!A.start&&!A.edit&&Object.keys(A.swaps||{}).length===0){
     delete DB.active[CUR];saveDB();
   }
   renderHome();
@@ -18155,7 +17883,6 @@ var BACK_RULES=[
   {n:'splash',       when:function(){return !splashGone;},                              act:function(){dismissSplash();}},
   {n:'the ritual',   when:function(){return onScr('ez');},                              act:function(){ezBack();}},
   {n:'the welcome',  when:function(){return onScr('welcome');},                         act:function(){wcBack();}},
-  {n:'the tour',     when:function(){var o=topOvl();return TUTON&&!(o&&o.id==='askOvl');},act:function(){if(TUTI>0)tutBack();else tutAskEnd();}},
   {n:'a night in the history',when:function(){return tops('histOvl')&&HIST.sel!==null;},act:function(){histBack();}},
   {n:'the sheet on top',when:function(){return !!topOvl();},                            act:function(){backCloses(topOvl().id);}},
   {n:'a session',    when:function(){return sessionOpen();},                            act:function(){leaveSession();}},
@@ -18618,14 +18345,6 @@ function sfxRestTest(){try{sfxRest();}catch(e){}}
 function drawAlertLvl(){
   var e=document.getElementById('alertLvl');if(!e)return;
   var r=document.getElementById('alertRange'),n=document.getElementById('alertNum');
-  // The tour carries the same control, so both faces of it move together and neither can show a
-  // number the app is not actually set to.
-  var tr=document.getElementById('tutVolRange'),tn=document.getElementById('tutVolNum');
-  if(tr){
-    if(tr.value!=String(ALERT_LVL))tr.value=ALERT_LVL;
-    tr.style.setProperty('--fill',(ALERT_LVL/ALERT_MAX*100)+'%');
-  }
-  if(tn)tn.textContent=alertMuted()?'MUTED':String(ALERT_LVL);
   if(r&&r.value!=String(ALERT_LVL))r.value=ALERT_LVL;
   // WebKit has no ::-moz-range-progress, so the filled part of the track is painted as a hard
   // gradient stop and this is where the stop sits.
@@ -19210,7 +18929,6 @@ function notifLive(){
 }
 function restAlert(){
   stopRestAlert();
-  if(TUTON)return;   // the tour starts a real rest so you can watch it; it must not fire
   // Hidden, or the context went to sleep anyway.
   var bg=(document.visibilityState!=='visible')||(actx&&actx.state!=='running');
   // In front of you the app's own phrase is worth more than a system ping, so the notice goes up
@@ -19629,7 +19347,7 @@ var WEARFOCUS=null;
 // phone; a swap is the one structural change that happens mid-session with the phone in a bag.
 var WEARSWAP=null;
 function wearSwapList(rowId){
-  if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
+  if(!CUR||!DB.active[CUR]||SANDBOX)return;
   // rowId is the slot. The watch swaps a block the same way the phone does, but every lookup
   // below is a library one, so they all read the base.
   var bId=slotBase(rowId);
@@ -19647,7 +19365,7 @@ function wearSwapList(rowId){
   wearPush();
 }
 function wearSwap(rowId,k){
-  if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
+  if(!CUR||!DB.active[CUR]||SANDBOX)return;
   swapTarget=rowId;
   doSwap(k||null);
   WEARSWAP=null;
@@ -19835,7 +19553,7 @@ function wearSaved(){
   return out;
 }
 function wearOpen(id){
-  if(SANDBOX||TUTON)return;
+  if(SANDBOX)return;
   var openWk=null;
   for(var k in (DB.active||{})){openWk=k;break;}
   if(openWk){
@@ -19901,7 +19619,7 @@ function wearDetail(id){
 }
 function wearPush(detailId){
   var wr=WR();
-  if(!wr||SANDBOX||TUTON)return;      // never drive a wrist from borrowed data
+  if(!wr||SANDBOX)return;      // never drive a wrist from borrowed data
   var st={open:false,week:wearWeek(),saved:wearSaved()};
   if(detailId){var d=wearDetail(detailId);if(d)st.detail=d;}
   var nx=wearNext();
@@ -20013,7 +19731,7 @@ function wearBind(){
 // The refusal to switch away from a session already running is kept exactly as it is - that
 // is a real question and the phone still asks it.
 function wearStartAt(id,rowId,setIdx,w,r){
-  if(SANDBOX||TUTON)return;
+  if(SANDBOX)return;
   var openWk=null;
   for(var k in (DB.active||{})){openWk=k;break;}
   if(openWk&&openWk!==id){wearOpen(id);return;}   // something else is running: wearOpen says so
@@ -20026,7 +19744,7 @@ function wearStartAt(id,rowId,setIdx,w,r){
   else wearPush();
 }
 function wearDoLog(id,i,w,r){
-  if(!CUR||!DB.active[CUR]||SANDBOX||TUTON)return;
+  if(!CUR||!DB.active[CUR]||SANDBOX)return;
   var nx=wearNext();
   if(!nx)return;
   // Only ever the set the watch was actually showing. If the phone has moved on since -
@@ -20190,7 +19908,7 @@ function hcSyncNow(){
 }
 function hcSync(manual){
   var hs=HS();if(!hs)return;
-  if(SANDBOX||TUTON)return;   // never write borrowed data into a stand-in DB
+  if(SANDBOX)return;   // never write borrowed data into a stand-in DB
   var last=+localStorage.getItem(KEY+':hcsync')||0;
   if(!manual&&Date.now()-last<600000)return;   // quiet syncs at most every ten minutes
   hs.granted().then(function(g){
@@ -20334,7 +20052,6 @@ function nativeCancel(){
   try{ln.cancel({notifications:[{id:NATIVE_REST_ID}]});}catch(e){}
 }
 function pushNotif(title,body,extra){
-  if(TUTON)return;
   if(!NOTIF_ON)return;
   if(isNative())return;        // scheduled natively at rest start; nothing to post from here
   if(typeof Notification==='undefined'||Notification.permission!=='granted')return;
@@ -20870,18 +20587,11 @@ function startTimer(secs,exName){
   var span=secs*1000;
   // Handed to Android now rather than fired by the page later. If the app is killed mid-rest the
   // alert still lands, which the web path could never promise.
-  // Nothing is handed to Android while the tour is running. The tour starts a REAL rest so the
-  // pill can be watched counting down, and these three give the alert to the OS at the moment it
-  // starts. restAlert() refusing to fire covers the page, but it cannot recall an alarm already
-  // handed over - so two minutes after a tour that promised silence, the phone buzzed for a rest
-  // that had never existed.
-  if(!TUTON){
-    if(NOTIF_ON)nativeSchedule(secs);
-    // The buzz and the notice come from the channel; the sound comes from ours. Two alarms for one
-    // rest, because Android will not let one thing do both.
-    if(SFX_ON&&!alertMuted())nativeSound(secs);
-    nativeTimer(secs);
-  }
+  if(NOTIF_ON)nativeSchedule(secs);
+  // The buzz and the notice come from the channel; the sound comes from ours. Two alarms for one
+  // rest, because Android will not let one thing do both.
+  if(SFX_ON&&!alertMuted())nativeSound(secs);
+  nativeTimer(secs);
   startFlame();
   function tick(){
     flFrac=Math.max(0,(timerEnd-Date.now())/span);
@@ -21122,8 +20832,6 @@ function openSettings(){
   scrapApply();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
-  // The two tour buttons say which LENGTH they are, so the theme's word for "Tutorial" no longer
-  // overwrites them - it was turning "Full tour" back into "Tutorial" on every open.
   document.getElementById('settingsOvl').classList.add('on');
 }
 
@@ -21851,875 +21559,6 @@ function bindExHold(){
   });
 }
 
-// ============================================================
-// GUIDED TOUR
-// ============================================================
-// The whole app renders from one global DB, so the tour swaps in a seeded one and
-// blocks every write (see persistNow). Nothing tapped in here can reach storage, which
-// is what lets the tour run over the real screens instead of a mock-up of them.
-var TUTON=false,TUTI=0,TUTMAX=0,TUTDB=null,TUTPOLL=null,TUTRAF=0,TUTARM=true;
-// Whether the one action a step asks for has already been taken. See the latch in tutGuard.
-var TUTHIT=false,TUTDW=0;
-// A step already walked is a step already done, so going back cannot re-trigger it: below
-// the furthest point reached the tour is a read-only replay - no gates, no reopening
-// sheets, NEXT always available - and normal gating resumes at the frontier.
-function tutRev(){return TUTI<TUTMAX;}
-
-function tutSeed(){
-  function d(n){var x=new Date();x.setDate(x.getDate()-n);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
-  function S(a){return a.map(function(p){return {w:p[0],r:p[1],unit:'',g:'match'};});}
-  // Three workouts, not a filled week (Aug 22). A board with something on all seven days read
-  // as "this is what the app expects of you"; two lifting days and a cardio day say the same
-  // things lighter. The numbers are deliberately modest for the same reason: the old sample
-  // benched 140 and asked you to make it 150, and anyone nowhere near that read the example
-  // as a standard they had already failed. Dumbbell bench at 20 going to 25 teaches the
-  // identical lesson and excludes nobody.
-  // Dumbbell bench tops out at 20x10 two weeks in, so taking it to 25 during the tour is a
-  // real record against real stored history - the grading demo is not faked.
-  // The sample days live in TUT_DAYS (injected into W by tutStart), NOT in custom - see there.
-  return {
-    logs:[
-      {day:'t1',date:d(16),entries:{dbbench:S([[15,10],[15,10],[15,9]]),dbfly:S([[10,12],[10,12],[10,11]]),dblat:S([[8,12],[8,12],[8,12]]),rope:S([[15,12],[15,12],[15,11]])},note:'',swaps:{}},
-      {day:'t3',date:d(14),entries:{latpd:S([[35,10],[35,10],[35,9]]),machrow:S([[35,10],[35,10],[35,10]]),bbcurl:S([[15,10],[15,10],[15,9]])},note:'',swaps:{}},
-      {day:'t1',date:d(9),entries:{dbbench:S([[20,8],[20,8],[20,7]]),dbfly:S([[15,12],[15,11],[15,11]]),dblat:S([[10,12],[10,12],[10,11]]),rope:S([[20,12],[20,11],[20,11]])},note:'',swaps:{}},
-      {day:'t3',date:d(7),entries:{latpd:S([[40,10],[40,10],[40,9]]),machrow:S([[40,10],[40,10],[40,9]]),bbcurl:S([[20,10],[20,9],[20,9]])},note:'',swaps:{}},
-      {day:'t1',date:d(2),entries:{dbbench:S([[20,10],[20,10],[20,10]]),dbfly:S([[15,12],[15,12],[15,12]]),dblat:S([[10,12],[10,12],[10,12]]),rope:S([[20,12],[20,12],[20,12]])},note:'Best push day yet.',swaps:{}}
-    ],
-    // The week is stated outright. This used to carry only the old {slots:{}} shape and the week
-    // appeared at all because dayMap's migration happened to rebuild it from WEEK - and that
-    // migration exists to be deleted one day. When it goes, a seed carrying the old shape opens
-    // the tour on an empty week with no Tuesday to tap and no way to notice until it happens.
-    days:{sun:[],mon:[],tue:['t1'],wed:[],thu:['t2'],fri:[],sat:['t3']},
-    extra:[],
-    custom:{},
-    active:{},slots:{},plan:[],cex:{},up:{},upSkip:{},dayEdit:{},vOvr:{},exNotes:{},walks:[],walkRun:null
-  };
-}
-// The tour's three sample days. Injected straight into W for the tour's duration (tutStart)
-// and lifted back out at tutEnd - deliberately NOT seeded as customs: a hold on a custom
-// day's exercise routes into the full builder (openExEdit -> sessionEdit), while the tour's
-// hold steps teach the small exercise sheet that only library days open. Seeded as customs,
-// step seven opened the builder underneath the scrim and stranded the whole tour - found
-// live on the device, which is why this comment is this specific.
-var TUT_DAYS={
-  t1:{name:'Push Day',tag:'Sample',color:'#c8794a',time:'~40 min',
-    sections:[{title:'Chest, shoulders and triceps',ss:false,rows:[
-      ['dbbench',{sets:'20x10\n20x10\n20x10',rest:'90 sec'}],
-      ['dbfly',{sets:'15x12\n15x12\n15x12',rest:'60 sec'}],
-      ['dblat',{sets:'10x12\n10x12\n10x12',rest:'60 sec'}],
-      ['rope',{sets:'20x12\n20x12\n20x12',rest:'60 sec'}]]}]},
-  t2:{name:'Cardio',kind:'cardio',tag:'Sample',color:'#4fb8a0',time:'~30 min',
-    sections:[{title:'Straight sets',ss:false,rows:[
-      ['walk',{sets:'30 min',rest:''}]]}]},
-  t3:{name:'Pull Day',tag:'Sample',color:'#5b8fb9',time:'~40 min',
-    sections:[{title:'Back and biceps',ss:false,rows:[
-      ['latpd',{sets:'40x10\n40x10\n40x10',rest:'90 sec'}],
-      ['machrow',{sets:'40x10\n40x10\n40x10',rest:'90 sec'}],
-      ['bbcurl',{sets:'20x10\n20x10\n20x10',rest:'60 sec'}]]}]}
-};
-
-// Shape is shared; only the words change per theme. A new world adds one copy block.
-// sel   - what the spotlight lights up (kept wide enough to stay readable)
-// hit   - what the fence lets you tap; everything else shakes the card instead
-// ping  - the one control the pulsing ring sits on
-// quiet - a step that asks for nothing: taps are still swallowed, but in silence
-// sweep - the highlight arrives around the whole week and closes onto this step's target
-// Two tours out of one set of steps. A fifteen step tour asked for more attention than a new
-// user has before their first set, and completion of a linear tour falls away fast past about
-// six. So the first run offers the CORE: see the week, open a day, log a set, watch the rest,
-// finish, read the export, done. Everything else - the exercise sheet, notes - is still there
-// under Tutorial in Settings for anyone who wants the whole thing.
-// The subset is built at start rather than threaded through the engine as an indirection,
-// because every part of the tour indexes TUT_STEPS directly and one shared index is one thing
-// to get wrong. Filter once, and the rest of the code cannot tell the difference.
-var TUT_CORE=[0,1,4,5,12,13,14];
-var TUT_STEPS,TUT_SCENE,TUT_COPY;
-function tutBuild(core){
-  // The four theme scripts are FOURTEEN steps and TUT_ALL is sixteen: they were written before
-  // the last two steps existed, and the only reason nobody has seen it is that GENERIC bypasses
-  // them entirely. Turn the themes back on with that gap open and TUT_COPY[14] is undefined -
-  // which is the LAST step of the FIRST-RUN tour, so it would land on a new install first.
-  // Any index a theme has not written borrows the generic words rather than nothing, so a short
-  // theme script can never strand the tour again, and a theme can be filled in a line at a time.
-  var themed=TUTC().steps;
-  var copy=TUT_ALL.map(function(_,i){return themed[i]||GEN_TUT.steps[i];});
-  if(core){
-    TUT_STEPS=TUT_CORE.map(function(i){return TUT_ALL[i];});
-    TUT_SCENE=TUT_CORE.map(function(i){return TUT_SCENE_ALL[i];});
-    TUT_COPY =TUT_CORE.map(function(i){return copy[i];});
-  }else{
-    TUT_STEPS=TUT_ALL;TUT_SCENE=TUT_SCENE_ALL;TUT_COPY=copy;
-  }
-}
-// Whichever sequence is running, the end of it is the end. Read from the length rather than a
-// flag on one particular step, or the core tour would run off the end looking for a DONE that
-// only the full tour's last step carries.
-function tutLast(){return TUTI===TUT_STEPS.length-1;}
-var TUT_ALL=[
-  // Nothing is being asked for yet, so nothing here is wrong: a tap while you are still
-  // taking the week in used to shake the card and tell you off before you had been given
-  // anything to do. It is swallowed all the same - the next step is the one that opens a day.
-  {sel:'#weekCards',pad:6,quiet:true,nudge:'Read this, then tap NEXT.'},
-  // The opening spans the whole DAY BOX, weekday label included - the copy says "on
-  // Tuesday", so Tuesday must be readable inside the light, not cut in half at its edge
-  // (audit, Aug 22). Only the card itself stays tappable.
-  {sel:'#weekCards .daybox[data-day="tue"]',hit:'#weekCards .card[data-base="t1"]',sweep:true,once:true,
-   w:'Waiting for Push Day',nudge:'Not that one. Push Day is the card in the highlight.',
-   when:function(){return document.getElementById('session').classList.contains('on');}},
-  // The whole exercise is lit, not the one row. Lighting a single set row left the grid floating
-  // with no sign of which exercise it belonged to; the ring on the weight still says exactly
-  // where to tap.
-  {sel:'#exc-dbbench',pad:6,hit:'#w-dbbench-0',ping:'#w-dbbench-0',once:true,
-   w:'Waiting for the weight',nudge:'Tap the weight in the highlight.',
-   when:function(){return tutOn('editOvl');}},
-  {sel:'#editOvl .edsheet',pad:10,ovl:'editOvl',hit:'#editOvl .edsheet|#w-dbbench-0',ping:'#editOvl .btn-go',
-   reopen:true,w:'Waiting for 25 or more',nudge:'It has to reach 25 before DONE will take it.',
-   when:function(){return !tutOn('editOvl')&&tutW()>=25;}},
-  // The opening frames the one EXERCISE, not the whole session (user note, Aug 23: a hole
-  // the size of the screen dims nothing, which reads as no emphasis at all). The rest of
-  // the workout stays readable behind the scrim, the pulsing box on the ROW keeps the
-  // emphasis where the words point, and the anvil stays the only thing the fence lets through.
-  // No once here: the anvil is a TOGGLE. Stepping back and tapping it off spent the one
-  // allowed tap, and the fence then refused the tap that would have turned it back on
-  // (user note, Aug 23). dwell holds the page for a moment after the set is marked, so the
-  // grade the tap just earned is actually seen before the timer step arrives.
-  {sel:'#exc-dbbench',pad:6,hit:'#sr-dbbench-0 .chk',ping:'#sr-dbbench-0',dwell:1500,hidePill:1,
-   w:'Waiting for the anvil',nudge:'Tap the anvil at the end of the highlighted row.',
-   when:function(){var e=document.getElementById('sr-dbbench-0');return !!(e&&e.classList.contains('done'));}},
-  // The only step whose subject can leave on its own: the rest runs out, the pill hides itself
-  // four seconds later, and the card is left describing a timer that is no longer on screen.
-  // Nothing rebuilds it, because a pill is not an overlay - hence keep rather than ovl.
-  // dim:true deepens the scrim for this one step (user note, Aug 23): the pill floats over
-  // the session's own rows, and at the normal dimness the two fought for the eye. The pad
-  // is tight for the same reason - less of the busy backdrop inside the opening.
-  {sel:'#timerPill',pad:4,dim:true,sample:true,keep:function(){tutRest();},
-   nudge:'Tap NEXT when you have had a look.'},
-  // The ring sits on ex-body: the name AND the target/last/best under it, which is the region a
-  // hold actually responds to. Around the whole block it read as "hold anywhere in here" when the
-  // weights and sigils are fenced off; around the name alone it read as "rename this". It is the
-  // exercise being changed, so the ring is drawn around the exercise's details.
-  // 'a' is in the block list to match bindExHold. Without it a tap on Instructions inside the
-  // handed-over card opened an external page in the middle of the tour.
-  {sel:'#exc-dbbench',pad:6,hit:'#exc-dbbench',ping:'#exc-dbbench .ex-body',
-   block:'input,button,textarea,a,.chk,.hold,.ex-swap,.lvl,.exdrag',
-   w:'Waiting for the hold',nudge:'Hold inside the highlight, away from the grip, the arrows and the links.',
-   when:function(){return tutOn('exEditOvl');}},
-  // One sheet, three steps. It used to be a single card listing all three things you can change,
-  // which is a list to read rather than three controls to find. The sheet stays lit the whole way
-  // through and the ring walks down it, so each one is pointed at where it actually sits.
-  {sel:'#exEditOvl .sheet',pad:10,ovl:'exEditOvl',top:true,ping:'#exEdRest',
-   nudge:'Tap NEXT to carry on.'},
-  {sel:'#exEditOvl .sheet',pad:10,ovl:'exEditOvl',top:true,ping:'#exEditOvl .exed-n',
-   nudge:'Tap NEXT to carry on.'},
-  // The ring was on Remove, which by this point in the tour is DISABLED: a set was logged on the
-  // bench four steps ago, so the button reads "already logged today" and does nothing. Ringing a
-  // dead control and asking someone to take it in is the wrong lesson. It sits on the two save
-  // buttons instead, which is the thing about this sheet worth knowing.
-  // A plain NEXT in the tour window closes the sheet (user note, Aug 23, second pass):
-  // forcing a tap on the sheet's own JUST TODAY made the step feel like homework, and the
-  // earlier DONE label read as "the tour is done". NEXT promises only the next step, which
-  // is exactly what it delivers. The ping stays on the save row, where the lesson lives.
-  {sel:'#exEditOvl .sheet',pad:10,ovl:'exEditOvl',top:true,ping:'#exEditOvl .sheet-btns',
-   nudge:'Tap NEXT to carry on.',act:function(){closeOvl('exEditOvl');}},
-  // Your own notes. Placed here because the exercise sheet has just closed, so the day is back
-  // on screen with the links row visible and nothing else competing for the highlight.
-  // The spotlight was on the links row alone, which showed a pair of buttons floating with no
-  // sign of what they belonged to. The whole exercise is lit now and the ring picks out the
-  // button inside it, so you can see where Add note actually sits.
-  // Ringed and tappable. A ring around a button that does nothing when you press it teaches the
-  // wrong thing about every other ring in the tour, so this one opens for real.
-  {sel:'#exc-dbbench',pad:6,hit:'#exc-dbbench .unote-btn',ping:'#exc-dbbench .unote-btn',once:true,
-   w:'Waiting for Add note',nudge:'Tap Add note inside the highlight.',
-   when:function(){return tutOn('exNoteOvl');}},
-  {sel:'#exNoteOvl .sheet',pad:10,ovl:'exNoteOvl',top:true,nudge:'Tap NEXT to carry on.',
-   act:function(){closeOvl('exNoteOvl');}},
-  // The grading step is gone. Three colours explained once during a tour is three colours nobody
-  // remembers an hour later, so the key lives at the top of the day now, where it is there to be
-  // glanced at on the tenth session as much as the first.
-  {sel:'.finish-inline',pad:10,hit:'.finishbtn',ping:'.finishbtn',once:true,sweep:true,
-   w:'Waiting for Finish',nudge:'Tap FINISH THE DAY in the highlight.',
-   // Between the tap and the export sheet the day seals itself. Get out of the way.
-   hide:function(){return !tutOn('exportOvl')&&!document.getElementById('session').classList.contains('on');},
-   when:function(){return tutOn('exportOvl');}},
-  // No top:true here (user note, Aug 22): this is the one sheet that shows what YOU just did,
-  // so the results read first and the card takes the room underneath - instructions after.
-  {sel:'#exportOvl .sheet',pad:10,ovl:'exportOvl',next:'CLOSE THE LOG',nudge:'Tap CLOSE THE LOG to carry on.',act:function(){closeOvl('exportOvl');}},
-  // Two steps, not one. What a completed day LOOKS like and what reopening the week DOES are
-  // different facts, and the second only makes sense once you have seen the first.
-  {sel:'#weekCards .daybox[data-day="tue"]',pad:6,sweep:true,
-   nudge:'Tap NEXT to carry on.'},
-  // Ends here. Dragging a workout between days and the rack underneath were both steps once, and
-  // both came out: a grip you drag is close enough to self-evident that spending two of sixteen
-  // steps on it costs more attention than it buys.
-  {sel:'#foot .footbar',pad:6,sweep:true,last:true,nudge:'Tap DONE to close the tour.'}
-];
-function tutOn(id){var e=document.getElementById(id);return !!(e&&e.classList.contains('on'));}
-function tutW(){var e=document.getElementById('w-dbbench-0');return e?parseFloat(e.value)||0:0;}
-
-// The tour kept its own private set of words, which is how it came to be saying "Forged" and
-// "the rack" while the app - running generic - said "Completed" and "Kept days" on the very
-// controls it was pointing at. It goes through the same gate as every other string now: this wins
-// while GENERIC is on, and the four worlds below are kept whole for when it comes off.
-// The grades are named by what they MEAN rather than by their colour, because the colour is the
-// one thing that genuinely changes per theme - the swatch already shows it.
-// HOUSE STYLE. Four rules, and every line below obeys them.
-//   1. One step, one job. If a line needs "and", it wants to be two steps. Short steps do not
-//      overwhelm anybody; one step carrying a wall of text does.
-//   2. The instruction comes FIRST, then at most two things worth knowing. Anything more becomes
-//      a list, because a list gets read and a paragraph on a phone gets skipped.
-//   3. Name what is on the screen, not the concept behind it. "Tap Add note on the bench" beats
-//      "notes can be attached to exercises".
-//   4. A step that asks for a tap gets almost no words. You are doing it, not reading about it -
-//      the explanation belongs on the NEXT step, where the result is in front of you.
-// No dashes standing in for punctuation, no sentence explaining the sentence before it, no
-// telling anyone how something feels.
-var GEN_TUT={btn:'Tutorial',ttl:'First time here?',
-  msg:'A quick walk through the real screens, using sample data.',
-  yes:'SHOW ME',no:'NOT NOW',steps:[
-  {t:'Your week',b:'Seven days, Sunday to Saturday. The + on any day adds a workout to it.'},
-  {t:'Open a workout',b:'Tap Push Day, on Tuesday.'},
-  {t:'The set grid',b:'Every row is one set: a weight, the reps, and a small anvil mark at the end. Tapping the anvil logs the set. Tap the weight on the first row.'},
-  {t:'Set the number',b:'Type 25 or more, then tap DONE.'},
-  {t:'Log the set',b:'Tap the anvil at the end of the row.'},
-  {t:'The rest timer',b:'That set is saved, and your rest started on its own.<ul><li>−15 and +15 adjust it, SKIP ends it</li><li>It keeps counting with the screen off</li><li>It sounds at zero, but stays silent during this tour</li></ul><p class="tut-fine">Set how loud it is below. You can change it later in Settings.</p>'},
-  {t:'Change an exercise',b:'Press and hold the bench, anywhere inside the highlight.'},
-  {t:'Rest between sets',b:'How long the timer runs after each set of this exercise.'},
-  {t:'How many sets',b:'Add or drop a set. The targets underneath follow along.'},
-  {t:'Saving a change',b:'<ul><li>JUST TODAY clears when the day is done</li><li>SAVE PERMANENTLY keeps the change for this day from now on</li></ul><p>Nothing changed just now, so NEXT closes the sheet.</p>'},
-  {t:'Your own notes',b:'Tap Add note on the bench.'},
-  {t:'What a note is for',b:'Yours, not the app&rsquo;s. A seat height, a pin number, a reminder that keeps your technique right. It shows up on that exercise every time it comes around.'},
-  {t:'Finish the day',b:'Tap FINISH THE DAY. One logged set is fine for the tour.'},
-  {t:'Logged and saved',b:'Your session is already saved in the app. History lives on this phone, not in a cloud. Closing this changes nothing.'},
-  {t:'Locked in',b:'Push Day is locked in. It stays that way until the week turns over, so you work through the other days instead of repeating one.<p>Everything you logged is already in your history.</p>'},
-  {t:'Your history',b:'Workouts finished holds every session you have logged, week by week. Your data, in Settings, keeps a copy off the phone. A locked day opens again on its own when the week turns over, and holding a locked card offers to unlock just that one.'}]};
-function TUTC(){
-  var t=curTheme();
-  var C={
-    dark:{btn:'Tutorial',ttl:'First time here?',
-      msg:'A short guided pass over the real screens, on sample data. A few minutes at most, and your own logs stay untouched.',
-      yes:'SHOW ME',steps:[
-      {t:'Your week',b:'Seven slots, Sunday to Saturday, laid out as they come round. Take them in \u2014 then tap NEXT and we will open one together.'},
-      {t:'Open a day',b:'Tap Tuesday. Chest, triceps and core.'},
-      {t:'The set grid',b:'Every row is one set: weight, reps, and a sigil to mark it. Tap the weight on the first bench set.'},
-      {t:'Set the number',b:'Tap the number and type it straight in. Raise it to 150 or more, then tap DONE.'},
-      {t:'Log it',b:'Tap the sigil at the end of the row. The set saves the instant you tap it, and the rest timer starts on its own.'},
-      {t:'The rest timer',b:'It starts itself when a set lands.<ul><li>\u221215 and +15 nudge it, SKIP cancels it</li><li>Keeps counting with the screen off</li><li>Sounds at zero \u2014 silent during this tour</li></ul>'},
-      {t:'Change it on the spot',b:'Press and hold any exercise. The bench is highlighted.'},
-      {t:'What you can change',b:'<ul><li>Rest between sets</li><li>How many sets it runs</li><li>Whether it is on the day at all</li></ul><p>Save it for today only and it clears when the day is sealed. Keep it and every Tuesday carries the change.</p>'},
-      {t:'Your own notes',b:'Tap Add note on any exercise for the things only you need - a seat height, a pin number, a reminder that keeps your technique right. It stays on that exercise every time it comes round.'},
-      {t:'How a set is graded',b:'<div class="tut-g"><div><i style="background:var(--gold)"></i><span><b>Gold</b> &mdash; beats your best ever</span></div><div><i style="background:var(--go)"></i><span><b>Cyan</b> &mdash; matches it</span></div><div><i style="background:var(--txt3)"></i><span><b>Grey</b> &mdash; a first attempt, or under your best</span></div></div><p>The ring in the header counts the whole day. Tap Finish when you are done.</p>'},
-      {t:'The export',b:'The tiles across the top are what you just did: sets, weight moved, reps, time, and any records. Below them is the same session written out as plain text. Save it as a note, send it to whoever writes your programme, or paste it into a chat for a review. Closing it changes nothing.'},
-      {t:'Sealed',b:'Tuesday is sealed, which only means done for this week. Everything you logged stays in your history and the day comes back around next week. When you want to restart the week early, this button reopens every day at once.'},
-      {t:'Move things around',b:'Every workout has a grip on its right-hand edge. Drag by the grip to move it — up and down inside a day, or onto another day entirely.<ul><li>A day holds three at most</li><li>A full day turns you away rather than dropping something out</li><li>Tapping the card opens it, so the grip is the part you drag</li></ul>'},
-      {t:'Days without a home',b:'Anything with no day on it waits here, under the week. Drag one up onto any day to put it back in the rotation, or drag a workout down here to take it out of the week without losing it — everything you have logged against it stays in your history.'}]},
-    forge:{btn:'Tutorial',ttl:'First time at the forge?',
-      msg:'A short guided pass over the real screens, on sample stock. A few minutes at most, and your own work stays untouched.',
-      yes:'SHOW ME',steps:[
-      {t:'The week\u2019s work',b:'Seven slots, Sunday to Saturday, set out in the order they come to the fire. Look them over \u2014 then tap NEXT and we will open one together.'},
-      {t:'Take a piece off the rack',b:'Tap Tuesday. Chest, triceps and core.'},
-      {t:'The set grid',b:'Every row is one set: weight, reps, and a sigil to mark it. Tap the weight on the first bench set.'},
-      {t:'Set the number',b:'Tap the number and strike it straight in. Raise it to 150 or more, then tap DONE.'},
-      {t:'Strike it',b:'Tap the sigil at the end of the row. The set lands the instant you tap it, and the cooling timer starts on its own.'},
-      {t:'The cooling timer',b:'It starts itself when a set lands.<ul><li>\u221215 and +15 nudge it, SKIP cancels it</li><li>Keeps counting with the screen off</li><li>Sounds at zero \u2014 silent during this tour</li></ul>'},
-      {t:'Rework it at the anvil',b:'Press and hold any exercise. The bench is highlighted.'},
-      {t:'What you can change',b:'<ul><li>Rest between sets</li><li>How many sets it runs</li><li>Whether it is on the day at all</li></ul><p>Save it for today only and it clears when the piece is quenched. Keep it and every Tuesday carries the change.</p>'},
-      {t:'Your own notes',b:'Tap Add note on any lift for what only you need to know - a seat height, a pin, a cue that keeps the movement honest. It stays with the lift every time it comes back to the fire.'},
-      {t:'How a set is graded',b:'<div class="tut-g"><div><i style="background:var(--gold)"></i><span><b>Gold</b> &mdash; beats your best ever</span></div><div><i style="background:var(--match)"></i><span><b>Violet</b> &mdash; matches it</span></div><div><i style="background:var(--txt3)"></i><span><b>Grey</b> &mdash; a first attempt, or under your best</span></div></div><p>The ring in the header counts the whole piece. Tap Finish when the work is done.</p>'},
-      {t:'The record',b:'The tiles across the top are what you just did: sets, weight moved, reps, time, and any records. Below them is the same piece written out as plain text. Save it as a note, send it to whoever sets your work, or paste it into a chat for a review. Closing it changes nothing.'},
-      {t:'Forged',b:'Tuesday is forged, which only means done for this week. Everything you logged stays on record and the day comes back around next week. When you want to restart the week early, this button reopens every day at once.'},
-      {t:'Move the work about',b:'Every piece has a grip on its right-hand edge. Drag by the grip to set it down elsewhere — up and down inside a day, or onto another day of the week.<ul><li>A day takes three at most</li><li>A full day turns you away rather than dropping something out</li><li>Tapping the card opens it, so the grip is the part you drag</li></ul>'},
-      {t:'Off the rack',b:'Anything with no day to it waits on the rack, under the week. Drag one up onto any day to put it back in the rotation, or drag a piece down here to take it off the week without losing it — everything you have ever struck against it stays on record.'}]},
-    moon:{btn:'Tutorial',ttl:'First time at the well?',
-      msg:'A short guided pass over the real screens, on sample water. A few minutes at most, and your own record stays untouched.',
-      yes:'SHOW ME',steps:[
-      {t:'Your week',b:'Seven nights, Sunday to Saturday, laid out as they come round. Take them in \u2014 then tap NEXT and we will open one together.'},
-      {t:'Open a night',b:'Tap Tuesday. Chest, triceps and core.'},
-      {t:'The set grid',b:'Every row is one set: weight, reps, and a sigil to mark it. Tap the weight on the first bench set.'},
-      {t:'Set the number',b:'Tap the number and type it straight in. Raise it to 150 or more, then tap DONE.'},
-      {t:'Mark it',b:'Tap the sigil at the end of the row. The set is kept the instant you touch it, and the rest begins on its own.'},
-      {t:'The rest',b:'It begins when a set is kept.<ul><li>\u221215 and +15 nudge it, SKIP cancels it</li><li>Keeps counting with the screen dark</li><li>Sounds at zero \u2014 silent during this tour</li></ul><p class="tut-fine">Set how loud it lands below. It sticks, and it lives in Settings under Volume.</p>'},
-      {t:'Change it on the spot',b:'Press and hold any exercise. The bench is highlighted.'},
-      {t:'What you can change',b:'<ul><li>Rest between sets</li><li>How many sets it runs</li><li>Whether it is on the night at all</li></ul><p>Save it for tonight only and it clears when the night is kept. Keep it and every Tuesday carries the change.</p>'},
-      {t:'Your own notes',b:'Tap Add note on any exercise to keep what only matters to you - a seat height, a pin number, a cue that holds your form. It stays with the lift every time it comes round.'},
-      {t:'How a set is graded',b:'<div class="tut-g"><div><i style="background:var(--gold)"></i><span><b>White</b> &mdash; passes your best ever</span></div><div><i style="background:var(--go)"></i><span><b>Moon-gold</b> &mdash; matches it</span></div><div><i style="background:var(--txt3)"></i><span><b>Grey</b> &mdash; a first attempt, or under your best</span></div></div><p>The ring in the header counts the whole night. Tap Finish when it is done.</p>'},
-      {t:'The record',b:'The tiles across the top are what you just did: sets, weight moved, reps, time, and any records. Below them is the same night written out as plain text. Keep it as a note, send it to whoever guides your training, or paste it into a chat for a reading. Closing it changes nothing.'},
-      {t:'Kept',b:'Tuesday is kept, which only means done for this week. Everything you logged stays in your record and the night comes back around next week. When you want to restart the week early, this button reopens every night at once.'},
-      {t:'Move things around',b:'Every workout has a grip on its right-hand edge. Drag by the grip to move it — up and down inside a night, or onto another night entirely.<ul><li>A night holds three at most</li><li>A full night turns you away rather than dropping something out</li><li>Tapping the card opens it, so the grip is the part you drag</li></ul>'},
-      {t:'Nights without a home',b:'Anything with no night on it waits here, under the week. Drag one up onto any night to put it back in the rotation, or drag one down here to take it out of the week without losing it — everything you have kept against it stays in your record.'}]},
-    light:{btn:'Tutorial',ttl:'First time out?',
-      msg:'A short guided pass over the real screens, on sample data. A few minutes at most, and your own logs stay untouched.',
-      yes:'SHOW ME',steps:[
-      {t:'Your week',b:'Seven days, Sunday to Saturday, laid out as they come round. Have a look at all of them \u2014 then tap NEXT and we will open one together.'},
-      {t:'Open a day',b:'Tap Tuesday. Chest, triceps and core.'},
-      {t:'The set grid',b:'Every row is one set: weight, reps, and a sigil to mark it. Tap the weight on the first bench set.'},
-      {t:'Set the number',b:'Tap the number and type it straight in. Raise it to 150 or more, then tap DONE.'},
-      {t:'Mark it',b:'Tap the sigil at the end of the row. The set saves the instant you tap it, and the rest timer starts on its own.'},
-      {t:'The rest timer',b:'It starts itself when a set lands.<ul><li>\u221215 and +15 nudge it, SKIP cancels it</li><li>Keeps counting with the screen off</li><li>Sounds at zero \u2014 silent during this tour</li></ul>'},
-      {t:'Change it on the spot',b:'Press and hold any exercise. The bench is highlighted.'},
-      {t:'What you can change',b:'<ul><li>Rest between sets</li><li>How many sets it runs</li><li>Whether it is on the day at all</li></ul><p>Save it for today only and it clears when the day is marked. Keep it and every Tuesday carries the change.</p>'},
-      {t:'Your own notes',b:'Tap Add note on any exercise for the things only you need - a seat height, a pin number, a reminder that keeps your technique right. It stays on that exercise every time it comes round.'},
-      {t:'How a set is graded',b:'<div class="tut-g"><div><i style="background:var(--gold)"></i><span><b>Gold</b> &mdash; beats your best ever</span></div><div><i style="background:var(--go)"></i><span><b>Blue</b> &mdash; matches it</span></div><div><i style="background:var(--txt3)"></i><span><b>Grey</b> &mdash; a first attempt, or under your best</span></div></div><p>The ring in the header counts the whole day. Tap Finish when you are done.</p>'},
-      {t:'The export',b:'The tiles across the top are what you just did: sets, weight moved, reps, time, and any records. Below them is the same day written out as plain text. Save it as a note, send it to whoever writes your programme, or paste it into a chat for a review. Closing it changes nothing.'},
-      {t:'Marked',b:'Tuesday is marked, which only means done for this week. Everything you logged stays in your logs and the day comes back around next week. When you want to restart the week early, this button reopens every day at once.'},
-      {t:'Move things around',b:'Every workout has a grip on its right-hand edge. Drag by the grip to move it — up and down inside a day, or onto another day entirely.<ul><li>A day holds three at most</li><li>A full day turns you away rather than dropping something out</li><li>Tapping the card opens it, so the grip is the part you drag</li></ul>'},
-      {t:'Days without a home',b:'Anything with no day on it waits here, under the week. Drag one up onto any day to put it back in the rotation, or drag a workout down here to take it out of the week without losing it — everything you have logged against it stays in your logs.'}]}
-  };
-  if(GENERIC)return GEN_TUT;
-  var c=C[t]||C.dark;
-  // The four worlds keep their own words, but only while those words still line up with the
-  // steps. Restructuring the tour shifts every index after the change, and a themed line
-  // describing the step BEFORE the one you are looking at is worse than a plain one describing
-  // the right step - and one index past the end takes the whole tour down. When the counts
-  // disagree the generic wording carries it, and the themed copy gets re-cut when themes return.
-  if(!c.steps||c.steps.length!==GEN_TUT.steps.length)
-    return {btn:c.btn,ttl:c.ttl,msg:c.msg,yes:c.yes,steps:GEN_TUT.steps};
-  return c;
-}
-
-/* ---- the fence ----
-   Every tap outside the step's own control is swallowed and answered with a shake, so a
-   stray tap can no longer strand the tour halfway through a screen it never opened.
-   The card itself is always live, which is what keeps End tour reachable. */
-function tutEls(sel){
-  if(!sel)return [];
-  return sel.split('|').map(function(s){return document.querySelector(s);}).filter(Boolean);
-}
-function tutGuard(e){
-  if(!TUTON)return;
-  var t=e.target;
-  if(!t||!t.closest)return;
-  if(t.closest('#tutCard'))return;
-  if(TUTASK&&t.closest('#askOvl'))return;   // the exit confirm's own buttons must work
-  var st=TUT_STEPS[TUTI];
-  // A step whose target is a whole card hands over everything inside it, including controls it
-  // never meant to offer: the weights opened the number sheet, the sigils logged sets that were
-  // not asked for, and a press held on an input raised the phone's own selection handles.
-  // block names what stays fenced off inside that opening, so the card can still be held while
-  // its contents stay dead. It is the same set bindExHold already refuses to start a hold on.
-  if(tutEls(st.hit).some(function(el){return el===t||el.contains(t);})
-     &&!(st.block&&t.closest(st.block))){
-    // A step that completes in ONE tap latches after that tap. Opening a day runs a 300ms page
-    // turn before the session is up, and the step only advances on the next 180ms tick - so for
-    // a third of a second the card is still live and still armed. Tapping Tuesday three times
-    // queued three page turns behind each other, and the last of them landed on a step that had
-    // already moved on, which is what broke the tour and left BACK with nowhere sensible to go.
-    // The latch is on click, not pointerdown: click is the event that actually fires the action,
-    // and latching on the first event of the gesture would have swallowed the tap meant to work.
-    // Silent - tapping again is not a mistake worth shaking the card over.
-    if(st.once){
-      if(TUTHIT){e.preventDefault();e.stopPropagation();return;}
-      if(e.type==='click')TUTHIT=true;
-    }
-    return;
-  }
-  // stopPropagation keeps the app's own handlers off it, so nothing opens, drags or starts a
-  // hold. preventDefault is what BLOCKS SCROLLING, so it is now only used on the events that
-  // actually activate something. Stopping it on pointerdown meant a drag to read down the export
-  // sheet went nowhere and shook the card at you for trying - the tour was refusing to let you
-  // look at the thing it had just told you to look at.
-  e.stopPropagation();
-  if(e.type==='click'||e.type==='dblclick'||e.type==='contextmenu')e.preventDefault();
-  // And the shake is only for a step that is WAITING for something. On a step that asks for
-  // nothing, a tap is not a mistake and there is nothing to correct.
-  if((e.type==='pointerdown'||e.type==='mousedown')&&st.when&&!tutRev()&&!st.quiet)tutNudge();
-}
-['pointerdown','mousedown','touchstart','click','dblclick','contextmenu'].forEach(function(ev){
-  document.addEventListener(ev,tutGuard,true);
-});
-var tutNT=null;
-var TUTWT=0,TUTASK=0;
-// One accidental tap on the X must not throw the tour away, so it asks first. The last
-// card is the natural end - asking there would be double-checking a finished thing.
-function tutAskEnd(){
-  if(!TUTON)return;
-  if(tutLast()){tutEnd();return;}
-  TUTASK=1;
-  ask('Leave the tour? You can run it again any time from Settings.',
-    function(){TUTASK=0;tutEnd();},
-    'End the tour?','LEAVE');
-}
-function tutNudge(){
-  var c=document.getElementById('tutCard'),n=document.getElementById('tutNudge');
-  c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');
-  n.textContent=TUT_STEPS[TUTI].nudge||'Tap inside the highlight, or End tour to leave.';
-  n.classList.add('on');
-  try{vib(25);}catch(e){}
-  clearTimeout(tutNT);tutNT=setTimeout(function(){n.classList.remove('on');},3200);
-}
-
-function tutStart(core){
-  if(TUTON)return;
-  closeOvl('settingsOvl');closeOvl('askOvl');
-  tutSeen();
-  tutBuild(core);                  // core on first run, the whole thing from Settings
-  TUTDB=DB;DB=tutSeed();TUTON=true;TUTMAX=0;
-  // The sample days go straight into the library for the tour's duration - NOT into
-  // DB.custom, or a hold would route into the full builder instead of the exercise sheet
-  // the tour teaches (see TUT_DAYS). Injected before first paint, or dayMap's !!W[id]
-  // filter would strip the seeded week and the tour would open on an empty board.
-  for(var tk in TUT_DAYS)W[tk]=TUT_DAYS[tk];
-  document.body.classList.add('tut');
-  if(CUR){document.getElementById('session').classList.remove('on');CUR=null;}
-  stopTimer();stopHold();resetHoldState();
-  renderHome();window.scrollTo(0,0);
-  // Invisible until the first placement frame has run. The card used to paint one frame at
-  // its CSS resting spot (40vh) and then jump to wherever tutPlace put it - the first thing
-  // anyone saw of the tour was furniture moving. It fades in already in position now.
-  var tc=document.getElementById('tutCard');
-  tc.style.opacity='0';
-  tc.classList.add('on');
-  TUTPOLL=setInterval(tutTick,180);
-  TUTRAF=requestAnimationFrame(tutFrame);
-  tutGo(0);
-}
-function tutEnd(){
-  if(!TUTON)return;
-  TUTON=false;
-  document.body.classList.remove('tut');
-  tutShift(null);   // put back any sheet the tour pushed down
-  clearInterval(TUTPOLL);cancelAnimationFrame(TUTRAF);clearTimeout(tutNT);clearTimeout(TUTSW);clearTimeout(TUTSC);clearTimeout(TUTSW2);clearTimeout(TUTGL);clearTimeout(TUTWT);cancelAnimationFrame(TUTPAN);
-  document.getElementById('tutHole').classList.remove('sweep');
-  document.getElementById('tutHole').classList.remove('glide');
-  // Taking the .on class off makes these invisible, not absent. opacity:0 is still a painted,
-  // composited element, and the four scrim rectangles keep whatever geometry the last step left
-  // on them - measured on the phone after a tour: the hole 336x66 and the first scrim rectangle
-  // 360x715, near enough the whole screen, all position:fixed and all still in the tree. They go
-  // back to the zero size the CSS starts them at.
-  // Honest about what this is: collapsing them did NOT move the frame numbers when it was tested
-  // on the device, so it is not the answer to anything that was reported. It is simply wrong to
-  // leave a viewport-sized fixed layer behind, and this file already records layer count as one
-  // of the things that starves the raster on the folded-open panel.
-  tutShrink();
-  ['editOvl','exportOvl','askOvl','swapOvl','lvlOvl'].forEach(function(id){
-    if(document.getElementById(id))closeOvl(id);
-  });
-  document.getElementById('session').classList.remove('on');
-  // Defensive: nothing in the tour should open the builder, but a stray route into it must
-  // not survive the tour's end standing over the real week (learned from the custom-day
-  // strand this teardown was tested against).
-  if(document.getElementById('make'))document.getElementById('make').classList.remove('on');
-  CUR=null;stopTimer();stopHold();resetHoldState();
-  DB=TUTDB;TUTDB=null;
-  // The sample days were injected into W for the tour's duration; the real library does
-  // not know them, so they are lifted back out before the real customs merge in below.
-  for(var tk in TUT_DAYS)delete W[tk];
-  document.getElementById('tutCard').classList.remove('on');
-  document.getElementById('tutHole').classList.remove('on');
-  document.getElementById('tutPing').classList.remove('on');
-  document.getElementById('tutNudge').classList.remove('on');
-  document.body.classList.remove('tut-nopill');
-  mergeCustom();renderHome();window.scrollTo(0,0);
-}
-function tutGo(i){
-  TUTI=i;if(i>TUTMAX)TUTMAX=i;
-  TUTHIT=false;                    // each step gets its one action back
-  TUTDW=0;                         // and a fresh dwell clock
-  document.body.classList.toggle('tut-nopill',!!TUT_STEPS[i].hidePill);
-  // The demo rest is a prop for ONE step - the pill's own - and belongs on no other.
-  // Two previous attempts at this both tied it to identity rather than to the rule. "i>8" tied
-  // it to a step number, so inserting a step moved which one killed the timer. Flagging the
-  // steps that end it was better but still hand-placed, and it broke the moment the short tour
-  // shipped: TUT_CORE is [0,1,4,5,12,13,14], the flag sat on TUT_ALL step 6, and 6 is not in
-  // that list - so on the tour a first run actually gets, the pill started on the rest step and
-  // nothing stopped it until the export. That is the timer sitting under the whole tutorial.
-  // Stated as the rule instead, it cannot be wrong for any subset: the rest runs on the pill's
-  // step and is stopped on every other. Found by index, in the list that is actually running.
-  var pill=-1;
-  for(var pz=0;pz<TUT_STEPS.length;pz++)if(TUT_STEPS[pz].sel==='#timerPill'){pill=pz;break;}
-  if(i!==pill)stopTimer();
-  var st=TUT_STEPS[i],c=TUT_COPY[i];
-  // A step must not fire on a condition that was ALREADY true when it arrived, or stepping
-  // BACK would bounce straight forward again. Arriving satisfied disarms the step until the
-  // condition goes false; then doing the thing advances it, exactly as on the first pass.
-  // In practice only the marked-set step lands disarmed - a set once marked stays marked, so
-  // its scene cannot un-satisfy it. Every other scene rebuilds to a screen where the thing
-  // has yet to be done, which is why they replay properly instead of being frozen out.
-  TUTARM=!(st.when&&st.when());
-  // The step count is stamped in the corner as a seal (v5.180, owner picked S3b); the eyebrow keeps the words.
-  document.getElementById('tutStep').textContent='SAMPLE DATA';
-  var tsl=document.getElementById('tutSeal');if(tsl)tsl.textContent=(i+1)+'/'+TUT_STEPS.length;
-  document.getElementById('tutT').textContent=c.t;
-  document.getElementById('tutB').innerHTML=c.b;
-  document.getElementById('tutNudge').classList.remove('on');
-  var nx=document.getElementById('tutNext'),wt=document.getElementById('tutWait');
-  clearTimeout(TUTWT);
-  if(st.when&&!tutRev()){
-    nx.style.display='none';wt.style.display='none';wt.textContent=st.w||'Waiting for you';
-    // The waiting pill used to appear the instant the step did - announcing a wait before
-    // anyone had a chance to act. It holds off for five quiet seconds now, then fades in
-    // and points. Anyone moving at their own pace never sees it.
-    TUTWT=setTimeout(function(){if(TUTON&&TUT_STEPS[TUTI]===st)wt.style.display='';},5000);
-  }
-  else{nx.style.display='';wt.style.display='none';nx.textContent=tutLast()?'DONE':'NEXT';}
-  document.getElementById('tutBack').style.display=i>0?'':'none';
-  document.getElementById('tutSfx').style.display=st.sample?'':'none';
-  var tv=document.getElementById('tutVol');
-  if(tv){tv.style.display=st.sample?'':'none';if(st.sample)drawAlertLvl();}
-  // NEXT says what NEXT does. A step that ends by writing the session out and one that just turns
-  // the page were the same word, so the button never told you whether it was a page turn or the
-  // thing itself - which is the question you are actually asking when you look at it.
-  var nb=document.getElementById('tutNext');
-  if(nb)nb.textContent=st.next||(tutLast()?'DONE':'NEXT');
-  // A sweep step TRAVELS to its target and then closes on it. The page scrolls smoothly, the hole
-  // rides along with it because placement runs every frame, and only once it has arrived does the
-  // highlight sweep shut. Jumping there instantly and sweeping in the same breath told you where
-  // the light ended up but never that it had moved, which on a dimmed screen reads as everything
-  // going dark and something new appearing somewhere else. The wait is what makes it a journey
-  // rather than a cut.
-  if(st.sweep){
-    // The sheet the last step was explaining is shut FIRST, so the screen is settled before the
-    // journey starts. Panning down while a sheet is still closing over the top of it is what made
-    // the move hard to follow, and the pan itself now runs at half the pace it did.
-    tutStray(i);
-    var PAN=900;
-    clearTimeout(TUTSW2);
-    // The wait exists so the sweep lands at the END of the travel rather than on top of it.
-    // But tutScroll declines to move when the target is already on screen, and then the wait was
-    // still served: on the closed phone Finish is already in view, so the ring cut onto it, sat
-    // there settled for nine hundred milliseconds, and only then bloomed open and closed again
-    // onto the exact spot it was already on - a finished transition replayed after a dead pause,
-    // which is the hiccup. No journey, no wait: the sweep goes now and is the only move the step
-    // makes. Which of the two happens depends on the screen, which is why it is asked rather
-    // than assumed - the same step travels on one size and does not on another.
-    // No journey, no sweep. The note above got half of it: it removed the dead PAUSE before the
-    // bloom but left the bloom itself, and a bloom is a JOURNEY - the hole opens to the whole
-    // viewport and closes back down. Played when the light is already sitting on or around the
-    // target, that reads as the highlight expanding and shrinking onto the spot it was already
-    // on, which is a stutter rather than a move.
-    // It shows up in the sandbox and not on a real week for a reason that is worth writing down:
-    // the starter week is three cards, so everything the tour points at is already on screen and
-    // tutScroll declines to move. On an eight card week the same steps genuinely travel and the
-    // sweep is doing its job. Same code, different amount of week.
-    // The hole not being lit yet is the one case that still wants a bloom - that is the tour
-    // arriving, and gliding from nothing is a cut.
-    // The bloom is retired. Three gates were written for it - a step number, then whether
-    // tutScroll had scrolled, then how far the light travelled - and it was reported wrong after
-    // every one of them, because each gate asked a question that could be answered wrong by
-    // ordinary timing. The last one read the hole's own rect, and tutFrame switches the hole OFF
-    // for any frame where the target has no height yet, which is exactly what happens on the
-    // frame a sheet is closing. So the measurement said "arriving from nowhere" and bloomed.
-    // There is no gate that survives this, because the thing being asked is unknowable at the
-    // moment it is asked. What IS knowable: a glide is never wrong. It moves the light from
-    // wherever it is to wherever it goes, at whatever distance, and reads as the same gesture
-    // every time. The journey on a long step is carried by the SCROLL, which still pans, and
-    // that was always the part doing the work - the bloom was decoration on top of it.
-    // tutSweep is left defined and unused rather than deleted; if a step is ever built that
-    // genuinely arrives from nothing, it is there to call.
-    tutGlide();
-    // The card is CSS-anchored and never parks or travels - only the page and the light move.
-    tutScroll(false,PAN);
-  }else{
-    tutGlide();
-    tutScroll();
-  }
-  // And again once the layout has settled. The board is rebuilt underneath several of these
-  // steps - sealing the day re-renders the whole week, which moves the rack hundreds of pixels
-  // down - and a scroll worked out before that happened lands nowhere near the target. The
-  // spotlight then sits on empty space with the real thing off screen, which reads as the screen
-  // having gone black rather than as a highlight in the wrong place. Only moves if the target is
-  // actually out of view, so it never fights a scroll already in the right spot.
-  clearTimeout(TUTSC);
-  TUTSC=setTimeout(function(){
-    if(!TUTON||TUTI!==i)return;
-    var el=tutEls(TUT_STEPS[i].sel)[0];if(!el||!el.offsetHeight)return;
-    var r=el.getBoundingClientRect();
-    if(r.top>=0&&r.bottom<=window.innerHeight)return;
-    tutScroll(true);
-  },420);
-}
-function tutBack(){
-  if(!TUTON||TUTI<=0)return;
-  var i=TUTI-1;
-  tutStray(i);
-  if(TUT_STEPS[i].ovl!=='exportOvl'&&tutOn('exportOvl'))closeOvl('exportOvl');
-  var sc=TUT_SCENE[i];
-  if(sc){try{sc();}catch(e){}}
-  tutGo(i);
-}
-// ---- what each step needs on screen ----
-// BACK used to close sheets by the step it was LEAVING and reopen nothing, so every step
-// whose subject IS a sheet - the number pad, the exercise sheet, the export - came back
-// against a screen that had already closed, and the spotlight landed on whatever was
-// underneath it. Each step now states the scene it belongs to and BACK rebuilds it.
-var TUT_SCENE_ALL=[
-  function(){tutHome();},
-  function(){tutHome();},
-  function(){tutDay();},
-  function(){tutDay();if(!tutOn('editOvl'))openEdit('dbbench',0,'w');},
-  function(){tutDay();},
-  function(){tutDay();tutRest();},
-  function(){tutDay();},
-  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('dbbench');},   // rest
-  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('dbbench');},   // sets
-  function(){tutDay();if(!tutOn('exEditOvl'))openExEdit('dbbench');},   // on the day or not
-  function(){tutDay();},                                    // tap Add note - the day, sheets closed
-  function(){tutDay();if(!tutOn('exNoteOvl'))openExNote('dbbench');},   // the note sheet itself
-  function(){tutDay();},                                    // Finish
-  function(){tutWeek();document.getElementById('exportOvl').classList.add('on');},
-  function(){tutWeek();},                                   // what a completed day looks like
-  function(){tutWeek();}                                    // reopening the week
-];
-function tutHome(){
-  tutUnseal();
-  if(CUR){document.getElementById('session').classList.remove('on');CUR=null;}
-  stopTimer();stopHold();resetHoldState();
-  renderHome();window.scrollTo(0,0);
-}
-function tutDay(){
-  tutUnseal();
-  if(CUR!=='t1'||!document.getElementById('session').classList.contains('on'))openWNow('t1');
-}
-// The rest the tour describes is started by the sigil on step five and stopped for good once
-// the week comes back, so stepping back onto the step whose whole subject is the pill found it
-// gone and the card explaining a timer that was not on screen. Restarted at the length the
-// bench actually carries, so it is the same clock the tap itself would have started - and left
-// alone if one is already running, or BACK would keep resetting a rest already counting down.
-function tutRest(){
-  var p=document.getElementById('timerPill');
-  if(p&&p.classList.contains('on'))return;
-  // the seeded t1 row carries 90 sec, so the rebuilt pill runs the same clock the sigil starts
-  startTimer(parseRest('90 sec'),EX.dbbench.name);
-}
-// past the finish the week is what you look at, and the day stays sealed
-function tutWeek(){
-  if(CUR){document.getElementById('session').classList.remove('on');CUR=null;}
-  stopTimer();renderHome();
-}
-// The tour runs on a throwaway record, so stepping back over the finish only has to lift
-// the sealed log off it and put the day back where it was.
-function tutUnseal(){
-  for(var i=DB.logs.length-1;i>=0;i--){
-    if(!DB.logs[i].sealed)continue;
-    var l=DB.logs.splice(i,1)[0];
-    DB.active[l.day]={date:l.date,entries:l.entries,note:l.note||'',swaps:l.swaps||{}};
-  }
-}
-function tutSample(){
-  try{initAudio();sfxRest();}catch(e){}
-}
-function tutAdvance(){
-  var st=TUT_STEPS[TUTI];
-  if(st.act)st.act();
-  if(tutLast()){tutEnd();return;}
-  var n=TUTI+1;
-  // BACK rebuilds the scene it lands on; NEXT never did, because on a first pass it does not
-  // have to - you got here by doing the thing, so the screen the next step wants is already
-  // up. Once you have walked backwards, that stops being true: NEXT skips the action, and the
-  // scene it would have built with it. Walking back to the week and forward again reached the
-  // set grid with the day still shut. Every step states its scene, so it is built here on the
-  // same terms BACK builds it - only when arriving without having done the thing.
-  if(tutRev()||(st.when&&!st.when())){
-    var sc=TUT_SCENE[n];
-    if(sc){try{sc();}catch(e){}}
-  }
-  tutGo(n);
-}
-// A tap where a hold was meant used to open a sheet the step knew nothing about, and the
-// fence then locked every button on it. Anything the step did not ask for is closed.
-var TUT_STRAY=['editOvl','exEditOvl','exNoteOvl','exAddOvl','exJoinOvl','swapOvl','settingsOvl','themeOvl','timerOvl',
-  'pumpOvl','lvlOvl','mkActOvl','mkPickOvl','progOvl','histOvl','bringOvl','askOvl','bwOvl','plateOvl'];
-function tutStray(i){
-  var keep=TUT_STEPS[i==null?TUTI:i].ovl||'';
-  TUT_STRAY.forEach(function(id){
-    // the exit confirm is the one ask the tour itself raises - the sweep leaves it be,
-    // and the flag clears itself once the sheet is answered either way
-    if(id==='askOvl'&&TUTASK){if(!tutOn('askOvl'))TUTASK=0;return;}
-    if(id!==keep&&document.getElementById(id)&&tutOn(id))closeOvl(id);
-  });
-}
-// A replayed step whose subject IS a sheet has to keep that sheet on screen. Closing it - DONE
-// on the number pad, or the exercise sheet's own dismiss - used to leave the card describing
-// steppers that were no longer there, with the advance suppressed so nothing put it back.
-// The step already states its scene; this just rebuilds it when it has been torn down.
-function tutRebuild(){
-  var st=TUT_STEPS[TUTI];
-  // Not every subject is an overlay. keep is for the ones that can leave on their own, and it
-  // does its own checking - it is called on every tick and must cost nothing when all is well.
-  if(st.keep)st.keep();
-  if(!st.ovl||tutOn(st.ovl))return;
-  var sc=TUT_SCENE[TUTI];
-  if(sc){try{sc();}catch(e){}}
-}
-function tutTick(){
-  if(!TUTON)return;
-  var st=TUT_STEPS[TUTI];
-  // Leaving the number sheet under 25 would strand the step, so it comes straight back.
-  if(st.reopen&&!tutOn('editOvl')&&tutW()<25){
-    tutNudge();openEdit('dbbench',0,'w');
-    return;
-  }
-  // The condition is only allowed to fire once it has been seen false - see TUTARM in tutGo.
-  // Checked BEFORE the stray sweep, because for four of the six steps the thing the step is
-  // waiting for IS a sheet, and the sweep would shut it in the same tick that should advance.
-  if(st.when){
-    if(TUTARM&&st.when()){
-      // A step can ask for a beat between the thing being done and the page turning
-      // (dwell, in ms). Without it the anvil step advanced on the very next tick and
-      // the grade the tap had just earned was gone before it registered.
-      if(st.dwell){
-        if(!TUTDW)TUTDW=Date.now();
-        if(Date.now()-TUTDW>=st.dwell){TUTDW=0;tutGo(TUTI+1);return;}
-      }else{tutGo(TUTI+1);return;}
-    }else if(TUTDW)TUTDW=0;   // toggled back off mid-dwell: the clock starts over
-    if(!TUTARM&&!st.when())TUTARM=true;
-  }
-  tutStray();
-  tutRebuild();
-}
-// Placement runs every frame: the target may be inside a scroller the user is dragging,
-// and a hole that lags behind its element reads as broken.
-function tutFrame(){
-  if(!TUTON)return;
-  tutPlace();
-  TUTRAF=requestAnimationFrame(tutFrame);
-}
-function tutBox(el,box,p){
-  var r=el.getBoundingClientRect();
-  // Placement runs every frame; writing identical values still costs a style recalc and a
-  // paint, which is most of what made the tour stutter. Only a real move is written.
-  var k=(r.top|0)+','+(r.left|0)+','+(r.width|0)+','+(r.height|0)+','+p;
-  if(box._k!==k){
-    box._k=k;
-    box.style.top=(r.top-p)+'px';box.style.left=(r.left-p)+'px';
-    box.style.width=Math.max(0,r.width+p*2)+'px';box.style.height=Math.max(0,r.height+p*2)+'px';
-    if(box.id==='tutHole')tutScrim(r.top-p,r.left-p,Math.max(0,r.width+p*2),Math.max(0,r.height+p*2));
-  }
-  box.classList.add('on');
-}
-// The highlight opens around the whole week and closes onto the day the step is about. The
-// full-viewport box is planted with transitions off and the placement cache cleared, so the
-// very next frame writes the step's real target with transitions armed and CSS carries it in.
-// Nothing here chooses the target - tutPlace does that, exactly as it always has.
-var TUTSW=null,TUTSC=null,TUTSW2=null,TUTGL=null;
-// While a step change is panning the page, the card is placed ONCE - from where the target
-// will be when the pan lands - and held. Re-placing it every frame of the travel flipped it
-// between its above/below positions as the target's rect streamed past the thresholds:
-// one-frame jumps, caught on a 120fps recording of the tour (v4.120). Until this stamp
-// passes, tutPlace leaves the card's top alone.
-// Back to the zero size the stylesheet starts them at. _k is the placement cache and has to go
-// with them, or the next tour compares against geometry that is no longer on the element and
-// skips the first write.
-function tutShrink(){
-  var h=document.getElementById('tutHole'),p=document.getElementById('tutPing');
-  [h,p].forEach(function(e){
-    if(!e)return;
-    e.style.top='0px';e.style.left='0px';e.style.width='0px';e.style.height='0px';
-    e._k=null;
-  });
-  if(h)[].forEach.call(h.children,function(c){c.style.cssText='';});
-}
-// Armed for one step change, then off, so per-frame tracking stays exact. See the glide rule.
-function tutGlide(){
-  var hole=document.getElementById('tutHole');
-  if(!hole.classList.contains('on'))return;   // nothing to glide FROM: it is arriving, not moving
-  hole.classList.add('glide');
-  clearTimeout(TUTGL);
-  TUTGL=setTimeout(function(){hole.classList.remove('glide');},340);
-}
-function tutSweep(){
-  var hole=document.getElementById('tutHole'),vw=window.innerWidth,vh=window.innerHeight;
-  hole.classList.remove('sweep');
-  hole._k=null;                  // whatever is cached, the next tutBox has to write over it
-  hole.style.top='0px';hole.style.left='0px';
-  hole.style.width=vw+'px';hole.style.height=vh+'px';
-  tutScrim(0,0,vw,vh);           // four rectangles of no area: nothing is dimmed yet
-  hole.classList.add('on');
-  void hole.offsetWidth;         // plant it before the transition is armed, or there is none
-  hole.classList.add('sweep');
-  clearTimeout(TUTSW);
-  TUTSW=setTimeout(function(){hole.classList.remove('sweep');},780);
-}
-// the four rectangles that make up the scrim, laid around the hole
-function tutScrim(t,l,w,h){
-  var n=document.getElementById('tutHole').children;
-  if(n.length<4)return;
-  var b=t+h,rt=l+w;
-  n[0].style.cssText='left:0;right:0;top:0;height:'+Math.max(0,t)+'px';
-  n[1].style.cssText='left:0;right:0;top:'+b+'px;bottom:0';
-  n[2].style.cssText='left:0;top:'+t+'px;width:'+Math.max(0,l)+'px;height:'+h+'px';
-  n[3].style.cssText='left:'+rt+'px;right:0;top:'+t+'px;height:'+h+'px';
-}
-// Steps that pin their card to the top are explaining a sheet that also starts at the top, so
-// the card came down on the very thing it was pointing at. The sheet is given a top padding
-// the height of the card instead, which moves it clear without moving it off screen. Only one
-// overlay is ever shifted, so the last one is put back before the next is touched.
-var TUTSHIFT=null;
-function tutShift(ov,px){
-  if(TUTSHIFT&&TUTSHIFT!==ov){TUTSHIFT.style.paddingTop='';}
-  TUTSHIFT=ov;
-  if(ov&&ov.style.paddingTop!==px)ov.style.paddingTop=px;
-}
-// What the system bars actually take, measured rather than assumed. env() only works in CSS, so a
-// hidden probe wears the insets as padding and JS reads them back off it. The card was placed with
-// flat pixel numbers - 14 from the top, 12 from the bottom - which is right in a browser tab and
-// wrong in the app, where the WebView draws behind the status bar and the gesture bar.
-// The card is CSS-anchored to the foot of the screen and this function never touches its
-// position - see the #tutCard comment. All that is placed here is the LIGHT: the hole,
-// the ping, and the one deliberate get-out-of-the-way fade for steps that hide.
-function tutPlace(){
-  var st=TUT_STEPS[TUTI],hole=document.getElementById('tutHole'),card=document.getElementById('tutCard');
-  var ping=document.getElementById('tutPing');
-  if(st.hide&&st.hide()){hole.classList.remove('on');ping.classList.remove('on');card.style.opacity='0';return;}
-  card.style.opacity='';
-  // the card's live height, published for the pieces of the scene that sit above it
-  var ch=card.offsetHeight;
-  if(window.__tutch!==ch){window.__tutch=ch;document.documentElement.style.setProperty('--tutch',ch+'px');}
-  var el=tutEls(st.sel)[0];
-  var pel=tutEls(st.ping)[0];
-  if(pel&&pel.offsetHeight)tutBox(pel,ping,5);else ping.classList.remove('on');
-  if(!el||!el.offsetHeight){
-    hole.classList.remove('on');
-    return;
-  }
-  tutBox(el,hole,st.pad==null?8:st.pad);
-  hole.classList.toggle('deep',!!st.dim);
-}
-// scrollIntoView drags whatever ancestor it likes; walk to the real scroller instead.
-// A pan we time ourselves. behavior:'smooth' is whatever pace the browser feels like, which on
-// the long trip down to Finish was a blur - you saw the screen change without seeing it travel.
-// Driving it by hand means the duration is a number we can set, and eased at both ends so it
-// reads as a camera move rather than a jump.
-var TUTPAN=0;
-function tutPan(sc,delta,ms){
-  var from=sc?sc.scrollTop:window.scrollY,t0=null;
-  cancelAnimationFrame(TUTPAN);
-  function step(now){
-    if(t0===null)t0=now;
-    var p=Math.min(1,(now-t0)/ms);
-    var e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;      // ease in and out
-    var y=from+delta*e;
-    if(sc)sc.scrollTop=y;else window.scrollTo(0,y);
-    if(p<1)TUTPAN=requestAnimationFrame(step);
-  }
-  TUTPAN=requestAnimationFrame(step);
-}
-// Returns whether it actually travelled. The sweep is timed against that journey, and on a screen
-// where the target is already in view there is no journey to time - see tutGo.
-function tutScroll(instant,ms){
-  var el=tutEls(TUT_STEPS[TUTI].sel)[0];
-  if(!el)return false;
-  var r=el.getBoundingClientRect(),want=r.top-window.innerHeight*0.30;
-  if(Math.abs(want)<50)return false;
-  var sc=el.closest('.ovl')||el.closest('#session')||el.closest('#make');
-  if(ms){tutPan(sc,want,ms);return true;}
-  var beh=instant?'auto':'smooth';
-  try{
-    if(sc)sc.scrollTo({top:sc.scrollTop+want,behavior:beh});
-    else window.scrollTo({top:window.scrollY+want,behavior:beh});
-  }catch(e){}
-  return true;
-}
-// The sandbox is a first run every time it opens, and it must not spend the real one: without
-// these two, opening it once would tick the tour off for good on the actual install.
-function tutSeen(){if(SANDBOX)return;try{localStorage.setItem(KEY+':tut','1');}catch(e){}}
-function tutWasSeen(){if(SANDBOX)return false;try{return !!localStorage.getItem(KEY+':tut');}catch(e){return true;}}
-// RETIRED in v5.273. The sixteen step tour is replaced by three hints that fire at the moment
-// they matter, so a first run is no longer offered one. tutSeen() still runs, so a phone that
-// upgrades is never asked either. The tour's own 873 lines and the 35 TUTON guards scattered
-// through the live app come out in their own build: a behaviour change and a deletion that size
-// do not belong in the same commit, and the guards are harmless meanwhile because TUTON can no
-// longer become true.
-function tutOffer(){ try{tutSeen();}catch(e){} }
 // The one question a first run gets before anything else: does it want a week to start from, or
 // an empty one to build. Asked once, on the launch after ownProgram found nothing to preserve,
 // and it always hands over to the tour offer afterwards - whichever way it is answered, that is
@@ -22748,7 +21587,7 @@ function wcStage(sub,picks,intro){
 function offerStart(){
   STARTPEND=false;
   var w=document.getElementById('welcome');
-  if(!w){installStarter();renderHome();setTimeout(tutOffer,600);return;}   // never strand a first run
+  if(!w){installStarter();renderHome();return;}   // never strand a first run
   var m=document.getElementById('wcMark');
   if(m)m.innerHTML=logoSvg('wc-logo',68);
   wcSafety();
@@ -22839,7 +21678,6 @@ function wcPick(n){
   if(n===1){ezOpen();return;}
   ownChosen();
   renderHome();window.scrollTo(0,0);
-  setTimeout(tutOffer,650);
 }
 // The welcome has been answered: the next launch is an ordinary one.
 function ownChosen(){try{localStorage.setItem(OWNKEY,'1');}catch(e){}}
@@ -23424,19 +22262,15 @@ function ezForge(){
   var saved=(EZ.into==='saved');
   var lead=saved?'It is waiting in Saved workouts. Hold one to put it on a day. ':'';
   if(two&&!saved)lead+='Week 2 is behind this one. Flip to it under Saturday. ';
-  // The tour offer waits for the philosophy line to be READ, not for a timer - seen on
-  // device: fired at 2.4s it landed on top of a note shown at 0.9s, giving the one line
-  // that says what the plan believes about a second and a half of life.
+  // 900ms, so the line that says what the plan believes is not landed on by the next thing.
+  // There used to BE a next thing: the tour offer arrived as a second dialog, then as a second
+  // button here (v5.100), and the tour itself went in v5.273. One box, one way on.
   if(EZ_WHY[goal]){
     setTimeout(function(){
       // No CANCEL: the week is already written, so a cancel promised an undo that did not exist.
-      // The tour offer used to follow as a SECOND dialog; it is the second button here now, so a
-      // first run meets one box, not two (v5.100). The Quick and Full tours stay in Settings.
-      // The second button was TAKE THE QUICK TOUR. The tour was retired in v5.273, so the
-      // forged week hands straight over to the week itself and the hints do the teaching.
-      ask(lead+EZ_WHY[goal],function(){tutSeen();},'Your week is forged','SHOW ME THE WEEK',false);
+      ask(lead+EZ_WHY[goal],function(){},'Your week is forged','SHOW ME THE WEEK',false);
     },900);
-  }else setTimeout(tutOffer,650);
+  }
 }
 
 // ---------- sandbox ----------
@@ -23469,7 +22303,6 @@ function libSwap(to){
 }
 function sbStart(){
   if(SANDBOX)return;
-  if(TUTON)tutEnd();
   closeOvl('settingsOvl');
   persistNow();                       // last honest write before the real week goes out of reach
   // Swapping the DB was only half of it. The libraries carry your merged-in days and exercises
@@ -23496,7 +22329,6 @@ function sbStart(){
 }
 function sbEnd(){
   if(!SANDBOX)return;
-  if(TUTON)tutEnd();                  // a tour inside the sandbox holds the sandbox DB; give it back first
   SANDBOX=false;
   document.body.classList.remove('sbx');
   ['editOvl','exportOvl','askOvl','swapOvl','lvlOvl','exEditOvl','exNoteOvl','exAddOvl','settingsOvl','histOvl','progOvl','bwOvl','plateOvl'].forEach(function(id){
@@ -23568,9 +22400,8 @@ function sbEnd(){
   setTimeout(function(){try{easeNotice();}catch(e){}},8000);
   // A week left with a session stranded on the day a workout used to stand on (v5.240).
   try{if(bonusHeal())renderHome();}catch(e){}
-  // A first run is asked how it wants to start, and that hands over to the tour offer itself.
-  // Everyone else goes straight to the offer as before.
-  setTimeout(function(){if(STARTPEND)offerStart();else tutOffer();},1600);
+  // A first run is asked how it wants to start. Everyone else is already where they belong.
+  setTimeout(function(){if(STARTPEND)offerStart();},1600);
   // And, if the week is finished, the offer to run it again. After the tour offer, and it stands
   // down if that one is up: two questions on one launch is one too many.
   setTimeout(offerReopen,2400);

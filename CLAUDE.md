@@ -124,9 +124,9 @@ main constraint on how to work in it. See **Traps** below before editing.
   sets still owed. **`wearNext` returning null is how the watch is told there is no session at
   all**, so it may only ever happen when the workout really is finished. Reproduced before it
   was fixed and re-checked after, along with the skip behaviour above.
-  The finish screen's list is fenced with `TUTON` like every other live feature, because the
-  tour's sample day is designed to be left unfinished and this told a first time user they had
-  failed three lifts nobody asked them to do. And `histMissed` tests `wkVar(id)` itself, not
+  The finish screen's list was fenced with `TUTON` until the tour was deleted in v5.278, because
+  the tour's sample day was designed to be left unfinished and this told a first time user they
+  had failed three lifts nobody asked them to do. And `histMissed` tests `wkVar(id)` itself, not
   just `'rest'`: an OPTIONAL day is never owed, which is what `waitingCount`, the week summary
   and `weekHello` have always said.
 - **Workouts finished opens on the DAY** (v5.261, owner). `histLastDay()` is the latest day of
@@ -195,10 +195,25 @@ main constraint on how to work in it. See **Traps** below before editing.
   A stuck chip is usually TELLING THE TRUTH: look for an open session on the phone before
   suspecting the watch, and fix it there, because force stopping the watch app only hides it
   until the next data event.
-- **The tour is a sealed space** (owner, 20 Sep). Nothing from the live app reaches into it: no level-up
-  arrow, no finish-screen raise, no alarms, pushes or prompts while TUTON. The seed data trips isReady;
-  the finish screen's raise is fenced off with TUTON since v5.212, and the seed itself gets fixed with the
-  tutorial rewrite. Check any new live feature against TUTON before it ships.
+- **The tour is GONE** (v5.278). The sixteen step guided tour was retired in v5.273 and its code
+  came out here: 869 lines of script, 191 lines of CSS, 34 lines of markup, the theme card, and
+  the 35 `TUTON` guards it had scattered through the live app. **1165 lines, 88KB.** `TUTON`,
+  `TUTI`, `TUT_STEPS`, `tutGo`, `tutEnd`, `tutSeed`, `tutOffer`, `tutSeen` and the rest no longer
+  exist, and neither does the `KEY+':tut'` flag, which only `tutWasSeen` ever read and nothing
+  ever called. Its old rule, "the tour is a sealed space, check every new live feature against
+  TUTON before it ships", is retired with it: there is nothing left to seal, and two live
+  features it was holding back (the finish screen's missed lifts and its level-up offer) are
+  simply live now. One rule survives the deletion and still matters: **the sandbox is still a
+  borrowed DB**, so every `SANDBOX` guard the tour used to share stays exactly as it was.
+  Deleting it took a specific order, which is worth repeating if anything this size ever comes
+  out again: the big block first, so the remaining references ARE the list of guards to resolve,
+  then markup, then CSS, then the guards, then the comments that described guards that no longer
+  exist. A comment that explains a check which is not there is worse than no comment.
+  Verified in the preview, not by reading: the app boots with no console error, nothing
+  tour-shaped is still defined, `tools/back-audit.js` passes 34 of 34, a first run walks safety
+  to the week with no stray dialog, the forging ritual still ends on one box with one button,
+  and a real session logged through the actual anvils finishes showing "You did not get to Rope
+  Pushdown" and "Level up x 3".
 - **Back is a list, not a run of ifs** (v5.217). `BACK_RULES` in index.html holds every place the
   hardware back has to answer for, in stack order (splash, ritual, welcome, tour, a night in the
   history, the sheet on top, a session, the builder, the saved fold), and `onBackButton` just walks
