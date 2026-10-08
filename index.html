@@ -3673,7 +3673,11 @@ body.wcon{overflow:hidden;}
       <!-- The scrap heap sits with the workouts, and only when it holds something (v5.236). -->
       <div id="scrapLine" hidden><button class="sv-btn" onclick="openScrap()"><svg viewBox="0 0 20 20"><path d="M4.5 6.5h11M8.5 6.5V5h3v1.5M6 6.5l.7 9h6.6l.7-9"/></svg><span id="scrapLineTxt">Scrap heap</span></button></div>
     </div>
-    <div class="sv-tip">HOLD ONE TO PLACE IT ON A DAY</div>
+    <!-- It said HOLD ONE TO PLACE IT ON A DAY, and holding a card opens a menu with no day in
+         it: edit, duplicate, send, delete. The gesture that really carries a workout to the
+         board is a hold on the GRIP and then a drag, which is what the grip hint teaches, so
+         the tip now says the same thing in the same words (v5.280). -->
+    <div class="sv-tip">HOLD THE LINES ON ONE, THEN DRAG IT TO A DAY</div>
   </div>
 </div>
 
@@ -9903,7 +9907,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.279';
+var APPV='v5.280';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11799,7 +11803,6 @@ function dayBox(d,nx,n0){
   var dnum=new Date(weekStartTs()+((twoOn()&&twoOff())?7:0)*864e5+d.js*864e5).getDate();
   // The column is the way into the day; the cards beside it still open their workouts (v5.234).
   h+='<div class="dayhead" onclick="event.stopPropagation();openDay(\''+d.k+'\')" title="'+d.n+(isToday?', today':'')+'"><span><b class="dh-n">'+d.n.slice(0,3).toUpperCase()+'</b><b class="dh-d">'+dnum+'</b></span>'+
-     (false&&ids.length&&ids.length<DAY_MAX?'<span class="dayhead-add" onclick="openNewDay(\''+d.k+'\')" title="Add another workout to '+d.n+'">'+PLUS+'</span>':'')+
      '</div>';
   // "Drag a workout here" is only an instruction if you HAVE a workout to drag. On a week that
   // started empty there is nothing on the rack and nothing on the other days, so every day read
@@ -12834,7 +12837,11 @@ function renderHome(){
   // the board right now, because the bar is fixed and would otherwise sit on top of it.
   try{var ss=document.getElementById('session');
     hintLeave('home');
-    if(!bare&&!(ss&&ss.classList.contains('on')))showHint('grip','home');}catch(e){}
+    // Not before he has trained, and not over the builder. A board he has never worked is not a
+    // board he wants rearranged, and #make is a full screen rather than a sheet, so the sheet
+    // gate above does not cover it: placing a workout from the builder re-renders home and the
+    // bar slid up over it telling him to use the gesture he had just avoided (v5.280).
+    if(!bare&&(DB.logs||[]).length&&!onScr('make')&&!(ss&&ss.classList.contains('on')))showHint('grip','home');}catch(e){}
   var fg=FG();
   // The footer's icons stay with the world; its WORDS go through the generic gate like every
   // other string. These were the last place still saying "Pieces finished" and "Work measured"
@@ -13046,15 +13053,25 @@ var HINTS={
   exhold:'Hold an exercise to change its sets or rest.'
 };
 function hintsOff(){try{return localStorage.getItem('arc_hints')==='0';}catch(e){return false;}}
-function hintSeen(k){try{return (JSON.parse(localStorage.getItem('arc_hintseen')||'{}')||{})[k];}catch(e){return false;}}
-function hintMark(k){
-  try{var o=JSON.parse(localStorage.getItem('arc_hintseen')||'{}')||{};o[k]=1;
-    localStorage.setItem('arc_hintseen',JSON.stringify(o));}catch(e){}
-}
+function hintBook(){try{return JSON.parse(localStorage.getItem('arc_hintseen')||'{}')||{};}catch(e){return {};}}
+// A hint retires when it is TAPPED, or after HINT_MAX sightings of being ignored (v5.280). Only
+// hintGot used to retire one, so a hint nobody answered came back on every incidental redraw for
+// ever: the grip hint in particular rides about twenty unrelated re-render paths, including the
+// end of a successful drag, so a man who worked the gesture out for himself was congratulated
+// with an instruction to do the thing he had just done, permanently. That is the furniture the
+// owner deleted weekHint for in August, grown back with an animation on it.
+// The count lives in its OWN key. Tapped and seen-once both wanted to be 1 in arc_hintseen, so
+// the first sighting read as the hint having been answered and it retired after one. Two facts,
+// two stores, and every phone that already carries arc_hintseen keeps meaning what it meant.
+var HINT_MAX=3;
+function hintSaws(){try{return JSON.parse(localStorage.getItem('arc_hintsaw')||'{}')||{};}catch(e){return {};}}
+function hintSeen(k){return !!hintBook()[k]||(hintSaws()[k]||0)>=HINT_MAX;}
+function hintMark(k){try{var o=hintBook();o[k]=1;localStorage.setItem('arc_hintseen',JSON.stringify(o));}catch(e){}}
+function hintSaw(k){try{var o=hintSaws();o[k]=(o[k]||0)+1;localStorage.setItem('arc_hintsaw',JSON.stringify(o));}catch(e){}}
 // Reset and skip are the same switch seen from two ends: Settings turns them back on and
 // forgets what was shown, the first hint's own NO HINTS turns them off.
 function hintsReset(){
-  try{localStorage.setItem('arc_hints','1');localStorage.removeItem('arc_hintseen');}catch(e){}
+  try{localStorage.setItem('arc_hints','1');localStorage.removeItem('arc_hintseen');localStorage.removeItem('arc_hintsaw');}catch(e){}
   drawHintRow();mkNote('Hints are back. They appear as you go, one at a time.','Hints on');
 }
 function hintsStop(){
@@ -13112,10 +13129,17 @@ function showHint(k,scr){
   var wc=document.getElementById('welcome');
   if(wc&&wc.classList.contains('on'))return;
   var e=document.getElementById('hintBar');if(!e)return;
-  var first=true;try{first=!Object.keys(JSON.parse(localStorage.getItem('arc_hintseen')||'{}')||{}).length;}catch(x){}
+  // The way out rides the LOG hint and only the log hint (v5.280). It used to ride whichever
+  // came first, and on a fresh install that is `grip`, on the board, before the man has trained
+  // once: his first ever hint was about rearranging a week he has not done yet, so he turns
+  // hints off, and the switch he just pressed silently costs him "tap the anvil to log a set".
+  // The comment above this function says the failure the whole system exists to prevent is
+  // finishing a day with nothing logged, and the off switch was sitting on the wrong hint to
+  // cause exactly that. Offer the exit beside the one hint that earns it.
   HINTNOW=k;HINTSCR=scr||null;
+  hintSaw(k);
   document.getElementById('hintTxt').textContent=HINTS[k];
-  var no=document.getElementById('hintNo');if(no)no.hidden=!first;
+  var no=document.getElementById('hintNo');if(no)no.hidden=(k!=='log');
   e.classList.add('on');
 }
 function renderSession(){

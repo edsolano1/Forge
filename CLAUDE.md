@@ -215,9 +215,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   and a real session logged through the actual anvils finishes showing "You did not get to Rope
   Pushdown" and "Level up x 3".
 - **Back is a list, not a run of ifs** (v5.217). `BACK_RULES` in index.html holds every place the
-  hardware back has to answer for, in stack order (splash, ritual, welcome, tour, a night in the
-  history, the sheet on top, a session, the builder, the saved fold), and `onBackButton` just walks
-  it. **A new full screen means one line there.** Sheets need nothing: any `.ovl` is covered by the
+  hardware back has to answer for, in stack order (splash, ritual, welcome, a night in the
+  history, the sheet on top, a session, the builder), and `onBackButton` just walks
+  it. Seven entries, and that list is the whole of it: the tour's line went with the tour in
+  v5.278 and the saved fold's went when Saved became a real sheet in v5.260. **A new full screen means one line there.** Sheets need nothing: any `.ovl` is covered by the
   sheet-on-top rule. `backWould()` names what back would do right now. `tools/back-audit.js` pasted
   into the console opens every sheet found in the page plus the screens it lists, presses back, and
   prints PASS or what it could not get out of. Run it after anything that adds a screen.
@@ -343,6 +344,29 @@ main constraint on how to work in it. See **Traps** below before editing.
   list is MIXED the notice must not claim all of them are impossible, because that is simply
   false: it leads with `N lifts are asking for the wrong weight`, which is true of both kinds.
   Pump Day is deliberately outside this, like all real progression.
+- **What three reviewers found after the tour came out** (v5.280, owner asked for them from the
+  road). The deletion itself was clean: zero dangling references, every `SANDBOX` guard intact,
+  every multi-term condition still correct, back audit 34 of 34. What they found instead was
+  three real defects in the thing that REPLACED the tour, and all three were in one mechanism.
+  **The off switch was on the wrong hint.** NO HINTS rode whichever hint came first, and on a
+  fresh install that is `grip`, on the board, before the man has trained once: his first ever
+  hint was about rearranging a week he had not done yet, so he turns hints off, and that
+  silently costs him `Tap the anvil to log a set`. The comment above `showHint` says the failure
+  the whole system exists to prevent is finishing a day with nothing logged, and the exit was
+  sitting on the hint that would cause exactly that. The exit now rides `log` and only `log`.
+  **An ignored hint never retired.** `hintMark` was called from `hintGot` alone, so a hint nobody
+  tapped came back on every incidental redraw for ever, and `grip` rides about twenty unrelated
+  re-render paths including the end of a successful drag: a man who worked the gesture out for
+  himself was congratulated with an instruction to do the thing he had just done. `HINT_MAX` is
+  3 sightings, counted in `arc_hintsaw`, which is its OWN key because tapped and seen-once both
+  wanted to be 1 in `arc_hintseen` and the collision retired every hint after one showing.
+  **`grip` fired over the builder**, which is a full screen and not an `.ovl`, so the sheet gate
+  never covered it; placing a workout from the builder re-renders home and the bar slid up over
+  it. Gated on `!onScr('make')` and on having trained at all.
+  Two more, both the app contradicting itself: Saved workouts said `HOLD ONE TO PLACE IT ON A
+  DAY` and holding a card opens a menu with no day in it (edit, duplicate, send, delete), so the
+  tip now names the grip in the same words the hint uses; and the day column's plus was behind a
+  literal `false&&`, dead since v5.231, now gone rather than left as a trap for the next edit.
 - **The targets check only ever looks at imported numbers** (v5.251). `easeArm()` from
   `doRestore` and `weekAdd` only; `easeArmed()` gates `easeNotice` AND `easePlan`, so the hold
   menu is dormant too; answering sleeps it until the next import. It had six builds of false
