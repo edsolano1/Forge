@@ -3726,11 +3726,11 @@ body.wcon{overflow:hidden;}
      other way, and the same one button for all of them. -->
 <div class="ovl" id="easeOvl">
   <div class="sheet" style="max-width:420px">
-    <h3>Out of reach</h3>
+    <h3 id="easeH">Out of reach</h3>
     <p id="easeSub"></p>
     <div class="ease-one">
       <div class="ease-n" id="easeName"></div>
-      <div class="ease-nums"><span>asks for <b id="easeAsk"></b></span><span>your best is <b class="up" id="easeBest"></b></span></div>
+      <div class="ease-nums"><span>asks for <b id="easeAsk"></b></span><span id="easeBestL">your best is <b class="up" id="easeBest"></b></span></div>
       <div class="ease-where" id="easeWhere"></div>
     </div>
     <div class="mk-acts" style="margin-top:12px">
@@ -9903,7 +9903,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.278';
+var APPV='v5.279';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10664,6 +10664,41 @@ function latticeNext(id,w,down){
   var n=(a10+k*s10+(down?-p10:p10))/10;
   return n<0?0:n;
 }
+// Does this weight exist on the machine? Only answerable once a lattice has been learned, so a
+// lift with fewer than two logged weights is never judged: silence means "no idea", never "fine".
+// Anchored on a logged weight, because a logged weight is on the lattice by definition.
+function offLattice(id,w){
+  var s=stackStep(id);if(!s)return false;
+  var a=null;
+  (DB.logs||[]).forEach(function(L){
+    for(var k in L.entries){
+      if(exOfKey(L,k)!==id)continue;
+      L.entries[k].forEach(function(x){if(x&&x.w>0&&(a===null||x.w>a))a=x.w;});
+    }
+  });
+  if(a===null)return false;
+  return (Math.abs(Math.round(w*10)-Math.round(a*10))%Math.round(s*10))!==0;
+}
+// Which real rung an off lattice target becomes. The rung BELOW it, unless he has already
+// lifted the one above, in which case that: on his own seven, that rule landed every single
+// one on the weight he is actually using. It can only ever return a weight out of his own
+// history, which is what makes rewriting a target he may have typed himself safe to do.
+function offLatFix(id,w,best){
+  var s=stackStep(id);if(!s)return null;
+  var ws={},a=null;
+  (DB.logs||[]).forEach(function(L){
+    for(var k in L.entries){
+      if(exOfKey(L,k)!==id)continue;
+      L.entries[k].forEach(function(x){if(x&&x.w>0){ws[Math.round(x.w*10)]=1;if(a===null||x.w>a)a=x.w;}});
+    }
+  });
+  if(a===null)return null;
+  var s10=Math.round(s*10),w10=Math.round(w*10),a10=Math.round(a*10);
+  var below=a10+Math.floor((w10-a10)/s10)*s10,above=below+s10;
+  if(ws[above])return above/10;
+  if(ws[below])return below/10;
+  return (typeof best==='number'&&best>0)?best:null;   // neither rung logged: fall back to his best
+}
 // Every lift that met all its targets last time, with the numbers it would move to. Nothing
 // is written until the sheet is confirmed - this only describes the change.
 function levelPlan(wk,showAll){
@@ -10835,34 +10870,58 @@ function easePlan(wk){
       var EXD=EX[id]||{};
       if(EXD.cardio||EXD.bw)return;
       var stamp=(DB.upAt||{})[(String(rf.id).indexOf('~')>=0)?rf.id:id];
-      if(!armed&&!stamp)return;                     // neither imported nor raised by the app
+      // THE THIRD SOURCE, and the only one that needs no provenance: a target standing on a
+      // weight THE MACHINE DOES NOT HAVE (v5.279, owner from the road: "cable cross keeps
+      // telling me to do 25.5 instead of 27, the lattice just doesn't update"). It was 25.5
+      // because an old plate math raise stepped 23 by 2.5 on a stack that goes up in fours,
+      // and v5.275 only governs raises made from then on - it never went back for the ones
+      // already written. Seven of his were wrong, and NOTHING was ever going to catch them:
+      // the raise only fires when you BEAT the target, and the out of reach check only looks
+      // at targets too HIGH, so a target sitting below his best was silent by design.
+      // This one may judge a target nobody can prove the app wrote, which v5.251 otherwise
+      // forbids, and the reason is that the evidence is not about the lifter at all. It is a
+      // fact about the hardware: 25.5 is not on a stack whose own logged weights say it steps
+      // by four. The safety property that makes it safe to act on is offLatFix below, which
+      // can only ever move a target onto a weight he HAS ALREADY LIFTED.
+      var offLat=offLattice(id,t0.w);
+      if(!armed&&!stamp&&!offLat)return;             // not imported, not raised, not off the rungs
       var at=attemptsFor(id,stamp);
       if(at.n<EASE_TRIES||at.best===null)return;
       // A raise taken five minutes ago asks for a weight never lifted BY DESIGN. Only a target
       // that has survived a session since it was set can be called out of reach (v5.232), and the
       // comparison is by DAY, because a log carries a date and nothing finer (v5.233).
-      if(stamp&&at.last<=dayNoon(stamp))return;
+      if(stamp&&!offLat&&at.last<=dayNoon(stamp))return;
       // And a raise is judged on TWO sessions after it, never one. The owner asked for exactly
       // this: double check what they put the next time, and the time after that. One day short
       // of a new weight is a bad night's sleep, not a number that is wrong.
-      if(stamp&&at.nSince<EASE_TRIES)return;
+      if(stamp&&!offLat&&at.nSince<EASE_TRIES)return;
       var inv=!!invEx(id);
-      if(inv?(at.best<=t0.w):(at.best>=t0.w))return; // it has been reached at least once
-      // Never pinned is not the same as cannot. Judge the best he has DONE against what the
-      // target asks for, and stay quiet when he is within EASE_NEAR of it (v5.250).
-      if(!inv){
-        var ask=0,got=0;
-        try{ask=setScore(id,{w:t0.w,r:t0.r||1});got=bestScoreFor(id);}catch(e2){}
-        if(ask>0&&got>=ask*EASE_NEAR)return;
+      // Both of the quiet rules below are about a target being too HARD, and neither has
+      // anything to say about one that is merely impossible. An off lattice target skips them:
+      // reaching 27 does not make 25.5 exist, and being within 90% of a weight that is not on
+      // the machine is not being near anything.
+      if(!offLat){
+        if(inv?(at.best<=t0.w):(at.best>=t0.w))return; // it has been reached at least once
+        // Never pinned is not the same as cannot. Judge the best he has DONE against what the
+        // target asks for, and stay quiet when he is within EASE_NEAR of it (v5.250).
+        if(!inv){
+          var ask=0,got=0;
+          try{ask=setScore(id,{w:t0.w,r:t0.r||1});got=bestScoreFor(id);}catch(e2){}
+          if(ask>0&&got>=ask*EASE_NEAR)return;
+        }
       }
+      // Where it lands. Off the lattice it is the nearest REAL rung, which is a weight out of
+      // his own history and so cannot be a weight he has not made; anything else is his best.
+      var land=offLat?offLatFix(id,t0.w,at.best):at.best;
+      if(land===null||land<=0)return;
       var to=lines.map(function(ln){
         var t=parseTarget(ln);
-        return t.type==='wr'?(at.best+'x'+t.r):ln;   // the reps stay; only the load comes back
+        return t.type==='wr'?(land+'x'+t.r):ln;      // the reps stay; only the load comes back
       });
       if(to.join('\n')===lines.join('\n'))return;
       out.push({id:id,name:rf.data.name,from:lines,to:to,slot:rf.id,baseId:rf.baseId,
                 swapped:!!rf.swapId,sk:(String(rf.id).indexOf('~')>=0)?rf.id:id,
-                ask:t0.w,best:at.best,tries:at.n,raised:!!stamp});
+                ask:t0.w,best:land,tries:at.n,raised:!!stamp,offLat:offLat});
     });
   }catch(e){}
   return out;
@@ -11137,7 +11196,7 @@ function easeLifts(only){
     if(only&&g.wk!==only)return;
     g.rows.forEach(function(r){
       var e=by[r.id];
-      if(!e){e=by[r.id]={id:r.id,name:r.name,ask:r.ask,best:r.best,rows:[]};out.push(e);}
+      if(!e){e=by[r.id]={id:r.id,name:r.name,ask:r.ask,best:r.best,off:!!r.offLat,rows:[]};out.push(e);}
       e.rows.push({wk:g.wk,row:r});
     });
   });
@@ -11156,6 +11215,8 @@ function easeRender(){
   document.getElementById('easeSub').textContent=
     EASEQ.length===1?'One lift to look at.':('Lift '+(EASEI+1)+' of '+EASEQ.length+'.');
   document.getElementById('easeName').textContent=q.name;
+  document.getElementById('easeH').textContent=q.off?'Not on the machine':'Out of reach';
+  document.getElementById('easeBestL').firstChild.nodeValue=q.off?'the machine has ':'your best is ';
   document.getElementById('easeAsk').textContent=fmtW(q.ask);
   document.getElementById('easeBest').textContent=fmtW(q.best);
   // Where it stands, so accepting once for three copies is never a surprise.
@@ -11202,7 +11263,7 @@ function hvySig(){
   var a=[];
   try{
     easeAll().forEach(function(g){g.rows.forEach(function(r){
-      if(r.raised)a.push((r.sk||r.id)+':'+r.ask);
+      if(r.raised||r.offLat)a.push((r.sk||r.id)+':'+r.ask);
     });});
   }catch(e){}
   return a.sort().join(',');
@@ -11227,15 +11288,46 @@ function easeNotice(){
     if(!easeArmed()){
       var sig=hvySig();
       if(!sig||DB.hvySeen===sig)return;
-      var hl={},hw=null;
+      // Two kinds can be standing here and they are not the same complaint, so they do not get
+      // the same sentence. A target on a weight the machine does not have is named that way: it
+      // is a fact about the stack, not a verdict on the lifter, and saying "you have not made
+      // it" about 25.5 on a machine that has no 25.5 would be the app blaming him for its own
+      // arithmetic. When both kinds are waiting the impossible one leads, because it is the one
+      // a person can check against the machine in front of them.
+      var hl={},hw=null,offN=0,offEg=null;
       all.forEach(function(g){g.rows.forEach(function(r){
-        if(!r.raised)return;
+        if(!r.raised&&!r.offLat)return;
         hl[r.id]=1;
+        if(r.offLat){
+          offN++;
+          if(!offEg)offEg={name:r.name,ask:r.ask,step:stackStep(r.id)};
+        }
         var gp=Math.abs(r.ask-r.best);
         if(!hw||gp>hw.gap)hw={name:r.name,ask:r.ask,best:r.best,gap:gp};
       });});
       var hn=Object.keys(hl).length;
       if(!hn)return;
+      if(offEg){
+        var oeg=' Your '+String(offEg.name).toLowerCase()+' asks for '+fmtW(offEg.ask)+' '+wUnitName()+
+                ' on a stack that moves in '+fmtW(offEg.step)+' '+wUnitName()+' steps.';
+        // The count has to be true of the sentence it is in. When the list is MIXED, some of
+        // these lifts are impossible and the rest are merely too heavy, and saying "7 machines
+        // do not have the weight" about a list containing one of each is simply false. The
+        // mixed sentence is the one thing true of every row: the weight is wrong, and the
+        // replacement is one he has lifted.
+        var mixed=offN<hn;
+        ask((mixed?(hn+' lifts are asking for the wrong weight.')
+                  :(hn===1?'One lift asks for a weight its machine does not have.'
+                          :hn+' lifts ask for weights their machines do not have.'))+oeg+
+            (mixed?' They can each go to a weight you have actually lifted, one at a time, keeping the same reps.'
+                  :(hn===1?' It can go to the nearest real weight, keeping the same reps.'
+                          :' They can go to the nearest real weight, one at a time, keeping the same reps.')),
+            function(){openEase(null);},
+            (mixed?'Targets worth a look'
+                  :(hn===1?'A weight the machine does not have':'Weights the machines do not have')),'SHOW ME',
+            function(){easeNoteDone();},{label:'LATER',fn:function(){}},'LEAVE THEM');
+        return;
+      }
       // Named, with its two numbers, the same way the import question does it: a person checks
       // that against their memory of the gym in a second. No apology and no explanation of how
       // the raise was arrived at, which is the app talking about itself.

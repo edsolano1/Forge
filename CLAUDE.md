@@ -319,6 +319,30 @@ main constraint on how to work in it. See **Traps** below before editing.
   eight. Then one was forced too high and the whole round trip was walked: it flags, the notice
   names the lift and both numbers, answering silences it, a SECOND shortfall wakes it again, and
   USE rewrites every row the lift stands in while keeping the reps.
+- **A target can also be on a weight THE MACHINE DOES NOT HAVE, and that is the third source**
+  (v5.279, owner from the road: *cable cross keeps telling me to do 25.5 instead of 27, the
+  lattice just doesn't update*). It was 25.5 because an old plate math raise stepped 23 by 2.5
+  on a stack that goes up in fours, and **v5.275 only governs raises made from then on. It never
+  went back for the ones already written.** Seven of his were standing on weights that do not
+  exist, and nothing was ever going to catch them: a raise only fires when you BEAT the target,
+  and the out of reach check only looks at targets too HIGH, so a target sitting BELOW his best
+  was silent by design. `offLattice(id,w)` asks whether the weight is on the lattice at all,
+  anchored on a logged weight; `offLatFix` returns the rung below, or the rung above when he has
+  already lifted that one. On his own seven that rule landed every single one on the weight he
+  is actually using: 25.5 to 27, 125 to 130, 37.5 to 40, 75 to 80, 145 to 140, 105 to 100.
+  **This one may judge a target nobody can prove the app wrote, which v5.251 otherwise forbids.**
+  The reason it is allowed: the evidence is not about the lifter at all, it is a fact about the
+  hardware, and the safety property is that `offLatFix` can only ever return a weight out of his
+  own history, so an accepted fix can never ask for something he has not already done. It also
+  skips the three quiet rules that exist for targets that are too HARD, because none of them
+  mean anything here: reaching 27 does not make 25.5 exist, being within `EASE_NEAR` of a weight
+  that is not on the machine is not being near anything, and an impossible weight needs no
+  "two sessions since the raise" waiting period.
+  The sheet now **says which problem it is fixing**: `Not on the machine` with `the machine has
+  27` for an off lattice row, `Out of reach` with `your best is` for the others. And when the
+  list is MIXED the notice must not claim all of them are impossible, because that is simply
+  false: it leads with `N lifts are asking for the wrong weight`, which is true of both kinds.
+  Pump Day is deliberately outside this, like all real progression.
 - **The targets check only ever looks at imported numbers** (v5.251). `easeArm()` from
   `doRestore` and `weekAdd` only; `easeArmed()` gates `easeNotice` AND `easePlan`, so the hold
   menu is dormant too; answering sleeps it until the next import. It had six builds of false
