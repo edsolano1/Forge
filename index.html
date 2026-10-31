@@ -9907,7 +9907,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.280';
+var APPV='v5.281';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12908,6 +12908,9 @@ function sealAway(wk){
   if(Object.keys(entries).length)DB.logs.push({day:wk,date:A.date,entries:entries,note:A.note||'',swaps:A.swaps||{}});
   delete DB.active[wk];
 }
+// Four hours. Long enough that a session which crossed midnight is still yours, short enough
+// that one left overnight is filed before you next open the app (v5.281).
+var STALE_MS=4*3600000;
 // on launch, make the one-session rule true again: keep the session you touched last,
 // seal the rest into history, and drop empty or unknown stubs
 function reconcileActive(){
@@ -12919,6 +12922,21 @@ function reconcileActive(){
     // or a cold start mid-session throws the whole day away
     if(loggedCount(k)===0&&(!A||(A.date!==td&&!A.note&&!Object.keys(A.swaps||{}).length))){
       delete DB.active[k];changed=true;continue;
+    }
+    // A session nobody came back to files ITSELF (v5.281, owner picked A of three). Until it is
+    // sealed its sets live in DB.active, and every reader of your training history reads DB.logs
+    // instead - lastForSlot, histForEx, stackStep, the pace, level ups, Workouts finished, the
+    // week's count - so the work is invisible to all of them. A session left open for three weeks
+    // is not an untidy card, it is three sets the lattice never learned from. sealAway files it
+    // under the day it happened, which is the v5.269 rule, and nothing is asked because the man
+    // is not here to answer: a raise it earned is still on the card's hold menu (v5.218).
+    // BOTH conditions are needed. The day having passed is not enough on its own: train at 11pm,
+    // cross midnight and close the app, and at 12:20am the day has passed while the session is
+    // minutes old. The staleness is not enough either, because a long gap inside one day is a
+    // man at work who means to come back after six. A session with sets but no timestamps is a
+    // leftover from before v5.182, and its day has passed, so it files too.
+    if(loggedCount(k)>0&&A.date!==td&&(Date.now()-(A.last||A.start||0))>=STALE_MS){
+      sealAway(k);changed=true;continue;
     }
     live.push(k);
   }
