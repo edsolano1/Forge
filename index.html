@@ -9907,7 +9907,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.282';
+var APPV='v5.283';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -19849,9 +19849,39 @@ function wearRestEnd(){
 // What comes back. The watch does not log anything itself - it says a set was done and the
 // phone does exactly what a tap on the screen would have done, so there is one code path and
 // one set of rules whichever end you press.
+//
+// It is bound with a RETRY, and that is the whole point of this function (v5.283). It used to
+// be bound once at boot and never again, and `WR()` is null until Capacitor has finished
+// registering its plugins - so a launch that lost that race left the page deaf to the wrist for
+// its entire life, silently, because both the null and any throw were swallowed.
+//
+// Nothing looks broken when this happens, which is why it survived so long. The phone keeps
+// PUSHING perfectly, so the watch shows your workout, your sets and your rest ring, and the
+// ongoing chip updates. It is only what comes BACK that is dropped, so the wrist turns into a
+// display: SKIP REST vibrates and the rest keeps running, and the watch sits on "One moment"
+// because nothing ever answers its request for a workout.
+//
+// Measured on the owner's phone before the fix, which is the only reason it was found: the
+// plugin event fired and the app's handler was simply not there. Six requests for the same
+// workout went unanswered, and a press of SKIP REST arrived at the plugin while wearSkipRest
+// never ran. Calling wearBind() by hand fixed it on the spot, same session, same button.
+//
+// WEARBOUND is not belt and braces, it is required: a second listener would handle every
+// message from the watch twice, and logging a set twice is not a cosmetic bug.
+// Thirty seconds of trying, twice a second, AND another go every time the app comes back to
+// the front. The window has to be generous because this app is loaded from a remote URL, which
+// is the arrangement where Capacitor injects its bridge AFTER the page is already running - so
+// the race is real and the page always starts out with no plugin. The visibility attempt is the
+// backstop: it costs one null check, and it means a phone that somehow ran the timer out still
+// repairs itself the next time it is picked up, rather than staying deaf until it is restarted.
+var WEARBOUND=false,wearBindTries=0;
 function wearBind(){
+  if(WEARBOUND)return;
   var wr=WR();
-  if(!wr||!wr.addListener)return;
+  if(!wr||!wr.addListener){
+    if(wearBindTries++<60)setTimeout(wearBind,500);
+    return;
+  }
   try{
     wr.addListener('wear',function(e){
       if(!e)return;
@@ -19866,7 +19896,8 @@ function wearBind(){
       if(e.path!=='/forge/log')return;
       wearDoLog(b.id,b.setIdx,(typeof b.w==='number'?b.w:undefined),(typeof b.r==='number'?b.r:undefined));
     });
-  }catch(e){}
+    WEARBOUND=true;
+  }catch(e){if(wearBindTries++<60)setTimeout(wearBind,500);}
 }
 // Beginning a day AT a particular lift. The watch offers this because looking at a lift on a
 // workout that is not running should not commit you to the whole day - so nothing is sent
@@ -20417,6 +20448,8 @@ function restHideSoon(){
 }
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState!=='visible')return;
+  try{wearBind();}catch(e){}   // v5.283: free once bound, and it repairs a page that lost the race
+
   // A rest that ran out while the app was away (v5.197). The page's clock is frozen in the
   // background, so the tick that ends a rest never ran: coming back, the app still believed it was
   // resting, ended the rest right then, and showed GO for a few seconds for an alarm that had
