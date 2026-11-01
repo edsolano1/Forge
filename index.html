@@ -9907,7 +9907,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.281';
+var APPV='v5.282';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -19816,16 +19816,28 @@ function wearRestLen(){
     return n>0?n:0;
   }catch(e){return 0;}
 }
-// Cutting a rest short from the wrist. Deliberately the SAME two lines the notification skip
-// runs - move the end to now and let the running tick land it - so there is one way a rest
-// finishes early no matter which surface asked, alarms handed back to Android included.
+// Cutting a rest short from somewhere that is NOT the page: the wrist, or the shade. One way
+// for both, which is what the old comment here promised and what this now actually does.
+//
+// Both used to move the end to now and leave the rest to the running tick. That was the bug.
+// The tick is a 250ms interval in a page that is frozen whenever the phone is in a pocket or
+// the shade is over it, which is precisely when neither of these surfaces IS the page: nobody
+// presses the shade's SKIP while looking at the app. So the mark landed and the teardown never
+// ran, and nativeCancel, nativeSoundCancel and nativeTimerHide all live inside that teardown -
+// a rest you skipped still went off at its original time, which is the one thing v5.182's
+// comment claimed it would not. Measured: in a frozen page the old code made exactly two calls,
+// clearRestNotif and wearPush, and left Android holding both alarms.
+// It is landed HERE instead, by calling the very same tick, so a rest still ends early through
+// one code path whichever surface asked. Never go back to only setting the mark.
+function skipRestNow(){
+  if(typeof timerInt==='undefined'||!timerInt)return false;
+  skipQuiet=true;timerEnd=Date.now();
+  try{clearRestNotif();}catch(e){}
+  try{if(restTick)restTick();}catch(e){}
+  return true;
+}
 function wearSkipRest(){
-  try{
-    if(typeof timerInt==='undefined'||!timerInt)return;
-    skipQuiet=true;timerEnd=Date.now();
-    try{clearRestNotif();}catch(e){}
-    wearPush();
-  }catch(e){}
+  try{if(skipRestNow())wearPush();}catch(e){}
 }
 function wearRestEnd(){
   try{
@@ -20258,7 +20270,7 @@ try{
     var d=e.data||{};
     if(d.type!=='rest-action')return;
     if(d.action==='plus30')adjustTimer(30);
-    else if(d.action==='skip'){skipQuiet=true;timerEnd=Date.now();clearRestNotif();}
+    else if(d.action==='skip')skipRestNow();   // v5.282: lands it now, so Android's alarm is really taken back
   });
 }catch(e){}
 // loud is decided by restAlert: silent when the app is in front of you and playing its own
