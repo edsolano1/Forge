@@ -189,6 +189,17 @@ main constraint on how to work in it. See **Traps** below before editing.
   `isFinishing`. Owner's rule, and the right one: going back all the way is a clear enough
   statement, the phone republishes on the next state change, and reopening is one tap. An
   ongoing notification nobody can dismiss is a bug however correct its contents are.
+- **A skip that comes from off the page must LAND, not leave a mark for the tick** (v5.282).
+  `skipRestNow()` is the one way a rest ends early from the wrist or the shade, and it ends it
+  by calling `restTick()` itself rather than setting `timerEnd` and trusting the 250ms interval.
+  That interval is in a page which is frozen whenever the phone is in a pocket or the shade is
+  over it, which is exactly when neither of those surfaces IS the page: nobody presses the
+  shade's SKIP while looking at the app. The teardown that hands Android's alarm, its sound and
+  its timer back lives INSIDE that tick, so for six builds a rest you skipped still went off at
+  its original time, which is the one thing v5.182's comment claimed it would not. Measured with
+  the interval cleared and its handle left in place, which is what a frozen page looks like to
+  the guard: before, exactly two calls and Android still holding both alarms; after, all three
+  taken back. Never go back to only setting the mark, on either surface.
 - **A number that changes shows the number it changed FROM** (watch 1.19, owner picked B of
   three). `roll(live, ghost, old, dir, rest)` carries the leaving number out of the slot while
   the arriving one comes in from the other side, 150ms on a PathInterpolator, and the pad
