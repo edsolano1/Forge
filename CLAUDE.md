@@ -189,6 +189,23 @@ main constraint on how to work in it. See **Traps** below before editing.
   `isFinishing`. Owner's rule, and the right one: going back all the way is a clear enough
   statement, the phone republishes on the next state change, and reopening is one tap. An
   ongoing notification nobody can dismiss is a bug however correct its contents are.
+- **The watch link is BOUND WITH A RETRY, and losing that race is silent** (v5.283, the owner's
+  SKIP REST bug, found with CDP on his own phone). `wearBind()` used to run once at boot and
+  open with `var wr=WR(); if(!wr||!wr.addListener)return;`. `WR()` is null until Capacitor has
+  registered its plugins, and Forge is loaded from a REMOTE url, which is the arrangement where
+  Capacitor injects its bridge after the page is already running: so the page always starts with
+  no plugin, boot is a race, and a launch that lost it left the page deaf to the wrist for its
+  whole life. Both the null and any throw were swallowed.
+  **Nothing looks broken when this happens**, which is why it lasted: pushing is unaffected, so
+  the watch shows the workout, the sets, the rest ring and the chip, and only what comes BACK is
+  dropped. The wrist becomes a display. Measured: six requests for a workout all arrived at the
+  plugin and none was answered (the watch sat on `One moment`), and a press of SKIP REST arrived
+  as `/forge/skiprest` while `wearSkipRest` never ran. Calling `wearBind()` by hand and pressing
+  the same button again ended the rest, same session, nothing else changed.
+  It now retries for 30s and tries again on every `visibilitychange` to visible. **`WEARBOUND` is
+  required, not belt and braces**: a second listener handles every message from the watch twice,
+  and logging a set twice is not cosmetic. Any future binding to a Capacitor plugin at boot has
+  the same hazard; never write a one-shot bind that returns quietly.
 - **A skip that comes from off the page must LAND, not leave a mark for the tick** (v5.282).
   `skipRestNow()` is the one way a rest ends early from the wrist or the shade, and it ends it
   by calling `restTick()` itself rather than setting `timerEnd` and trusting the 250ms interval.
