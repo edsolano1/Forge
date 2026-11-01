@@ -189,6 +189,24 @@ main constraint on how to work in it. See **Traps** below before editing.
   `isFinishing`. Owner's rule, and the right one: going back all the way is a clear enough
   statement, the phone republishes on the next state change, and reopening is one tap. An
   ongoing notification nobody can dismiss is a bug however correct its contents are.
+- **A number that changes shows the number it changed FROM** (watch 1.19, owner picked B of
+  three). `roll(live, ghost, old, dir, rest)` carries the leaving number out of the slot while
+  the arriving one comes in from the other side, 150ms on a PathInterpolator, and the pad
+  wheel's neighbours FADE to their new values instead of snapping. Both surfaces that roll a
+  number are double buffered for it: `wVal` and `rVal` each sit in a FrameLayout over a
+  `wGhost` / `rGhost` twin drawn behind them (behind, so the new number comes to the front and
+  so the twin swallows no taps), and the pad wheel's middle is built the same way in `drawPad`.
+  What shipped before flashed for three reasons stacked on each other, and all three had to go:
+  only the live number moved while the wheel's neighbours snapped, 90ms is under the length an
+  eye reads as travel rather than a blink, and every detent cancelled the roll before it and
+  teleported the view back to its start offset, so a fast spin killed each motion mid flight.
+  **The resting state is set at the TOP of `roll`, never in a finish handler**, because a
+  cancelled animation fires none; and `restAlpha` reads the rule `paint()` uses instead of the
+  view's current alpha, because settling to whatever a cancelled roll happened to leave behind
+  is how a number ends up permanently dim. A 150ms animation cannot be caught by `adb screencap`
+  at all, so this was verified at `animator_duration_scale 10` (now in `device-settings.sh`):
+  both numbers on screen at once on all three rows, and six rapid steps landed on exactly the
+  right value with nothing stuck and no drift.
 - **The wrist chip has an expiry** (watch 1.12). `setTimeoutAfter` six hours, re-set on every
   state update. An ongoing chip cannot be swiped away and only the phone can clear it, so a
   session left open used to hold the watch face slot against Spotify and every timer forever.

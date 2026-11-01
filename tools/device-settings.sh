@@ -31,6 +31,7 @@ KEYS=(
   "system font_scale"
   "system screen_brightness_mode"
   "secure immersive_mode_confirmations"
+  "global animator_duration_scale"     # slowed to catch a 150ms animation in a screencap
 )
 # </dev/null on every adb call: inside the restore loop adb would otherwise swallow the rest of
 # the snapshot file off stdin, and only the first setting would ever be put back.
