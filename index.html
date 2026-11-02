@@ -9907,7 +9907,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.283';
+var APPV='v5.284';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13543,6 +13543,7 @@ function toggleSet(id,i,rest,unit){
     // of whoever built the workout: every day earns it, generated or hand-made.
     var dayDone=loggedCount(CUR)>=totalSets(CUR);
     if(secs>0&&!dayDone)startTimer(secs,(EX[exId]||{}).name);
+    WEARJUST={id:id,i:i,g:gr};   // v5.284: what this set graded, for the wrist's own cue
     try{wearPush();}catch(e){}   // the wrist moves on with the phone
     try{
       // The record cue is for beating something, and the first time you do a lift there is
@@ -19480,6 +19481,15 @@ var WEARFOCUS=null;
 // including regrading anything already logged in the slot. Structure editing stays on the
 // phone; a swap is the one structural change that happens mid-session with the phone in a bag.
 var WEARSWAP=null;
+// The set that was JUST logged and what it graded, carried on the one push that follows it
+// (v5.284). The wrist cannot work this out for itself: the push after a log describes the set
+// you are going ON to, so by the time it lands `sets` is the NEXT lift's ladder and the set
+// just logged is not in it at all. The watch was reading the grade out of that ladder, which
+// works only while the next set belongs to the same lift - so the gold buzz was missing on the
+// LAST set of every lift, on both halves of every superset, and on the last set of the whole
+// session, which is exactly where a best usually happens.
+// Same shape as WEARSWAP above: set at the moment it is true, spent by the next push.
+var WEARJUST=null;
 function wearSwapList(rowId){
   if(!CUR||!DB.active[CUR]||SANDBOX)return;
   // rowId is the slot. The watch swaps a block the same way the phone does, but every lookup
@@ -19795,6 +19805,7 @@ function wearPush(detailId){
     if(detailId){var d2=wearDetail(detailId);if(d2)st.detail=d2;}
   }
   if(WEARSWAP){st.swap=WEARSWAP;WEARSWAP=null;}
+  if(WEARJUST){st.just=WEARJUST;WEARJUST=null;}   // v5.284: rides exactly one push, like the swap
   // The Data Layer drops an item identical to the one already standing - so a re-request
   // whose answer happened to match byte-for-byte was silently swallowed, and the watch sat
   // on Loading forever. A timestamp makes every deliberate push distinct.
@@ -19935,7 +19946,7 @@ function wearDoLog(id,i,w,r){
       if(typeof w==='number'&&isFinite(w)&&w>=0)E.w=Math.round(inW(w)*100)/100;
       if(typeof r==='number'&&isFinite(r)&&r>0)E.r=r;
       // Re-grade the corrected set, as the phone's own edit pad does (v5.104).
-      try{var g=setGrade(nx.exId,E);E.g=g;if(g==='pr')E.pr=1;else delete E.pr;}catch(e){}
+      try{var g=setGrade(nx.exId,E);E.g=g;if(g==='pr')E.pr=1;else delete E.pr;WEARJUST={id:nx.id,i:nx.i,g:g};}catch(e){}
       saveDB();
       try{renderSession();}catch(e){}
     }
