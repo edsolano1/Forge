@@ -189,6 +189,20 @@ main constraint on how to work in it. See **Traps** below before editing.
   `isFinishing`. Owner's rule, and the right one: going back all the way is a clear enough
   statement, the phone republishes on the next state change, and reopening is one tap. An
   ongoing notification nobody can dismiss is a bug however correct its contents are.
+- **The wrist is TOLD what a set graded, it never works it out** (v5.284 / watch 1.20). The push
+  that follows a log describes the set you are going ON to, so its `sets` is the NEXT lift's
+  ladder and the set just logged is usually not in it. 1.18's gold buzz read the grade out of
+  that ladder, so it fired only while the next set belonged to the same lift: **no gold on the
+  last set of any lift** (the push's `id` has already moved on), **none on either half of a
+  superset** (the ladder alternates), and **none on the last set of the session at all**, where
+  `wearNext()` is null and the push carries `open:false` with no `id` and no ladder to read.
+  That is most of the places a best happens. `WEARJUST` now carries `{id,i,g}` on exactly one
+  push and is spent there, the same shape as `WEARSWAP`, set where a set is logged and where one
+  is corrected from the wrist. It stays gated on `pendingLog` on the watch, so it only ever
+  answers a press on that wrist: a set logged on the phone is the phone's to announce.
+  **This is a BUZZ, not a sound**, and that is not a shortcut: the phone's fanfare is web audio
+  and v5.248 drops it while the page is hidden, which is exactly the case being solved here.
+  Verified against a real 28 set session, both boundaries and a genuine `pr`.
 - **The watch link is BOUND WITH A RETRY, and losing that race is silent** (v5.283, the owner's
   SKIP REST bug, found with CDP on his own phone). `wearBind()` used to run once at boot and
   open with `var wr=WR(); if(!wr||!wr.addListener)return;`. `WR()` is null until Capacitor has
