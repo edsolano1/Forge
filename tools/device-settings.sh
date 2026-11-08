@@ -4,7 +4,7 @@
 # has been left in a portrait it cannot be read in whichever wrist it is on, both of which the
 # owner then had to fix by hand.
 #
-#   tools/device-settings.sh save    [serial]   # before touching anything
+#   tools/device-settings.sh save    [serial]   # before touching anything, ONCE per device
 #   tools/device-settings.sh show    [serial]   # what it is now, beside what was saved
 #   tools/device-settings.sh restore [serial]   # put every one of them back
 #
@@ -41,6 +41,18 @@ del(){ "${A[@]}" shell settings delete "$1" "$2" >/dev/null 2>&1 </dev/null; }
 
 case "$CMD" in
   save)
+    # A SECOND save is how a good baseline gets destroyed, and it is what actually went wrong on
+    # 8 Nov: by the time the second one runs something has usually already drifted, the drift is
+    # written down as the owner's own setting, and the later restore then faithfully puts the
+    # WRONG value back. That is how auto-rotate came to be "restored" to on, on a phone he keeps
+    # in portrait, after a session that believed it had tidied up. The first snapshot of a device
+    # is the only one taken before anything was touched, so it is the only one worth having.
+    if [ -f "$FILE" ] && [ "${3:-}" != "--force" ]; then
+      echo "$ID already has a snapshot, and save will not overwrite it:"
+      sed 's/^/  /' "$FILE"
+      echo "restore it first. Only pass --force if you are certain it is stale."
+      exit 1
+    fi
     : > "$FILE"
     for k in "${KEYS[@]}"; do ns=${k%% *}; key=${k#* }; key=${key%% *}; echo "$ns $key $(get "$ns" "$key")" >> "$FILE"; done
     echo "saved $ID:"; cat "$FILE"
