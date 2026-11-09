@@ -3886,6 +3886,14 @@ body.wcon{overflow:hidden;}
       <span class="ydw"><b>Its own history</b><span id="ydVaultSt"></span></span>
       <button class="sfx-tog" onclick="openVault()">OPEN</button>
     </div>
+    <!-- The copy that is NOT on this phone (v5.286). Hidden entirely until a Google client id
+         exists and the platform can actually sign in, because a switch that cannot work is
+         worse than no switch. -->
+    <div class="ydstat" id="ydDrive" hidden>
+      <svg viewBox="0 0 20 20"><path d="M6.4 16h7.8a3.2 3.2 0 0 0 .3-6.4A4.5 4.5 0 0 0 6.2 8.3 3.4 3.4 0 0 0 6.4 16z"/><path d="M10 14V8.4M10 8.4L8.2 10.2M10 8.4l1.8 1.8"/></svg>
+      <span class="ydw"><b>A copy in your Drive</b><span id="ydDriveSt"></span></span>
+      <button class="sfx-tog" id="ydDriveTog" onclick="driveToggle()">OFF</button>
+    </div>
     <div class="ydlbl">A COPY YOU KEEP</div>
     <div class="ydg">
       <button class="yd" onclick="exportDest('backup')">
@@ -9941,7 +9949,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.285';
+var APPV='v5.286';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12138,7 +12146,7 @@ function markDayDone(id){
   // decision that undoes itself.
   DB.logs.push({day:id,name:(W[id]||{}).name||'',date:today(),entries:{},note:'',swaps:{},sealed:1,marked:1});
   delete DB.active[id];
-  saveDB();try{autoBk();}catch(e){}try{vaultPut();}catch(e){}renderHome();
+  saveDB();try{autoBk();}catch(e){}try{vaultPut();}catch(e){}try{drivePush();}catch(e){}renderHome();
   if(typeof mkRender==='function'&&document.getElementById('make').classList.contains('on'))mkRender();
   offerReopen();                                 // marking the last open day locks the week too
 }
@@ -15748,6 +15756,7 @@ function finishNow(){
   saveDB();
   try{autoBk();}catch(e){}
   try{vaultPut();}catch(e){}
+  try{drivePush();}catch(e){}
   syncPumpBtn();
   renderSummary(sum);
   document.getElementById('session').classList.remove('on');
@@ -16097,14 +16106,17 @@ function igniteDiamond(cb){
 // One list, so the two halves can never drift into disagreeing about what a backup contains.
 // v5.213: the units and the plate bar travel too. Found rehearsing migration day on the phone: a kg user
 // restoring onto a new install came back in pounds, and miles and the remembered bar were lost with them.
-var BK_KEYS=['arc_sfx','arc_alert10','arc_notif','arc_motion','arc_sfxoff','arc_autobk','arc_bknudge','arc_lastbk','arc_kg','arc_km','arc_bar'];
+var BK_KEYS=['arc_sfx','arc_alert10','arc_notif','arc_motion','arc_sfxoff','arc_autobk','arc_bknudge','arc_lastbk','arc_kg','arc_km','arc_bar','arc_drive'];
 function backupBlob(){
   var s={};
   BK_KEYS.forEach(function(k){
     try{var v=localStorage.getItem(k);if(v!==null)s[k]=v;}catch(e){}
   });
   try{s[TKEY]=curTheme();}catch(e){}
-  return JSON.stringify({arcanum:1,app:APPV,at:new Date().toISOString(),db:DB,settings:s});
+    // The vault rides along (v5.286). Without it a restore hands back today and throws away
+  // every day behind it, which is the one thing the vault exists to keep.
+  var vlt=(VAULT&&Array.isArray(VAULT.e)&&VAULT.e.length)?VAULT:null;
+  return JSON.stringify({arcanum:1,app:APPV,at:new Date().toISOString(),db:DB,settings:s,vault:vlt});
 }
 function backupName(){return 'forge-backup-'+today()+'.json';}
 // A generated download only works where the browser honours it. The Android app does not:
@@ -16230,6 +16242,9 @@ function doRestore(input){
           if(k===TKEY||s[k]===undefined)return;
           try{localStorage.setItem(k,String(s[k]));}catch(e){}
         });
+        // A backup made before v5.286 has no vault, and that is not an error: the app simply
+        // starts a fresh history from what was restored.
+        if(d.vault&&Array.isArray(d.vault.e)){VAULT=d.vault;try{Store.set(VKEY,VAULT);}catch(e){}}
         mergeCustom();
         easeArm();                 // numbers from a file: worth a look once (v5.251)
         persistNow();
@@ -16574,6 +16589,264 @@ function autoBk(first){
     });
   }catch(e){fail();}
 }
+// ---------- Google Drive: the copy that is not on this phone (v5.286) ----------
+// The vault keeps every day, and it keeps them ON THE PHONE. A phone that is lost, stolen,
+// dropped in a pool or simply replaced takes the whole thing with it, and the one thing standing
+// between a user and that is a file they have to remember to make. Nobody remembers. This is the
+// same safety copy, sent somewhere else, by itself, after every finished workout.
+//
+// Three decisions worth knowing before changing any of this:
+//
+// THE FILE IS VISIBLE, in a Forge folder in the user's own Drive, NOT in Drive's hidden app
+// folder. The hidden folder is tidier and it is a trap: Google's own documentation is clear that
+// it cannot be seen by the user OR by any other app, which would mean the owner could never open
+// his own backup, hand it to anybody, or let an assistant read it. A backup you cannot see is a
+// promise, not a backup.
+//
+// THE PERMISSION IS THE NARROW ONE. drive.file lets an app touch only the files it created
+// itself, so Forge cannot read one document, photo or spreadsheet in there - not as a promise but
+// because it is never given the ability. It is also the cheap tier: no security assessment, no
+// annual audit, none of the cost full Drive access drags behind it.
+//
+// NOTHING IS LOADED UNTIL IT IS TURNED ON. Google's sign-in script is fetched the first time
+// somebody says yes and never before, so an app whose whole point is working with no network
+// does not reach out to Google on every launch to support a feature most people will not use.
+//
+// DRIVE_CID is the OAuth client id, and an EMPTY ONE MEANS THE FEATURE DOES NOT EXIST: every
+// entry point hides itself, nothing is asked, nothing is fetched, and the app is exactly what it
+// was before. That is deliberate. A client id is made once in the Google Cloud console against a
+// real account and cannot be invented here, so the code ships ahead of it rather than waiting.
+var DRIVE_CID='';
+var DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
+var DRIVE_DIR='Forge',DRIVE_NAME='forge-backup.json';
+var DRV={tok:null,exp:0,client:null,wait:null,busy:false};
+
+function driveOn(){try{return localStorage.getItem('arc_drive')==='1';}catch(e){return false;}}
+function driveNative(){
+  var C=window.Capacitor;
+  try{return !!(C&&C.isNativePlatform&&C.isNativePlatform());}catch(e){return false;}
+}
+// Google refuses to sign anybody in inside an embedded browser, and the Android wrapper IS one.
+// So the wrapper needs its own way in (a system browser and a deep link back, or Play Services),
+// and until that exists this says so rather than offering a switch that cannot work. Checked in
+// one place so there is one thing to change when the native half lands.
+function driveAvail(){return !!DRIVE_CID&&!driveNative();}
+function driveWhy(){
+  if(!DRIVE_CID)return 'setup';
+  if(driveNative())return 'native';
+  return '';
+}
+function driveGis(){
+  return new Promise(function(res,rej){
+    try{if(window.google&&google.accounts&&google.accounts.oauth2)return res(true);}catch(e){}
+    var s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client';s.async=true;s.defer=true;
+    s.onload=function(){res(true);};
+    s.onerror=function(){rej(new Error('offline'));};
+    document.head.appendChild(s);
+  });
+}
+// interactive: a person is looking at the screen and a sign-in window is fair. Silent is what
+// every automatic copy uses, and a silent failure is recorded and shown in Settings rather than
+// throwing a Google window over somebody who has just finished a workout.
+function driveToken(interactive){
+  return new Promise(function(res,rej){
+    if(DRV.tok&&Date.now()<DRV.exp)return res(DRV.tok);
+    driveGis().then(function(){
+      if(!DRV.client){
+        DRV.client=google.accounts.oauth2.initTokenClient({
+          client_id:DRIVE_CID,scope:DRIVE_SCOPE,
+          callback:function(r){
+            var w=DRV.wait;DRV.wait=null;
+            if(r&&r.access_token){
+              DRV.tok=r.access_token;
+              DRV.exp=Date.now()+((+r.expires_in||3600)-90)*1000;
+              if(w)w.res(DRV.tok);
+            }else if(w)w.rej(new Error('no token'));
+          },
+          error_callback:function(e){var w=DRV.wait;DRV.wait=null;if(w)w.rej(e||new Error('denied'));}
+        });
+      }
+      if(DRV.wait)return rej(new Error('busy'));
+      DRV.wait={res:res,rej:rej};
+      try{DRV.client.requestAccessToken(interactive?{}:{prompt:''});}
+      catch(e){DRV.wait=null;rej(e);}
+    }).catch(rej);
+  });
+}
+function driveFetch(url,opt,interactive){
+  opt=opt||{};
+  return driveToken(interactive).then(function(t){
+    var h={};for(var k in (opt.headers||{}))h[k]=opt.headers[k];
+    h.Authorization='Bearer '+t;
+    return fetch(url,{method:opt.method||'GET',headers:h,body:opt.body});
+  }).then(function(r){
+    // A token can die between being handed over and being used. One retry, once, and only when
+    // Google itself says the token is the problem.
+    if(r.status!==401)return r;
+    DRV.tok=null;DRV.exp=0;
+    return driveToken(interactive).then(function(t2){
+      var h2={};for(var k2 in (opt.headers||{}))h2[k2]=opt.headers[k2];
+      h2.Authorization='Bearer '+t2;
+      return fetch(url,{method:opt.method||'GET',headers:h2,body:opt.body});
+    });
+  });
+}
+function driveQ(q){
+  return 'https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id,name)&q='+
+         encodeURIComponent(q+" and trashed=false");
+}
+// Find or make the Forge folder. With drive.file the search only ever sees what Forge itself
+// made, so a folder the user renamed or binned is simply not there and a new one is made: that
+// is the scope working, not a fault.
+async function driveDir(interactive){
+  var cached='';try{cached=localStorage.getItem('arc_drive_dir')||'';}catch(e){}
+  if(cached)return cached;
+  var r=await driveFetch(driveQ("name='"+DRIVE_DIR+"' and mimeType='application/vnd.google-apps.folder'"),null,interactive);
+  if(!r.ok)throw new Error('look '+r.status);
+  var j=await r.json();
+  var id=(j.files&&j.files[0]&&j.files[0].id)||'';
+  if(!id){
+    var c=await driveFetch('https://www.googleapis.com/drive/v3/files?fields=id',
+      {method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({name:DRIVE_DIR,mimeType:'application/vnd.google-apps.folder'})},interactive);
+    if(!c.ok)throw new Error('folder '+c.status);
+    id=(await c.json()).id;
+  }
+  try{localStorage.setItem('arc_drive_dir',id);}catch(e){}
+  return id;
+}
+// The whole errand: get the file id (cached, then searched, then created) and put the data in it.
+// Returns the file id. Anything that throws is the caller's to record.
+async function drivePut(body,interactive){
+  var id='';try{id=localStorage.getItem('arc_drive_fid')||'';}catch(e){}
+  if(id){
+    var up=await driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',
+      {method:'PATCH',headers:{'Content-Type':'application/json'},body:body},interactive);
+    if(up.ok)return id;
+    if(up.status!==404)throw new Error('send '+up.status);
+    // Deleted in Drive since last time. Forget it and make a new one rather than failing for ever.
+    try{localStorage.removeItem('arc_drive_fid');}catch(e){}
+    id='';
+  }
+  var r=await driveFetch(driveQ("name='"+DRIVE_NAME+"'"),null,interactive);
+  if(!r.ok)throw new Error('look '+r.status);
+  var j=await r.json();
+  id=(j.files&&j.files[0]&&j.files[0].id)||'';
+  if(id){
+    try{localStorage.setItem('arc_drive_fid',id);}catch(e){}
+    var up2=await driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',
+      {method:'PATCH',headers:{'Content-Type':'application/json'},body:body},interactive);
+    if(!up2.ok)throw new Error('send '+up2.status);
+    return id;
+  }
+  var dir=await driveDir(interactive);
+  var B='-forge-'+Date.now();
+  var multi='--'+B+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+
+    JSON.stringify({name:DRIVE_NAME,parents:[dir]})+
+    '\r\n--'+B+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+B+'--';
+  var mk=await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+    {method:'POST',headers:{'Content-Type':'multipart/related; boundary='+B},body:multi},interactive);
+  if(!mk.ok)throw new Error('make '+mk.status);
+  id=((await mk.json())||{}).id||'';
+  // A 200 carrying no id is not a copy. Without this the switch reads ON, Settings says it was
+  // sent, and there is nothing in the Drive - which is the worst thing a backup can do, because
+  // it is the one state the user will never go and check.
+  if(!id)throw new Error('no id back');
+  try{localStorage.setItem('arc_drive_fid',id);}catch(e){}
+  return id;
+}
+// Called after every sealed session, and by hand from Settings. Never in the sandbox, never
+// twice at once, and never when it is switched off.
+async function drivePush(interactive,quiet){
+  if(SANDBOX||!driveAvail()||!driveOn())return false;
+  if(DRV.busy)return false;
+  DRV.busy=true;
+  try{
+    await drivePut(backupBlob(),interactive);
+    try{
+      localStorage.setItem('arc_drive_ok',String(Date.now()));
+      localStorage.setItem('arc_lastbk',String(Date.now()));
+      localStorage.removeItem('arc_drive_fail');
+    }catch(e){}
+    driveDraw();
+    if(interactive&&!quiet)mkNote('Your training is in a Forge folder in your Drive, and it refreshes itself after every workout from now on.','Copied to Drive');
+    return true;
+  }catch(e){
+    try{localStorage.setItem('arc_drive_fail',String(Date.now()));}catch(e2){}
+    driveDraw();
+    // An automatic copy that failed says so ONCE, in Settings, and never interrupts. The usual
+    // reason is no signal, which fixes itself by the next workout.
+    if(interactive&&!quiet){
+      ask('Forge could not reach your Drive just now. It will try again after your next workout, and Save a copy now still works.',
+        null,'Could not reach Drive',"OK",false);
+    }
+    return false;
+  }finally{DRV.busy=false;}
+}
+function driveToggle(){
+  if(!driveAvail())return;
+  if(driveOn()){
+    try{
+      localStorage.setItem('arc_drive','0');
+    }catch(e){}
+    DRV.tok=null;DRV.exp=0;
+    driveDraw();
+    return;
+  }
+  driveStart();
+}
+// Turning it on signs in FIRST and only writes the switch once a real copy has landed, so the
+// row can never read ON over an account that was never granted.
+function driveStart(){
+  if(!driveAvail())return;
+  try{localStorage.setItem('arc_drive','1');}catch(e){}
+  driveDraw();
+  drivePush(true).then(function(ok){
+    if(ok)return;
+    try{localStorage.setItem('arc_drive','0');}catch(e){}
+    driveDraw();
+  });
+}
+function driveWhen(){
+  var ok=0,bad=0;
+  try{ok=+localStorage.getItem('arc_drive_ok')||0;bad=+localStorage.getItem('arc_drive_fail')||0;}catch(e){}
+  return {ok:ok,bad:bad};
+}
+function driveDraw(){
+  var box=document.getElementById('ydDrive');
+  if(!box)return;
+  box.hidden=!driveAvail();
+  if(!driveAvail())return;
+  var on=driveOn(),tg=document.getElementById('ydDriveTog'),st=document.getElementById('ydDriveSt');
+  if(tg){tg.textContent=on?'ON':'OFF';tg.style.color=on?'var(--go)':'';tg.style.borderColor=on?'var(--go)':'';}
+  if(!st)return;
+  var w=driveWhen();
+  st.textContent=!on?'Off. Nothing is sent anywhere.':
+    (w.bad>w.ok?'It could not be sent last time. It tries again after your next workout.':
+    (w.ok?'Sent '+pretty(new Date(w.ok).toISOString().slice(0,10))+', to a Forge folder in your Drive.':
+          'On. It goes up after your next workout.'));
+  st.style.color=(on&&w.bad>w.ok)?'#f0645a':'';
+}
+// The question, asked once ever and only when there is a real yes behind it. It waits for a
+// finished workout rather than meeting somebody at the door, because "keep what you have done so
+// far" means nothing to a person who has not done anything yet. Owner's words: they could choose,
+// yes back me up on the cloud, or no keep me offline.
+function driveAsk(){
+  if(SANDBOX||!driveAvail()||driveOn())return;
+  try{
+    if(localStorage.getItem('arc_driveask'))return;
+    if(!(DB.logs||[]).length)return;
+    localStorage.setItem('arc_driveask','1');
+  }catch(e){return;}
+  askAlso('It goes to a Forge folder in your own Google Drive, where you can open it, move it or '+
+          'delete it. Forge is only ever given reach over the one file it makes, so the rest of '+
+          'your Drive stays its own business. You can turn it off again in Settings, under Your data.');
+  ask('Keep a copy of your training in your Google Drive? It refreshes itself after every workout, so there is nothing to remember.',
+    function(){driveStart();},
+    'Back it up for you?','BACK ME UP',null,null,'KEEP ME OFFLINE');
+}
+
 // ---------- the vault: what the app keeps for itself (v5.285) ----------
 // Everything above this is a FILE, which somebody has to remember to make. This is the other
 // half, and it is the half that works for people who never remember anything: the app keeps its
@@ -21354,7 +21627,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();drawHintRow();ntDraw();hcDraw();autoBkDraw();vaultDraw();
+  drawAlertLvl();drawThemePick();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();drawHintRow();ntDraw();hcDraw();autoBkDraw();vaultDraw();driveDraw();
   scrapApply();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
@@ -22925,6 +23198,10 @@ function sbEnd(){
   // And the targets check (v5.225). It runs on its own, says nothing at all when every target is
   // reachable, and asks only once for any given list.
   setTimeout(function(){try{easeNotice();}catch(e){}},8000);
+  // The offer to keep a copy off the phone. It waits for the launch AFTER a finished workout
+  // rather than landing on the finish screen, where the level up offer and the missed lifts
+  // are already competing for the same moment.
+  setTimeout(function(){try{driveAsk();}catch(e){}},7000);
   // A week left with a session stranded on the day a workout used to stand on (v5.240).
   try{if(bonusHeal())renderHome();}catch(e){}
   // The vault gets the launch too, not just a finished session: a week built on a day nobody
