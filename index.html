@@ -9949,7 +9949,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.286';
+var APPV='v5.287';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16616,7 +16616,12 @@ function autoBk(first){
 // entry point hides itself, nothing is asked, nothing is fetched, and the app is exactly what it
 // was before. That is deliberate. A client id is made once in the Google Cloud console against a
 // real account and cannot be invented here, so the code ships ahead of it rather than waiting.
-var DRIVE_CID='';
+// Set on 8 Nov 2026, from the Forge project (forge-514202) in the owner's own Google account.
+// A client id is PUBLIC - it only names the app - and the Authorised JavaScript origins on it
+// (the live site and the local test server) are what stop anyone else using it. The client
+// SECRET that Google shows beside it is not here, is not needed, and must never be: a secret in
+// a page that anybody can view source on is not a secret.
+var DRIVE_CID='1038069629844-h121k09460c16oidg46fuu8vc2pssvt7.apps.googleusercontent.com';
 var DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
 var DRIVE_DIR='Forge',DRIVE_NAME='forge-backup.json';
 var DRV={tok:null,exp:0,client:null,wait:null,busy:false};
