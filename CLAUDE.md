@@ -71,6 +71,38 @@ main constraint on how to work in it. See **Traps** below before editing.
   `W` is NOT pruned when a workout is deleted, so `W[id]` cannot answer whether an id is free:
   `WSTOCK` (the built-ins, snapshotted in `mergeCustom` before the user's are merged over them) is
   what to ask.
+- **The app keeps its own history, and a checkpoint is never the only copy of a day** (v5.285).
+  `VAULT` (`arc_vault`, its own Store key so a big one can never endanger the DB save) is one
+  entry per day anything was logged: a diff of the whole DB against the state the entry before it
+  rebuilds to. `vaultPut` is called from a sealed session, a day marked done, the launch, and
+  `vaultGo`; the day-coalescing (today's entry is REPLACED, never added to) is what keeps a year
+  at about 365 entries. No switch and no clock, like the scrap heap, because nothing leaves the
+  phone. This is **incremental forever** with **GFS** retention, which is also **event sourcing**,
+  and `DB.logs` was already an append-only list of dated immutable records, so the shape was not
+  invented for the backup. Measured: 1499 bytes a session, about 3MB for a decade at four a week.
+  Three rules came out of three defects, all found by TESTING and none visible by reading:
+  **A checkpoint carries its diff AND a snapshot, never a snapshot instead of its diff.** The
+  first version wrote the snapshot in place of that day's diff, so thinning removed the day's
+  session with it and every replay afterwards came out one short. Carrying both is the whole
+  reason "dropping a checkpoint loses nothing" is true; `vThin` therefore deletes only `db`/`f`
+  and only from an entry that still has `k`. Caught by replaying two simulated years and
+  comparing all 417 entries against the state each was written from.
+  **The entry's stamp is the key, and it is made unique on write.** `Date.now()` is not: two
+  writes in one millisecond collided and tapping Tue Nov 3 offered to restore Sun Nov 1. The list
+  hands `vaultGo` a STAMP and never a position, because `vThin` removes entries and the launch
+  writes one four seconds in, so a position read when the sheet was drawn can point elsewhere by
+  the time it is tapped.
+  **A restore writes a BOUNDARY first (`vaultPut(1)`, `r:1`), which nothing may coalesce over.**
+  Without it, going back on a day you had already trained let the next write replace the very
+  entry holding the state you left, so the dialog's promise that you can come back was false.
+  Measured live: 10 sessions down to 7, and the launch write four seconds later took the 10 away.
+  `vGuard` is the size valve (`V_CAP`, well under the localStorage quota because Chrome counts
+  UTF-16) and it should never open: snapshots go first, oldest after the floor, and only when the
+  floor is the last one left does it fold the oldest days into it as a **synthetic full**, counted
+  in `VAULT.rolled` so the sheet says so. The vault can never be smaller than one copy of the DB.
+  **The cloud half is not built.** The ask the owner described, *yes back me up on the cloud, or
+  no keep me offline*, belongs with Drive: it is a question about something leaving the phone, and
+  until something does there is nothing to consent to. This is the layer that has to exist first.
 - **Your data is a list, and sharing lives with the workouts** (v5.237). The Backup & restore sheet
   is gone; Settings carries the status line (`ydAuto`, drawn by `autoBkDraw`), then rows, with
   `Put a copy back` alone in warning colour. **Never put this back in a grid**: a tile cannot hold
