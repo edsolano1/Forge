@@ -80,8 +80,22 @@ main constraint on how to work in it. See **Traps** below before editing.
   the first time somebody says yes and never before** - an offline-first app does not call Google
   on every launch for a feature most people will not use.
   **`DRIVE_CID` empty means the feature does not exist**: the row hides itself, nothing is asked,
-  nothing is fetched. That is how it ships ahead of a client id, which can only be made once in
+  nothing is fetched. That is how it shipped ahead of a client id, which can only be made once in
   the Google Cloud console against a real account.
+  **Set 8 Nov 2026** (v5.287), in the owner's own Google account: project **`forge-514202`**, Drive
+  API enabled, consent screen **Forge**, audience **External** and left in **Testing** so it needs
+  no Google review, the owner the one test user, Web client **Forge Web** whose Authorised
+  JavaScript origins are `https://edsolano1.github.io` and `http://localhost:8131` (the second is
+  what lets the preview server test it). A client id is **public** and belongs in the repo; the
+  client **secret** Google shows beside it is not here and never may be, because a secret in a
+  page anybody can view source on is not a secret, and this sign-in does not want one.
+  Proved end to end on the live site the same day: consent granted, `My Drive / Forge /
+  forge-backup.json` created and private to him, and the folder id the app cached matches the one
+  in Drive's own URL. The file id is cached too, so every later send **overwrites that one file**
+  rather than piling up copies.
+  The console has been redesigned: it is **Google Auth Platform** now, not "OAuth consent screen",
+  and the setup is a four step wizard (App Information, Audience, Contact Information, Finish).
+  Any older walkthrough of this is stale.
   `backupBlob()` now carries `VAULT`, so a restore brings every day and not just today; a file
   from before v5.286 has none and simply starts a fresh history.
   **A 200 carrying no file id is a failure, not a success.** Otherwise the switch reads ON,
