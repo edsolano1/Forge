@@ -105,11 +105,32 @@ main constraint on how to work in it. See **Traps** below before editing.
   user deleting the file out of their own Drive (forget the id, make a new one, never fail for
   ever). A failed send is recorded and shown in Settings and **never interrupts**: the usual cause
   is no signal and the next workout fixes it.
-  **The Android app cannot use this**, and `driveAvail()` says so rather than offering a switch
-  that cannot work: Google refuses to sign anybody in inside an embedded browser and the Capacitor
-  wrapper is one. It needs an Android OAuth client (package plus signing SHA-1), a system browser
-  handoff with a deep link back, and an intent filter, all in `Arcanum-Android` and none of it
-  here. Until then this is the web half only.
+  **The Android app got its own way in** (v5.288 / APK 1.6, 8 Nov 2026), and it is NOT the one
+  written down here the day before. Google still refuses to sign anybody in inside an embedded
+  browser, but the answer was never a system browser, a deep link, an intent filter and PKCE:
+  `AuthorizationClient` (`play-services-auth`, the current non-deprecated path) does it natively,
+  **asks once, and from then on returns a token with no window and no interaction at all**.
+  Google's own guidance is also never to keep a refresh token on a device, which the browser flow
+  would have forced. `DrivePlugin.kt` is about forty lines and hands the page a token; everything
+  after the token is identical on both halves, because it is plain HTTP with a Bearer header.
+  There is no intent filter in that app and there must not be one.
+  **WHAT IDENTIFIES THE APP IS ITS SIGNATURE, NOT A CLIENT ID.** The Android OAuth client ("Forge
+  Android", same `forge-514202` project) carries the package name and the SHA-1 of the signing
+  key, and Play Services checks both, so `DRIVE_CID` governs the WEB half only and an empty one
+  does not switch the app off. `driveAvail()` asks whether the PLUGIN is there instead, so an
+  older APK hides the row the same way a missing client id does. The key is
+  `~/.android/debug.keystore`, SHA-1 `AC:45:97:...:84:72`, **now a third thing hanging off that
+  one file** after the watch pairing and installing over existing data; signing with Play later
+  ADDS a second Android client, it does not replace this one.
+  **The consent screen is launched from MainActivity, not the plugin**: Play Services returns a
+  `PendingIntent`, Capacitor's `startActivityForResult` takes only an `Intent`, and a launcher
+  for an IntentSender has to be registered while the activity is still being created, which a
+  plugin can never do. If that launch throws it answers with a null Intent on purpose.
+  **The page times the native ask out after ninety seconds and that is load bearing.** It earned
+  its keep on the first run: the screen timed out under the consent window, Android tore the
+  activity down, and the plugin call died with it. Without the timeout the promise hangs for
+  ever, `DRV.busy` stays on, and every copy from then on stops silently. Anything that awaits a
+  native dialog wants the same guard.
 - **The app keeps its own history, and a checkpoint is never the only copy of a day** (v5.285).
   `VAULT` (`arc_vault`, its own Store key so a big one can never endanger the DB save) is one
   entry per day anything was logged: a diff of the whole DB against the state the entry before it
