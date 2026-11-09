@@ -285,6 +285,18 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .scr-m{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);}
 .scr .dsrow{margin:11px 0 0;}
 .scr .dsb{flex:1;}
+/* Going back to a day (v5.285). A date and what it held, with the action beside it rather than
+   under it: there is one action, and a row of one button with a word under it reads as a card
+   that lost its other buttons. */
+.vrow{display:flex;align-items:center;gap:12px;border:1px solid #3a2214;border-radius:12px;
+  background:#130c09;padding:11px 12px;margin-bottom:9px;}
+.vrw{flex:1;min-width:0;}
+.vrd{font-family:'Marcellus',serif;font-size:16px;color:var(--txt);margin-bottom:2px;}
+.vrm{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);}
+.vck{font-family:var(--mono);font-size:8.5px;font-style:normal;letter-spacing:.12em;color:var(--gold);
+  border:1px solid rgba(224,182,103,.45);border-radius:3px;padding:1px 4px;vertical-align:2px;}
+.vrow .dsb{flex:none;}
+
 /* The day sheet (v5.234, owner picked A): the day on a plate, its workouts, and under each one the
    actions as labelled icons. Icons alone were rejected as a guessing game; the word under each
    glyph costs one line and settles it. */
@@ -3866,6 +3878,14 @@ body.wcon{overflow:hidden;}
       <span class="ydw"><b>Copying itself</b><span id="ydAutoSt"></span></span>
       <button class="sfx-tog" id="ydAutoTog" onclick="autoBkToggle()">ON</button>
     </div>
+    <!-- The app's own history (v5.285). Always here, on the web as well as the phone, because it
+         writes to the app's own storage and needs nothing from the device. No switch: it is the
+         same promise the scrap heap makes about a deleted workout, kept about every day. -->
+    <div class="ydstat" id="ydVault">
+      <svg viewBox="0 0 20 20"><path d="M4 10a6 6 0 1 0 6-6"/><path d="M4 6.6v3.4h3.4"/><path d="M10 7v3.3l2.4 1.5"/></svg>
+      <span class="ydw"><b>Its own history</b><span id="ydVaultSt"></span></span>
+      <button class="sfx-tog" onclick="openVault()">OPEN</button>
+    </div>
     <div class="ydlbl">A COPY YOU KEEP</div>
     <div class="ydg">
       <button class="yd" onclick="exportDest('backup')">
@@ -3935,6 +3955,20 @@ body.wcon{overflow:hidden;}
     </div>
     <div class="mk-hint" style="margin:0 0 12px">Workouts you deleted. Put one back and it lands in Saved workouts.</div>
     <div id="scrapBody"></div>
+  </div>
+</div>
+
+<!-- Going back to a day (v5.285). The app's own version history, which it keeps without being
+     asked and which never leaves the phone. A date, what it held, and one way back. -->
+<div class="ovl" id="vaultOvl">
+  <div class="sheet" style="max-width:440px">
+    <div class="dsh">
+      <span class="dsd"><b>DAYS</b><i id="vaultN"></i></span>
+      <span class="dst">Go back to a day</span>
+      <button class="dsb dsx" onclick="closeOvl('vaultOvl')" title="Close"><svg viewBox="0 0 20 20"><path d="M6 6l8 8M14 6l-8 8"/></svg></button>
+    </div>
+    <div class="mk-hint" style="margin:0 0 12px">Every day you logged something, kept by the app itself. Going back asks you first, and writes today down before it does.</div>
+    <div id="vaultBody"></div>
   </div>
 </div>
 
@@ -9907,7 +9941,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.284';
+var APPV='v5.285';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12104,7 +12138,7 @@ function markDayDone(id){
   // decision that undoes itself.
   DB.logs.push({day:id,name:(W[id]||{}).name||'',date:today(),entries:{},note:'',swaps:{},sealed:1,marked:1});
   delete DB.active[id];
-  saveDB();try{autoBk();}catch(e){}renderHome();
+  saveDB();try{autoBk();}catch(e){}try{vaultPut();}catch(e){}renderHome();
   if(typeof mkRender==='function'&&document.getElementById('make').classList.contains('on'))mkRender();
   offerReopen();                                 // marking the last open day locks the week too
 }
@@ -15713,6 +15747,7 @@ function finishNow(){
   delete DB.active[wk];
   saveDB();
   try{autoBk();}catch(e){}
+  try{vaultPut();}catch(e){}
   syncPumpBtn();
   renderSummary(sum);
   document.getElementById('session').classList.remove('on');
@@ -16538,6 +16573,307 @@ function autoBk(first){
       write(nt).then(function(){try{localStorage.setItem('arc_autobk_tag',nt);}catch(e){}ok();}).catch(fail);
     });
   }catch(e){fail();}
+}
+// ---------- the vault: what the app keeps for itself (v5.285) ----------
+// Everything above this is a FILE, which somebody has to remember to make. This is the other
+// half, and it is the half that works for people who never remember anything: the app keeps its
+// own version history, on its own, and nobody is asked to do a thing.
+//
+// The shape is the one the industry settled on for exactly this, under two different names.
+// Backup people call it INCREMENTAL FOREVER: one full copy at the start, then only what changed,
+// with a fuller snapshot taken now and then as a checkpoint, and GFS retention thinning those
+// checkpoints (the last few monthly ones, then one a year). Software people call it EVENT
+// SOURCING, and their rule is the important one: the log of changes is the truth, and a snapshot
+// is disposable derived data that must never become the thing you depend on. Both are obeyed
+// here. The chain is continuous - every entry describes the whole state at its own moment, and
+// each increment is a diff against the state the entry before it reconstructs to - which has one
+// consequence worth knowing before touching any of this: DELETING A CHECKPOINT LOSES NOTHING,
+// because the previous checkpoint plus the increments in between rebuild it exactly. A
+// checkpoint buys replay speed and a clean floor to land on if one increment is ever garbage.
+// It is never the only copy of anything.
+//
+// DB.logs is already an append-only list of dated, immutable session records, so the "one entry
+// per day you trained" idea is not a scheme invented for the backup. It is what the data already
+// is, written down.
+//
+// Measured on the owner's own 39 sessions: a session increment is about 1.5KB, so four workouts
+// a week for ten years is roughly 3MB of increments. The checkpoints are what cost, which is why
+// they are the only thing thinned.
+var VKEY='arc_vault',VAULT=null;
+var V_FULL_DAYS=30;    // a checkpoint about once a month
+var V_FULL_KEEP=3;     // the last three of those, plus one per year, plus the first ever
+// The whole vault, in characters of JSON. Chrome counts localStorage against its quota in
+// UTF-16, two bytes a character, against a limit near 5MB that the DB and its :bak copy are
+// already eating into - so this is deliberately well under what the arithmetic allows.
+var V_CAP=1600000;
+
+function vJson(x){try{return JSON.stringify(x===undefined?null:x);}catch(e){return 'null';}}
+function vClone(x){try{return JSON.parse(vJson(x));}catch(e){return null;}}
+
+// A patch for ONE key of DB. An array that only grew carries its tail and nothing else, which is
+// the case that matters: logging a session appends one record to DB.logs and changes nothing
+// else, so the whole day costs about 1.5KB. Anything else carries the whole value. Degrading to
+// the whole value is correct rather than a shortcut - a log corrected after the fact is no
+// longer an append, and quietly treating it as one would write down a history that never happened.
+function vPatch(prev,next){
+  if(vJson(prev)===vJson(next))return null;
+  if(next===undefined)return {x:1};
+  if(Array.isArray(prev)&&Array.isArray(next)&&next.length>prev.length){
+    var pre=true;
+    for(var i=0;i<prev.length;i++){if(vJson(prev[i])!==vJson(next[i])){pre=false;break;}}
+    if(pre)return {a:next.slice(prev.length)};
+  }
+  return {s:next};
+}
+function vApply(st,k,p){
+  if(!p)return;
+  if(p.x){delete st[k];return;}
+  if(p.a){var a=st[k];if(!Array.isArray(a))a=[];st[k]=a.concat(vClone(p.a)||[]);return;}
+  st[k]=vClone(p.s);
+}
+function vDiff(prev,next){
+  var k={},any=false,seen={};
+  Object.keys(next).forEach(function(key){
+    seen[key]=1;
+    var p=vPatch(prev[key],next[key]);
+    if(p){k[key]=p;any=true;}
+  });
+  Object.keys(prev).forEach(function(key){
+    if(seen[key])return;
+    k[key]={x:1};any=true;
+  });
+  return any?k:null;
+}
+// Replay to entry i, inclusive. Finds the newest snapshot at or before it and walks forward.
+// A checkpoint carries BOTH a diff and a snapshot, so landing on one is a clone and passing
+// through one may be either: the snapshot is taken because it is cheaper, never because the
+// diff would be wrong.
+function vAt(i){
+  var V=VAULT;if(!V||!V.e||!V.e.length)return null;
+  var L=V.e,j=-1;
+  if(i>=L.length)i=L.length-1;
+  if(i<0)return null;
+  for(var n=i;n>=0;n--){if(L[n].db){j=n;break;}}
+  if(j<0)return null;                 // nothing to stand on, which should be impossible
+  var st=vClone(L[j].db)||{};
+  for(var m=j+1;m<=i;m++){
+    var e=L[m];
+    if(e.db){st=vClone(e.db)||{};continue;}
+    for(var key in (e.k||{}))vApply(st,key,e.k[key]);
+  }
+  return st;
+}
+// How many sessions stood on each entry, in ONE forward pass. Calling vAt per row instead was
+// quadratic: four hundred entries each replaying a hundred diffs, with a clone inside every one.
+function vCounts(){
+  var L=((VAULT&&VAULT.e)||[]),out=new Array(L.length),st=null;
+  for(var i=0;i<L.length;i++){
+    var e=L[i];
+    if(e.db)st=vClone(e.db)||{};
+    else if(st){for(var key in (e.k||{}))vApply(st,key,e.k[key]);}
+    out[i]=(st&&Array.isArray(st.logs))?st.logs.length:0;
+  }
+  return out;
+}
+function vCount(st){return st&&Array.isArray(st.logs)?st.logs.length:0;}
+function vLen(){return ((VAULT&&VAULT.e)||[]).length;}
+
+// GFS, on the snapshots only. The diffs are never thinned: a decade of them is about three
+// megabytes and they are the actual history.
+function vThin(){
+  var V=VAULT,L=V.e,idx=[],i;
+  for(i=0;i<L.length;i++)if(L[i].db)idx.push(i);
+  if(idx.length<=V_FULL_KEEP+1)return;
+  var keep={},yr={};
+  keep[idx[0]]=1;                                        // the floor, always
+  for(i=Math.max(0,idx.length-V_FULL_KEEP);i<idx.length;i++)keep[idx[i]]=1;
+  idx.forEach(function(n){var y=String(L[n].d||'').slice(0,4);if(yr[y]===undefined)yr[y]=n;});
+  for(var y in yr)keep[yr[y]]=1;
+  // A checkpoint that goes keeps its DIFF and loses only its snapshot. That is the whole reason
+  // this is lossless, and it is where the first version of this was WRONG: it removed the entry
+  // outright, and because a checkpoint was written INSTEAD of that day's diff rather than
+  // alongside it, the day's session went with it and every replay afterwards came out one
+  // session short. Found by replaying two simulated years and comparing all 398 entries against
+  // the state each was written from, not by reading it. A snapshot may only ever be dropped
+  // from an entry that still has a diff, which is what the L[n].k test is for.
+  idx.forEach(function(n){
+    if(keep[n]||!L[n].k)return;
+    delete L[n].db;delete L[n].f;
+  });
+}
+// The valve, and it should never open. Snapshots go first, oldest after the floor, and losing
+// one of those costs nothing at all. Only when the floor is the last one left does the floor
+// itself move.
+function vGuard(){
+  var V=VAULT;
+  for(var pass=0;pass<80;pass++){
+    if(vJson(V).length<=V_CAP)return;
+    var fi=[],i,did=false;
+    for(i=0;i<V.e.length;i++)if(V.e[i].db)fi.push(i);
+    for(i=1;i<fi.length;i++){
+      if(!V.e[fi[i]].k)continue;                         // never strip one with no diff behind it
+      delete V.e[fi[i]].db;delete V.e[fi[i]].f;did=true;break;
+    }
+    if(did)continue;
+    // The oldest days now fold INTO the first entry, which is a SYNTHETIC FULL: the state at
+    // that day, written out whole, standing where those days stood. Nothing about today is
+    // lost; what is given up is the ability to go back to those particular old days, and it is
+    // counted so the sheet can say so rather than quietly shortening somebody's history.
+    var cut=-1;
+    for(i=1;i<V.e.length;i++)if(V.e[i].k){cut=i;break;}
+    if(cut<0)return;
+    var st=vAt(cut);
+    if(!st)return;
+    V.e[0]={t:V.e[cut].t,d:V.e[cut].d,f:1,db:st};
+    V.e.splice(1,cut);
+    V.rolled=(V.rolled||0)+cut;
+  }
+}
+function vaultSave(){try{Store.set(VKEY,VAULT);}catch(e){}}
+async function vaultLoad(){
+  try{
+    var v=await Store.get(VKEY);
+    VAULT=(v&&Array.isArray(v.e))?v:{v:1,e:[],rolled:0};
+  }catch(e){VAULT={v:1,e:[],rolled:0};}
+}
+// Called from four places and no more: a sealed session, a day marked done, the launch, and the
+// moment before going back. All of them come through here, and the day-coalescing below is what
+// keeps the promise that a year of training is about 365 entries rather than one per time the
+// app was opened.
+//
+// mark is set only by vaultGo, and it means: this entry is a BOUNDARY, leave it alone. Without
+// it, going back to an older day and then writing anything later the SAME day coalesced over the
+// entry holding the state you left - so the way forward was destroyed by the very step that was
+// supposed to preserve it, and the dialog's promise that you can come back was false. Measured:
+// restored from 10 sessions to 7, and four seconds later the launch write took the 10 away.
+function vaultPut(mark){
+  try{
+    if(SANDBOX)return;        // a borrowed DB never reaches the real history
+    var V=VAULT;if(!V||!V.e)return;
+    // The stamp is the KEY the list hands back to vaultGo, so it has to be unique. Date.now()
+    // alone is not: two writes in the same millisecond gave two entries the same stamp, the
+    // lookup found the earlier one, and tapping Tue Nov 3 offered to restore Sun Nov 1. Days
+    // apart in real use, but a key that is only usually unique is not a key.
+    var d=today(),cur=vClone(DB),i;
+    var now=Math.max(Date.now(),(V.e.length?V.e[V.e.length-1].t:0)+1);
+    if(!cur)return;
+    var prev=V.e.length?vAt(V.e.length-1):null;
+    // The first write is the floor: a whole copy, with no diff, and nothing may ever strip it.
+    if(!prev||(V.e.length===1&&V.e[0].d===d&&!V.e[0].k)){
+      V.e[0]={t:now,d:d,f:1,db:cur};vaultSave();return;
+    }
+    // Today already has an entry? It is REPLACED by a diff against the state BEFORE it, never
+    // added to, which is what makes a day one entry however many times it gets written.
+    var last=V.e[V.e.length-1];
+    var coal=(last.d===d&&V.e.length>1&&!last.r&&!mark);
+    var base=coal?vAt(V.e.length-2):prev;
+    if(coal&&!base){coal=false;base=prev;}
+    var k=vDiff(base,cur);
+    if(!k){
+      // Nothing changed, so the newest entry already holds this state and IS the way back.
+      if(mark){last.r=1;vaultSave();return;}
+      if(coal){V.e.pop();vaultSave();}   // the day's changes were undone; the day goes with them
+      return;
+    }
+    var ent={t:now,d:d,k:k};
+    if(mark)ent.r=1;
+    // A checkpoint about once a month, carried ON that day's diff rather than instead of it.
+    // The entry being replaced is skipped when looking for the last one, or a day written twice
+    // would keep finding its own snapshot and never take a new one.
+    var lastFull=0;
+    for(i=V.e.length-1-(coal?1:0);i>=0;i--)if(V.e[i].db){lastFull=V.e[i].t;break;}
+    if(!lastFull||(now-lastFull)>V_FULL_DAYS*864e5){ent.f=1;ent.db=cur;}
+    if(coal)V.e[V.e.length-1]=ent;else V.e.push(ent);
+    vThin();vGuard();vaultSave();
+  }catch(e){}
+}
+
+// ---------- going back to a day ----------
+function vaultLine(){
+  var n=vLen();
+  if(!n)return 'It starts keeping one as soon as you log something.';
+  if(n===1)return 'One day in it so far. Every day you train joins it.';
+  return n+' days kept, back to '+pretty(String(VAULT.e[0].d))+'.';
+}
+function vaultDraw(){
+  var st=document.getElementById('ydVaultSt');
+  if(st)st.textContent=vaultLine();
+}
+function openVault(){
+  if(!vLen()){
+    ask('Nothing is in it yet. The app writes a day into its own history every time you finish a workout, and the list opens here once there is one.',
+      null,'Nothing kept yet',"OK",false);
+    return;
+  }
+  vaultDrawList();
+  openHeld('vaultOvl');
+}
+// Both halves read the entry's DAY, never the instant it happened to be written. They agree in
+// normal use and come apart at the edges - a set logged either side of midnight, a phone whose
+// clock moved - and a row that says Today above a date from last week is worse than either.
+function vaultWhen(e){
+  var p=String(e.d||'').split('-'),ms=e.t;
+  if(p.length===3)ms=new Date(+p[0],+p[1]-1,+p[2],12,0,0,0).getTime();
+  var days=Math.round((dayNoon(Date.now())-ms)/864e5);
+  if(days<=0)return 'Today';
+  if(days===1)return 'Yesterday';
+  return pretty(String(e.d));
+}
+function vaultDrawList(){
+  var b=document.getElementById('vaultBody');if(!b)return;
+  var L=VAULT.e,h='',n=0;
+  var C=document.getElementById('vaultN');if(C)C.textContent=L.length;
+  // Newest first, because the day you want is nearly always a recent one. The count beside each
+  // date is how many sessions existed on that day, which is what tells you whether you are
+  // looking far enough back.
+  var cnt=vCounts();
+  for(var i=L.length-1;i>=0;i--){
+    var e=L[i],c=cnt[i];
+    h+='<div class="vrow"><div class="vrw"><div class="vrd">'+esc(vaultWhen(e))+
+       (e.db?' <i class="vck">CHECKPOINT</i>':'')+'</div>'+
+       '<div class="vrm">'+c+' session'+(c===1?'':'s')+'</div></div>'+
+       '<button class="dsb" onclick="vaultGo('+e.t+')"><svg viewBox="0 0 20 20">'+DSI.up+
+       '</svg><b>Go back</b></button></div>';
+    if(++n>=400)break;
+  }
+  if(VAULT.rolled)h+='<div class="footnote" style="margin:12px 2px 0">The '+VAULT.rolled+
+    ' oldest day'+(VAULT.rolled===1?'':'s')+' were folded into the first entry to save room. '+
+    'Nothing you have now was lost.</div>';
+  b.innerHTML=h;
+}
+// It asks twice, like the file restore does, because there is no undo in front of it - and then
+// it writes TODAY into the vault first, so there is one behind it. Going back is reversible here
+// in a way that putting a file back never was.
+// It takes the entry's OWN stamp, never its position in the list. vThin removes checkpoints and
+// the launch writes an entry four seconds in, so a position read when the sheet was drawn can
+// point at a different day by the time it is tapped - which would silently restore the wrong one.
+function vaultGo(t){
+  var i=-1,L=(VAULT&&VAULT.e)||[];
+  for(var n=0;n<L.length;n++)if(L[n].t===t){i=n;break;}
+  if(i<0){vaultDrawList();ask('That day moved while the list was open. It is listed again now.',null,'Try it again',"OK",false);return;}
+  var st=vAt(i);
+  if(!st||!Array.isArray(st.logs)){
+    ask('That day could not be rebuilt. Try a checkpoint instead, or put a saved file back.',null,'Could not read it',"OK",false);
+    return;
+  }
+  var e=VAULT.e[i],inN=st.logs.length,haveN=(DB.logs||[]).length;
+  ask('Everything in the app goes back to how it stood on '+pretty(String(e.d))+': '+inN+
+      ' logged session'+(inN===1?'':'s')+', and the week as it was that day'+
+      (haveN>inN?'. The '+(haveN-inN)+' session'+(haveN-inN===1?'':'s')+' logged since then '+
+       'will not be in it':'')+'. Today is written into the history first, so you can come back.',
+    function(){
+      try{vaultPut(1);}catch(err){}              // a boundary, so this state cannot be coalesced away
+      DB=st;
+      if(!DB.active)DB.active={};if(!DB.up)DB.up={};if(!DB.upSkip)DB.upSkip={};
+      if(!DB.extra)DB.extra=[];if(!DB.plan)DB.plan=[];if(!DB.walks)DB.walks=[];
+      if(!DB.days)DB.days={};if(!DB.custom)DB.custom={};if(!DB.cex)DB.cex={};
+      if(!DB.slots)DB.slots={};if(!DB.exNotes)DB.exNotes={};
+      if(!DB.dayEdit)DB.dayEdit={};if(!DB.vOvr)DB.vOvr={};if(!DB.bw)DB.bw=[];
+      if(!DB.exBar)DB.exBar={};
+      if(DB.walkRun===undefined)DB.walkRun=null;
+      mergeCustom();persistNow();
+      setTimeout(function(){location.reload();},400);
+    },'Go back to '+pretty(String(e.d))+'?','GO BACK');
 }
 // One nudge, once ever: real history, no backup of any kind, and this phone the only place
 // it exists. Whatever is answered, it never comes back - Settings holds the door open.
@@ -21018,7 +21354,7 @@ function openTimerSheet(){
 }
 function openSettings(){
   initAudio();
-  drawAlertLvl();drawThemePick();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();drawHintRow();ntDraw();hcDraw();autoBkDraw();
+  drawAlertLvl();drawThemePick();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();drawHintRow();ntDraw();hcDraw();autoBkDraw();vaultDraw();
   scrapApply();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
@@ -22545,6 +22881,7 @@ function sbEnd(){
 (async function(){
   await Store.init();
   await loadDB();
+  await vaultLoad();
   reconcileActive();
   // Before anything renders: the week becomes the user's own data rather than the app's default.
   ownProgram();
@@ -22590,6 +22927,10 @@ function sbEnd(){
   setTimeout(function(){try{easeNotice();}catch(e){}},8000);
   // A week left with a session stranded on the day a workout used to stand on (v5.240).
   try{if(bonusHeal())renderHome();}catch(e){}
+  // The vault gets the launch too, not just a finished session: a week built on a day nobody
+  // trained is still work worth keeping. It writes nothing when nothing changed, and the
+  // day-coalescing means opening the app twice is still one entry.
+  setTimeout(function(){try{vaultPut();}catch(e){}},4000);
   // A first run is asked how it wants to start. Everyone else is already where they belong.
   setTimeout(function(){if(STARTPEND)offerStart();},1600);
   // And, if the week is finished, the offer to run it again. After the tour offer, and it stands
