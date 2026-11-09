@@ -9949,7 +9949,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.287';
+var APPV='v5.288';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -16612,9 +16612,10 @@ function autoBk(first){
 // somebody says yes and never before, so an app whose whole point is working with no network
 // does not reach out to Google on every launch to support a feature most people will not use.
 //
-// DRIVE_CID is the OAuth client id, and an EMPTY ONE MEANS THE FEATURE DOES NOT EXIST: every
-// entry point hides itself, nothing is asked, nothing is fetched, and the app is exactly what it
-// was before. That is deliberate. A client id is made once in the Google Cloud console against a
+// DRIVE_CID is the OAuth client id FOR THE WEB HALF, and an empty one means the feature does not
+// exist there: every entry point hides itself, nothing is asked, nothing is fetched, and the page
+// is exactly what it was before. That is deliberate. The Android app does not use it at all and
+// is governed by its signing key instead - see driveAvail. A client id is made once in the Google Cloud console against a
 // real account and cannot be invented here, so the code ships ahead of it rather than waiting.
 // Set on 8 Nov 2026, from the Forge project (forge-514202) in the owner's own Google account.
 // A client id is PUBLIC - it only names the app - and the Authorised JavaScript origins on it
@@ -16624,21 +16625,32 @@ function autoBk(first){
 var DRIVE_CID='1038069629844-h121k09460c16oidg46fuu8vc2pssvt7.apps.googleusercontent.com';
 var DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
 var DRIVE_DIR='Forge',DRIVE_NAME='forge-backup.json';
-var DRV={tok:null,exp:0,client:null,wait:null,busy:false};
+var DRV={tok:null,exp:0,client:null,wait:null,busy:false,dead:null,late:0};
 
 function driveOn(){try{return localStorage.getItem('arc_drive')==='1';}catch(e){return false;}}
 function driveNative(){
   var C=window.Capacitor;
   try{return !!(C&&C.isNativePlatform&&C.isNativePlatform());}catch(e){return false;}
 }
-// Google refuses to sign anybody in inside an embedded browser, and the Android wrapper IS one.
-// So the wrapper needs its own way in (a system browser and a deep link back, or Play Services),
-// and until that exists this says so rather than offering a switch that cannot work. Checked in
-// one place so there is one thing to change when the native half lands.
-function driveAvail(){return !!DRIVE_CID&&!driveNative();}
+// Google refuses to sign anybody in inside an embedded browser, and the Android wrapper IS one,
+// so the two halves get their token in completely different ways: the web asks Google's own
+// sign-in script, the app asks the Drive plugin, which asks Play Services. Everything AFTER the
+// token is identical - it is plain HTTP with a Bearer header either way, which is the whole
+// reason the app half came to about forty lines.
+//
+// DRIVE_CID DOES NOT GOVERN THE APP. An Android OAuth client is matched on the package name plus
+// the SHA-1 of the key the APK is signed with, checked by Play Services itself, so no client id
+// comes near the native path and an empty one does not switch it off.
+//
+// What can be missing there is the PLUGIN, because an older APK has no Drive in it. Then the row
+// hides itself, exactly as it does on the web with no client id: no switch that cannot work.
+function drivePlug(){
+  try{var C=window.Capacitor;return (C&&C.Plugins&&C.Plugins.Drive)||null;}catch(e){return null;}
+}
+function driveAvail(){return driveNative()?!!drivePlug():!!DRIVE_CID;}
 function driveWhy(){
+  if(driveNative())return drivePlug()?'':'app';
   if(!DRIVE_CID)return 'setup';
-  if(driveNative())return 'native';
   return '';
 }
 function driveGis(){
@@ -16651,12 +16663,42 @@ function driveGis(){
     document.head.appendChild(s);
   });
 }
+// The app's way in, and it is the SHORT one. Play Services holds the grant, so the first ask
+// shows a Google window and every ask after it is silent: no browser handoff, no deep link, no
+// intent filter, and above all no refresh token sitting on the phone, which Google's own
+// guidance says never to do. The plan recorded for this was all four of those things.
+//
+// THE TIMEOUT IS NOT BELT AND BRACES. If Android destroys the activity while the consent window
+// is up, the plugin call dies with it and this promise never settles - and an unsettled promise
+// leaves DRV.busy stuck on, which silently stops every copy from then on. A clean failure the
+// next workout retries is strictly better than a backup that quietly stopped.
+var DRIVE_WAIT=90000;
+function driveTokNative(interactive,res,rej){
+  var P=drivePlug();
+  if(!P)return rej(new Error('no plugin'));
+  var done=false,dead=DRV.dead||'';
+  DRV.dead=null;
+  var t=setTimeout(function(){if(done)return;done=true;rej(new Error('timeout'));},DRIVE_WAIT);
+  P.token({interactive:!!interactive,stale:dead}).then(function(r){
+    if(done)return;done=true;clearTimeout(t);
+    var tok=r&&r.token;
+    if(!tok)return rej(new Error('no token'));
+    // Play Services never says when a token dies and Google's own answer is an hour. Stop a
+    // quarter of an hour short of that, and let the 401 retry below cover everything else.
+    DRV.tok=tok;DRV.exp=Date.now()+45*60*1000;
+    res(tok);
+  },function(e){
+    if(done)return;done=true;clearTimeout(t);
+    rej(e||new Error('denied'));
+  });
+}
 // interactive: a person is looking at the screen and a sign-in window is fair. Silent is what
 // every automatic copy uses, and a silent failure is recorded and shown in Settings rather than
 // throwing a Google window over somebody who has just finished a workout.
 function driveToken(interactive){
   return new Promise(function(res,rej){
     if(DRV.tok&&Date.now()<DRV.exp)return res(DRV.tok);
+    if(driveNative())return driveTokNative(interactive,res,rej);
     driveGis().then(function(){
       if(!DRV.client){
         DRV.client=google.accounts.oauth2.initTokenClient({
@@ -16689,7 +16731,9 @@ function driveFetch(url,opt,interactive){
     // A token can die between being handed over and being used. One retry, once, and only when
     // Google itself says the token is the problem.
     if(r.status!==401)return r;
-    DRV.tok=null;DRV.exp=0;
+    // WHICH token died. Play Services caches them, so asking again without saying returns the
+    // same dead one for ever; clearToken is what breaks that loop. The web half ignores it.
+    DRV.dead=DRV.tok;DRV.tok=null;DRV.exp=0;
     return driveToken(interactive).then(function(t2){
       var h2={};for(var k2 in (opt.headers||{}))h2[k2]=opt.headers[k2];
       h2.Authorization='Bearer '+t2;
@@ -16821,6 +16865,11 @@ function driveWhen(){
 function driveDraw(){
   var box=document.getElementById('ydDrive');
   if(!box)return;
+  // Capacitor registers its plugins AFTER the page is already running, which is the same race
+  // that left the watch deaf for a whole launch in v5.283. Nothing here is bound once, so this
+  // heals itself - but a Settings sheet drawn in that first instant would hide a row that is
+  // perfectly fine, so look again once rather than making him close Settings and open it afresh.
+  if(driveNative()&&!drivePlug()&&!DRV.late){DRV.late=1;setTimeout(driveDraw,1500);}
   box.hidden=!driveAvail();
   if(!driveAvail())return;
   var on=driveOn(),tg=document.getElementById('ydDriveTog'),st=document.getElementById('ydDriveSt');
