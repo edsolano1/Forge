@@ -71,6 +71,31 @@ main constraint on how to work in it. See **Traps** below before editing.
   `W` is NOT pruned when a workout is deleted, so `W[id]` cannot answer whether an id is free:
   `WSTOCK` (the built-ins, snapshotted in `mergeCustom` before the user's are merged over them) is
   what to ask.
+- **The copy that is not on this phone** (v5.286). `drivePush` rides the same two seal points as
+  `vaultPut` and sends `backupBlob()` to a **visible** `Forge` folder in the user's own Drive.
+  **Never move it to Drive's hidden app folder**: Google's own docs say that folder is invisible
+  to the user AND to every other app, so he could never open his own backup, hand it to anybody,
+  or let an assistant read it. The scope is `drive.file` (only files Forge made, and the
+  non-sensitive tier: no security assessment, no audit), and **Google's sign-in script is fetched
+  the first time somebody says yes and never before** - an offline-first app does not call Google
+  on every launch for a feature most people will not use.
+  **`DRIVE_CID` empty means the feature does not exist**: the row hides itself, nothing is asked,
+  nothing is fetched. That is how it ships ahead of a client id, which can only be made once in
+  the Google Cloud console against a real account.
+  `backupBlob()` now carries `VAULT`, so a restore brings every day and not just today; a file
+  from before v5.286 has none and simply starts a fresh history.
+  **A 200 carrying no file id is a failure, not a success.** Otherwise the switch reads ON,
+  Settings says it was sent, and the Drive is empty - the worst state a backup can be in, because
+  it is the one nobody goes and checks. Found by a mock of Google's API, which also covers the two
+  cases that are awkward to produce live: a token dying mid-errand (one retry, silent) and the
+  user deleting the file out of their own Drive (forget the id, make a new one, never fail for
+  ever). A failed send is recorded and shown in Settings and **never interrupts**: the usual cause
+  is no signal and the next workout fixes it.
+  **The Android app cannot use this**, and `driveAvail()` says so rather than offering a switch
+  that cannot work: Google refuses to sign anybody in inside an embedded browser and the Capacitor
+  wrapper is one. It needs an Android OAuth client (package plus signing SHA-1), a system browser
+  handoff with a deep link back, and an intent filter, all in `Arcanum-Android` and none of it
+  here. Until then this is the web half only.
 - **The app keeps its own history, and a checkpoint is never the only copy of a day** (v5.285).
   `VAULT` (`arc_vault`, its own Store key so a big one can never endanger the DB save) is one
   entry per day anything was logged: a diff of the whole DB against the state the entry before it
