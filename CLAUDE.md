@@ -22,7 +22,7 @@ Ships as two halves:
   PLAY-RELEASE.md tells you to put in that very folder), `local.properties`, 158MB of gradle
   output and `node_modules`.
 
-`index.html` is ~800KB and contains everything: markup, one `<style>` block, one `<script>` block.
+`index.html` is ~1.6MB and contains everything: markup, one `<style>` block, one `<script>` block.
 That is deliberate — it is why the app works offline as a single artifact — and it is also the
 main constraint on how to work in it. See **Traps** below before editing.
 
@@ -131,6 +131,25 @@ main constraint on how to work in it. See **Traps** below before editing.
   activity down, and the plugin call died with it. Without the timeout the promise hangs for
   ever, `DRV.busy` stays on, and every copy from then on stops silently. Anything that awaits a
   native dialog wants the same guard.
+- **A copy in Drive is never written over one that holds more** (v5.289, from the nine reviewer
+  pass of 16 Nov). An install with no file id of its own used to find the backup BY NAME and write
+  straight over it, so a new phone with one workout replaced a year of history the moment Drive
+  was switched on, and the phone and the browser shared one file, last finisher wins. `drivePut`
+  now writes blind only when the file is still exactly what THIS install last sent (`driveState`
+  against Google's `md5Checksum`, kept in `arc_drive_md5`). Otherwise it reads the file first
+  (`driveCovers`) and replaces it only when every session in it is already here, matched by DATE
+  and counted, never by workout id, because `wkCopy` re-points ids. A file holding something this
+  install lacks is left alone and the install starts its own beside it,
+  `forge-backup-<the day it started>.json`. A binned file counts as gone (a write into the bin
+  succeeds and saves nothing), and a 404 on making the file clears `arc_drive_dir` and tries once
+  more, because a deleted folder used to kill the backup for good. Eleven cases against a mock of
+  Google's API, including the 200 with no id. **Not yet seen against the real Drive.**
+- **Anything named in an `onclick` string is live, and a caller search of the script will not
+  find it** (v5.289). v5.270's dead code clear out removed `mkCreate` and `mkShell` because nothing
+  in the script called them; four buttons in the builder did. CREATE THIS WORKOUT threw and made
+  nothing for nineteen builds, so a workout could be forged but never built by hand, and nobody
+  saw it because forging worked. Before deleting a function, grep the WHOLE file for its name,
+  markup strings included, and click the buttons of the screen it lived on afterwards.
 - **The app keeps its own history, and a checkpoint is never the only copy of a day** (v5.285).
   `VAULT` (`arc_vault`, its own Store key so a big one can never endanger the DB save) is one
   entry per day anything was logged: a diff of the whole DB against the state the entry before it

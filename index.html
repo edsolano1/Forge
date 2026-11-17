@@ -9949,7 +9949,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.288';
+var APPV='v5.289';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15578,6 +15578,21 @@ function mkSave(){
 // stay=true is the create step: write the day and place it, but hold the screen open so the work
 // can go in. Without it, making a day would save and close, and you would have to reopen the
 // thing you just made in order to put anything in it.
+// These two were swept out with the dead code in v5.270 and were not dead: the builder's own
+// buttons call them (CREATE THIS WORKOUT, WORKOUT SETTINGS, DONE, and back out of the settings).
+// For nineteen builds the first of those threw and made nothing, so a workout could only be
+// forged, never built by hand. They are called from onclick strings, which is why a search for
+// callers in the script found none. Anything named in an onclick is live.
+function mkShell(open){MK.shellOpen=!!open;mkRender();document.getElementById('make').scrollTop=0;}
+// Making the workout is its own step, and it ends by writing an EMPTY one. That is a legitimate
+// state here: it is what a workout is for the seconds between naming it and filling it.
+function mkCreate(){
+  if(!MK.name.trim()){mkNote('Name the workout first. It goes on the card.');return;}
+  mkCommit(true);
+  MK.shellOpen=false;
+  mkRender();
+  document.getElementById('make').scrollTop=0;
+}
 function mkCommit(stay){
   var id=MK.id||('cus'+Date.now().toString(36)+Math.floor(Math.random()*99).toString(36));
   MK.id=id;
@@ -16767,42 +16782,112 @@ async function driveDir(interactive){
 }
 // The whole errand: get the file id (cached, then searched, then created) and put the data in it.
 // Returns the file id. Anything that throws is the caller's to record.
-async function drivePut(body,interactive){
-  var id='';try{id=localStorage.getItem('arc_drive_fid')||'';}catch(e){}
-  if(id){
-    var up=await driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',
-      {method:'PATCH',headers:{'Content-Type':'application/json'},body:body},interactive);
-    if(up.ok)return id;
-    if(up.status!==404)throw new Error('send '+up.status);
-    // Deleted in Drive since last time. Forget it and make a new one rather than failing for ever.
-    try{localStorage.removeItem('arc_drive_fid');}catch(e){}
-    id='';
-  }
-  var r=await driveFetch(driveQ("name='"+DRIVE_NAME+"'"),null,interactive);
+//
+// A COPY IS NEVER WRITTEN OVER ONE THAT HOLDS MORE (v5.289). Until now a phone with no file id
+// of its own looked the backup up BY NAME and wrote straight over it, so a new phone with one
+// workout on it replaced a year of history the moment Drive was switched on, which is the exact
+// day the backup exists for. And the phone and the browser shared one file, each replacing the
+// other's on every finish. Two rules close both:
+// 1. The file is only written blind when it is still exactly what THIS install last put there
+//    (Google's own checksum of it, remembered after every send).
+// 2. Otherwise it is read first, and it is only replaced when everything in it is already here.
+//    If it holds a session this install does not, it is left alone and this install starts a
+//    file of its own beside it, named with the day it started.
+// A file in Drive's bin counts as gone: writing into the bin succeeds and saves nothing.
+var DRIVE_UP='https://www.googleapis.com/upload/drive/v3/files';
+function driveMd5(v){
+  try{if(v)localStorage.setItem('arc_drive_md5',v);else localStorage.removeItem('arc_drive_md5');}catch(e){}
+}
+function driveForget(){
+  try{localStorage.removeItem('arc_drive_fid');}catch(e){}
+  driveMd5('');
+}
+// 1 it is ours as we left it, 0 somebody else has written it, -1 it is gone or binned.
+async function driveState(id,interactive){
+  var r=await driveFetch('https://www.googleapis.com/drive/v3/files/'+id+'?fields=md5Checksum,trashed',null,interactive);
+  if(r.status===404)return -1;
   if(!r.ok)throw new Error('look '+r.status);
   var j=await r.json();
-  id=(j.files&&j.files[0]&&j.files[0].id)||'';
-  if(id){
-    try{localStorage.setItem('arc_drive_fid',id);}catch(e){}
-    var up2=await driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',
-      {method:'PATCH',headers:{'Content-Type':'application/json'},body:body},interactive);
-    if(!up2.ok)throw new Error('send '+up2.status);
-    return id;
+  if(!j||j.trashed)return -1;
+  var mine='';try{mine=localStorage.getItem('arc_drive_md5')||'';}catch(e){}
+  return (mine&&j.md5Checksum===mine)?1:0;
+}
+// Is everything in that file already on this phone? Sessions are matched by their date and
+// counted, not by workout id, because ids are re-pointed when a workout is copied to a second day.
+// A file that cannot be read as a backup is never a reason to write over it.
+async function driveCovers(id,interactive){
+  var r=await driveFetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media',null,interactive);
+  if(!r.ok)throw new Error('read '+r.status);
+  var j=null;try{j=JSON.parse(await r.text());}catch(e){return false;}
+  var theirs=j&&j.db&&j.db.logs;
+  if(!Array.isArray(theirs))return false;
+  var have={};
+  (DB.logs||[]).forEach(function(g){if(g&&g.date)have[g.date]=(have[g.date]||0)+1;});
+  for(var i=0;i<theirs.length;i++){
+    var d=theirs[i]&&theirs[i].date;
+    if(!d||!have[d])return false;
+    have[d]--;
   }
-  var dir=await driveDir(interactive);
-  var B='-forge-'+Date.now();
-  var multi='--'+B+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+
-    JSON.stringify({name:DRIVE_NAME,parents:[dir]})+
-    '\r\n--'+B+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+B+'--';
-  var mk=await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
-    {method:'POST',headers:{'Content-Type':'multipart/related; boundary='+B},body:multi},interactive);
+  return true;
+}
+// true when it landed, false when the file is not there any more.
+async function driveSend(id,body,interactive){
+  var up=await driveFetch(DRIVE_UP+'/'+id+'?uploadType=media&fields=id,md5Checksum',
+    {method:'PATCH',headers:{'Content-Type':'application/json'},body:body},interactive);
+  if(up.status===404)return false;
+  if(!up.ok)throw new Error('send '+up.status);
+  var j={};try{j=(await up.json())||{};}catch(e){}
+  driveMd5(j.md5Checksum||'');
+  return true;
+}
+async function drivePut(body,interactive){
+  var id='',skip='';try{id=localStorage.getItem('arc_drive_fid')||'';}catch(e){}
+  if(id){
+    var st=await driveState(id,interactive);
+    if(st===0&&!(await driveCovers(id,interactive))){st=-1;skip=id;}
+    if(st>=0&&(await driveSend(id,body,interactive)))return id;
+    // Deleted or binned in Drive, or it now holds more than this install does. Forget it and
+    // find or make another rather than failing for ever.
+    driveForget();
+  }
+  // With drive.file the list only ever holds what Forge itself made, so this is every backup.
+  var r=await driveFetch(driveQ("mimeType!='application/vnd.google-apps.folder'"),null,interactive);
+  if(!r.ok)throw new Error('look '+r.status);
+  var all=((await r.json())||{}).files||[];
+  var mine=all.filter(function(f){return f&&f.id&&/^forge-backup.*\.json$/i.test(f.name||'');});
+  for(var i=0;i<mine.length&&i<6;i++){
+    var f=mine[i];
+    if(f.id===skip)continue;
+    if(!(await driveCovers(f.id,interactive)))continue;
+    if(await driveSend(f.id,body,interactive)){
+      try{localStorage.setItem('arc_drive_fid',f.id);}catch(e){}
+      return f.id;
+    }
+  }
+  var name=mine.length?('forge-backup-'+today()+'.json'):DRIVE_NAME;
+  var mk=null;
+  // Twice, because the folder id is remembered and the folder can be deleted out of Drive. A 404
+  // on making the file is that: forget the folder, find or make another, and try once more.
+  for(var n=0;n<2;n++){
+    var dir=await driveDir(interactive);
+    var B='-forge-'+Date.now();
+    var multi='--'+B+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+
+      JSON.stringify({name:name,parents:[dir]})+
+      '\r\n--'+B+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+B+'--';
+    mk=await driveFetch(DRIVE_UP+'?uploadType=multipart&fields=id,md5Checksum',
+      {method:'POST',headers:{'Content-Type':'multipart/related; boundary='+B},body:multi},interactive);
+    if(mk.status!==404)break;
+    try{localStorage.removeItem('arc_drive_dir');}catch(e){}
+  }
   if(!mk.ok)throw new Error('make '+mk.status);
-  id=((await mk.json())||{}).id||'';
+  var made=(await mk.json())||{};
+  id=made.id||'';
   // A 200 carrying no id is not a copy. Without this the switch reads ON, Settings says it was
   // sent, and there is nothing in the Drive - which is the worst thing a backup can do, because
   // it is the one state the user will never go and check.
   if(!id)throw new Error('no id back');
   try{localStorage.setItem('arc_drive_fid',id);}catch(e){}
+  driveMd5(made.md5Checksum||'');
   return id;
 }
 // Called after every sealed session, and by hand from Settings. Never in the sandbox, never
