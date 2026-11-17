@@ -150,6 +150,39 @@ main constraint on how to work in it. See **Traps** below before editing.
   nothing for nineteen builds, so a workout could be forged but never built by hand, and nobody
   saw it because forging worked. Before deleting a function, grep the WHOLE file for its name,
   markup strings included, and click the buttons of the screen it lived on afterwards.
+- **The reviewers' bug list, worked through** (v5.290, 17 Nov). Each of these was reproduced or
+  read in the code first, and re-run in the preview after.
+  **The wrist follows the workout that is RUNNING, not the day the phone is looking at.**
+  Looking at another day makes it `CUR` and opens an empty session for it; leaving deleted the
+  empty session and left `CUR` on it, so the next push told the watch the workout was closed.
+  `wearRun()` is the one with sets on it, `wearPush` works everything out for that and puts `CUR`
+  back, `wearHome()` brings the phone back before a press from the wrist is acted on, and
+  `leaveSession` returns `CUR` and pushes. Never read `CUR` in new wrist code without it.
+  **`wearNext` falls back to a walked-past lift (`walked`) when that is all there is left**, so
+  skipping the first lift and finishing the rest no longer reads as no session.
+  **The lattice is worked out in the lifter's own unit.** `lu`/`lw`/`ls` are lattice units
+  (tenths of a pound, or quarter kilos); `stackU`, `stackPaceU`, `paceU` are the unit versions
+  and `stackStep`, `stackPace`, `paceFor` still answer in pounds. In tenths of a pound a
+  kilogram stack has a common step of ONE, so kg users got no lattice or a wrong one. Pounds are
+  numerically unchanged. **The rungs sit on the remainder most logged weights share
+  (`latRes`), not on the heaviest weight**, which hung the whole lattice on a stray top set.
+  **A fix rewrites only the lines that are wrong**: `easePlan` used to write one weight into
+  every line and flatten a pyramid. **`DB.upSet` remembers what a raise wrote**, so the same
+  lift typed by hand in another workout is no longer judged as a raise; old stamps have no
+  record and are judged as before.
+  **A just-today edit rides in the open session (`A.esnap`)**, so the app being killed before
+  Finish still asks the question. **A vault boundary on day one is kept** (the floor is not
+  replaced when `mark` is set or the floor carries `r`). **A restore never writes `arc_drive`.**
+  **`sfx` drops a sound while the page is hidden even when the context is running.**
+  **`persistNow` notices a save that did not land**: drops the `:bak` copy, tries again, and
+  says so once a launch (`SAVEFAIL`). **`planDropFrom(id,from)`** takes a workout off ONE day in
+  a two week program so its twin survives a drag, and going back to one week no longer orphans
+  workouts when Saved is full. SHOW ME on the import question opens the sheet (it used to
+  disarm the check first). `--violet`, `--line2` and `--cream` never existed: they are
+  `--match`, `--line` and `--txt`.
+  **Deliberately not done:** two tabs of the web app can still overwrite each other; a weighted
+  bodyweight set (push-ups with a plate) still scores below a longer unweighted one, because
+  ranking them needs the lifter's bodyweight and that is the owner's call.
 - **The app keeps its own history, and a checkpoint is never the only copy of a day** (v5.285).
   `VAULT` (`arc_vault`, its own Store key so a big one can never endanger the DB save) is one
   entry per day anything was logged: a diff of the whole DB against the state the entry before it
@@ -850,7 +883,7 @@ further down the file, set `background`. The first won the colour, the second wo
 the GO pill came out as three black ovals. **Grepping for the class you are editing is not
 enough: grep for the class you are editing INSIDE every state it can be in.**
 
-**10. `saveDB()` is debounced, so a write from the console can simply never land.** An open
+**10. `saveDB()` WAS debounced (it writes at once now), and a write from the console could simply never land.** An open
 session was deleted over CDP, read back as gone in the same call, and was still there after the
 app restarted: the in-memory object had changed and the write had not been flushed. Follow any
 scripted change to `DB` with `persistNow()`, and prove it by force-stopping the app and reading

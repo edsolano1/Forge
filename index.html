@@ -176,7 +176,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .wk-add svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;}
 /* The ember: a bonus you notice, never a scoreboard you can fail. Dim early, lit at seven, gone
    at nothing, and a missed day only takes the glow away. */
-.wk-emb{flex:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line2);
+.wk-emb{flex:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);
   border-radius:20px;padding:4px 9px;font-family:var(--mono);font-size:9.4px;color:var(--txt3);}
 .wk-emb svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
 .wk-emb.warm{border-color:color-mix(in srgb,var(--go) 45%,transparent);color:var(--go);
@@ -189,9 +189,9 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .wk-met{height:4px;border-radius:3px;background:#241510;overflow:hidden;margin:10px 0 5px;}
 .wk-met i{display:block;height:100%;background:linear-gradient(90deg,var(--go),var(--gold));}
 .wk-sub{font-family:var(--mono);font-size:9.4px;letter-spacing:.08em;color:var(--txt3);}
-.wk-rule{height:1px;background:var(--line2);opacity:.75;margin-top:14px;}
+.wk-rule{height:1px;background:var(--line);opacity:.75;margin-top:14px;}
 .wk-row{display:flex;align-items:center;gap:12px;padding:13px 2px;}
-.wk-mk{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);background:#130c09;
+.wk-mk{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#130c09;
   display:flex;align-items:center;justify-content:center;color:var(--go);}
 .wk-mk svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
 .wk-b{flex:1;min-width:0;}
@@ -199,7 +199,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .wk-b .d{font-family:var(--mono);font-size:9.4px;letter-spacing:.1em;color:var(--txt3);}
 .wk-b .n{font-family:'Marcellus',serif;font-size:17px;color:var(--txt);margin:2px 0 3px;}
 .wk-b .m{font-family:var(--mono);font-size:10.4px;line-height:1.5;color:var(--txt3);overflow-wrap:anywhere;}
-.wk-every{display:block;width:100%;text-align:center;margin-top:6px;padding:14px 0;border:0;border-top:1px solid var(--line2);
+.wk-every{display:block;width:100%;text-align:center;margin-top:6px;padding:14px 0;border:0;border-top:1px solid var(--line);
   background:none;color:var(--txt3);font-family:var(--mono);font-size:9.4px;letter-spacing:.12em;cursor:pointer;}
 @media (hover:hover){.wk-every:hover,.wk-add:hover{color:var(--gold);}}
 .wk-none{color:var(--txt3);font-size:13.5px;text-align:center;padding:18px 0;}
@@ -2378,7 +2378,7 @@ body.forge .mk-adj{width:28px;height:28px;border-radius:50%;border-color:#4a2c1c
 body.forge .mk-foot .mk-link{height:36px;padding:0 14px;border-radius:999px;border:1px solid #4a3a6a;color:var(--match);font-weight:600;font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:rgba(143,111,190,.06);}
 body.forge .mk-grp{border:0;border-left:3px solid var(--match);border-radius:0;background:transparent;padding:0 0 0 8px;}
 body.forge .mk-grp-h span:first-child{color:var(--match);}
-body.forge .mk-unlink{border-radius:999px;border-color:#4a3a6a;color:var(--violet);font-size:10px;letter-spacing:.12em;}
+body.forge .mk-unlink{border-radius:999px;border-color:#4a3a6a;color:var(--match);font-size:10px;letter-spacing:.12em;}
 body.forge .mk-add{border:1px dashed #4a2c1c;border-radius:999px;padding:11px;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);}
 
 /* ---- Every other sheet, v5.170: the seal, carried through. ----
@@ -2478,7 +2478,7 @@ body.forge .iconbtn:hover{color:var(--gold);border-color:#6a3f26;}
 /* S6: the history's chips and sub-rows. */
 body.forge .hset{font-family:var(--mono);border-radius:9px;border:1px solid #3a2214;background:#0e0806;color:var(--txt2);}
 body.forge .hset.pr{border-color:#6a3f26;color:var(--gold);background:rgba(255,138,31,.08);}
-body.forge .hset.mt{border-color:#4a3a6a;color:var(--violet);background:rgba(143,111,190,.08);}
+body.forge .hset.mt{border-color:#4a3a6a;color:var(--match);background:rgba(143,111,190,.08);}
 body.forge .hrow-rec{border-radius:9px;}
 body.forge .hex-n{font-family:'Marcellus',serif;font-weight:400;font-size:14px;color:#fff6e6;}
 body.forge .hnote{border-radius:10px;}
@@ -2813,7 +2813,7 @@ body.forge .side{border-radius:5px;
   align-items:center;gap:9px;padding:11px 12px 11px 15px;border-radius:14px;
   background:linear-gradient(#241307,#170d07);border:1px solid #6a3f26;
   box-shadow:0 14px 34px -14px #000,0 0 26px -14px var(--go);
-  font-size:12.5px;line-height:1.45;color:var(--cream);
+  font-size:12.5px;line-height:1.45;color:var(--txt);
   transform:translateY(14px);opacity:0;transition:transform .22s cubic-bezier(.2,.7,.2,1),opacity .22s;}
 #hintBar.on{display:flex;transform:none;opacity:1;}
 /* The rest timer pill is also fixed to the bottom, at 22px and z-index 120, and the bar is at
@@ -3930,7 +3930,7 @@ body.wcon{overflow:hidden;}
          NO HINTS turns them off. -->
     <div class="sfx-lbl"><span>Hints</span></div>
     <div class="presets" style="grid-template-columns:1fr" id="hintRow"></div>
-    <div class="footnote" style="margin:6px 2px 0">They appear once each, as you go.</div>
+    <div class="footnote" style="margin:6px 2px 0">They appear as you go. Each one stops once you tap it.</div>
     <!-- The sandbox came off this sheet at release (Aug 23) as a dev tool, and came back
          (v5.41) as a user feature: it replays the whole first run - welcome, ritual,
          generated week - in a copy where nothing is saved, and leaving throws it all away. -->
@@ -9949,7 +9949,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.289';
+var APPV='v5.290';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -9979,9 +9979,25 @@ var saveT=null;
 function persistNow(){
   clearTimeout(saveT);saveT=null;
   if(SANDBOX)return;   // both run on a swapped-in DB; nothing they do may reach storage
-  try{Store.set(KEY,DB);}catch(e){}
+  var sv=null;
+  try{sv=Store.set(KEY,DB);}catch(e){}
   try{localStorage.setItem(KEY+':bak',JSON.stringify({t:Date.now(),db:DB}));}catch(e){}
+  // A save that did not land used to be swallowed twice over, and the app carried on in memory
+  // looking exactly as if it had worked (v5.290). The spare copy goes first, because it is the
+  // same size again and is the likeliest thing to have filled the room; only if the real one
+  // still will not fit is anything said, once a launch.
+  if(sv&&sv.then)sv.then(function(ok){
+    if(ok!==false||Store.mode==='memory')return;
+    try{localStorage.removeItem(KEY+':bak');}catch(e){}
+    Store.set(KEY,DB).then(function(ok2){
+      if(ok2!==false||SAVEFAIL)return;
+      SAVEFAIL=1;
+      ask('Forge could not save just now, because the storage this app is allowed is full. What you log still shows, but it will be gone when the app closes. In Settings, under Your data, save a copy now.',
+        null,'This was not saved',"OK",false);
+    });
+  });
 }
+var SAVEFAIL=0;
 function saveDB(){persistNow();}
 // The app is a page that never navigates. Opening it from the launcher resumes the WebView with
 // whatever it was already showing, so a build pushed since is not picked up until the process
@@ -10577,15 +10593,30 @@ var LOCKI='<svg viewBox="0 0 20 20"><rect x="5" y="9" width="10" height="7.5" rx
 // Two distinct logged weights are enough to learn it; a lift without them falls back to
 // plate math until it has been trained at a second weight. Computed in tenths so float dust
 // cannot poison the gcd.
-function stackStep(id){
+// THE LATTICE IS WORKED OUT IN THE UNIT THE LIFTER USES (v5.290). It used to be worked out in
+// tenths of a pound whatever the unit, and a kilogram stack does not sit on a pound lattice:
+// 20, 22.5 and 25 kg are stored as 44.09, 49.6 and 55.12 lb, whose common step in tenths of a
+// pound is ONE. So a kilogram user either got no lattice at all, or, when the rounding happened
+// to line up, a wrong one, and was told a weight he lifts every week is "not on the machine".
+// lu() is a weight in lattice units (tenths of a pound, or quarter kilos), lw() is the way back
+// to stored pounds, ls() turns a STEP into pounds. In pounds every number here is exactly what
+// it was before.
+function lu(w){return UNIT_KG?Math.round(w/LB_PER_KG*4):Math.round(w*10);}
+function lw(u){return UNIT_KG?Math.round(u/4*LB_PER_KG*100)/100:u/10;}
+function ls(u){return UNIT_KG?u/4*LB_PER_KG:u/10;}
+// Every distinct weight this lift has been logged at, in lattice units, lightest first.
+function latWs(id){
   var ws={};
   (DB.logs||[]).forEach(function(L){
     for(var k in L.entries){
       if(exOfKey(L,k)!==id)continue;
-      L.entries[k].forEach(function(s){if(s&&s.w>0)ws[Math.round(s.w*10)]=1;});
+      L.entries[k].forEach(function(s){if(s&&s.w>0)ws[lu(s.w)]=1;});
     }
   });
-  var a=Object.keys(ws).map(Number).sort(function(x,y){return x-y;});
+  return Object.keys(ws).map(Number).sort(function(x,y){return x-y;});
+}
+function stackU(id){
+  var a=latWs(id);
   if(a.length<2)return 0;
   var g=gcdOf(a);
   // The outlier guard. One stray weight - a typo, a day on a different bar, an odd plate
@@ -10600,7 +10631,9 @@ function stackStep(id){
   // cost nothing while the step was being thrown away downstream - the moment the step is
   // trusted it offers him 185 off a 165 bench. 2.5lb is the smallest increment that exists
   // anywhere in this app, so a gcd under it is the only thing worth second-guessing.
-  if(g<25&&a.length>=4){
+  // In kilograms the same two lines sit at 1.25 kg and half a kilo.
+  var noise=UNIT_KG?5:25,least=UNIT_KG?2:10;
+  if(g<noise&&a.length>=4){
     var sole=-1,n=0;
     for(var j=0;j<a.length;j++){
       var g2=gcdOf(a.slice(0,j).concat(a.slice(j+1)));
@@ -10608,7 +10641,17 @@ function stackStep(id){
     }
     if(n===1)g=gcdOf(a.slice(0,sole).concat(a.slice(sole+1)));
   }
-  return g>=10?g/10:0;   // a step under 1lb means the history is noise, not a lattice
+  return g>=least?g:0;   // a step under 1lb means the history is noise, not a lattice
+}
+function stackStep(id){var u=stackU(id);return u?ls(u):0;}
+// Where the rungs SIT: the remainder most of the logged weights share. It used to be read off
+// the heaviest weight ever logged, so when the heaviest was the stray one (a typo, an odd plate)
+// the whole lattice was hung on it and every real weight read as off the machine.
+function latRes(id,s){
+  var a=latWs(id),c={},best=null,bn=0;
+  a.forEach(function(u){var r=u%s;c[r]=(c[r]||0)+1;});
+  a.forEach(function(u){var r=u%s;if(c[r]>=bn){bn=c[r];best=r;}});
+  return best;
 }
 function gcdOf(a){
   var g=0;
@@ -10643,9 +10686,9 @@ function gcdOf(a){
 // The LATTICE above is deliberately not windowed. A machine does not change its increments;
 // only the lifter changes pace, and an old weight is still proof of a rung that exists.
 var PACE_WIN=8;
-function stackPace(id){
-  var s=stackStep(id);if(!s)return 0;
-  var down=!!invEx(id),s10=Math.round(s*10),tops=[];
+function stackPaceU(id){
+  var s10=stackU(id);if(!s10)return 0;
+  var down=!!invEx(id),tops=[];
   (DB.logs||[]).forEach(function(L){
     var t=0;
     for(var k in L.entries){
@@ -10655,7 +10698,7 @@ function stackPace(id){
         t=t?(down?Math.min(t,x.w):Math.max(t,x.w)):x.w;
       });
     }
-    if(t>0)tops.push(Math.round(t*10));
+    if(t>0)tops.push(lu(t));
   });
   function modeOf(a){
     var c={},best=0,bn=0;
@@ -10669,18 +10712,20 @@ function stackPace(id){
     return best;
   }
   var best=modeOf(tops.length>PACE_WIN?tops.slice(-PACE_WIN):tops)||modeOf(tops);
-  return best?best/10:s;
+  return best||s10;
 }
+function stackPace(id){var u=stackPaceU(id);return u?ls(u):0;}
 // The pace, measured against the weight it is moving FROM. Capped at a tenth of that weight:
 // past 10% in one session the mode has caught a rebound off a deload, not a habit. The floor is
 // one notch of the machine, because on a stack that steps by ten there is nothing smaller to
 // offer - which is the entire bug this replaces.
-function paceFor(id,w){
-  var s=stackStep(id);if(!s)return 0;
-  var s10=Math.round(s*10),p10=Math.round((stackPace(id)||s)*10),cap=Math.round(w*10)*0.10;
+function paceU(id,w){
+  var s10=stackU(id);if(!s10)return 0;
+  var p10=stackPaceU(id)||s10,cap=lu(w)*0.10;
   if(p10>cap)p10=Math.max(s10,Math.floor(cap/s10)*s10);
-  return p10/10;
+  return p10;
 }
+function paceFor(id,w){var u=paceU(id,w);return u?ls(u):0;}
 function stepFor(id,w){
   return paceFor(id,w)||(w>=40?5:2.5);
 }
@@ -10691,58 +10736,42 @@ function stepFor(id,w){
 // of walking 22.5, 25.5, 28.5 forever. Anchored on a logged weight, because logged weights
 // sit on the lattice by definition; integer tenths throughout, floats stay out of it.
 function latticeNext(id,w,down){
-  var s=stackStep(id);if(!s)return null;
-  var p=paceFor(id,w);if(!p)return null;
-  var a=0;
-  (DB.logs||[]).forEach(function(L){
-    for(var k in L.entries){
-      if(exOfKey(L,k)!==id)continue;
-      L.entries[k].forEach(function(x){if(x&&x.w>a)a=x.w;});
-    }
-  });
-  if(!a)return null;
+  var s10=stackU(id);if(!s10)return null;
+  var p10=paceU(id,w);if(!p10)return null;
+  var r=latRes(id,s10);if(r===null)return null;
   // Snap onto the lattice first, THEN move by the pace. Snapping is what pulls an off-lattice
   // target back: a 115 accepted before the stack was learned lands on 110 and goes to 120,
   // instead of walking 120, 125, 130 off a rung that was never there.
-  var s10=Math.round(s*10),p10=Math.round(p*10),w10=Math.round(w*10),a10=Math.round(a*10),k;
-  if(down){k=Math.ceil((w10-a10)/s10);}
-  else{k=Math.floor((w10-a10)/s10);}
-  var n=(a10+k*s10+(down?-p10:p10))/10;
-  return n<0?0:n;
+  var w10=lu(w),k=down?Math.ceil((w10-r)/s10):Math.floor((w10-r)/s10);
+  var n=r+k*s10+(down?-p10:p10);
+  return n<0?0:lw(n);
 }
 // Does this weight exist on the machine? Only answerable once a lattice has been learned, so a
 // lift with fewer than two logged weights is never judged: silence means "no idea", never "fine".
 // Anchored on a logged weight, because a logged weight is on the lattice by definition.
 function offLattice(id,w){
-  var s=stackStep(id);if(!s)return false;
-  var a=null;
-  (DB.logs||[]).forEach(function(L){
-    for(var k in L.entries){
-      if(exOfKey(L,k)!==id)continue;
-      L.entries[k].forEach(function(x){if(x&&x.w>0&&(a===null||x.w>a))a=x.w;});
-    }
-  });
-  if(a===null)return false;
-  return (Math.abs(Math.round(w*10)-Math.round(a*10))%Math.round(s*10))!==0;
+  var s10=stackU(id);if(!s10)return false;
+  var r=latRes(id,s10);if(r===null)return false;
+  return (((lu(w)-r)%s10)+s10)%s10!==0;
 }
 // Which real rung an off lattice target becomes. The rung BELOW it, unless he has already
 // lifted the one above, in which case that: on his own seven, that rule landed every single
 // one on the weight he is actually using. It can only ever return a weight out of his own
 // history, which is what makes rewriting a target he may have typed himself safe to do.
 function offLatFix(id,w,best){
-  var s=stackStep(id);if(!s)return null;
-  var ws={},a=null;
+  var s10=stackU(id);if(!s10)return null;
+  var r=latRes(id,s10);if(r===null)return null;
+  // the weight AS IT WAS LOGGED, so what comes back is his own number and not a conversion of it
+  var ws={};
   (DB.logs||[]).forEach(function(L){
     for(var k in L.entries){
       if(exOfKey(L,k)!==id)continue;
-      L.entries[k].forEach(function(x){if(x&&x.w>0){ws[Math.round(x.w*10)]=1;if(a===null||x.w>a)a=x.w;}});
+      L.entries[k].forEach(function(x){if(x&&x.w>0)ws[lu(x.w)]=x.w;});
     }
   });
-  if(a===null)return null;
-  var s10=Math.round(s*10),w10=Math.round(w*10),a10=Math.round(a*10);
-  var below=a10+Math.floor((w10-a10)/s10)*s10,above=below+s10;
-  if(ws[above])return above/10;
-  if(ws[below])return below/10;
+  var below=r+Math.floor((lu(w)-r)/s10)*s10,above=below+s10;
+  if(ws[above])return ws[above];
+  if(ws[below])return ws[below];
   return (typeof best==='number'&&best>0)?best:null;   // neither rung logged: fall back to his best
 }
 // Every lift that met all its targets last time, with the numbers it would move to. Nothing
@@ -10915,7 +10944,15 @@ function easePlan(wk){
       // check spent two of its eleven warnings on it (v5.250).
       var EXD=EX[id]||{};
       if(EXD.cardio||EXD.bw)return;
-      var stamp=(DB.upAt||{})[(String(rf.id).indexOf('~')>=0)?rf.id:id];
+      var sk0=(String(rf.id).indexOf('~')>=0)?rf.id:id;
+      var stamp=(DB.upAt||{})[sk0];
+      // The stamp is kept per LIFT, so a raise taken in one workout used to mark the same lift
+      // in every other workout as raised too, and a number somebody typed there themselves got
+      // "a raise that has not stuck". What the app wrote is remembered beside the stamp now, and
+      // a row that says anything else is a row somebody chose (v5.290). Older stamps carry no
+      // such record and are judged as they always were.
+      var wrote=(DB.upSet||{})[sk0];
+      if(stamp&&wrote!==undefined&&wrote!==lines.join('\n'))stamp=0;
       // THE THIRD SOURCE, and the only one that needs no provenance: a target standing on a
       // weight THE MACHINE DOES NOT HAVE (v5.279, owner from the road: "cable cross keeps
       // telling me to do 25.5 instead of 27, the lattice just doesn't update"). It was 25.5
@@ -10960,9 +10997,19 @@ function easePlan(wk){
       // his own history and so cannot be a weight he has not made; anything else is his best.
       var land=offLat?offLatFix(id,t0.w,at.best):at.best;
       if(land===null||land<=0)return;
-      var to=lines.map(function(ln){
+      // The reps stay; only the load comes back. And only on the lines that are WRONG (v5.290):
+      // this used to write the one landing weight into every line, so fixing the first set of
+      // 135, 155, 175 turned a pyramid into three sets of the same thing.
+      var to=lines.map(function(ln,li){
         var t=parseTarget(ln);
-        return t.type==='wr'?(land+'x'+t.r):ln;      // the reps stay; only the load comes back
+        if(!t||t.type!=='wr')return ln;
+        if(li===0)return land+'x'+t.r;
+        if(offLat){
+          if(!t.w||!offLattice(id,t.w))return ln;
+          var fx=offLatFix(id,t.w,null);
+          return (fx&&fx>0)?(fx+'x'+t.r):ln;
+        }
+        return (inv?(t.w<land):(t.w>land))?(land+'x'+t.r):ln;
       });
       if(to.join('\n')===lines.join('\n'))return;
       out.push({id:id,name:rf.data.name,from:lines,to:to,slot:rf.id,baseId:rf.baseId,
@@ -11156,6 +11203,7 @@ function lvlWrite(items){
     // When this target was written. Until the lift is logged again, it has not been tried, so the
     // out of reach check leaves it alone (v5.232).
     DB.upAt=DB.upAt||{};DB.upAt[p.sk||p.id]=Date.now();
+    DB.upSet=DB.upSet||{};DB.upSet[p.sk||p.id]=p.to.join('\n');
     p.done=true;
   });
   saveDB();
@@ -11412,7 +11460,7 @@ function easeNotice(){
     ask((n===1?'One lift that came in with the file asks for more weight than has ever been logged here.'
              :n+' lifts that came in with the file ask for more weight than has ever been logged here.')+eg+
         ' They can be set to the best in your history, one at a time, keeping the same reps.',
-        function(){easeNoteDone();openEase(null);},
+        function(){openEase(null);},
         'Worth a look after the import','SHOW ME',
         function(){easeNoteDone();},{label:'LATER',fn:function(){}},'LEAVE AS IMPORTED');
   }catch(e){}
@@ -11749,7 +11797,9 @@ function twoToggle(){
     function(){
       if(twoOff())twoSwapBoards();          // show the live board
       DB.extra=DB.extra||[];
-      moving.forEach(function(id){if(DB.extra.indexOf(id)<0&&DB.extra.length<BANK_MAX)DB.extra.push(id);});
+      // Past the limit on purpose. Stopping at BANK_MAX left the rest on no board and not in
+      // Saved either: still stored, and unreachable from anywhere in the app (v5.290).
+      moving.forEach(function(id){if(DB.extra.indexOf(id)<0)DB.extra.push(id);});
       delete DB.two;
       saveDB();renderHome();
     },'One week program','SWITCH TO ONE WEEK');
@@ -14230,6 +14280,18 @@ function planDropSilent(id){
   DAYS.forEach(function(d){DB.days[d.k]=(DB.days[d.k]||[]).filter(function(x){return x!==id;});});
   DB.extra=(DB.extra||[]).filter(function(x){return x!==id;});
 }
+// Off ONE day. In a two week program a workout may stand on two days of the same board
+// (A B A), and taking it off every day to move one card deleted its twin (v5.290).
+function planDropFrom(id,from){
+  if(from&&twoOn()){
+    var a=DB.days[from]||[],ix=a.indexOf(id);
+    if(ix>=0){a.splice(ix,1);return;}
+  }
+  planDropSilent(id);
+}
+function planOnBoard(id){
+  return DAYS.some(function(d){return (DB.days[d.k]||[]).indexOf(id)>=0;});
+}
 function planDrop(id){
   planDropSilent(id);
   DB.extra=DB.extra||[];
@@ -14509,7 +14571,7 @@ function scrapBack(i){
   savedOpen();renderHome();scrapApply();
   try{sfxLog();}catch(err){}
   var nm=String((e.w&&e.w.name)||'It').replace('Optional: ','');
-  ask(nm+' is back in Saved workouts. Hold it to put it on a day.',null,'Back from the heap',"OK",false);
+  ask(nm+' is back in Saved workouts. Hold the lines on it, then drag it to a day.',null,'Back from the heap',"OK",false);
 }
 function scrapBurn(i){
   var e=(DB.scrap||[])[i];if(!e)return;
@@ -15744,6 +15806,7 @@ function finishSession(){
 // putting the plan back afterwards - today already ran the new shape either way.
 function finishGate(){
   var wk=CUR;
+  try{var A1=DB.active[wk];if((!SESSEDIT||SESSEDIT.wk!==wk)&&A1&&A1.esnap&&DB.custom[wk])SESSEDIT={wk:wk,snap:A1.esnap};}catch(e){}
   if(SESSEDIT&&SESSEDIT.wk===wk&&JSON.stringify(DB.custom[wk]||null)!==SESSEDIT.snap){
     var snap=SESSEDIT.snap;
     ask('You changed this workout during the session. Today counts either way.',
@@ -16254,7 +16317,10 @@ function doRestore(input){
         // phone and come back has earned. The theme is handled separately below.
         var s=d.settings||{};
         BK_KEYS.forEach(function(k){
-          if(k===TKEY||s[k]===undefined)return;
+          // Never the Drive switch (v5.290). On is a permission the person gave on THAT phone;
+          // a file arriving on this one cannot give it, and it left the switch reading ON over
+          // an account that was never asked.
+          if(k===TKEY||k==='arc_drive'||s[k]===undefined)return;
           try{localStorage.setItem(k,String(s[k]));}catch(e){}
         });
         // A backup made before v5.286 has no vault, and that is not an error: the app simply
@@ -17171,7 +17237,11 @@ function vaultPut(mark){
     if(!cur)return;
     var prev=V.e.length?vAt(V.e.length-1):null;
     // The first write is the floor: a whole copy, with no diff, and nothing may ever strip it.
-    if(!prev||(V.e.length===1&&V.e[0].d===d&&!V.e[0].k)){
+    // Not when this write is a BOUNDARY, and not once the floor is one (v5.290). Going back on
+    // the first day the history existed replaced the floor with the state being left, and the
+    // launch write four seconds later replaced it again with the state gone back to, so the
+    // promise that you can come back was false for exactly one day.
+    if(!prev||(V.e.length===1&&V.e[0].d===d&&!V.e[0].k&&!V.e[0].r&&!mark)){
       V.e[0]={t:now,d:d,f:1,db:cur};vaultSave();return;
     }
     // Today already has an entry? It is REPLACED by a diff against the state BEFORE it, never
@@ -17293,7 +17363,7 @@ function bkNudge(){
   if(SANDBOX)return;
   try{
     if(localStorage.getItem('arc_bknudge'))return;
-    if(autoBkOn()||localStorage.getItem('arc_lastbk'))return;
+    if(autoBkOn()||driveOn()||localStorage.getItem('arc_lastbk'))return;
     if((DB.logs||[]).length<5)return;
     localStorage.setItem('arc_bknudge','1');
   }catch(e){return;}
@@ -18243,7 +18313,7 @@ function histRowHtml(it){
       '<div class="hrow-mk"><svg viewBox="0 0 100 100">'+anvilAt(59,'fill="var(--gold)"')+'</svg></div>'+
       '<div class="hrow-b">'+
         '<div class="hrow-d">'+pretty(L.date)+'</div>'+
-        '<div class="hrow-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
+        '<div class="hrow-n">'+esc(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
         (L.marked?'<div class="hrow-m">Marked done</div>':
         '<div class="hrow-hero"><b>'+s.n+'</b><span>'+of+'</span>'+(L.mins?'<i class="hrow-min">'+fmtMins(L.mins)+'</i>':'')+(s.pr?'<em class="hrow-rec">'+s.pr+' record'+(s.pr>1?'s':'')+'</em>':'')+'</div>')+
       '</div>'+
@@ -18519,7 +18589,7 @@ function renderHist(){
     var rows='';
     for(var id in L.entries){
       var exid=exOfKey(L,id),ex=R(exid),wasSwap=exid!==id;
-      rows+='<div class="hex"><div class="hex-n">'+(ex?ex.name:id)+(wasSwap?' <span style="color:var(--gold);font-size:10px">SWAP</span>':'')+'</div><div class="hex-s">'+
+      rows+='<div class="hex"><div class="hex-n">'+esc(ex?ex.name:id)+(wasSwap?' <span style="color:var(--gold);font-size:10px">SWAP</span>':'')+'</div><div class="hex-s">'+
         L.entries[id].map(function(s,si){
           // Sealed is not carved. A 40 typed where a 20 was meant would otherwise stand as
           // this exercise's Best forever, and grade every honest set after it grey against a
@@ -18539,7 +18609,7 @@ function renderHist(){
         }).join('')+'</div></div>';
     }
     body.innerHTML='<div class="hback" onclick="histBack()">&larr; All sessions</div>'+
-      '<div class="hdet-n">'+(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
+      '<div class="hdet-n">'+esc(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
       (L.marked?'':'<button class="hdet-t" onclick="histMinsEdit()">'+MK_GLASS+'<span>'+(L.mins?fmtMins(L.mins):'Add the time')+'</span></button>')+
       '<div class="hscroll">'+rows+(L.note?'<div class="hnote">'+esc(L.note)+'</div>':'')+'</div>'+
       '<div class="hdel" onclick="deleteLog('+HIST.sel+')"><svg viewBox="0 0 20 20"><path d="M4 6h12M8.5 6V4.5h3V6M6 6l.8 10h6.4L14 6M8.4 8.6v4.8M11.6 8.6v4.8"/></svg>Delete this session</div>';
@@ -18756,6 +18826,9 @@ function leaveSession(){
   if(A&&loggedCount(CUR)===0&&!A.note&&!A.start&&!A.edit&&Object.keys(A.swaps||{}).length===0){
     delete DB.active[CUR];saveDB();
   }
+  // CUR goes back to the workout that is running, and the wrist is told, so a look at another
+  // day never ends with the watch saying there is no session (v5.290).
+  try{var rn=wearRun();if(rn&&rn!==CUR&&!DB.active[CUR])CUR=rn;wearPush();}catch(e){}
   renderHome();
 }
 // v5.217: every place back has to answer for, written as one ordered list instead of a run of
@@ -19421,7 +19494,13 @@ function sfx(fn){
   if(!SFX_ON)return;
   initAudio();
   if(!actx)return;
-  if(audioLive()){try{fn(actx.currentTime+0.01);}catch(e){}return;}
+  if(audioLive()){
+    // Hidden means dropped, even with the clock running (v5.290). A set logged on the wrist
+    // while the phone was in a pocket still clanged out of the pocket when the context happened
+    // to be awake. The rest alert is native and does not come through here.
+    if(!pageUp())return;
+    try{fn(actx.currentTime+0.01);}catch(e){}return;
+  }
   // Not running. In front of you that is the first tap after a launch, so resume and play on the
   // other side of it; in a pocket it is a sound nobody asked to hear four sets later, so drop it.
   if(!pageUp())return;
@@ -20339,7 +20418,7 @@ function wearNext(){
   var hw=-1;
   all.forEach(function(p,ix){if(p.m.ent[p.s])hw=ix;});
   // Where each lift first comes up, and whether it has a single set on it.
-  var firstIx={},any={},back=null;
+  var firstIx={},any={},back=null,walked=null;
   all.forEach(function(p,ix){
     if(firstIx[p.m.id]===undefined)firstIx[p.m.id]=ix;
     if(p.m.ent[p.s])any[p.m.id]=true;
@@ -20356,7 +20435,7 @@ function wearNext(){
     // always brings it back, which is how you pick a machine up when somebody gets off it, and
     // what you never got to is named once on the finish screen.
     var dropped=(!any[m.id]&&hw>firstIx[m.id]&&!tapped);
-    if(dropped)return;
+    if(dropped){if(!walked)walked=c;return;}
     // A lift you STARTED and then left behind is not a lift you walked past, so it is owed and
     // it comes back once everything ahead of it is done (v5.267). Without this the wrist fell
     // off a cliff: log one set of the bench, go and finish everything else because the bench is
@@ -20379,7 +20458,12 @@ function wearNext(){
   // Nothing after the mark, but something is still owed behind it. Returning null here is what
   // tells the watch there is no session at all, so it must only ever happen when the workout
   // really is done.
-  return aimed||out||back;
+  // And when the ONLY things left are lifts that were walked past, the first of those is what
+  // the wrist shows (v5.290). Skipping the first lift and finishing everything else left nothing
+  // after the mark and nothing started behind it, so this returned null and the watch was told
+  // the session was closed while the phone still had it open. It is not nagging: it comes up
+  // once, at the very end, when there is nothing else to keep trucking on to.
+  return aimed||out||back||walked;
 }
 // Every set of one lift as the wrist draws it: done sets carry what was logged and how it
 // graded (gold beat, violet matched), the rest their targets, all in the display unit.
@@ -20509,7 +20593,39 @@ function wearDetail(id){
   });
   return {id:id,name:(w.name||'').replace('Optional: ',''),rows:rows};
 }
+// Which workout is actually being trained. Looking at another day on the phone makes that day
+// CUR and opens an empty session for it, and leaving deletes the empty session but used to leave
+// CUR pointing at it: the next push found no session there and told the watch the workout was
+// CLOSED, with the real one still open and half done (v5.290). Looking is not training, so the
+// one with sets on it wins.
+function wearRun(){
+  try{
+    if(CUR&&DB.active[CUR]&&loggedCount(CUR)>0)return CUR;
+    for(var k in (DB.active||{}))if(k!==CUR&&loggedCount(k)>0)return k;
+    return (CUR&&DB.active[CUR])?CUR:null;
+  }catch(e){return CUR;}
+}
+// Before acting on a press from the wrist: a press is about the running workout. If the phone
+// is sitting on another day it is brought back, and the day it was only looking at is dropped
+// the same way leaving it would have dropped it.
+function wearHome(){
+  var run=wearRun();
+  if(!run||run===CUR)return;
+  if(sessionOpen()){
+    var A=DB.active[CUR];
+    if(A&&loggedCount(CUR)===0&&!A.note&&!A.start&&!A.edit&&Object.keys(A.swaps||{}).length===0)delete DB.active[CUR];
+    openWNow(run);
+  }else CUR=run;
+}
+// Everything the wrist is told is worked out for the running workout, whatever the phone has on
+// screen, and CUR is put back afterwards so the phone's own screen is untouched.
 function wearPush(detailId){
+  var keep=CUR,run=null;
+  try{run=wearRun();}catch(e){}
+  if(run&&run!==CUR)CUR=run;
+  try{wearPushNow(detailId);}finally{CUR=keep;}
+}
+function wearPushNow(detailId){
   var wr=WR();
   if(!wr||SANDBOX)return;      // never drive a wrist from borrowed data
   var st={open:false,week:wearWeek(),saved:wearSaved()};
@@ -20647,6 +20763,7 @@ function wearBind(){
       var b={};try{b=JSON.parse(e.body||'{}');}catch(err){}
       if(e.path==='/forge/detail'){wearPush(b.id);return;}
       if(e.path==='/forge/open'){wearOpen(b.id);return;}
+      if(e.path==='/forge/pick'||e.path==='/forge/swaplist'||e.path==='/forge/swap'||e.path==='/forge/log'){try{wearHome();}catch(err){}}
       if(e.path==='/forge/pick'){wearPick(b.i,(typeof b.s==='number'?b.s:null));return;}
       if(e.path==='/forge/skiprest'){wearSkipRest();return;}
       if(e.path==='/forge/swaplist'){wearSwapList(b.i);return;}
@@ -21809,6 +21926,10 @@ function exBlockOf(wk,id){
 var SESSEDIT=null;
 function sessionEdit(id){
   if(!SESSEDIT||SESSEDIT.wk!==CUR)SESSEDIT={wk:CUR,snap:JSON.stringify(DB.custom[CUR])};
+  // The plan as it stood before the edit rides in the open session as well as in memory
+  // (v5.290). Android killing the app between the edit and Finish used to lose it, so the
+  // question was never asked and a change meant for today became permanent without a word.
+  try{var A0=DB.active[CUR];if(A0&&!A0.esnap){A0.esnap=SESSEDIT.snap;saveDB();}}catch(e){}
   SESSEDIT.on=true;
   stopHold();
   document.getElementById('session').classList.remove('on');
@@ -22309,17 +22430,18 @@ function cardEnd(){
       if((DB.extra||[]).length>=BANK_MAX&&(DB.extra||[]).indexOf(d.id)<0){
         mkNote('Saved workouts is full at '+BANK_MAX+'. Delete one first.');
       }else{
-        planDropSilent(d.id);
-        DB.extra=DB.extra||[];DB.extra.splice(Math.min(idx,DB.extra.length),0,d.id);
+        planDropFrom(d.id,d.from||null);
+        DB.extra=DB.extra||[];
+        if(!planOnBoard(d.id)&&DB.extra.indexOf(d.id)<0)DB.extra.splice(Math.min(idx,DB.extra.length),0,d.id);
         saveDB();mergeCustom();try{sfxLog();}catch(e){}
       }
     }else if(!here&&(DB.days[key]||[]).length>=DAY_MAX){
       mkNote(daysName(key)+' already holds '+DAY_MAX+' workouts.');
     }else{
       var wasOn=d.from||null;                 // the day it is leaving, for its session (v5.240)
-      planDropSilent(d.id);
+      planDropFrom(d.id,wasOn);
       DB.days[key]=DB.days[key]||[];
-      DB.days[key].splice(Math.min(idx,DB.days[key].length),0,d.id);
+      if(DB.days[key].indexOf(d.id)<0)DB.days[key].splice(Math.min(idx,DB.days[key].length),0,d.id);
       moveWeekLogs(d.id,wasOn,key);
       saveDB();mergeCustom();try{sfxLog();}catch(e){}
     }
