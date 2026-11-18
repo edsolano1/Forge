@@ -3353,6 +3353,42 @@ body.wcon{overflow:hidden;}
 :root.mo-off .card-day::after,:root.mo-off .markglow{opacity:0;}
 /* the ready-day arrow is a control, not ornament - it keeps a steady lit ring instead of none */
 :root.mo-off .lvl::after{animation:none;opacity:.6;}
+/* ===== One lift open at a time (v5.292, owner picked 7B) =====
+   The card is name, last time, sets. Everything that is not logging sits behind one button, and
+   the lifts you are not on fold to a line each. Nothing here is removed from the page: a shut
+   card keeps every row and id it had, it is only not drawn, so logging from the wrist, the plate
+   calculator landing a weight and the rest timer all find what they always found. */
+body.forge .ex-links{display:none;}
+body.forge .ex-more{width:38px;height:38px;border-radius:12px;border:1px solid #4a2c1c;background:#130c09;display:flex;align-items:center;justify-content:center;color:var(--txt2);cursor:pointer;}
+body.forge .ex-more svg{width:18px;height:18px;fill:currentColor;}
+body.forge .ex-more:active{transform:scale(.96);}
+body.forge .ex-mt{display:none;font-family:var(--mono);font-size:13px;color:var(--txt3);white-space:nowrap;margin-left:8px;}
+body.forge .ex-mt.part{color:var(--txt2);}
+body.forge .ex-mt.all{color:var(--match);}
+body.forge .exc.shut{cursor:pointer;border-color:#2a1810;}
+body.forge .exc.shut .ex-mt{display:block;}
+body.forge .exc.shut .ex-tools,body.forge .exc.shut .exdrag,body.forge .exc.shut .ex-note,body.forge .exc.shut .ex-unote,
+body.forge .exc.shut .ex-stats,body.forge .exc.shut .sets,body.forge .exc.shut .shead,body.forge .exc.shut .ex-foot{display:none;}
+body.forge .exc.shut .ex-nrow{border-bottom:0;background:transparent;padding:14px 12px;}
+body.forge .exc.shut .ex-n{color:var(--txt2);}
+body.forge #sBody.rearrange .exc.shut .exdrag{display:flex;}
+body.forge .shead{display:grid;grid-template-columns:18px 1fr 1fr 48px;gap:8px;padding:8px 12px 2px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--txt3);text-align:center;}
+body.forge .exc .srow{grid-template-columns:18px 1fr 1fr 48px;padding:6px 4px;}
+body.forge .exc .srow:has(.inp.wide){grid-template-columns:18px 1fr 1fr 48px;}
+body.forge .exc .srow:has(.inp.wide):has(.hold){grid-template-columns:18px 1fr 1fr 40px 48px;}
+body.forge .exc .sno{font-size:12px;}
+body.forge .exc .srow .inp{font-size:18px;padding:9px 0;}
+body.forge .exc .srow .chk{width:48px;height:42px;border-radius:12px;}
+body.forge .exc .srow.next .chk{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);border-color:#ffb35c;color:#1b0f06;}
+body.forge .exc .srow.next .chk svg{color:#1b0f06;}
+body.forge .exc .srow.next .inp{border-color:#6a3f26;}
+body.forge .ex-rest,body.forge .ex-pr{font-size:12px;}
+body.forge .xm-list{display:flex;flex-direction:column;margin:4px 0 12px;border:1px solid #4a2c1c;border-radius:14px;overflow:hidden;}
+body.forge .xm-row{display:flex;align-items:center;gap:12px;width:100%;padding:14px 14px;background:#130c09;border:0;border-top:1px solid #2a1810;color:var(--txt);font-family:var(--sans);font-size:16px;text-align:left;cursor:pointer;}
+body.forge .xm-row:first-child{border-top:0;}
+body.forge .xm-row:active{background:#1f130c;}
+body.forge .xm-row svg{width:20px;height:20px;flex:none;fill:none;stroke:var(--txt2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
 </style>
 </head>
 <body class="booting">
@@ -3578,6 +3614,13 @@ body.wcon{overflow:hidden;}
   </div>
 </div>
 
+<div class="ovl" id="exMoreOvl">
+  <div class="sheet" style="max-width:420px">
+    <h3 id="exMoreName">Exercise</h3>
+    <div class="xm-list" id="exMoreList"></div>
+    <div class="sheet-btns"><div class="btn" onclick="closeOvl('exMoreOvl')">CLOSE</div></div>
+  </div>
+</div>
 <div class="ovl" id="exNoteOvl">
   <div class="sheet" style="max-width:420px">
     <h3 id="exNoteName">Note</h3>
@@ -9949,7 +9992,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.291';
+var APPV='v5.292';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13290,13 +13333,16 @@ function renderSession(){
       var ent=A.entries[id]||[];
       var allDone=tg.length>0&&tg.every(function(_,i){return ent[i];});
       var L=lastFor(rf.exId),ready=isReady(rf.exId,tg,rf.id),bst=bestEver(rf.exId);
-      html+='<div class="exc'+(allDone?' alldone':'')+'" id="exc-'+id+'">';
+      // The folded line: the plan until something is logged, then how far in you are (sfApply).
+      var t0=tg[0]||{};
+      var planTxt=tg.length+' × '+(t0.r!=null?t0.r:'')+(t0.unit?' '+t0.unit:'')+((t0.type==='wr'&&!r.bw&&t0.w)?' · '+fmtW(t0.w):'');
+      html+='<div class="exc'+(allDone?' alldone':'')+'" id="exc-'+id+'" onclick="sfTap(\''+id+'\')">';
       // ex-body groups everything a press-and-hold actually acts on - the name and the
       // target/last/best under it - as one box. Ringing the name alone read
       // as "rename this"; the hold changes the exercise, not what it is called. It stops short of
       // the links row below on purpose: Instructions and Add note are not part of what a hold does.
-      html+='<div class="ex-h"><div class="ex-body"><div class="ex-nrow">'+DRAGSVG+'<div class="ex-n">'+esc(r.name)+(rf.swapId?' <span style="color:var(--gold);font-size:11px;font-weight:500">SWAPPED</span>':'')+'</div>'+
-            '<div class="ex-tools">'+(ready&&canRaise[rf.id]?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(CUR)">'+ARROW+'</span>':'')+'<div class="ex-swap" onclick="openSwap(\''+rf.id+'\')" title="Swap exercise"><svg viewBox="0 0 20 20"><path d="M3 7h11l-2.6-2.6M17 13H6l2.6 2.6"/></svg></div></div></div>';
+      html+='<div class="ex-h"><div class="ex-body"><div class="ex-nrow">'+DRAGSVG+'<div class="ex-n">'+esc(r.name)+(rf.swapId?' <span style="color:var(--gold);font-size:11px;font-weight:500">SWAPPED</span>':'')+'</div><span class="ex-mt" data-plan="'+esc(planTxt)+'">'+esc(planTxt)+'</span>'+
+            '<div class="ex-tools">'+(ready&&canRaise[rf.id]?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(CUR)">'+ARROW+'</span>':'')+'<div class="ex-more" onclick="event.stopPropagation();openExMore(\''+id+'\')" title="More" aria-label="More for this exercise"><svg viewBox="0 0 20 20"><circle cx="4.5" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="15.5" cy="10" r="1.6"/></svg></div></div></div>';
       // Your own note on the exercise. Keyed on exId, so it follows the lift through a swap and
       // survives every session - machine seat height, a grip, a cue that only matters to you.
       // Separate from r.note, which is the app's own coaching line and is not yours to edit.
@@ -13350,7 +13396,11 @@ function renderSession(){
             (showPl?'<a onclick="event.stopPropagation();openPlates(\''+rf.exId+'\','+plw+',\''+id+'\')">'+
               '<svg viewBox="0 0 20 20"><path d="M2 10h16"/><path d="M5 6.5v7M7.5 5v10M12.5 5v10M15 6.5v7"/></svg> Plates</a>':'')+
             '</div>';
-      html+='</div><div class="sets">';
+      // What the menu needs, kept by row. Only the row id ever crosses into an onclick.
+      XMORE[id]={row:rf.id,ex:rf.exId,ins:hasIns?insEx:'',rl:hasIns?'':(rl||''),hist:!!L,pl:showPl?plw:-1,note:!!un,name:r.name};
+      html+='</div>';
+      if(t0.type==='wr'&&!r.bw)html+='<div class="shead"><span></span><span>'+wUnitName().toUpperCase()+'</span><span>REPS</span><span></span></div>';
+      html+='<div class="sets">';
       tg.forEach(function(t,i){
         var e=ent[i];
         var dr=draftOf(A,id,i);   // what you set but have not logged yet (v5.182)
@@ -13424,6 +13474,7 @@ function renderSession(){
   });
   document.getElementById('sBody').style.setProperty('--c',dayC(wk));
   bindExHold();blkBind();
+  try{sfApply(true);}catch(e){}
   var nb=document.getElementById('noteBox');
   if(nb)nb.oninput=function(){DB.active[CUR].note=nb.value;saveSoon();};
   updateProg();
@@ -13658,7 +13709,125 @@ function toggleSet(id,i,rest,unit){
   delete holdAcc[key];delete holdBreak[key];delete pauseAt[key];
   saveDB();updateProg();
 }
+// ---- one lift open at a time (v5.292) ----
+// SF.id is the row the lifter is on. A superset opens and shuts as one, because its halves take
+// turns. When the open one is finished the next unfinished one AFTER it opens by itself, and only
+// when nothing is left ahead does it go back for one that was walked past: the same keep trucking
+// rule the wrist follows. Nothing is stored; a fresh visit opens on the first unfinished lift.
+var SF={wk:null,id:null,was:false,t:null},XMORE={},XMCUR=null;
+function sfUnits(){
+  var out=[],grp=[];
+  [].forEach.call(document.querySelectorAll('#sBody .exc'),function(ex){
+    var g=ex.closest('.ssgrp'),ix=g?grp.indexOf(g):-1;
+    if(ix>=0){out[ix].cards.push(ex);return;}
+    grp[out.length]=g||null;
+    out.push({cards:[ex]});
+  });
+  out.forEach(function(u){
+    u.done=u.cards.every(function(ex){
+      var r=ex.querySelectorAll('.srow');
+      return r.length>0&&[].every.call(r,function(x){return x.classList.contains('done');});
+    });
+    u.has=function(id){return u.cards.some(function(ex){return ex.id==='exc-'+id;});};
+  });
+  return out;
+}
+function sfApply(fresh){
+  var us=sfUnits();if(!us.length)return;
+  if(SF.wk!==CUR){SF.wk=CUR;SF.id=null;clearTimeout(SF.t);}
+  var cur=-1,i,j;
+  us.forEach(function(u,n){if(SF.id&&u.has(SF.id))cur=n;});
+  if(cur<0){
+    for(i=0;i<us.length;i++)if(!us[i].done){cur=i;break;}
+    if(cur<0)cur=0;
+    SF.id=us[cur].cards[0].id.slice(4);SF.was=us[cur].done;
+  }
+  // Just finished: move on, after a beat so the grade on the last set is seen.
+  if(us[cur].done&&!SF.was&&!fresh){
+    SF.was=true;
+    var nx=-1;
+    for(j=cur+1;j<us.length;j++)if(!us[j].done){nx=j;break;}
+    if(nx<0)for(j=0;j<cur;j++)if(!us[j].done){nx=j;break;}
+    if(nx>=0){
+      var to=us[nx].cards[0].id.slice(4);
+      clearTimeout(SF.t);
+      SF.t=setTimeout(function(){if(SF.wk!==CUR)return;SF.id=to;SF.was=false;sfApply(true);sfShow(to);},700);
+    }
+  }else if(!us[cur].done)SF.was=false;
+  // The one bright button. In a superset it is on whichever half has done fewer, so it takes turns.
+  var tgt=null,best=null,bestN=0;
+  us[cur].cards.forEach(function(ex){
+    if(!ex.querySelector('.srow:not(.done)'))return;
+    var dn=ex.querySelectorAll('.srow.done').length;
+    if(best===null||dn<bestN){best=ex;bestN=dn;}
+  });
+  if(best)tgt=best.querySelector('.srow:not(.done)');
+  us.forEach(function(u,n){
+    u.cards.forEach(function(ex){
+      ex.classList.toggle('shut',n!==cur);
+      var rows=ex.querySelectorAll('.srow'),dn=0;
+      [].forEach.call(rows,function(r){
+        if(r.classList.contains('done'))dn++;
+        r.classList.toggle('next',r===tgt);
+      });
+      var mt=ex.querySelector('.ex-mt');
+      if(mt){
+        mt.textContent=dn===0?(mt.getAttribute('data-plan')||''):dn>=rows.length?'Done':dn+' of '+rows.length;
+        mt.classList.toggle('part',dn>0&&dn<rows.length);
+        mt.classList.toggle('all',rows.length>0&&dn>=rows.length);
+      }
+    });
+  });
+}
+function sfShow(id){
+  var el=document.getElementById('exc-'+id);if(!el)return;
+  try{el.scrollIntoView({block:'center',behavior:MOTION==='off'?'auto':'smooth'});}catch(e){el.scrollIntoView();}
+}
+function sfTap(id){
+  var el=document.getElementById('exc-'+id);
+  if(!el||!el.classList.contains('shut'))return;
+  var sb=document.getElementById('sBody');if(sb&&sb.classList.contains('rearrange'))return;
+  clearTimeout(SF.t);SF.id=id;
+  var u=null;sfUnits().forEach(function(x){if(x.has(id))u=x;});
+  SF.was=u?u.done:false;
+  sfApply(true);
+  sfShow(id);
+}
+function openExMore(id){
+  var m=XMORE[id];if(!m)return;
+  XMCUR=id;
+  document.getElementById('exMoreName').textContent=m.name;
+  var I={how:HOWI,
+    pl:'<svg viewBox="0 0 20 20"><path d="M2 10h16"/><path d="M5 6.5v7M7.5 5v10M12.5 5v10M15 6.5v7"/></svg>',
+    hist:'<svg viewBox="0 0 20 20"><path d="M3 15V9M7.3 15V5M11.6 15v-4M16 15V7"/></svg>',
+    note:'<svg viewBox="0 0 20 20"><path d="M4 3.5h9l3 3v10h-12z"/><path d="M7 8.5h6M7 12h4"/></svg>',
+    swap:'<svg viewBox="0 0 20 20"><path d="M3 7h11l-2.6-2.6M17 13H6l2.6 2.6"/></svg>',
+    edit:'<svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/></svg>'};
+  function row(k,label,small){
+    return '<button class="xm-row" onclick="exMoreGo(\''+k+'\')">'+I[k]+'<span>'+label+'</span>'+(small?'<small>'+small+'</small>':'')+'</button>';
+  }
+  var h='';
+  if(m.ins||m.rl)h+=row('how','How to do it');
+  if(m.pl>=0)h+=row('pl','Plate calculator',m.pl>0?fmtW(m.pl)+' '+wUnitName():'');
+  if(m.hist)h+=row('hist','History');
+  h+=row('note','Your note',m.note?'Saved':'');
+  h+=row('swap','Swap this lift');
+  h+=row('edit','Edit this workout');
+  document.getElementById('exMoreList').innerHTML=h;
+  document.getElementById('exMoreOvl').classList.add('on');
+}
+function exMoreGo(k){
+  var id=XMCUR,m=XMORE[id];if(!m)return;
+  closeOvl('exMoreOvl');
+  if(k==='how'){if(m.ins)openInstr(m.ins);else if(m.rl)window.open(m.rl,'_blank','noopener');}
+  else if(k==='pl')openPlates(m.ex,m.pl,id);
+  else if(k==='hist')openExHist(m.ex);
+  else if(k==='note')openExNote(m.ex);
+  else if(k==='swap')openSwap(m.row);
+  else if(k==='edit')openExEdit(id);
+}
 function updateProg(){
+  try{sfApply();}catch(e){}
   var tot=totalSets(CUR),done=loggedCount(CUR),pct=tot?done/tot:0;
   var tm=estLabel(CUR,done,tot);
   document.getElementById('sSub').innerHTML='<b>'+done+'</b> of '+tot+(tot===1?' set':' sets')+

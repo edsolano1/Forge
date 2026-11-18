@@ -222,6 +222,23 @@ main constraint on how to work in it. See **Traps** below before editing.
   like the safe one. Sending a workout is `shareOne`/`oneBlob` from the workout's own buttons;
   `openBring` (the plus in Saved workouts) is the only way in, with `window.__forgeFileIn`
   gating the tap the file card until the wrapper can really be handed a file.
+- **One lift open at a time, and the tools are behind one button** (v5.292, owner picked 7B,
+  17 Nov; this replaces the four plates of v5.238 on the session screen). The open card is name,
+  coaching line, Last, a LB / REPS heading, the sets and the foot. Every other lift is one line:
+  its name and the plan, then `2 of 4`, then `Done`. `sfApply` decides which is open and is
+  called from `renderSession` and `updateProg`; `SF.id` is the open row and nothing is stored.
+  **A shut card is only not drawn**: every `sr-`, `w-` and `r-` id is still in the page, which is
+  why the wrist, `plLand` and the rest timer needed no change. Never build the folded line by
+  leaving rows out of the markup. A superset opens and shuts as one (`.ssgrp`), and the one
+  bright log button (`.srow.next`) sits on whichever half has done fewer. Finishing a lift opens
+  the next unfinished one AFTER it, 700ms later so the grade is seen, and only goes back for a
+  walked-past lift when nothing is left ahead, the same rule as `wearNext`.
+  The three dots (`.ex-more`, `openExMore`, `exMoreGo`, `#exMoreOvl`) carry How to do it, Plate
+  calculator, History, Your note, Swap this lift and Edit this workout. `XMORE[id]` holds what
+  each row needs so only an id crosses into an onclick. `.ex-links` is still built and is hidden
+  by CSS in the Forge theme; the swap icon left the card for the menu.
+  Tested in the preview on his real Push day by clicking the real buttons. **Not yet seen on the
+  phone or against the watch.**
 - **The exercise card is buttons, and you say what it shows** (v5.238, owner picked B). The row
   under the name is four plates, icon over word (`body.forge .ex-links a`): HOW TO, NOTE,
   HISTORY, PLATES. `openExHist` is every session that lift appears in (`histForEx`), best at the
