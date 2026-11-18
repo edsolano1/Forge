@@ -745,6 +745,10 @@ main constraint on how to work in it. See **Traps** below before editing.
   `plCancel`. **`plFly` only animates on add and sub.** On a first draw there is no previous
   state, so every plate counted as new, every plate started at opacity 0 waiting to fly in, and
   anything that stalled the frame loop left a bar with no plates on it at all.
+- **MINUS means that much lighter on each end, on or not** (v5.291, owner). The minus now
+  shows under every plate the load can spare, not only under one that is on the bar. A plate
+  that is on just comes off; one that is not is subtracted and `plLoadFor` makes the bar again
+  (135, minus 5, is 35 and 5 a side). His words: I should not have to do the calculation.
 - **The plate numbers wear their plate's colour, and the bar has no caption** (v5.255, owner).
   The plates were colour coded and the numbers were grey, which threw the whole trick away.
   "both ends shown, this is the whole bar" described the picture you were already looking at

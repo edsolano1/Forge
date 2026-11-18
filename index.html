@@ -9949,7 +9949,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.290';
+var APPV='v5.291';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -17847,7 +17847,7 @@ function plDraw(){
     return '<button class="pl-dnt" onclick="plAdd('+p+')" aria-label="add a '+k+'">'+
       plDonut(p,rr)+
       '<span class="pl-badge up" aria-hidden="true">+</span>'+
-      (n?'<span class="pl-badge dn" onclick="event.stopPropagation();plSub('+p+')" aria-label="take off a '+k+'">&minus;</span>':'')+
+      (per>=p-0.001?'<span class="pl-badge dn" onclick="event.stopPropagation();plSub('+p+')" aria-label="take off a '+k+'">&minus;</span>':'')+
     '</button>';
   }).join('');
   plBarBtns();   // the list is on the sheet permanently, so it redraws with everything else
@@ -17884,9 +17884,21 @@ function plTypeLoad(v){
   plDraw();
 }
 function plAdd(p){PL.want=null;PL.on.push(p);PL.anim='add';plDraw();try{sfxTick&&sfxTick();}catch(e){}}
+// MINUS means that much LIGHTER on each end, whether or not that plate is on (v5.291, owner).
+// It used to exist only under a plate that was loaded, so 135 on a bar is one 45 a side and
+// there was no way to ask for five less: you had to work out 35 and 5 in your head, which is
+// the one sum this sheet exists to do. A plate that is on still just comes off. One that is
+// not is taken out of the load, and the bar is made again from what is left.
 function plSub(p){
   PL.want=null;
-  for(var i=PL.on.length-1;i>=0;i--)if(Math.abs(PL.on[i]-p)<0.001){PL.on.splice(i,1);break;}
+  var hit=-1;
+  for(var i=PL.on.length-1;i>=0;i--)if(Math.abs(PL.on[i]-p)<0.001){hit=i;break;}
+  if(hit>=0)PL.on.splice(hit,1);
+  else{
+    var left=Math.round((plPerSide()-p)*1000)/1000;
+    if(left<-0.001)return;
+    PL.on=plLoadFor(plSolo()?left:plBarW(PL.bar)+left*2);
+  }
   PL.anim='sub';plDraw();try{sfxTick&&sfxTick();}catch(e){}
 }
 // What is on the bar right now, per lift, for as long as the app is open. Deliberately NOT
