@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Forge Figure Trial</title>
+<style>
+:root{--bg:#f4efe8;--card:#fffaf3;--txt:#2a211a;--dim:#6b5d50;--line:#dccfbf;--hot:#d9621a;--warm:#f0b98a;--stage:#1d1915}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14100d;--card:#1f1a15;--txt:#efe6da;--dim:#a8998a;--line:#3a3129;--hot:#ff7a1a;--warm:#8f5a34}}
+:root[data-theme="dark"]{--bg:#14100d;--card:#1f1a15;--txt:#efe6da;--dim:#a8998a;--line:#3a3129;--hot:#ff7a1a;--warm:#8f5a34}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+main{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:30px;line-height:1.15;margin:0 0 8px;text-wrap:balance}
+h2{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:22px;margin:0}
+p{margin:0 0 12px}.lead{color:var(--dim);max-width:60ch}
+.lift{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:18px 0}
+.lift .says{color:var(--dim);margin:2px 0 12px;font-size:15px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stage{background:var(--stage);border-radius:10px;overflow:hidden;position:relative}
+.stage canvas{display:block;width:100%;height:auto;aspect-ratio:1}
+.stage span{position:absolute;left:10px;top:8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#a8998a}
+.key{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:12px;font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:999px}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--hot);display:inline-block}
+.chip.help i{background:#f0b48a}
+.kt{width:100%;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}th{color:var(--dim);font-weight:500;font-size:13px}
+td.n,th.n{text-align:right}
+.ask{border-left:3px solid var(--hot);padding:4px 0 4px 14px;margin:14px 0}
+.ask b{display:block}
+</style></head><body><main>
+<h1>One body, five lifts</h1>
+<p class="lead">This is the trial you said yes to. The same body does all five lifts, seen from two sides. The muscles doing the work glow. Nothing here is in the app yet.</p>
+<div id="lifts"></div>
+<div class="lift">
+<h2>Proof that nothing stretches</h2>
+<p class="says">This page measures every limb on every frame of all five lifts, right now, on your phone. If a limb ever stretched, the two numbers would differ.</p>
+<table><thead><tr><th>Part</th><th class="n">Shortest</th><th class="n">Longest</th></tr></thead><tbody id="proof"></tbody></table>
+</div>
+<div class="lift">
+<h2>What I need from you</h2>
+<div class="ask"><b>Does it read as a person?</b>Look at the squat and the deadlift first. Those are the hardest to get right.</div>
+<div class="ask"><b>Are the lit muscles clear at phone size?</b>Bright means it does the work. Pale means it helps.</div>
+<div class="ask"><b>Is anything wonky?</b>Name the lift and the moment. One body means one fix carries to every lift.</div>
+</div>
+</main>
+<script>
+// FIG: one body, fixed bone lengths, posed in 3D and drawn from any side.
+// Units are canvas pixels on the app's 480 x 480 stage. y is UP from the floor,
+// z is the way the lifter faces, x is across the body (the lifter's right is -x).
+var FIG=(function(){
+"use strict";
+var INK="#e8ded2", FAR="#8d8378", GO="#d97b2e", LINE="#3a3632", HOT="#ff7a1a", DEF="rgba(70,48,30,.20)";
+var FLOOR=432;
+// ---- the body. Nothing below this line may set a length of its own. ----
+var B={ankH:12, shin:86, thigh:92, trunk:100, uarm:64, farm:64, wrist:.81, shoW:39, hipW:17, neck:12, headR:[17,23.5,20.5]};
+// torso cross-sections: [how far up the trunk, half width, depth in front, depth behind]
+var TOR=[[-.13,19,10,12],[-.04,27,15,20],[.06,29,16,22],[.18,27,16,18],[.32,23,15,14],[.48,27,18,16],
+         [.62,32,22,18],[.76,35,24,19],[.90,37,20,19],[1.0,35,14,15],[1.06,22,10,12],[1.11,11,8,10]];
+
+function add(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]];}
+function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+function mul(a,s){return [a[0]*s,a[1]*s,a[2]*s];}
+function dot3(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+function len(a){return Math.sqrt(dot3(a,a));}
+function norm(a){var l=len(a)||1;return [a[0]/l,a[1]/l,a[2]/l];}
+function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+function mix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+function lerp(a,b,t){return a+(b-a)*t;}
+
+// two bones from a to a target: the joint between them goes toward the pole.
+// The target is pulled in if it is out of reach, so a bone can never stretch.
+function ik(a,tg,l1,l2,pole){
+  var d=sub(tg,a), dist=len(d), mx=l1+l2-.4, mn=Math.abs(l1-l2)+.4;
+  if(dist>mx){d=mul(d,mx/dist);dist=mx;}
+  if(dist<mn){d=dist?mul(d,mn/dist):[0,-mn,0];dist=mn;}
+  var dir=mul(d,1/dist);
+  var p=sub(pole,mul(dir,dot3(pole,dir)));
+  if(len(p)<1e-4)p=cross(dir,[1,0,0]);
+  p=norm(p);
+  var x=(l1*l1-l2*l2+dist*dist)/(2*dist), h=Math.sqrt(Math.max(0,l1*l1-x*x));
+  return {mid:add(add(a,mul(dir,x)),mul(p,h)), end:add(a,d), bend:p};
+}
+
+// pose -> every joint. A pose says where the hips, feet and hands are; the rest follows.
+function solve(p){
+  var R=Math.PI/180, L=(p.lean||0)*R;
+  var u=[0,Math.cos(L),Math.sin(L)], n=[0,-Math.sin(L),Math.cos(L)], X=[1,0,0];
+  var H=p.hip, S=add(H,mul(u,B.trunk));
+  var J={u:u,n:n,H:H,S:S,side:{}};
+  var Ln=((p.lean||0)+(p.neck||0))*R, nu=[0,Math.cos(Ln),Math.sin(Ln)];
+  J.nu=nu; J.nn=[0,-Math.sin(Ln),Math.cos(Ln)];
+  J.neck0=add(S,mul(u,6)); J.head=add(J.neck0,mul(nu,B.neck+B.headR[1]-2));
+  [-1,1].forEach(function(s){
+    var q={}, m=function(v){return v?[v[0]*-s,v[1],v[2]]:v;};   // poses are written for the right side (s=-1)
+    q.hipJ=add(H,mul(X,s*B.hipW));
+    q.shoJ=add(add(S,mul(X,s*B.shoW)),p.shrug?add(mul(u,p.shrug[0]),mul(n,p.shrug[1])):[0,0,0]);
+    var ank=m(s<0?(p.ankR||p.ank):(p.ankL||p.ank));
+    var kp=m(p.kneePole||[-.2,0,1]);
+    var lg=ik(q.hipJ,ank,B.thigh,B.shin,kp);
+    q.knee=lg.mid;q.ank=lg.end;q.legF=lg.bend;
+    var fd=m(p.footDir||[-.17,0,1]);q.footDir=norm(fd);
+    var hd=m(s<0?(p.handR||p.hand):(p.handL||p.hand));
+    var ep=m(p.elbPole||[-.3,-1,-.4]);
+    var ar=ik(q.shoJ,hd,B.uarm,B.farm,ep);
+    q.elb=ar.mid;q.hand=ar.end;q.armB=ar.bend;
+    J.side[s]=q;
+  });
+  return J;
+}
+
+// ---- views ----
+function view(kind,cx){
+  if(kind==='side')return {k:kind,v:[-1,0,0],p:function(a){return [cx+a[2],FLOOR-a[1],-a[0]];},d:function(a){return [a[2],-a[1]];}};
+  if(kind==='back')return {k:kind,v:[0,0,-1],p:function(a){return [cx-a[0],FLOOR-a[1],-a[2]];},d:function(a){return [-a[0],-a[1]];}};
+  return {k:kind,v:[0,0,1],p:function(a){return [cx+a[0],FLOOR-a[1],a[2]];},d:function(a){return [a[0],-a[1]];}};
+}
+// an ellipsoid seen from a view is an ellipse: sample its edge
+function blobPts(V,c,ax,N){
+  var a=V.d(ax[0]),b=V.d(ax[1]),e=V.d(ax[2]);
+  var m00=a[0]*a[0]+b[0]*b[0]+e[0]*e[0], m01=a[0]*a[1]+b[0]*b[1]+e[0]*e[1], m11=a[1]*a[1]+b[1]*b[1]+e[1]*e[1];
+  var l00=Math.sqrt(Math.max(m00,1e-6)), l10=m01/l00, l11=Math.sqrt(Math.max(m11-l10*l10,1e-6));
+  var o=V.p(c), out=[];N=N||14;
+  for(var i=0;i<N;i++){var t=i/N*6.2832,cs=Math.cos(t),sn=Math.sin(t);out.push([o[0]+l00*cs,o[1]+l10*cs+l11*sn]);}
+  return out;
+}
+function hull(pts){
+  pts=pts.slice().sort(function(a,b){return a[0]-b[0]||a[1]-b[1];});
+  function cr(o,a,b){return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);}
+  var lo=[],up=[],i;
+  for(i=0;i<pts.length;i++){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],pts[i])<=0)lo.pop();lo.push(pts[i]);}
+  for(i=pts.length-1;i>=0;i--){while(up.length>=2&&cr(up[up.length-2],up[up.length-1],pts[i])<=0)up.pop();up.push(pts[i]);}
+  lo.pop();up.pop();return lo.concat(up);
+}
+// a body part is a chain of blobs; its outline is the hulls of each neighbouring pair
+function chainPath(V,blobs){
+  var path=new Path2D(), prev=null;
+  blobs.forEach(function(b,i){
+    var pts=blobPts(V,b.c,b.ax);
+    var h=hull(prev?prev.concat(pts):pts);
+    if(prev||blobs.length===1){path.moveTo(h[0][0],h[0][1]);for(var j=1;j<h.length;j++)path.lineTo(h[j][0],h[j][1]);path.closePath();}
+    prev=pts;
+  });
+  return path;
+}
+function sph(c,r){return {c:c,ax:[[r,0,0],[0,r,0],[0,0,r]]};}
+
+function buildParts(J,V){
+  var parts=[], u=J.u, n=J.n, X=[1,0,0];
+  function depth(c){return V.p(c)[2];}
+  function part(name,blobs,joint,jr,far,order){
+    var d=0;blobs.forEach(function(b){d+=depth(b.c);});
+    parts.push({name:name,blobs:blobs,d:d/blobs.length,joint:joint,jr:jr,far:far,o:order,mus:[]});
+    return parts[parts.length-1];
+  }
+  // torso
+  var tb=TOR.map(function(t){
+    var c=add(add(J.H,mul(u,t[0]*B.trunk)),mul(n,(t[2]-t[3])/2));
+    return {c:c,ax:[mul(X,t[1]),mul(n,(t[2]+t[3])/2),mul(u,3)]};
+  });
+  var torso=part('torso',tb,null,0,false,10);
+  function tpt(f){return add(J.H,mul(u,f*B.trunk));}
+  function tm(key,f,lat,face,hh,hw,dep){
+    var N=mul(n,face), c=add(add(tpt(f),mul(X,lat)),mul(N,dep*.72));
+    torso.mus.push({key:key,c:c,ax:[mul(u,hh),mul(X,hw),mul(N,dep*.5)],N:N});
+  }
+  tm('chest',.77,-17,1,13,15,19);tm('chest',.77,17,1,13,15,19);
+  tm('abs',.36,0,1,25,10,14);
+  tm('lats',.56,-20,-1,27,12,15);tm('lats',.56,20,-1,27,12,15);
+  tm('traps',.93,0,-1,15,21,14);
+  tm('lowback',.20,-8,-1,19,6,14);tm('lowback',.20,8,-1,19,6,14);
+  tm('glute',-.02,-14,-1,15,12,18);tm('glute',-.02,14,-1,15,12,18);
+  // neck and head
+  part('neck',[sph(add(J.S,mul(u,2)),9),sph(add(J.neck0,mul(J.nu,B.neck)),8)],add(J.S,mul(u,4)),13,false,11);
+  var hr=B.headR;
+  part('head',[{c:J.head,ax:[[hr[0],0,0],mul(J.nu,hr[1]),mul(J.nn,hr[2])]},
+               {c:add(add(J.head,mul(J.nu,-12)),mul(J.nn,6)),ax:[[11,0,0],mul(J.nu,10),mul(J.nn,12)]}],
+       add(J.neck0,mul(J.nu,B.neck)),10,false,12);
+  [-1,1].forEach(function(s){
+    var q=J.side[s], far=(V.k==='side'&&s>0);
+    function limb(name,a,b,rs,ts,front,bulge,joint,jr,order){
+      var bl=rs.map(function(r,i){var c=mix(a,b,ts[i]);if(bulge&&bulge[i])c=add(c,mul(front,bulge[i]));return sph(c,r);});
+      var P=part(name,bl,joint,jr,far,order);
+      P.a=a;P.b=b;P.dir=norm(sub(b,a));P.L=len(sub(b,a));P.front=front;
+      return P;
+    }
+    function lm(P,key,t,hl,r,face,always){
+      var N=always?V.v:mul(P.front,face), sd=norm(cross(P.dir,N));
+      var c=add(mix(P.a,P.b,t),mul(N,r*.5));
+      P.mus.push({key:key,c:c,ax:[mul(P.dir,hl*P.L),mul(sd,r*.8),mul(N,r*.55)],N:N});
+    }
+    var th=limb('thigh',q.hipJ,q.knee,[16.5,16,13,10.5],[0,.4,.75,1],q.legF,[0,1.5,0,0],q.hipJ,19,20);
+    lm(th,'quad',.5,.38,15,1);lm(th,'ham',.48,.38,15,-1);
+    var sh=limb('shin',q.knee,q.ank,[10.5,11.5,8.5,6.5],[0,.3,.7,1],q.legF,[0,-3,-1,0],q.knee,12,21);
+    lm(sh,'calf',.3,.24,11,-1);
+    var fd=q.footDir, dn=[0,-1,0];
+    part('foot',[sph(add(add(q.ank,mul(fd,-5)),mul(dn,5)),7),sph(add(add(q.ank,mul(fd,20)),mul(dn,6.5)),5.5),sph(add(add(q.ank,mul(fd,31)),mul(dn,7.6)),4.4)],
+         q.ank,8,far,22);
+    var ua=limb('uarm',q.shoJ,q.elb,[12.5,10.5,8.5],[0,.45,1],mul(q.armB,-1),null,q.shoJ,15,30);
+    ua.mus.push({key:'delt',c:q.shoJ,ax:[[11.5,0,0],[0,11.5,0],[0,0,11.5]],N:V.v});
+    lm(ua,'biceps',.58,.28,10,1);lm(ua,'triceps',.52,.32,10,-1);
+    var wr=mix(q.elb,q.hand,B.wrist);
+    var fa=limb('farm',q.elb,wr,[8.5,9.2,6.2,5.6],[0,.3,.8,1],mul(q.armB,-1),null,q.elb,10,31);
+    lm(fa,'forearm',.3,.24,8,1,true);
+    part('hand',[sph(mix(wr,q.hand,.35),6),sph(q.hand,7.6)],wr,7,far,32);
+  });
+  return parts;
+}
+
+// ---- drawing ----
+function drawPart(x,V,P,lit){
+  var path=chainPath(V,P.blobs);
+  // a thin gap round the part so one limb reads against another, but not at its own joint
+  x.save();
+  if(P.joint){
+    var j=V.p(P.joint), cl=new Path2D();
+    cl.rect(-50,-50,600,600);cl.arc(j[0],j[1],P.jr,0,6.2832);
+    x.clip(cl,'evenodd');
+  }
+  x.globalCompositeOperation='destination-out';x.lineWidth=5;x.lineJoin='round';x.stroke(path);
+  x.restore();
+  x.fillStyle=P.far?FAR:INK;x.fill(path);
+  if(P.far||!P.mus.length)return;
+  x.save();x.clip(path);
+  P.mus.forEach(function(m){
+    if(dot3(norm(m.N),V.v)<-.2)return;
+    var lv=lit&&lit[m.key];
+    x.fillStyle=lv===2?HOT:DEF;
+    x.globalAlpha=lv===2?1:(lv===1?1:1);
+    if(lv===1)x.fillStyle="rgba(255,122,26,.42)";
+    var pts=blobPts(V,m.c,m.ax,20);
+    x.beginPath();x.moveTo(pts[0][0],pts[0][1]);for(var i=1;i<pts.length;i++)x.lineTo(pts[i][0],pts[i][1]);x.closePath();x.fill();
+  });
+  x.restore();
+}
+function drawGear(x,V,g){
+  var a,b,c;
+  if(g.t==='bar'){                               // a loaded bar lying across the body
+    c=V.p(g.c);
+    if(V.k==='side'){
+      if(g.end){x.fillStyle=GO;x.beginPath();x.arc(c[0],c[1],g.r>8?6:5,0,7);x.fill();}
+      else if(g.r>8){
+        x.fillStyle="#15171b";x.beginPath();x.arc(c[0],c[1],g.r,0,7);x.fill();
+        x.strokeStyle=GO;x.lineWidth=7;x.beginPath();x.arc(c[0],c[1],g.r-3.5,0,7);x.stroke();
+      }
+    }else{
+      x.strokeStyle=GO;x.lineWidth=7;x.lineCap='round';
+      x.beginPath();x.moveTo(c[0]-g.half,c[1]);x.lineTo(c[0]+g.half,c[1]);x.stroke();
+      if(g.r>8){x.fillStyle=GO;x.fillRect(c[0]-g.half-2,c[1]-g.r,13,g.r*2);x.fillRect(c[0]+g.half-11,c[1]-g.r,13,g.r*2);}
+    }
+  }else if(g.t==='line'){
+    a=V.p(g.a);b=V.p(g.b);
+    x.strokeStyle=g.col||LINE;x.lineWidth=g.w||6;x.lineCap='round';
+    x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();
+  }else if(g.t==='box'){                         // a pad or a bench top, given by two corners
+    a=V.p(g.a);b=V.p(g.b);
+    var x0=Math.min(a[0],b[0]),y0=Math.min(a[1],b[1]),w=Math.abs(a[0]-b[0]),h=Math.abs(a[1]-b[1]);
+    x.fillStyle="#211e1b";x.strokeStyle=LINE;x.lineWidth=4;x.lineJoin='round';
+    x.beginPath();x.rect(x0,y0,w,h);x.fill();x.stroke();
+  }
+}
+function gearDepth(V,g){
+  if(g.t==='bar')return V.k==='side'?(g.end?200:-200):V.p(g.c)[2];
+  if(g.d!=null)return g.d[V.k]!=null?g.d[V.k]:0;
+  return (V.p(g.a)[2]+V.p(g.b)[2])/2;
+}
+function draw(x,kind,pose,gear,lit,cx,ground){
+  x.clearRect(0,0,480,480);
+  var V=view(kind,cx==null?240:cx);
+  x.strokeStyle=LINE;x.lineWidth=6;x.lineCap='round';
+  x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();
+  var J=solve(pose), items=[];
+  buildParts(J,V).forEach(function(P){items.push({d:P.d,o:P.o,P:P});});
+  (gear||[]).forEach(function(g){
+    items.push({d:gearDepth(V,g),o:g.t==='bar'?99:0,g:g});
+    if(g.t==='bar'&&V.k==='side'){var e={};for(var q in g)e[q]=g[q];e.end=1;items.push({d:200,o:99,g:e});}
+  });
+  items.sort(function(a,b){return a.d-b.d||a.o-b.o;});
+  items.forEach(function(it){if(it.P)drawPart(x,V,it.P,lit);else drawGear(x,V,it.g);});
+  return J;
+}
+return {draw:draw,solve:solve,B:B,lerp:lerp,add:add,mul:mul};
+})();
+
+// ---------------- the five lifts ----------------
+var LIFTS=(function(){
+"use strict";
+var B=FIG.B, lerp=FIG.lerp, R=Math.PI/180, ARM=B.uarm+B.farm-.6;
+function S_of(hip,lean){return [0,hip[1]+B.trunk*Math.cos(lean*R),hip[2]+B.trunk*Math.sin(lean*R)];}
+return {
+squat:{name:'Back Squat',views:['side','front'],cx:[236,240],
+  lit:{quad:2,glute:2,ham:1,lowback:1,abs:1},
+  says:'Thighs and backside do the work. The back and stomach hold you steady.',
+  pose:function(k){
+    var lean=lerp(3,40,k), hip=[0,lerp(187,82,k),lerp(-2,-50,k)];
+    var S=S_of(hip,lean), n=[0,-Math.sin(lean*R),Math.cos(lean*R)], u=[0,Math.cos(lean*R),Math.sin(lean*R)];
+    var bar=[0,S[1]+u[1]*3-n[1]*14,S[2]+u[2]*3-n[2]*14];
+    return {p:{hip:hip,lean:lean,neck:-lean*.55,ank:[-31,B.ankH,0],kneePole:[-.42,0,1],footDir:[-.36,0,1],
+               hand:[-60,bar[1],bar[2]],elbPole:[-.25,-1,-.35]},
+            gear:[{t:'bar',c:bar,half:104,r:40}]};
+  }},
+dead:{name:'Deadlift',views:['side','back'],cx:[236,240],
+  lit:{glute:2,ham:2,lowback:2,quad:1,traps:1,lats:1,forearm:1},
+  says:'Backside, back of the thighs and lower back. The grip and upper back hold on.',
+  pose:function(k){
+    var lean=lerp(67,2,k), hz=lerp(-66,-2,k), bz=lerp(14,18,k), by=lerp(40,162,k);
+    var Sz=hz+B.trunk*Math.sin(lean*R), dz=Sz-bz, dx=9;
+    var Sy=by+Math.sqrt(Math.max(0,ARM*ARM-dz*dz-dx*dx));
+    var hy=Math.min(187,Sy-B.trunk*Math.cos(lean*R));
+    return {p:{hip:[0,hy,hz],lean:lean,neck:-lean*.45,ank:[-19,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.12,0,1],
+               hand:[-30,by,bz],elbPole:[-.2,0,-1]},
+            gear:[{t:'bar',c:[0,by,bz],half:104,r:40}]};
+  }},
+bench:{name:'Bench Press',views:['side','back'],labels:['Side','From the head end'],cx:[236,240],ground:[60,420],
+  lit:{chest:2,delt:1,triceps:1},
+  says:'The chest pushes. The shoulders and the back of the arms help.',
+  pose:function(k){
+    var hip=[0,138,44], lean=-87, S=S_of(hip,lean);
+    var bar=[0,lerp(168,S[1]+ARM-5,k),lerp(-28,S[2]+2,k)];
+    return {p:{hip:hip,lean:lean,neck:0,ank:[-36,B.ankH,128],kneePole:[-.1,1,.5],footDir:[-.2,0,1],
+               hand:[-72,bar[1],bar[2]],elbPole:[-.6,-1,.5]},
+            gear:[{t:'box',a:[-30,104,-134],b:[30,118,70],d:{side:-100,back:-40,front:-200}},
+                  {t:'line',a:[0,100,-112],b:[0,4,-112],w:7,d:{side:-101,back:-41}},{t:'line',a:[0,100,50],b:[0,4,50],w:7,d:{side:-101,back:-300}},
+                  {t:'bar',c:bar,half:104,r:40}]};
+  }},
+row:{name:'Barbell Row',views:['side','back'],cx:[232,240],
+  lit:{lats:2,traps:2,biceps:1,delt:1,lowback:1,forearm:1},
+  says:'The big muscles of the back pull. The arms and lower back help.',
+  pose:function(k){
+    var hip=[0,170,-42], lean=58, S=S_of(hip,lean);
+    var bar=[0,lerp(S[1]-ARM+1,181,k),lerp(S[2]+1,13,k)];
+    return {p:{hip:hip,lean:lean,neck:-28,ank:[-19,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.12,0,1],
+               hand:[-46,bar[1],bar[2]],elbPole:[-.25,.5,-1]},
+            gear:[{t:'bar',c:bar,half:104,r:40}]};
+  }},
+pull:{name:'Lat Pulldown',views:['side','back'],cx:[214,240],ground:[80,400],
+  lit:{lats:2,biceps:1,forearm:1,traps:1},
+  says:'The wide muscles down the sides of the back. The arms help.',
+  pose:function(k){
+    var hip=[0,114,0], lean=-9, S=S_of(hip,lean);
+    var bar=[0,lerp(S[1]+ARM-7,209,k),lerp(8,17,k)];
+    return {p:{hip:hip,lean:lean,neck:10,ank:[-22,B.ankH,92],kneePole:[-.05,1,.6],footDir:[-.1,0,1],
+               hand:[-66,bar[1],bar[2]],elbPole:[-.9,-1,-.45]},
+            gear:[{t:'box',a:[-26,84,-26],b:[26,96,44],d:{side:-100,back:-200}},
+                  {t:'line',a:[0,82,8],b:[0,4,8],w:7,d:{side:-101,back:-201}},
+                  {t:'box',a:[-30,131,40],b:[30,144,80],d:{side:100,back:-150}},
+                  {t:'line',a:[0,440,bar[2]],b:bar,w:4,d:{side:-5,back:-90}},
+                  {t:'bar',c:bar,half:84,r:5}]};
+  }}
+};
+})();
+
+</script>
+<script>
+(function(){
+var NAMES={quad:"Front of the thigh",glute:"Backside",ham:"Back of the thigh",lowback:"Lower back",abs:"Stomach",chest:"Chest",delt:"Shoulders",triceps:"Back of the arm",biceps:"Front of the arm",lats:"Sides of the back",traps:"Upper back",forearm:"Forearm and grip",calf:"Calf"};
+var VIEW={side:"Side",front:"Front",back:"From behind"};
+var reduce=false;try{reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
+function cycle(t,period,hold){var u=(t%period)/period,tr=(1-2*hold)/2;
+  if(u<tr)return .5-.5*Math.cos(u/tr*Math.PI);if(u<tr+hold)return 1;
+  if(u<2*tr+hold)return .5+.5*Math.cos((u-tr-hold)/tr*Math.PI);return 0;}
+var host=document.getElementById("lifts"),stages=[];
+Object.keys(LIFTS).forEach(function(id){
+  var L=LIFTS[id],d=document.createElement("section");d.className="lift";
+  var hard=[],help=[];Object.keys(L.lit).forEach(function(m){(L.lit[m]===2?hard:help).push(NAMES[m]);});
+  d.innerHTML="<h2>"+L.name+"</h2><p class=\"says\">"+L.says+"</p><div class=\"pair\"></div>"+
+    "<div class=\"key\"><div class=\"kt\">Does the work</div>"+hard.map(function(n){return "<span class=\"chip\"><i></i>"+n+"</span>";}).join("")+
+    "<div class=\"kt\">Helps</div>"+help.map(function(n){return "<span class=\"chip help\"><i></i>"+n+"</span>";}).join("")+"</div>";
+  host.appendChild(d);
+  var pair=d.querySelector(".pair");
+  L.views.forEach(function(v,i){
+    var s=document.createElement("div");s.className="stage";
+    var c=document.createElement("canvas");c.width=c.height=480;
+    var lab=document.createElement("span");lab.textContent=(L.labels&&L.labels[i])||VIEW[v];
+    s.appendChild(c);s.appendChild(lab);pair.appendChild(s);
+    stages.push({L:L,v:v,i:i,x:c.getContext("2d"),el:s,on:true});
+  });
+});
+function paint(st,k){var r=st.L.pose(k);FIG.draw(st.x,st.v,r.p,r.gear,st.L.lit,st.L.cx[st.i],st.L.ground);}
+if("IntersectionObserver" in window){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){stages.forEach(function(st){if(st.el===e.target)st.on=e.isIntersecting;});});},{rootMargin:"120px"});
+  stages.forEach(function(st){io.observe(st.el);});
+}
+var FIX=/[?&]k=([0-9.]+)/.exec(location.search);
+stages.forEach(function(st){paint(st,FIX?+FIX[1]:(reduce?.5:0));});
+if(!reduce&&!FIX)(function loop(t){stages.forEach(function(st){if(st.on)paint(st,cycle(t,3000,.12));});requestAnimationFrame(loop);})(0);
+// the proof: measure every bone on every frame
+var bones={"Thigh":["hipJ","knee"],"Shin":["knee","ank"],"Upper arm":["shoJ","elb"],"Forearm and hand":["elb","hand"]},mm={};
+function note(b,l){mm[b]=mm[b]||[1e9,0];mm[b][0]=Math.min(mm[b][0],l);mm[b][1]=Math.max(mm[b][1],l);}
+function dist(a,c){return Math.sqrt(Math.pow(a[0]-c[0],2)+Math.pow(a[1]-c[1],2)+Math.pow(a[2]-c[2],2));}
+Object.keys(LIFTS).forEach(function(id){for(var f=0;f<=40;f++){var J=FIG.solve(LIFTS[id].pose(f/40).p);
+  note("Hips to shoulders",dist(J.S,J.H));
+  [-1,1].forEach(function(s){var q=J.side[s];Object.keys(bones).forEach(function(b){note(b,dist(q[bones[b][0]],q[bones[b][1]]));});});}});
+document.getElementById("proof").innerHTML=Object.keys(mm).map(function(b){return "<tr><td>"+b+"</td><td class=\"n\">"+mm[b][0].toFixed(1)+"</td><td class=\"n\">"+mm[b][1].toFixed(1)+"</td></tr>";}).join("");
+window.__mm=mm;
+})();
+</script>
+</body></html>
