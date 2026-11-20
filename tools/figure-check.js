@@ -92,7 +92,8 @@ Object.keys(LIFTS).forEach(function(id){
         if(ov<6||oh<6)continue;
         if(A.lim&&A.lim===Bb.lim&&Math.abs(A.o-Bb.o)===1)continue;   // neighbours on one limb share a joint and a colour
         var key=vk+'|'+A.n+'|'+Bb.n,front=(A.d-Bb.d||A.o-Bb.o)>0?A.n:Bb.n;
-        if(prevOrder[key]&&prevOrder[key].f===f-1&&prevOrder[key].front!==front)say('FLIP',vk+' view: '+A.n+' and '+Bb.n+' swap',k);
+        var real=L.okFlip&&/torso/.test(key)&&/arm|hand/.test(key);   // an arm truly passing from in front of the trunk to behind it
+        if(!real&&prevOrder[key]&&prevOrder[key].f===f-1&&prevOrder[key].front!==front)say('FLIP',vk+' view: '+A.n+' and '+Bb.n+' swap',k);
         prevOrder[key]={f:f,front:front};
       }
     });
