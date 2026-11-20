@@ -100,7 +100,7 @@ Object.keys(LIFTS).forEach(function(id){
       }
     });
     // JUMP
-    if(prev)[-1,1].forEach(function(s){['knee','elb'].forEach(function(j){var d=len(sub(J.side[s][j],prev.side[s][j]));if(d>9)say('JUMP',(s<0?'right ':'left ')+j+' moved '+d.toFixed(0)+' in one frame',k);});});
+    if(prev)[-1,1].forEach(function(s){['knee','elb'].forEach(function(j){var d=len(sub(J.side[s][j],prev.side[s][j]));if(d>(L.cycle?30:9))say('JUMP',(s<0?'right ':'left ')+j+' moved '+d.toFixed(0)+' in one frame',k);});});
     // JERK: a hand, hip or bar that changes speed sharply between frames reads as a shake
     var now={hand:J.side[-1].hand,hip:J.H,sho:J.S};(r.gear||[]).forEach(function(g){if(g.t==='bar')now.bar=g.c;});
     if(!L.cycle&&prevNow&&prevVel)Object.keys(now).forEach(function(nk){var v=sub(now[nk],prevNow[nk]),dv=len(sub(v,prevVel[nk]||v));if(dv>2.2)say('JERK',nk+' changes speed sharply, by',k,dv);});
