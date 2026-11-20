@@ -23,16 +23,17 @@ function segDist(p1,p2,q1,q2){
 }
 var total=0;
 Object.keys(LIFTS).forEach(function(id){
-  if(only&&only!==id)return;
+  if(only&&only.split(',').indexOf(id)<0)return;
+  try{
   var L=LIFTS[id],found={},prev=null,prevOrder={},prevNow=null,prevVel=null;
   function say(kind,what,k,w){var key=kind+' '+what;if(!found[key])found[key]={k0:k,k1:k,worst:w||0};found[key].k1=k;if(w>found[key].worst)found[key].worst=w;}
   for(var f=0;f<=N;f++){
-    var k=f/N,r=L.pose(k),p=r.p,J=FIG.solve(p);
+    var k=L.cycle?f/N*.999:f/N,r=L.pose(k),p=r.p,J=FIG.solve(p);
     [-1,1].forEach(function(s){
       var q=J.side[s],nm=s<0?'right':'left';
       // REACH: did the limb get where the pose asked?
-      var m=function(v){return [v[0]*-s,v[1],v[2]];};
-      var wantH=m(s<0?(p.handR||p.hand):(p.handL||p.hand)),wantA=m(s<0?(p.ankR||p.ank):(p.ankL||p.ank));
+      var get=function(nm2){var e=p[nm2+(s<0?'R':'L')];if(e)return e;var v=p[nm2];return [v[0]*-s,v[1],v[2]];};
+      var wantH=get('hand'),wantA=get('ank');
       if(len(sub(wantH,q.hand))>.5)say('REACH',nm+' hand short by '+len(sub(wantH,q.hand)).toFixed(1),k);
       if(len(sub(wantA,q.ank))>.5)say('REACH',nm+' foot short by '+len(sub(wantA,q.ank)).toFixed(1),k);
       // BEND: joints past what a body can do
@@ -102,7 +103,7 @@ Object.keys(LIFTS).forEach(function(id){
     if(prev)[-1,1].forEach(function(s){['knee','elb'].forEach(function(j){var d=len(sub(J.side[s][j],prev.side[s][j]));if(d>9)say('JUMP',(s<0?'right ':'left ')+j+' moved '+d.toFixed(0)+' in one frame',k);});});
     // JERK: a hand, hip or bar that changes speed sharply between frames reads as a shake
     var now={hand:J.side[-1].hand,hip:J.H,sho:J.S};(r.gear||[]).forEach(function(g){if(g.t==='bar')now.bar=g.c;});
-    if(prevNow&&prevVel)Object.keys(now).forEach(function(nk){var v=sub(now[nk],prevNow[nk]),dv=len(sub(v,prevVel[nk]||v));if(dv>2.2)say('JERK',nk+' changes speed sharply, by',k,dv);});
+    if(!L.cycle&&prevNow&&prevVel)Object.keys(now).forEach(function(nk){var v=sub(now[nk],prevNow[nk]),dv=len(sub(v,prevVel[nk]||v));if(dv>2.2)say('JERK',nk+' changes speed sharply, by',k,dv);});
     if(prevNow){prevVel={};Object.keys(now).forEach(function(nk){prevVel[nk]=sub(now[nk],prevNow[nk]);});}
     prevNow=now;
     prev=J;
@@ -110,9 +111,10 @@ Object.keys(LIFTS).forEach(function(id){
   // RUSH: the hands should travel at an even speed through the rep. A stretch much faster than the rest reads as a jerk.
   var hs=[],hp=null;for(var f2=0;f2<=N;f2++){var hq=FIG.solve(L.pose(f2/N).p).side[-1].hand;if(hp)hs.push(len(sub(hq,hp)));hp=hq;}
   var mean=hs.reduce(function(a,b){return a+b;},0)/hs.length,peak=Math.max.apply(null,hs);
-  if(peak>mean*1.6)say('RUSH','hands move '+(peak/mean).toFixed(1)+' times their average speed at one point',hs.indexOf(peak)/N);
+  if(!L.cycle&&!L.hold&&mean>.4&&peak>mean*1.6)say('RUSH','hands move '+(peak/mean).toFixed(1)+' times their average speed at one point',hs.indexOf(peak)/N);
   var keys=Object.keys(found);total+=keys.length;
   console.log('\n'+L.name+': '+(keys.length?keys.length+' to look at':'clean'));
   keys.forEach(function(key){var e=found[key];console.log('  '+key+(e.worst?', worst '+e.worst.toFixed(0):'')+'   (k '+e.k0.toFixed(2)+(e.k1!==e.k0?' to '+e.k1.toFixed(2):'')+')');});
+  }catch(err){total++;console.log('\n'+id+': CRASHED '+err.message);}
 });
 console.log('\nTOTAL '+total);

@@ -41,26 +41,27 @@ function ik(a,tg,l1,l2,pole){
 }
 
 // pose -> every joint. A pose says where the hips, feet and hands are; the rest follows.
+function rot(a,b,deg){var t=deg*Math.PI/180,c=Math.cos(t),sn=Math.sin(t);return [add(mul(a,c),mul(b,sn)),sub(mul(b,c),mul(a,sn))];}
 function solve(p){
-  var R=Math.PI/180, L=(p.lean||0)*R;
+  var R=Math.PI/180, L=(p.lean||0)*R, r;
   var u=[0,Math.cos(L),Math.sin(L)], n=[0,-Math.sin(L),Math.cos(L)], X=[1,0,0];
+  if(p.spin){r=rot(X,n,p.spin);X=r[0];n=r[1];}                      // the whole body turned about its own length
+  var Xs=X, ns=n; if(p.twist){r=rot(X,n,p.twist);Xs=r[0];ns=r[1];}   // the shoulders turned against the hips
   var H=p.hip, S=add(H,mul(u,B.trunk));
-  var J={u:u,n:n,H:H,S:S,side:{}};
-  var Ln=((p.lean||0)+(p.neck||0))*R, nu=[0,Math.cos(Ln),Math.sin(Ln)];
-  J.nu=nu; J.nn=[0,-Math.sin(Ln),Math.cos(Ln)];
-  J.neck0=add(S,mul(u,6)); J.head=add(J.neck0,mul(nu,B.neck+B.headR[1]-2));
+  var J={u:u,n:n,X:X,Xs:Xs,ns:ns,H:H,S:S,side:{}};
+  r=rot(u,ns,p.neck||0); J.nu=r[0]; J.nn=r[1];
+  J.neck0=add(S,mul(u,6)); J.head=add(J.neck0,mul(J.nu,B.neck+B.headR[1]-2));
   [-1,1].forEach(function(s){
-    var q={}, m=function(v){return v?[v[0]*-s,v[1],v[2]]:v;};   // poses are written for the right side (s=-1)
+    // a pose names one value (written for the RIGHT side and mirrored for the left), or one per side
+    // (ankR / ankL, handR / handL, kneePoleR / L, elbPoleR / L, footDirR / L), each given as it really is
+    function get(name,def){var e=p[name+(s<0?'R':'L')];if(e)return e;var v=p[name]||def;return [v[0]*-s,v[1],v[2]];}
+    var q={};
     q.hipJ=add(H,mul(X,s*B.hipW));
-    q.shoJ=add(add(S,mul(X,s*B.shoW)),p.shrug?add(mul(u,p.shrug[0]),mul(n,p.shrug[1])):[0,0,0]);
-    var ank=m(s<0?(p.ankR||p.ank):(p.ankL||p.ank));
-    var kp=m(p.kneePole||[-.2,0,1]);
-    var lg=ik(q.hipJ,ank,B.thigh,B.shin,kp);
+    q.shoJ=add(add(S,mul(Xs,s*B.shoW)),p.shrug?add(mul(u,p.shrug[0]),mul(ns,p.shrug[1])):[0,0,0]);
+    var lg=ik(q.hipJ,get('ank'),B.thigh,B.shin,get('kneePole',[-.2,0,1]));
     q.knee=lg.mid;q.ank=lg.end;q.legF=lg.bend;
-    var fd=m(p.footDir||[-.17,0,1]);q.footDir=norm(fd);
-    var hd=m(s<0?(p.handR||p.hand):(p.handL||p.hand));
-    var ep=m(p.elbPole||[-.3,-1,-.4]);
-    var ar=ik(q.shoJ,hd,B.uarm,B.farm,ep);
+    q.footDir=norm(get('footDir',[-.17,0,1]));
+    var ar=ik(q.shoJ,get('hand'),B.uarm,B.farm,get('elbPole',[-.3,-1,-.4]));
     q.elb=ar.mid;q.hand=ar.end;q.armB=ar.bend;
     J.side[s]=q;
   });
@@ -68,14 +69,14 @@ function solve(p){
 }
 
 // ---- views ----
+// side, front, back; rear (from behind, off to the lifter's right), quarter (from in front, off to the right),
+// top (looking straight down, head of a lying lifter to the left)
 function view(kind,cx){
   if(kind==='side')return {k:kind,v:[-1,0,0],p:function(a){return [cx+a[2],FLOOR-a[1],-a[0]];},d:function(a){return [a[2],-a[1]];}};
-  if(kind==='rear'){
-    var f=38*Math.PI/180, vx=-Math.sin(f), vz=-Math.cos(f), ex=vz, ez=-vx;
-    return {k:kind,v:[vx,0,vz],p:function(a){return [cx+a[0]*ex+a[2]*ez,FLOOR-a[1],a[0]*vx+a[2]*vz];},d:function(a){return [a[0]*ex+a[2]*ez,-a[1]];}};
-  }
-  if(kind==='back')return {k:kind,v:[0,0,-1],p:function(a){return [cx-a[0],FLOOR-a[1],-a[2]];},d:function(a){return [-a[0],-a[1]];}};
-  return {k:kind,v:[0,0,1],p:function(a){return [cx+a[0],FLOOR-a[1],a[2]];},d:function(a){return [a[0],-a[1]];}};
+  if(kind==='top')return {k:kind,v:[0,1,0],p:function(a){return [cx+a[2],250+a[0],a[1]];},d:function(a){return [a[2],a[0]];}};
+  var f=38*Math.PI/180, v=kind==='rear'?[-Math.sin(f),0,-Math.cos(f)]:kind==='quarter'?[-Math.sin(f),0,Math.cos(f)]:kind==='back'?[0,0,-1]:[0,0,1];
+  var ex=v[2], ez=-v[0];
+  return {k:kind,v:v,p:function(a){return [cx+a[0]*ex+a[2]*ez,FLOOR-a[1],a[0]*v[0]+a[2]*v[2]];},d:function(a){return [a[0]*ex+a[2]*ez,-a[1]];}};
 }
 // an ellipsoid seen from a view is an ellipse: sample its edge
 function blobPts(V,c,ax,N){
@@ -108,7 +109,8 @@ function chainPath(V,blobs){
 function sph(c,r){return {c:c,ax:[[r,0,0],[0,r,0],[0,0,r]]};}
 
 function buildParts(J,V){
-  var parts=[], u=J.u, n=J.n, X=[1,0,0];
+  var parts=[], u=J.u;
+  function fr(f){var w=Math.max(0,Math.min(1,(f-.25)/.5));w=w*w*(3-2*w);return {X:norm(mix(J.X,J.Xs,w)),n:norm(mix(J.n,J.ns,w))};}
   function depth(c){return V.p(c)[2];}
   function part(name,blobs,joint,jr,far,order){
     var d=0;blobs.forEach(function(b){d+=depth(b.c);});
@@ -117,17 +119,18 @@ function buildParts(J,V){
   }
   // torso
   var tb=TOR.map(function(t){
-    var c=add(add(J.H,mul(u,t[0]*B.trunk)),mul(n,(t[2]-t[3])/2));
-    return {c:c,ax:[mul(X,t[1]),mul(n,(t[2]+t[3])/2),mul(u,3)]};
+    var F=fr(t[0]), c=add(add(J.H,mul(u,t[0]*B.trunk)),mul(F.n,(t[2]-t[3])/2));
+    return {c:c,ax:[mul(F.X,t[1]),mul(F.n,(t[2]+t[3])/2),mul(u,3)]};
   });
   var torso=part('torso',tb,null,0,false,10);
   function tpt(f){return add(J.H,mul(u,f*B.trunk));}
   function tm(key,f,lat,face,hh,hw,dep){
-    var N=mul(n,face), c=add(add(tpt(f),mul(X,lat)),mul(N,dep*.72));
-    torso.mus.push({key:key,c:c,ax:[mul(u,hh),mul(X,hw),mul(N,dep*.5)],N:N});
+    var F=fr(f), N=mul(F.n,face), c=add(add(tpt(f),mul(F.X,lat)),mul(N,dep*.72));
+    torso.mus.push({key:key,c:c,ax:[mul(u,hh),mul(F.X,hw),mul(N,dep*.5)],N:N});
   }
   tm('chest',.77,-17,1,13,15,19);tm('chest',.77,17,1,13,15,19);
   tm('abs',.36,0,1,25,10,14);
+  tm('obl',.34,-19,1,19,5.5,13);tm('obl',.34,19,1,19,5.5,13);
   tm('lats',.56,-20,-1,27,12,15);tm('lats',.56,20,-1,27,12,15);
   tm('traps',.93,0,-1,15,21,14);
   tm('lowback',.20,-8,-1,19,6,14);tm('lowback',.20,8,-1,19,6,14);
@@ -135,12 +138,12 @@ function buildParts(J,V){
   // neck and head
   part('neck',[sph(add(J.S,mul(u,2)),9),sph(add(J.neck0,mul(J.nu,B.neck)),8)],add(J.S,mul(u,4)),13,false,11);
   var hr=B.headR;
-  part('head',[{c:J.head,ax:[[hr[0],0,0],mul(J.nu,hr[1]),mul(J.nn,hr[2])]},
-               {c:add(add(J.head,mul(J.nu,-12)),mul(J.nn,6)),ax:[[11,0,0],mul(J.nu,10),mul(J.nn,12)]}],
+  part('head',[{c:J.head,ax:[mul(J.Xs,hr[0]),mul(J.nu,hr[1]),mul(J.nn,hr[2])]},
+               {c:add(add(J.head,mul(J.nu,-12)),mul(J.nn,6)),ax:[mul(J.Xs,11),mul(J.nu,10),mul(J.nn,12)]}],
        add(J.neck0,mul(J.nu,B.neck)),10,false,12)
-    .mus.push({key:'face',c:add(add(J.head,mul(J.nn,13)),mul(J.nu,-3)),ax:[[9.5,0,0],mul(J.nu,13),mul(J.nn,7)],N:J.nn});
+    .mus.push({key:'face',c:add(add(J.head,mul(J.nn,13)),mul(J.nu,-3)),ax:[mul(J.Xs,9.5),mul(J.nu,13),mul(J.nn,7)],N:J.nn});
   [-1,1].forEach(function(s){
-    var q=J.side[s], far=(V.k==='side'&&s>0);
+    var q=J.side[s], far=(V.k==='side'&&s>0&&q.hipJ[0]>4);   // the far side is dimmed from the side, unless the body is turned on its side
     function limb(name,a,b,rs,ts,front,bulge,joint,jr,order){
       var bl=rs.map(function(r,i){var c=mix(a,b,ts[i]);if(bulge&&bulge[i])c=add(c,mul(front,bulge[i]));return sph(c,r);});
       var P=part(name,bl,joint,jr,far,order);
@@ -200,8 +203,16 @@ function drawPart(x,V,P,lit){
   });
   x.restore();
 }
+var GX={};       // gear a lift file brings itself: FIG.gear.name=function(x,V,g){...}, used as {t:'name',...}
+function ringPts(V,c,ax,off,rad){
+  ax=norm(ax);var e1=norm(cross(ax,Math.abs(ax[1])>.9?[1,0,0]:[0,1,0])), e2=cross(ax,e1), o=[], i, t;
+  for(i=0;i<18;i++){t=i/18*6.2832;o.push(V.p(add(add(c,mul(ax,off)),add(mul(e1,rad*Math.cos(t)),mul(e2,rad*Math.sin(t))))));}
+  return o;
+}
+function poly(x,h){x.beginPath();h.forEach(function(q,j){if(j)x.lineTo(q[0],q[1]);else x.moveTo(q[0],q[1]);});x.closePath();}
 function drawGear(x,V,g){
   var a,b,c;
+  if(GX[g.t]){GX[g.t](x,V,g);return;}
   if(g.t==='bar'){                               // a loaded bar lying across the body
     c=V.p(g.c);
     if(V.k==='side'){
@@ -211,9 +222,10 @@ function drawGear(x,V,g){
       }
       x.fillStyle=GO;x.beginPath();x.arc(c[0],c[1],g.r>8?6:5,0,7);x.fill();
     }else{
+      a=V.p([g.c[0]-g.half,g.c[1],g.c[2]]);b=V.p([g.c[0]+g.half,g.c[1],g.c[2]]);
       x.strokeStyle=GO;x.lineWidth=7;x.lineCap='round';
-      x.beginPath();x.moveTo(c[0]-g.half,c[1]);x.lineTo(c[0]+g.half,c[1]);x.stroke();
-      if(g.r>8){x.fillStyle=GO;x.fillRect(c[0]-g.half-2,c[1]-g.r,13,g.r*2);x.fillRect(c[0]+g.half-11,c[1]-g.r,13,g.r*2);}
+      x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();
+      if(g.r>8){x.fillStyle=GO;[-1,1].forEach(function(sg){poly(x,hull(ringPts(V,g.c,[1,0,0],sg*(g.half-11),g.r).concat(ringPts(V,g.c,[1,0,0],sg*(g.half+2),g.r))));x.fill();});}
     }
   }else if(g.t==='db'){                          // a dumbbell: a handle with a head on each end
     var ax=norm(g.ax), e1=norm(cross(ax,Math.abs(ax[1])>.9?[1,0,0]:[0,1,0])), e2=cross(ax,e1), HR=11.5, IN=8.5, OUT=19;
@@ -253,14 +265,15 @@ function gearDepth(V,g){
   if(g.t==='bar'){if(V.k==='side')return 200;if(g.d&&g.d[V.k]!=null)return g.d[V.k];return V.p(g.c)[2];}
   if(g.t==='db')return 2000+V.p(g.c)[2]*.01;        // draw() ties it to the hand that holds it
   if(g.d!=null&&g.d[V.k]!=null)return g.d[V.k];
-  if(g.d!=null&&V.k!=='rear')return 0;
+  if(g.d!=null&&(V.k==='side'||V.k==='front'||V.k==='back'))return 0;
+  if(!g.a||!g.b)return g.c?V.p(g.c)[2]:0;
   return (V.p(g.a)[2]+V.p(g.b)[2])/2;
 }
 function draw(x,kind,pose,gear,lit,cx,ground){
   x.clearRect(0,0,480,480);
   var V=view(kind,cx==null?240:cx);
   x.strokeStyle=LINE;x.lineWidth=6;x.lineCap='round';
-  x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();
+  if(kind!=='top'){x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();}
   var J=solve(pose), items=[], handD={};
   var lay=pose.layer&&pose.layer[kind];
   buildParts(J,V).forEach(function(P){
@@ -283,13 +296,15 @@ function draw(x,kind,pose,gear,lit,cx,ground){
   items.forEach(function(it){if(it.P)drawPart(x,V,it.P,lit);else drawGear(x,V,it.g);});
   return J;
 }
-return {draw:draw,solve:solve,B:B,lerp:lerp,add:add,mul:mul,view:view,parts:buildParts,blobPts:blobPts,gearDepth:gearDepth,TOR:TOR};
+return {draw:draw,solve:solve,B:B,lerp:lerp,add:add,sub:sub,mul:mul,dot:dot3,len:len,norm:norm,cross:cross,mix:mix,hull:hull,poly:poly,ringPts:ringPts,ik:ik,
+        view:view,parts:buildParts,blobPts:blobPts,gearDepth:gearDepth,TOR:TOR,gear:GX,col:{INK:INK,FAR:FAR,GO:GO,LINE:LINE,PAD:"#211e1b"}};
 })();
 
 // ---------------- the five lifts ----------------
 // stand: a standing lift, so the bar must stay over the middle of the foot.
 // tall: the end of the rep (k) where the lifter stands fully upright.
-var LIFTS=(function(){
+// LK: what every lift is written with. Lift files added after this one use the same.
+var LK=(function(){
 "use strict";
 var B=FIG.B, lerp=FIG.lerp, R=Math.PI/180, ARM=B.uarm+B.farm-.6, PL=44;
 function S_of(hip,lean){return [0,hip[1]+B.trunk*Math.cos(lean*R),hip[2]+B.trunk*Math.sin(lean*R)];}
@@ -310,6 +325,11 @@ function under(sho,hand,fall){
 }
 // a dumbbell in each hand: the hand given is the right one, the left is its mirror
 function dbs(h,ax){return [{t:'db',c:[h[0],h[1],h[2]],ax:ax,front:9},{t:'db',c:[-h[0],h[1],h[2]],ax:ax,front:9}];}
+return {B:B,lerp:lerp,R:R,ARM:ARM,PL:PL,S_of:S_of,smooth:smooth,under:under,dbs:dbs};
+})();
+var LIFTS=(function(){
+"use strict";
+var B=LK.B, lerp=LK.lerp, R=LK.R, ARM=LK.ARM, PL=LK.PL, S_of=LK.S_of, smooth=LK.smooth, under=LK.under, dbs=LK.dbs;
 return {
 squat:{name:'Back Squat',views:['side','front'],cx:[236,240],stand:1,tall:0,up:0,
   lit:{quad:2,glute:2,ham:1,lowback:1,abs:1},
