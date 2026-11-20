@@ -126,7 +126,7 @@ function buildParts(J,V){
   function tpt(f){return add(J.H,mul(u,f*B.trunk));}
   function tm(key,f,lat,face,hh,hw,dep){
     var F=fr(f), N=mul(F.n,face), c=add(add(tpt(f),mul(F.X,lat)),mul(N,dep*.72));
-    torso.mus.push({key:key,c:c,ax:[mul(u,hh),mul(F.X,hw),mul(N,dep*.5)],N:N});
+    torso.mus.push({key:key,c:c,ax:[mul(u,hh),mul(F.X,hw),mul(N,dep*.5)],N:N,sd:lat<0?'R':lat>0?'L':''});
   }
   tm('chest',.77,-17,1,13,15,19);tm('chest',.77,17,1,13,15,19);
   tm('abs',.36,0,1,25,10,14);
@@ -159,7 +159,7 @@ function buildParts(J,V){
     lm(th,'quad',.5,.38,15,1);lm(th,'ham',.48,.38,15,-1);
     var sh=limb('shin',q.knee,q.ank,[10.5,11.5,8.5,6.5],[0,.3,.7,1],q.legF,[0,-3,-1,0],q.knee,12,21);
     lm(sh,'calf',.3,.24,11,-1);
-    var fd=q.footDir, dn=norm([0,-fd[2],fd[1]]);          // the sole faces square away from the way the toes point
+    var fd=q.footDir, dn=Math.abs(fd[1])+Math.abs(fd[2])<.05?[0,-1,0]:norm([0,-fd[2],fd[1]]);          // the sole faces square away from the way the toes point
     var toe=add(add(q.ank,mul(fd,36)),mul(dn,7.4)), flat=q.ank[1]<40&&fd[1]<-.05;
     if(flat&&toe[1]<4.6)toe=[toe[0],4.6,toe[2]+2];       // up on the ball of the foot, the toes bend and stay down
     part('foot',[sph(add(add(q.ank,mul(fd,-5)),mul(dn,5)),7),sph(add(add(q.ank,mul(fd,23)),mul(dn,6.3)),5.7),sph(toe,4.6)],
@@ -194,7 +194,8 @@ function drawPart(x,V,P,lit){
   x.save();x.clip(path);
   P.mus.forEach(function(m){
     if(dot3(norm(m.N),V.v)<-.2)return;
-    var lv=lit&&lit[m.key];
+    var sd=m.sd!=null?m.sd:(P.s?(P.s<0?'R':'L'):'');          // lit:{quad:2} lights both sides, lit:{quadR:2} the right only
+    var lv=lit&&(lit[m.key]||(sd&&lit[m.key+sd]));
     x.fillStyle=lv===2?HOT:DEF;
     x.globalAlpha=lv===2?1:(lv===1?1:1);
     if(lv===1)x.fillStyle="rgba(255,122,26,.42)";

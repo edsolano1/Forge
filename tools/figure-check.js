@@ -84,7 +84,7 @@ Object.keys(LIFTS).forEach(function(id){
         P.blobs.forEach(function(bl){FIG.blobPts(V,bl.c,bl.ax,8).forEach(function(pt){x0=Math.min(x0,pt[0]);x1=Math.max(x1,pt[0]);y0=Math.min(y0,pt[1]);y1=Math.max(y1,pt[1]);});});
         var lay=p.layer&&p.layer[vk],grp=P.o>=30?'arms':(P.o>=20?'legs':null),dd=P.d;if(lay&&grp&&lay[grp])dd=(lay[grp]==='front'?1:-1)*(grp==='arms'?1000:900);
         var one=lay&&P.s&&lay[P.name+(P.s<0?'R':'L')];if(one)dd=(one==='front'?1:-1)*1000;   // one part on one side, the same rule draw() uses
-        items.push({n:P.name+(P.blobs[0].c[0]<-1?' R':P.blobs[0].c[0]>1?' L':''),lim:grp?grp+(P.blobs[0].c[0]<0?'R':'L'):'',d:Math.round(dd*50)/50,o:P.o,bb:[x0,y0,x1,y1]});
+        items.push({n:P.name+(P.s?(P.s<0?' R':' L'):''),lim:grp?grp+(P.s<0?'R':'L'):'',d:Math.round(dd*50)/50,o:P.o,bb:[x0,y0,x1,y1]});
       });
       (r.gear||[]).forEach(function(g,gi){if(g.t!=='bar')return;var c=V.p(g.c);
         items.push({n:'bar',d:FIG.gearDepth(V,g),o:99,bb:vk==='side'?[c[0]-g.r,c[1]-g.r,c[0]+g.r,c[1]+g.r]:[c[0]-g.half,c[1]-4,c[0]+g.half,c[1]+4]});});
