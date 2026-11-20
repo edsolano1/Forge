@@ -1576,20 +1576,24 @@ crunch:{name:'Crunch',views:['side','rear'],labels:['Side','From the head end, o
     return {p:p,gear:[]};
   }},
 
-// ---- BICYCLE CRUNCH. One full loop is both sides. Right knee in while the shoulders turn to the right, so the
-// left elbow comes across to meet it; then the other way.
+// ---- BICYCLE CRUNCH, the ordinary one: lying on the back, the weight on the backside and the back, only the
+// shoulder blades lifted. The trunk is rigid, so the lift is a small tip (about 11 degrees) with the head and neck
+// leading, and the hip height is worked out from the trunk's own thickness so its back rests ON the floor.
+// One full loop is both sides. Right knee in while the shoulders turn to the right, so the left elbow comes across.
 bike:{name:'Bicycle Crunch',views:['side','top'],labels:['Side','From above'],cx:[196,196],ground:[50,430],up:1,cycle:1,period:2600,
   lit:{abs:2,obl:2},
   says:'The stomach and the muscles down its sides, which do the turning.',
   pose:function(k){
     var s=Math.sin(k*2*Math.PI);                 // +1: right knee in, shoulders turned to the right
-    var hip=[0,LIE,10], lean=-64, twist=32*s, neck=18;
+    var lean=-81+3*s*s, twist=30*s, neck=24+4*s*s, a=(90+lean)*R, hy=0;
+    FIG.TOR.forEach(function(t){if(t[0]>=0&&t[0]<.6)hy=Math.max(hy,t[3]*Math.cos(a)-t[0]*B.trunk*Math.sin(a));});   // the lowest point of the back touches the floor
+    var hip=[0,hy,10];
     // from above a leg is over the trunk wherever the two meet (the knee comes in above the belly)
     var p={hip:hip,lean:lean,twist:twist,neck:neck,layer:{top:{legs:'front'}}};
     function leg(t,sx){                          // t 0 = stretched out long and off the floor, 1 = knee drawn in
-      var hj=[sx*B.hipW,LIE,hip[2]];
-      var out=[sx*13,hj[1]+LEG*Math.sin(16*R),hj[2]+LEG*Math.cos(16*R)];
-      var a=108*R, kn=[sx*15,hj[1]+B.thigh*Math.sin(a),hj[2]+B.thigh*Math.cos(a)];
+      var hj=[sx*B.hipW,hy,hip[2]];
+      var out=[sx*13,hj[1]+LEG*Math.sin(7*R),hj[2]+LEG*Math.cos(7*R)];   // long and low, the heel a hand's width off the floor
+      var a=98*R, kn=[sx*15,hj[1]+B.thigh*Math.sin(a),hj[2]+B.thigh*Math.cos(a)];
       var inn=[sx*15,kn[1]+8,kn[2]+85];          // shin level with the floor
       return [lerp(out[0],inn[0],t),lerp(out[1],inn[1],t),lerp(out[2],inn[2],t)];
     }
@@ -1824,6 +1828,23 @@ FIG.gear.g8_water=function(x,V,g){
   x.fillStyle='rgba(29,25,21,.42)';x.fillRect(0,y,480,480-y);
 };
 
+// one step of a moving staircase: a solid wedge with a dark riser facing the climber and a lighter tread on top.
+// prof is its outline in the plane the climber faces along, as [z,y] corners; tr the tread's; hw half its width.
+FIG.gear.g8_step=function(x,V,g){
+  function face(pf,col,rim,w){
+    var pts=[];pf.forEach(function(q){pts.push(V.p([-g.hw,q[1],q[0]]));pts.push(V.p([g.hw,q[1],q[0]]));});
+    FIG.poly(x,FIG.hull(pts));x.fillStyle=col;x.fill();x.strokeStyle=rim;x.lineWidth=w;x.lineJoin='round';x.stroke();
+  }
+  face(g.prof,'#332e29',LINE,3);
+  if(g.riser&&V.v[2]<-.1){       // the riser faces back at the climber: seen only from behind
+    var r=g.riser,q=[[-g.hw,r[1],r[0]],[g.hw,r[1],r[0]],[g.hw,r[2],r[0]],[-g.hw,r[2],r[0]]].map(function(a){return V.p(a);});
+    FIG.poly(x,q);x.fillStyle='#211e1b';x.fill();x.strokeStyle=LINE;x.lineWidth=2;x.stroke();
+    x.strokeStyle='#3a342f';x.lineWidth=1.5;                 // the ribs moulded into it
+    [.33,.66].forEach(function(f){var yy=r[1]+(r[2]-r[1])*f,a=V.p([-g.hw+4,yy,r[0]]),b=V.p([g.hw-4,yy,r[0]]);x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();});
+  }
+  if(g.tr)face(g.tr,'#6a6159','#15120f',1.4);
+};
+
 // ---- a foot on a surface ----
 // (cy,cz) is the point of the surface under the ball of the foot, raised by any lift. a is how far the toes point
 // down against the surface, in degrees: under zero the foot stands on its heel, over zero it has rolled up onto
@@ -1852,7 +1873,7 @@ function legPhase(G,ph){
     var w=(ph-st)/(1-st), m=(G.bk-G.fr)/st*(1-st)*(G.carry==null?1:G.carry), w2=w*w, w3=w2*w;
     b=(2*w3-3*w2+1)*G.bk+(w3-2*w2+w)*m+(-2*w3+3*w2)*G.fr+(w3-w2)*m;
     var sn=Math.sin(Math.PI*Math.pow(w,G.skew||1));
-    lift=G.lift*sn*sn;
+    lift=G.lp?G.lift*Math.pow(sn*sn,G.lp):G.lift*sn*sn;
     a=lerp(G.pd,G.strike,smooth(w))+G.kick*Math.sin(Math.PI*w);
   }
   return {b:b,lift:lift,a:a};
@@ -1883,10 +1904,37 @@ var WALK={st:.6,fr:60,bk:-24,strike:-14,roll:.2,pd:32,push:.35,lift:12,kick:6,hi
           armBase:0,armA:22,armBend:26,armFlex:10,elbOut:.1,handIn:.02,twist:5,spin:3,fx:13};
 var TWALK={st:.6,fr:60,bk:-30,strike:-10,roll:.2,pd:30,push:.35,lift:14,kick:6,hipY:178,bob:3,bobPh:.3,lean:9,
           armBase:4,armA:24,armBend:28,armFlex:10,elbOut:.1,handIn:.02,twist:5,spin:3,fx:13,slope:9,deck:32};
-var TRUN={st:.38,fr:36,bk:-44,strike:-3,roll:.1,pd:42,push:.45,lift:50,skew:.72,kick:30,hipY:176,bob:-5,bobPh:.19,lean:8,
-          armBase:4,armA:24,armBend:82,armFlex:8,elbOut:.16,handIn:.3,twist:8,spin:4,fx:10,deck:16,carry:.7};
-var ORUN={st:.38,fr:34,bk:-46,strike:-3,roll:.1,pd:42,push:.45,lift:52,skew:.72,kick:32,hipY:176,bob:-5,bobPh:.19,lean:9,
-          armBase:4,armA:25,armBend:82,armFlex:8,elbOut:.16,handIn:.3,twist:8,spin:4,fx:10,carry:.7};
+// ---- the run ----
+// The legs go round the same loop as the walk, with a real flight between the steps. What makes it a run and not a
+// march is everything above the hips: the trunk tips forward, the hips turn with the leading leg while the shoulders
+// turn the other way, and each arm swings from the SHOULDER with the elbow near a right angle: hand up by the chest
+// in front, back by the hip behind, and low past the side in between so the forearm never lies across the belly.
+var TRUN={st:.36,fr:46,bk:-50,strike:-3,roll:.12,pd:44,push:.45,lift:72,lp:.8,skew:.72,kick:30,hipY:181,bob:-6,bobPh:.18,lean:9,
+          twist:17,spin:6,fx:9,deck:16};
+var ORUN={st:.36,fr:46,bk:-52,strike:-3,roll:.12,pd:44,push:.45,lift:74,lp:.8,skew:.72,kick:32,hipY:181,bob:-6,bobPh:.18,lean:11,
+          twist:17,spin:6,fx:9};
+function runPose(G,k){
+  var c=Math.cos(TAU*(k+.06)), b2=Math.cos(2*TAU*(k-G.bobPh)), deck=G.deck||0;
+  var lean=G.lean+1.2*b2, hip=[0,deck+G.hipY+G.bob*b2,0];
+  var p={hip:hip,lean:lean,neck:-lean*.55,twist:G.twist*c,spin:-G.spin*c};
+  [-1,1].forEach(function(s){
+    var L=legPhase(G,k+(s<0?0:.5)), nm=s<0?'R':'L';
+    var F=footAt(s*G.fx,deck+L.lift,L.b,L.a,0,s*.1,!deck);
+    p['ank'+nm]=F.ank;p['footDir'+nm]=F.fd;p['kneePole'+nm]=[s*.05,0,1];
+  });
+  p.hand=[-44,hip[1],10];
+  var J=FIG.solve(p);
+  [-1,1].forEach(function(s){
+    // the right arm is back as the right foot lands ahead: opposite arm with opposite leg
+    var nm=s<0?'R':'L', sh=J.side[s].shoJ, sw=(s<0?-1:1)*c, up=Math.max(0,sw);
+    var al=(-12+30*sw)*R, be=al+(92+14*sw-16*(1-sw*sw))*R;
+    var e=add(sh,mul(norm([s*.15,-Math.cos(al),Math.sin(al)]),B.uarm));
+    var h=add(e,mul(norm([-s*(.04+.34*up*up),-Math.cos(be),Math.sin(be)]),B.farm-.3));
+    p['hand'+nm]=h;p['elbPole'+nm]=sub(e,mid3(sh,h));
+  });
+  delete p.hand;p.layer=QL;
+  return p;
+}
 
 // ---- the treadmill: a deck with the belt on top, the motor hood at the front, two posts, a console, two short rails ----
 function treadmill(deck,slope){
@@ -1932,6 +1980,8 @@ function rider(th,o){
 }
 
 // ---- the elliptical's linkage, one side: a crank at the back, a long foot bar, a swinging pole at the front ----
+var ST_HY=192, ST_BOB=4, ST_PH=.4, ST_HZ=8, ST_LEAN=10;
+var JR_LAG=26, JR_VIEWS=['front','side'];
 var EL={C:[58,-118],R:40,Lb:210,P:[232,92],Lp:178,Lh:84,K:5};
 function ellSide(th){
   var C=EL.C, Bp=[C[0]-EL.R*Math.sin(th),C[1]+EL.R*Math.cos(th)], P=EL.P;
@@ -1959,55 +2009,79 @@ treadrun:{name:'Treadmill Run',cycle:1,period:900,views:['side','rear'],labels:[
   lit:{quad:2,ham:2,glute:2,calf:2},
   says:'The whole leg works: thighs, backside and calves. The heart and lungs do the rest.',
   pose:function(k){
-    return {p:gaitPose(TRUN,k),gear:treadmill(TRUN.deck,0)};
+    return {p:runPose(TRUN,k),gear:treadmill(TRUN.deck,0)};
   }},
-outrun:{name:'Outdoor Run',cycle:1,period:900,views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[232,226],up:1,
+outrun:{name:'Outdoor Run',cycle:1,period:900,views:['side','rear'],labels:['Side','From behind, off to one side'],cx:[232,226],up:1,
   lit:{quad:2,ham:2,glute:2,calf:2},
   says:'The whole leg works: thighs, backside and calves. The heart and lungs do the rest.',
   pose:function(k){
-    return {p:gaitPose(ORUN,k),gear:[]};
+    return {p:runPose(ORUN,k),gear:[]};
   }},
-stairs:{name:'Stairmaster',cycle:1,period:1600,views:['side','rear'],labels:['Side','From behind, off to one side'],cx:[176,196],ground:[50,430],up:1,
+stairs:{name:'Stairmaster',cycle:1,period:1600,views:['side','rear'],labels:['Side','From behind, off to one side'],cx:[190,196],ground:[50,430],up:1,
   lit:{quad:2,glute:2,calf:1,ham:1},
   says:'The front of the thighs and the backside lift you up each step. The calves and the back of the thighs help.',
   pose:function(k){
     // the staircase really turns: the steps roll down and back one step every half stride. Each foot lands flat on
-    // the step ahead, rides it down, then lifts clear and over the edge of the next one.
-    var SR=50, SH=36, Y0=16, Z0=-30, o=(2*k)%1, g=[], j;
-    var c=Math.cos(TAU*k), hip=[0,Y0+177-3*Math.cos(2*TAU*k),6], lean=7;
-    var p={hip:hip,lean:lean,neck:-4,twist:3*c};
+    // the step ahead, rides it down as that leg straightens and lifts the body, then peels off and climbs over the
+    // edge of the next one. The hands rest on the two side rails, so the trunk tips a little toward them.
+    var SR=50, SH=36, Y0=50, Z0=-30, o=(2*k)%1, g=[], j;
+    var ZT=Z0+3.2*SR, YP=15, YT=Y0+SH*3.2+8;                  // where the steps come out of the tower; the top of the base; the top of the tower
+    var c=Math.cos(TAU*k), sn=Math.sin(TAU*k);
+    // the hips rise as the standing leg straightens and sink as the weight passes to the other foot: twice a stride.
+    // They also shift a little over the standing foot.
+    var hip=[-4*sn,Y0+ST_HY+ST_BOB*Math.cos(2*TAU*(k-ST_PH)),ST_HZ], lean=ST_LEAN+1.5*Math.cos(2*TAU*(k-ST_PH-.25));
+    var p={hip:hip,lean:lean,neck:-lean*.5,twist:4*c,spin:-3*c};
     [-1,1].forEach(function(s){
       var ph=k+(s<0?0:.5), nm=s<0?'R':'L', by, bz, a; ph-=Math.floor(ph);
-      if(ph<.5){var u=ph/.5;bz=Z0+25+SR*(1-u);by=Y0+SH*(1-u);a=18*smooth((u-.75)/.25);}
+      if(ph<.5){var u=ph/.5;bz=Z0+25+SR*(1-u);by=Y0+SH*(1-u);a=20*smooth((u-.7)/.3);}
       else{
         // worked out ON the staircase and then carried back with it: the foot peels off its step, rises over the edge of
         // the next one, and only then travels forward over the edge of the one it lands on
-        var w=(ph-.5)/.5, sn=Math.sin(Math.PI*w), pk=Math.sin(Math.PI*Math.min(1,w/.4));
-        by=Y0+2*SH*smooth(w/.62)+8*sn*sn-SH*w;bz=Z0+25+2*SR*smooth((w-.3)/.7)-SR*w;a=18*(1-smooth((w-.2)/.5))+8*pk*pk;}
+        var w=(ph-.5)/.5, sw=Math.sin(Math.PI*w), pk=Math.sin(Math.PI*Math.min(1,w/.4));
+        by=Y0+2*SH*smooth(w/.62)+11*sw*sw-SH*w;bz=Z0+25+2*SR*smooth((w-.3)/.7)-SR*w;a=20*(1-smooth((w-.2)/.5))+10*pk*pk;}
       var F=footAt(s*15,by,bz,a,0,s*.1,false);
       p['ank'+nm]=F.ank;p['footDir'+nm]=F.fd;p['kneePole'+nm]=[s*.06,0,1];
     });
-    p.hand=[-44,hip[1],10];
-    var J=FIG.solve(p);
-    [-1,1].forEach(function(s){
-      var nm=s<0?'R':'L', sh=J.side[s].shoJ, sw=(s<0?-1:1)*c, al=(4+13*sw)*R, be=al+(42+6*sw)*R;
-      var e=add(sh,mul(norm([s*.12,-Math.cos(al),Math.sin(al)]),B.uarm)), h=add(e,mul(norm([-s*.1,-Math.cos(be),Math.sin(be)]),B.farm-.3));
-      p['hand'+nm]=h;p['elbPole'+nm]=sub(e,mid3(sh,h));
-    });
-    delete p.hand;p.layer=QL;
-    // the steps: each one a block, cut off where it goes under the back of the machine and where it comes out of the front
-    var ZA=Z0-34, ZB=Z0+3.2*SR, YB=Y0+3.3*SH;
-    for(j=4;j>=-1;j--){
-      var z0=Z0+SR*(j-o), y1=Y0+SH*(j-o), za=Math.max(z0,ZA), zb=Math.min(z0+SR,ZB), ya=Math.max(y1-SH-4,0), yb=Math.min(y1,YB);
-      if(zb-za<1||yb-ya<1)continue;
-      g.push(bx([-36,ya,za],[36,yb,zb],{side:-100-j,rear:-500-j}));   // under the feet, and each lower step this side of the one above
+    // the rails: one each side, running back from the tower and falling a little. The hands lie on top of them.
+    var RZ0=38, RZ1=ZT+14, RY0=Y0+218, RY1=Y0+234, RX=46, HZ=66;
+    function railY(z){return lerp(RY0,RY1,(z-RZ0)/(RZ1-RZ0));}
+    p.hand=[-RX,railY(HZ)+5,HZ];p.elbPole=[-.12,-.45,-1];
+    p.layer=QL;
+    // ---- the machine ----
+    function clip(P,f){            // keep the part of an outline where f is not negative
+      var out=[],i,a,b,fa,fb;
+      for(i=0;i<P.length;i++){a=P[i];b=P[(i+1)%P.length];fa=f(a);fb=f(b);
+        if(fa>=0)out.push(a);
+        if((fa<0)!==(fb<0)){var t=fa/(fa-fb);out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]);}}
+      return out;
     }
-    g.push(bx([-40,0,ZB-2],[40,YB+20,ZB+40],{side:-90,rear:-520}));              // the body of the machine the steps come out of
-    g.push(ln([0,YB+16,ZB+24],[0,300,ZB+16],8,null,{side:-91,rear:-521}));       // the mast
-    g.push(bx([-26,292,ZB+6],[26,318,ZB+22],{side:-92,rear:-522}));              // the console
-    [-1,1].forEach(function(s){                                                  // two short rails, ahead of the hands
-      g.push(ln([s*46,238,ZB+14],[s*46,236,ZB-52],6,STEEL,{side:s<0?300:-300}));
-      g.push(ln([s*46,238,ZB+14],[0,262,ZB+18],6,STEEL,{side:s<0?299:-301}));
+    function trim(P){return clip(clip(P,function(q){return ZT-q[0];}),function(q){return q[1]-YP;});}
+    // the base, with the bed the steps ride on rising out of it to the tower. From the side these are behind the
+    // steps and the feet; from behind, the tower is the far end and the base the near one.
+    g.push(bx([-40,0,Z0-SR-8],[40,YP,ZT+58],{side:-95,rear:-495}));
+    var bed=[];[-39,39].forEach(function(px){[[Z0+SR*(YP-Y0+SH)/SH,YP],[ZT,YP],[ZT,Y0+SH*2.2]].forEach(function(q){bed.push([px,q[1],q[0]]);});});
+    g.push({t:'g8_slab',pts:bed,col:PAD,rim:LINE,w:4,d:{side:-140,rear:-560}});
+    g.push(bx([-40,0,ZT],[40,YT,ZT+58],{side:-130,rear:-580}));                 // the tower the steps come out of
+    for(j=4;j>=-1;j--){
+      var z0=Z0+SR*(j-o), y1=Y0+SH*(j-o);
+      if(z0>=ZT-1||y1<=YP+1)continue;
+      var prof=trim([[z0,y1-SH],[z0,y1],[z0+SR,y1]]), tr=trim([[z0-3,y1-5],[z0-3,y1],[z0+SR,y1],[z0+SR,y1-5]]);
+      if(prof.length<3)continue;
+      // each lower step is this side of the one above it, from the side and from behind alike
+      g.push({t:'g8_step',prof:prof,tr:tr.length>2?tr:null,riser:[z0,Math.max(y1-SH,YP),y1-5],hw:36,d:{side:-100-j,rear:-500-j}});
+    }
+    g.push(ln([0,YT-4,ZT+38],[0,Y0+296,ZT+30],9,null,{side:-129,rear:-579}));       // the mast
+    var con=[];[-29,29].forEach(function(px){[-22,22].forEach(function(al){[0,9].forEach(function(dp){
+      con.push([px,Y0+304+al*.92-dp*.38,ZT+19+al*.38+dp*.92]);});});});
+    g.push({t:'box',pts:con,d:{side:-128,rear:-578}});                           // the console, tipped back to face the climber
+    [-1,1].forEach(function(s){
+      // from the side the right rail is this side of the trunk and under the right arm; the left one is beyond the
+      // whole body. From behind and to the right, the right rail is under the right hand and the left one is beyond
+      // the trunk, under the left hand.
+      var n=s<0, D={side:n?30:-300,rear:n?900:-1001}, D2={side:n?29:-301,rear:n?-470:-575};
+      g.push(ln([s*42,YT-3,ZT+26],[s*RX,RY1-2,RZ1-4],6,null,D2));                 // the post that holds it
+      g.push(ln([s*RX,RY1,RZ1],[0,RY1+14,ZT+32],6,null,D2));                      // and its tie to the mast
+      g.push(ln([s*RX,RY1,RZ1],[s*RX,RY0,RZ0],7,STEEL,D));
     });
     return {p:p,gear:g};
   }},
@@ -2124,7 +2198,7 @@ rower:{name:'Rowing Machine',cycle:1,period:2800,okFlip:1,views:['side','rear'],
     return {p:{hip:hip,lean:lean,neck:-lean*.5,ank:A,kneePole:[-.05,1,.1],footDir:fd,
                hand:hand,elbPole:[-.8,-.45,-1],shrug:[0,lerp(5,-5,ka)],layer:{rear:{uarmR:'front'}}},gear:g};
   }},
-jumprope:{name:'Jump Rope',cycle:1,period:900,views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[236,236],ground:[30,450],up:1,
+jumprope:{name:'Jump Rope',cycle:1,period:900,views:JR_VIEWS,labels:['Front','Side'],cx:[240,236],ground:[30,450],up:1,
   lit:{calf:2,quad:1,delt:1,forearm:1},
   says:'The calves do the bouncing. The thighs soften each landing and the shoulders and forearms turn the rope.',
   pose:function(k){
@@ -2132,19 +2206,28 @@ jumprope:{name:'Jump Rope',cycle:1,period:900,views:['side','quarter'],labels:['
     var ph=TAU*k, air=Math.max(0,Math.sin(ph-Math.PI/2)), hop=11*air, gr=Math.max(0,-Math.sin(ph-Math.PI/2)), dip=5*gr*gr;
     var a=lerp(24,40,smooth(air*1.4))-6*gr*gr;
     var F=footAt(-12,hop,10,a,0,-.14,true);
-    var hip=[0,F.ank[1]+Math.sqrt(Math.pow(174.5-dip*1.6,2)-196),F.ank[2]+14], lean=2, S=S_of(hip,lean);
-    // the wrists turn the rope: each hand goes round a very small circle in step with it
-    var hc=[-58,hip[1]-4,14], hand=[hc[0],hc[1]+4*Math.cos(ph),hc[2]+4*Math.sin(ph)];
-    // the rope: up over the head it stands tall and narrow, under the feet it is short and wide and brushes the floor
-    var rho=lerp(hc[1]-3.5,198,.5+.5*Math.cos(ph)), bul=.26-.14*Math.cos(ph), half=[[],[]], i, t;
-    for(i=0;i<=14;i++){t=i/14*Math.PI/2;
-      var rr=rho*Math.pow(Math.cos(t),.8), px=58*Math.sin(t)*(1+bul*Math.cos(t)), py=hc[1]+(rr+4)*Math.cos(ph), pz=hc[2]+(rr+4)*Math.sin(ph);
-      half[0].unshift([-px,py,pz]);half[1].push([px,py,pz]);}
-    var fz=Math.sin(ph)>=0?700:-700;     // in front of the body on the way down, behind it on the way up; it swaps above the head and under the feet
-    return {p:{hip:hip,lean:lean,neck:0,ank:F.ank,footDir:F.fd,kneePole:[-.12,0,1],hand:hand,elbPole:[-.25,-.3,-1],layer:{quarter:{arms:'front'}}},
-            gear:[{t:'g8_path',pts:half[0],col:GO,w:3.5,d:{side:600,quarter:fz}},
-                  {t:'g8_path',pts:half[1],col:'#8a5a2c',w:3.5,d:{side:-600},v:['side']},     // from the side the far half of the rope is beyond the body
-                  {t:'g8_path',pts:half[1],col:GO,w:3.5,d:{quarter:fz},v:['quarter']}]};
+    var hip=[0,F.ank[1]+Math.sqrt(Math.pow(174.5-dip*1.6,2)-196),F.ank[2]+14], lean=2;
+    // the wrists turn the rope: each hand goes round a very small circle, a little AHEAD of the rope. A rope is not a
+    // hoop: the hands lead and the middle of it trails behind, so it bows, and that bow is what shows it turning.
+    var LAG=JR_LAG*R, hc=[-58,hip[1]-4,14], hy=hc[1]+4*Math.cos(ph+LAG), hz=hc[2]+4*Math.sin(ph+LAG), hand=[hc[0],hy,hz];
+    // over the head it stands tall and narrow, under the feet it is short and wide and brushes the floor
+    var rho=lerp(hc[1]-3.5,198,.5+.5*Math.cos(ph)), bul=.26-.14*Math.cos(ph), N=18, i, t, pts=[], gear=[];
+    for(i=0;i<=N;i++){t=(1-i/N)*Math.PI/2;                    // from the hand in to the middle of the rope
+      var f=Math.pow(Math.cos(t),.8), an=ph+LAG*(1-f);
+      pts.push([58*Math.sin(t)*(1+bul*Math.cos(t)),hy+rho*f*Math.cos(an),hz+rho*f*Math.sin(an)]);}
+    // drawn in short lengths, because part of a bowed rope can be in front of the body while the rest is still behind
+    // it. Each length is in front while it is forward of the hands and behind while it is back of them; it changes
+    // over only above the head or under the feet. From the side the near half is this side of the body, the far half beyond.
+    for(i=0;i<N;i+=3){
+      var seg=pts.slice(i,i+4), zm=(seg[0][2]+seg[3][2])/2-hc[2], fr=zm>=0?700:-700;
+      [-1,1].forEach(function(s){
+        gear.push({t:'g8_path',pts:seg.map(function(q){return [s*q[0],q[1],q[2]];}),col:GO,w:3.5,v:['front','quarter','rear','back'],
+                   d:{front:fr,quarter:fr,rear:-fr,back:-fr}});
+        gear.push({t:'g8_path',pts:seg.map(function(q){return [s*q[0],q[1],q[2]];}),col:s<0?GO:'#8a5a2c',w:3.5,v:['side'],d:{side:s<0?600:-600}});
+      });
+    }
+    return {p:{hip:hip,lean:lean,neck:0,ank:F.ank,footDir:F.fd,kneePole:[-.12,0,1],hand:hand,elbPole:[-.25,-.3,-1],
+               layer:{quarter:{arms:'front'},front:{arms:'front'},rear:{arms:'front'}}},gear:gear};
   }},
 swim:{name:'Swim',okFlip:1,cycle:1,period:1500,views:['side','top'],labels:['Side','From above'],cx:[285,285],ground:[-60,-50],up:1,
   lit:{lats:2,chest:2,delt:1,triceps:1,abs:1,glute:1,quad:1},
