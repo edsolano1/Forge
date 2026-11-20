@@ -265,25 +265,43 @@ dead:{name:'Deadlift',views:['side','back'],cx:[236,240],stand:1,tall:1,
   lit:{glute:2,ham:2,lowback:2,quad:2,traps:1,lats:1,forearm:1,abs:1},
   says:'Backside, thighs and lower back lift it. The grip, upper back and stomach hold on.',
   pose:function(k){
-    // The hips rise on the legs' schedule. The shoulders stay just ahead of the bar until the
-    // last part of the pull, and the back angle is whatever keeps the arms straight to the bar.
-    // The bar rides up the front of the leg: its place is worked out FROM the leg, never set by hand.
-    var hyT=lerp(150,188.6,1-Math.pow(1-k,1.7)), by=lerp(PL,162,k), w=smooth((k-.5)/.5);
-    var lean=60, hz=-60, bz=15, p, dx=2;
-    for(var it=0;it<6;it++){
-      var Sz=lerp(bz+5,-1,w), dz=Sz-bz, Sy=by+Math.sqrt(Math.max(0,ARM*ARM-dz*dz-dx*dx));
-      var c=Math.max(-1,Math.min(1,(Sy-Math.min(188.6,hyT))/B.trunk));
-      lean=Math.acos(c)/R; hz=Sz-B.trunk*Math.sin(lean*R);
-      var hyN=Sy-B.trunk*c, far=Math.sqrt(Math.max(0,177*177-(hyN-B.ankH)*(hyN-B.ankH)-25));
-      if(hz<-far){                              // never further back than the legs can reach:
-        hz=-far; Sz=hz+B.trunk*Math.sin(lean*R); dz=Sz-bz;   // the shoulders come forward instead,
-        Sy=by+Math.sqrt(Math.max(0,ARM*ARM-dz*dz-dx*dx)); hyN=Sy-B.trunk*c;   // and the hips settle to keep the arms on the bar
-      }
-      p={hip:[0,hyN,hz],lean:lean,neck:-lean*.25,ank:[-22,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.15,0,1],
-         hand:[-41,by,bz],elbPole:[-.2,0,-1],layer:{back:{arms:'back',legs:'back'}}};
+    // THE PULL: the hips rise on the legs' schedule, the shoulders stay just ahead of the bar, and the
+    // back angle is whatever keeps the arms straight to it. The bar rides up the front of the leg: its
+    // place is worked out FROM the leg, never set by hand.
+    // THE FINISH: the last third eases into standing tall, and there the bar's height comes from the
+    // arms. Asking for a bar height AND a hip height AND an upright back at once is three demands on
+    // two freedoms, and the solver hopping between them is what shook the hands at the top.
+    var dx=2, by=lerp(PL,150,k), hyT=lerp(134,186,1-Math.pow(1-k,1.7)), bz=15, lean=60, hip=[0,150,-60], p, it;
+    function mk(){return {hip:hip,lean:lean,neck:-lean*.25,ank:[-22,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.15,0,1],
+                          hand:[-41,by,bz],elbPole:[-.2,0,-1],layer:{back:{arms:'back',legs:'back'}}};}
+    function ride(){                            // ease the bar toward the front of the leg at its own height
       var q=FIG.solve(p).side[-1], lo=by<=q.knee[1], a=lo?q.ank:q.knee, b=lo?q.knee:q.hipJ;
       var t=Math.max(0,Math.min(1,(by-a[1])/((b[1]-a[1])||1))), rr=lo?lerp(6.5,11,t):lerp(11,16,t);
-      bz=Math.max(13,a[2]+(b[2]-a[2])*t+rr+5);
+      bz=bz*.5+Math.max(13,a[2]+(b[2]-a[2])*t+rr+5)*.5;
+    }
+    for(it=0;it<24;it++){
+      var Sz=bz+5, Sy=by+Math.sqrt(ARM*ARM-25-dx*dx);
+      var c=Math.max(-1,Math.min(1,(Sy-hyT)/B.trunk));
+      lean=Math.acos(c)/R;
+      var hz=Sz-B.trunk*Math.sin(lean*R), hy=Sy-B.trunk*c;
+      var far=Math.sqrt(Math.max(0,177*177-(hy-B.ankH)*(hy-B.ankH)-25));
+      // nor so far back that the shins tip backward: the knee stays over the foot, easing back as the bar passes it
+      far=Math.min(far,Math.sqrt(Math.max(0,B.thigh*B.thigh-(hy-97)*(hy-97)))-lerp(12,3,smooth(k/.5)));
+      if(hz<-far){                              // never further back than the legs can reach: the shoulders
+        hz=-far; var dz=hz+B.trunk*Math.sin(lean*R)-bz;        // come forward instead, and the hips settle
+        hy=by+Math.sqrt(Math.max(0,ARM*ARM-dz*dz-dx*dx))-B.trunk*c;
+      }
+      hip=[0,hy,hz]; p=mk(); ride();
+    }
+    var w=smooth((k-.66)/.34);
+    if(w>0){
+      hip=[0,lerp(hip[1],189.4,w),lerp(hip[2],-2,w)]; lean=lerp(lean,1.5,w);
+      for(it=0;it<24;it++){
+        var S=S_of(hip,lean), d2=S[2]-bz;
+        by=S[1]-Math.sqrt(Math.max(0,ARM*ARM-d2*d2-dx*dx));
+        p=mk(); ride();
+      }
+      p=mk();
     }
     return {p:p,gear:[{t:'bar',c:[0,by,bz],half:112,r:PL,d:{back:-500}}]};
   }},

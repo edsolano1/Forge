@@ -24,7 +24,7 @@ function segDist(p1,p2,q1,q2){
 var total=0;
 Object.keys(LIFTS).forEach(function(id){
   if(only&&only!==id)return;
-  var L=LIFTS[id],found={},prev=null,prevOrder={};
+  var L=LIFTS[id],found={},prev=null,prevOrder={},prevNow=null,prevVel=null;
   function say(kind,what,k,w){var key=kind+' '+what;if(!found[key])found[key]={k0:k,k1:k,worst:w||0};found[key].k1=k;if(w>found[key].worst)found[key].worst=w;}
   for(var f=0;f<=N;f++){
     var k=f/N,r=L.pose(k),p=r.p,J=FIG.solve(p);
@@ -98,6 +98,11 @@ Object.keys(LIFTS).forEach(function(id){
     });
     // JUMP
     if(prev)[-1,1].forEach(function(s){['knee','elb'].forEach(function(j){var d=len(sub(J.side[s][j],prev.side[s][j]));if(d>9)say('JUMP',(s<0?'right ':'left ')+j+' moved '+d.toFixed(0)+' in one frame',k);});});
+    // JERK: a hand, hip or bar that changes speed sharply between frames reads as a shake
+    var now={hand:J.side[-1].hand,hip:J.H,sho:J.S};(r.gear||[]).forEach(function(g){if(g.t==='bar')now.bar=g.c;});
+    if(prevNow&&prevVel)Object.keys(now).forEach(function(nk){var v=sub(now[nk],prevNow[nk]),dv=len(sub(v,prevVel[nk]||v));if(dv>2.2)say('JERK',nk+' changes speed sharply, by',k,dv);});
+    if(prevNow){prevVel={};Object.keys(now).forEach(function(nk){prevVel[nk]=sub(now[nk],prevNow[nk]);});}
+    prevNow=now;
     prev=J;
   }
   var keys=Object.keys(found);total+=keys.length;
