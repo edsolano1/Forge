@@ -737,11 +737,11 @@ bdip:{name:'Bench Dip',views:['side','rear'],labels:['Side','From behind, off to
                   {t:'line',a:[-96,72,-37],b:[-96,4,-37],w:7,d:{side:-101,rear:19}},
                   {t:'line',a:[96,72,-37],b:[96,4,-37],w:7,v:['rear'],d:{rear:-300}}]};
   }},
-wcurl:{zoom:{s:2.3,on:'hands'},name:'Wrist Curl',views:['quarter','top'],labels:['From the front, off to one side','From above'],cx:[236,190],ground:[80,400],up:1,
+wcurl:{zoom:{s:1.45,on:'hands',views:['top']},name:'Wrist Curl',views:['quarter','top'],labels:['From the front, off to one side','From above'],cx:[236,190],ground:[80,400],up:1,
   lit:{forearm:2},
   says:'The forearm does all of it. Only the hand moves, palms up.',
   pose:function(k){return wristPose(k,-55,52,0);}},
-rwcurl:{zoom:{s:2.3,on:'hands'},name:'Reverse Wrist Curl',views:['quarter','top'],labels:['From the front, off to one side','From above'],cx:[236,190],ground:[80,400],up:1,
+rwcurl:{zoom:{s:1.45,on:'hands',views:['top']},name:'Reverse Wrist Curl',views:['quarter','top'],labels:['From the front, off to one side','From above'],cx:[236,190],ground:[80,400],up:1,
   lit:{forearm:2},
   says:'The top of the forearm does all of it. Only the hand moves, palms down and knuckles up.',
   pose:function(k){return wristPose(k,-50,40,1);}}
