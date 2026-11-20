@@ -115,6 +115,8 @@ function solve(p){
     q.footDir=norm(get('footDir',[-.17,0,1]));
     var ar=ik(q.shoJ,get('hand'),B.uarm,B.farm,get('elbPole',[-.3,-1,-.4]));
     q.elb=ar.mid;q.hand=ar.end;q.armB=ar.bend;
+    if(p.palm||p['palm'+(s<0?'R':'L')])q.palm=norm(get('palm'));       // the way the palm faces
+    if(p.thumb||p['thumb'+(s<0?'R':'L')])q.thumb=norm(get('thumb'));   // the way the thumb points
     J.side[s]=q;
   });
   return J;
@@ -222,7 +224,11 @@ function buildParts(J,V){
     var wr=mix(q.elb,q.hand,B.wrist);
     var fa=limb('farm',q.elb,wr,[8.5,9.2,6.2,5.6],[0,.3,.8,1],mul(q.armB,-1),null,q.elb,10,31);
     lm(fa,'forearm',.3,.24,8,1,true);
-    part('hand',[sph(mix(wr,q.hand,.35),6),sph(q.hand,7.6)],wr,7,far,32).s=s;
+    var hb=[sph(mix(wr,q.hand,.35),6),sph(q.hand,7.6)];
+    if(q.thumb)hb.push(sph(add(q.hand,mul(q.thumb,8.5)),3.6));
+    var hp=part('hand',hb,wr,7,far,32);hp.s=s;
+    if(q.palm){var fdir=norm(sub(q.hand,wr)), sdir=norm(cross(fdir,q.palm));
+      hp.mus.push({key:'palm',c:add(q.hand,mul(q.palm,3.5)),ax:[mul(fdir,5.2),mul(sdir,4.6),mul(q.palm,3)],N:q.palm,sd:''});}
   });
   // the neck sits behind both the trunk and the head, always: left to its own depth it swaps with them mid rep
   parts[1].d=Math.min(parts[0].d,parts[2].d)-.02;
@@ -245,12 +251,14 @@ function drawPart(x,V,P,lit){
   if(P.far||!P.mus.length)return;
   x.save();x.clip(path);
   P.mus.forEach(function(m){
-    if(dot3(norm(m.N),V.v)<-.2)return;
+    var dt=dot3(norm(m.N),V.v);if(dt<-.5)return;
+    var fd=Math.max(0,Math.min(1,(dt+.5)/.4));fd=fd*fd*(3-2*fd);     // turning away it fades, it never blinks off
     var sd=m.sd!=null?m.sd:(P.s?(P.s<0?'R':'L'):'');          // lit:{quad:2} lights both sides, lit:{quadR:2} the right only
     var lv=lit&&(lit[m.key]||(sd&&lit[m.key+sd]));
     x.fillStyle=lv===2?HOT:DEF;
-    x.globalAlpha=lv===2?1:(lv===1?1:1);
+    x.globalAlpha=fd;
     if(lv===1)x.fillStyle="rgba(255,122,26,.42)";
+    if(m.key==='palm')x.fillStyle="rgba(70,48,30,.5)";
     var pts=blobPts(V,m.c,m.ax,20);
     x.beginPath();x.moveTo(pts[0][0],pts[0][1]);for(var i=1;i<pts.length;i++)x.lineTo(pts[i][0],pts[i][1]);x.closePath();x.fill();
   });
