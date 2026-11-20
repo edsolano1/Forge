@@ -11,6 +11,6 @@ L.views.forEach(function(v,i){
     var c=document.createElement('canvas');c.width=c.height=480;c.style.width=c.style.height=(480*Z)+'px';
     var d=document.createElement('div');d.className='c';d.appendChild(c);
     var b=document.createElement('b');b.textContent=id+' '+v+' k='+k.toFixed(2);d.appendChild(b);r.appendChild(d);
-    var p=L.pose(k);FIG.draw(c.getContext('2d'),v,p.p,p.gear,L.lit,L.cx[i],L.ground);}
+    var p=L.pose(k);FIG.draw(c.getContext('2d'),v,p.p,p.gear,L.lit,L.cx[i],L.ground,FIG.zoomOf(L,v));}
 });
 </script>

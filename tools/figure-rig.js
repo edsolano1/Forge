@@ -278,9 +278,11 @@ function gearDepth(V,g){
   if(!g.a||!g.b)return g.c?V.p(g.c)[2]:0;
   return (V.p(g.a)[2]+V.p(g.b)[2])/2;
 }
-function draw(x,kind,pose,gear,lit,cx,ground){
-  x.clearRect(0,0,480,480);
+// zoom: {s:scale, at:[x,y,z]} draws closer in, with that point of the scene held at the middle of the frame
+function draw(x,kind,pose,gear,lit,cx,ground,zoom){
+  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,480,480);
   var V=view(kind,cx==null?240:cx);
+  if(zoom){var zf=V.p(zoom.at);x.translate(240,240);x.scale(zoom.s,zoom.s);x.translate(-zf[0],-zf[1]);}
   x.strokeStyle=LINE;x.lineWidth=6;x.lineCap='round';
   if(kind!=='top'){x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();}
   var J=solve(pose), items=[], handD={};
@@ -303,9 +305,17 @@ function draw(x,kind,pose,gear,lit,cx,ground){
   });
   items.sort(function(a,b){return a.d-b.d||a.o-b.o;});
   items.forEach(function(it){if(it.P)drawPart(x,V,it.P,lit);else drawGear(x,V,it.g);});
+  x.setTransform(1,0,0,1,0,0);
   return J;
 }
-return {draw:draw,solve:solve,B:B,lerp:lerp,add:add,sub:sub,mul:mul,dot:dot3,len:len,norm:norm,cross:cross,mix:mix,hull:hull,poly:poly,ringPts:ringPts,ik:ik,
+// a lift asks for a close up with zoom:{s:2.3,on:'hands'} (or on:[x,y,z]); views:['top'] limits it to some views.
+// The point is worked out ONCE, from the middle of the rep, so the camera never moves.
+function zoomOf(L,kind){
+  var z=L.zoom;if(!z||(z.views&&z.views.indexOf(kind)<0))return null;
+  if(!z._at){var at=z.on;if(at==='hands'||!at){var J=solve(L.pose(.5).p),a=J.side[-1].hand,b=J.side[1].hand;at=[(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2];}z._at=at;}
+  return {s:z.s||2,at:z._at};
+}
+return {zoomOf:zoomOf,draw:draw,solve:solve,B:B,lerp:lerp,add:add,sub:sub,mul:mul,dot:dot3,len:len,norm:norm,cross:cross,mix:mix,hull:hull,poly:poly,ringPts:ringPts,ik:ik,
         view:view,parts:buildParts,blobPts:blobPts,gearDepth:gearDepth,TOR:TOR,gear:GX,col:{INK:INK,FAR:FAR,GO:GO,LINE:LINE,PAD:"#2f2a26"}};
 })();
 
