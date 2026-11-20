@@ -105,6 +105,10 @@ Object.keys(LIFTS).forEach(function(id){
     prevNow=now;
     prev=J;
   }
+  // RUSH: the hands should travel at an even speed through the rep. A stretch much faster than the rest reads as a jerk.
+  var hs=[],hp=null;for(var f2=0;f2<=N;f2++){var hq=FIG.solve(L.pose(f2/N).p).side[-1].hand;if(hp)hs.push(len(sub(hq,hp)));hp=hq;}
+  var mean=hs.reduce(function(a,b){return a+b;},0)/hs.length,peak=Math.max.apply(null,hs);
+  if(peak>mean*1.6)say('RUSH','hands move '+(peak/mean).toFixed(1)+' times their average speed at one point',hs.indexOf(peak)/N);
   var keys=Object.keys(found);total+=keys.length;
   console.log('\n'+L.name+': '+(keys.length?keys.length+' to look at':'clean'));
   keys.forEach(function(key){var e=found[key];console.log('  '+key+(e.worst?', worst '+e.worst.toFixed(0):'')+'   (k '+e.k0.toFixed(2)+(e.k1!==e.k0?' to '+e.k1.toFixed(2):'')+')');});

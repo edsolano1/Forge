@@ -250,7 +250,7 @@ var B=FIG.B, lerp=FIG.lerp, R=Math.PI/180, ARM=B.uarm+B.farm-.6, PL=44;
 function S_of(hip,lean){return [0,hip[1]+B.trunk*Math.cos(lean*R),hip[2]+B.trunk*Math.sin(lean*R)];}
 function smooth(v){v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);}
 return {
-squat:{name:'Back Squat',views:['side','front'],cx:[236,240],stand:1,tall:0,
+squat:{name:'Back Squat',views:['side','front'],cx:[236,240],stand:1,tall:0,up:0,
   lit:{quad:2,glute:2,ham:1,lowback:1,abs:1},
   says:'Thighs and backside do the work. The back and stomach hold you steady.',
   pose:function(k){
@@ -261,10 +261,19 @@ squat:{name:'Back Squat',views:['side','front'],cx:[236,240],stand:1,tall:0,
                hand:[-84,bar[1],bar[2]],elbPole:[-.25,-1,-.35],layer:{front:{arms:'back',legs:'front'}}},
             gear:[{t:'bar',c:bar,half:112,r:PL,d:{front:-500}}]};
   }},
-dead:{name:'Deadlift',views:['side','back'],cx:[236,240],stand:1,tall:1,
+dead:{name:'Deadlift',views:['side','back'],cx:[236,240],stand:1,tall:1,up:1,
   lit:{glute:2,ham:2,lowback:2,quad:2,traps:1,lats:1,forearm:1,abs:1},
   says:'Backside, thighs and lower back lift it. The grip, upper back and stomach hold on.',
   pose:function(k){
+    // the bar climbs at ONE steady speed: the path below is read back by bar height, so no part of the
+    // pull can rush. Without this the bar covered the top third in a fifth of the time, which read as a jerk.
+    var me=this, N=96, i;
+    if(!me.T){me.T=[];for(i=0;i<=N;i++)me.T.push(me.poseS(i/N).gear[0].c[1]);}
+    var y=lerp(me.T[0],me.T[N],k);i=0;while(i<N-1&&me.T[i+1]<y)i++;
+    var f=(y-me.T[i])/((me.T[i+1]-me.T[i])||1);
+    return me.poseS((i+Math.max(0,Math.min(1,f)))/N);
+  },
+  poseS:function(k){
     // THE PULL: the hips rise on the legs' schedule, the shoulders stay just ahead of the bar, and the
     // back angle is whatever keeps the arms straight to it. The bar rides up the front of the leg: its
     // place is worked out FROM the leg, never set by hand.
@@ -293,7 +302,7 @@ dead:{name:'Deadlift',views:['side','back'],cx:[236,240],stand:1,tall:1,
       }
       hip=[0,hy,hz]; p=mk(); ride();
     }
-    var w=smooth((k-.66)/.34);
+    var w=smooth((k-.5)/.5);
     if(w>0){
       hip=[0,lerp(hip[1],189.4,w),lerp(hip[2],-2,w)]; lean=lerp(lean,1.5,w);
       for(it=0;it<24;it++){
@@ -305,7 +314,7 @@ dead:{name:'Deadlift',views:['side','back'],cx:[236,240],stand:1,tall:1,
     }
     return {p:p,gear:[{t:'bar',c:[0,by,bz],half:112,r:PL,d:{back:-500}}]};
   }},
-bench:{name:'Bench Press',views:['side','back'],labels:['Side','From the head end'],cx:[236,240],ground:[60,420],
+bench:{name:'Bench Press',views:['side','back'],labels:['Side','From the head end'],cx:[236,240],ground:[60,420],up:1,
   lit:{chest:2,triceps:2,delt:1},
   says:'The chest and the back of the arms push. The shoulders help.',
   pose:function(k){
@@ -317,7 +326,7 @@ bench:{name:'Bench Press',views:['side','back'],labels:['Side','From the head en
                   {t:'line',a:[0,70,-116],b:[0,4,-116],w:7,d:{side:-101,back:-41}},{t:'line',a:[0,70,36],b:[0,4,36],w:7,d:{side:-101,back:-300}},
                   {t:'bar',c:bar,half:112,r:PL,d:{back:500}}]};
   }},
-row:{name:'Barbell Row',views:['side','back'],cx:[236,240],stand:1,
+row:{name:'Barbell Row',views:['side','back'],cx:[236,240],stand:1,up:1,
   lit:{lats:2,traps:2,biceps:1,delt:1,lowback:1,forearm:1},
   says:'The big muscles of the back pull. The arms and lower back help.',
   pose:function(k){
@@ -327,7 +336,7 @@ row:{name:'Barbell Row',views:['side','back'],cx:[236,240],stand:1,
                hand:[-46,bar[1],bar[2]],elbPole:[-.25,.5,-1]},
             gear:[{t:'bar',c:bar,half:112,r:PL,d:{back:-500}}]};
   }},
-pull:{name:'Lat Pulldown',views:['side','back'],cx:[214,240],ground:[80,400],
+pull:{name:'Lat Pulldown',views:['side','back'],cx:[214,240],ground:[80,400],up:1,
   lit:{lats:2,biceps:1,forearm:1,traps:1,delt:1},
   says:'The wide muscles down the sides of the back. The arms and shoulders help.',
   pose:function(k){
