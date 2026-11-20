@@ -1350,7 +1350,7 @@ sldl:{name:'Single-Leg Romanian Deadlift',views:['side','quarter'],labels:['Side
             gear:[{t:'db',c:hl,ax:[0,0,1],front:9}]};
   }},
 
-nordic:{name:'Nordic Hamstring Curl',views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[180,205],ground:[40,440],up:0,
+nordic:{name:'Nordic Hamstring Curl',views:['side','rear'],labels:['Side','From behind, off to one side'],cx:[180,205],ground:[40,440],up:0,
   lit:{ham:2,glute:1,calf:1},
   says:'The back of the thighs lowers you and holds you. The backside and calves help keep the body in one line.',
   pose:function(k){
@@ -1360,11 +1360,11 @@ nordic:{name:'Nordic Hamstring Curl',views:['side','quarter'],labels:['Side','Fr
     var hand=[-44,S[1]-10*c-46.5*s,S[2]-10*s+46.5*c];           // held ready in front of the chest; they meet the floor at the bottom
     return {p:{hip:hip,lean:th,neck:-lerp(0,16,k),ank:[-17,9,-85.7],kneePole:[0,-1,.4],footDir:[0,-.15,-1],
                hand:hand,elbPole:[-.5,lerp(-1,.6,k),lerp(-.4,-1,k)],
-               layer:{quarter:{legs:'back'}}},     // from in front the trunk is over the thighs it tips past
-            gear:[{t:'box',a:[-36,0,-16],b:[36,5.5,18],d:{side:-100,quarter:-950}},            // something soft under the knees
-                  {t:'line',a:[-46,23,-74],b:[46,23,-74],w:9,col:GREY,d:{side:250,quarter:-960}},            // whatever pins the heels: from in front it is behind the knees
-                  {t:'line',a:[-46,23,-74],b:[-46,3,-74],w:7,d:{side:251,quarter:-961}},
-                  {t:'line',a:[46,23,-74],b:[46,3,-74],w:7,d:{side:-251,quarter:-961}}]};
+               layer:{rear:{legs:'front'}}},     // from behind the legs are nearer than the trunk that tips away
+            gear:[{t:'box',a:[-36,0,-16],b:[36,5.5,18],d:{side:-100,rear:-950}},            // something soft under the knees
+                  {t:'line',a:[-46,23,-74],b:[46,23,-74],w:9,col:GREY,d:{side:250,rear:960}},            // whatever pins the heels: from in front it is behind the knees
+                  {t:'line',a:[-46,23,-74],b:[-46,3,-74],w:7,d:{side:251,rear:961}},
+                  {t:'line',a:[46,23,-74],b:[46,3,-74],w:7,d:{side:-251,rear:961}}]};
   }},
 
 glutebr:{name:'Glute Bridge',views:['side','quarter'],labels:['Side','From the feet, off to one side'],cx:[262,250],ground:[60,420],up:1,
@@ -1646,7 +1646,7 @@ kneeraise:{name:'Hanging Knee Raise',views:['side','quarter'],labels:['Side','Fr
     var ank=[-13,kn[1]+(B.shin-.4)*sd[1],kn[2]+(B.shin-.4)*sd[2]];
     return {p:{hip:hip,lean:lean,neck:lerp(2,8,k),ank:ank,kneePole:[-.02,.3,1],footDir:[0,fp[1]*.92+sd[1]*.38,fp[2]*.92+sd[2]*.38],
                hand:[-62,BY,0],elbPole:[-.3,-1,.6],layer:{quarter:{legs:'front'}}},
-            gear:[{t:'bar',c:[0,BY,0],half:96,r:5,d:{quarter:-500}}]};     // the hands close over the bar
+            gear:[{t:'line',a:[0,6,-110],b:[0,BY,-110],w:10,d:{side:-140,quarter:-600}},{t:'line',a:[0,BY,-110],b:[0,BY,0],w:8,d:{side:-141,quarter:-601}},{t:'line',a:[0,5,-110],b:[0,5,40],w:8,d:{side:-141,quarter:-601}},{t:'bar',c:[0,BY,0],half:96,r:5,d:{quarter:-500}}]};     // the hands close over the bar
   }},
 
 // ---- AB CRUNCH MACHINE. Raised seat, feet hanging, a cushion across the thighs holding them down, a pad on the

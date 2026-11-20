@@ -8,7 +8,7 @@ var PUSH_HZ=-4,PUSH_LEAN=16,PUSH_TH0=100,PUSH_PZ=78;
 // z is the way the lifter faces, x is across the body (the lifter's right is -x).
 var FIG=(function(){
 "use strict";
-var INK="#e8ded2", FAR="#8d8378", GO="#d97b2e", LINE="#3a3632", HOT="#ff7a1a", DEF="rgba(70,48,30,.20)";
+var INK="#e8ded2", FAR="#8d8378", GO="#d97b2e", LINE="#514a43", HOT="#ff7a1a", DEF="rgba(70,48,30,.20)";
 var FLOOR=432;
 // ---- the body. Nothing below this line may set a length of its own. ----
 var B={ankH:12, shin:86, thigh:92, trunk:100, uarm:64, farm:64, wrist:.81, shoW:39, hipW:17, neck:12, headR:[17,23.5,20.5]};
@@ -258,7 +258,7 @@ function drawGear(x,V,g){
     if(g.pts)cs=g.pts.map(function(q){return V.p(q);});      // a slab that is not square to the room: its own corners
     else for(i=0;i<8;i++)cs.push(V.p([i&1?g.a[0]:g.b[0],i&2?g.a[1]:g.b[1],i&4?g.a[2]:g.b[2]]));
     cs=hull(cs);
-    x.fillStyle="#211e1b";x.strokeStyle=LINE;x.lineWidth=4;x.lineJoin='round';
+    x.fillStyle="#2f2a26";x.strokeStyle=LINE;x.lineWidth=4;x.lineJoin='round';
     x.beginPath();cs.forEach(function(q,j){if(j)x.lineTo(q[0],q[1]);else x.moveTo(q[0],q[1]);});x.closePath();x.fill();x.stroke();
   }
 }
@@ -298,7 +298,7 @@ function draw(x,kind,pose,gear,lit,cx,ground){
   return J;
 }
 return {draw:draw,solve:solve,B:B,lerp:lerp,add:add,sub:sub,mul:mul,dot:dot3,len:len,norm:norm,cross:cross,mix:mix,hull:hull,poly:poly,ringPts:ringPts,ik:ik,
-        view:view,parts:buildParts,blobPts:blobPts,gearDepth:gearDepth,TOR:TOR,gear:GX,col:{INK:INK,FAR:FAR,GO:GO,LINE:LINE,PAD:"#211e1b"}};
+        view:view,parts:buildParts,blobPts:blobPts,gearDepth:gearDepth,TOR:TOR,gear:GX,col:{INK:INK,FAR:FAR,GO:GO,LINE:LINE,PAD:"#2f2a26"}};
 })();
 
 // ---------------- the five lifts ----------------
