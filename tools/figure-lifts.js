@@ -517,18 +517,32 @@ function pin(sh,E,hand){return [E[0]-(sh[0]+hand[0])/2,E[1]-(sh[1]+hand[1])/2,E[
 // a point one bone length from a, with a fixed x, swung in the side plane: ang is measured from straight down, forward positive
 function swing(a,x,L,ang){var dx=x-a[0], l=Math.sqrt(L*L-dx*dx);return [x,a[1]-l*Math.cos(ang),a[2]+l*Math.sin(ang)];}
 
-// a dumbbell held by one END with both hands (no fist drawn on the handle): its depth is its own, between the two hands
-FIG.gear.g3_db=function(x,V,g){
-  var ax=FIG.norm(g.ax), HR=14.5, IN=8.5, OUT=23, tw=FIG.dot(ax,V.v), near=tw>=0?1:-1, a, b;
+// a dumbbell with no fist painted on it, so the real hands show. part: 0 all of it, 1 / -1 one head, 2 the handle.
+// inn is half the handle, r the head.
+FIG.gear.g3_dumb=function(x,V,g){
+  var ax=FIG.norm(g.ax), HR=g.r||11.5, IN=g.inn||8.5, OUT=IN+10.5, tw=FIG.dot(ax,V.v), near=tw>=0?1:-1, a, b, pt=g.part||0;
+  var col=g.dim&&V.k==='side'?"#8a5a2c":GO;
   function head(sg){
     var h=FIG.hull(FIG.ringPts(V,g.c,ax,sg*IN,HR).concat(FIG.ringPts(V,g.c,ax,sg*OUT,HR)));
-    FIG.poly(x,h);x.fillStyle=GO;x.fill();x.strokeStyle="#15120f";x.lineWidth=1.6;x.lineJoin='round';x.stroke();
+    FIG.poly(x,h);x.fillStyle=col;x.fill();x.strokeStyle="#15120f";x.lineWidth=1.6;x.lineJoin='round';x.stroke();
     if(tw*sg>.5){var c=V.p(FIG.add(g.c,FIG.mul(ax,sg*OUT)));x.fillStyle="#15171b";x.beginPath();x.arc(c[0],c[1],3,0,7);x.fill();}
   }
-  head(-near);
-  a=V.p(FIG.add(g.c,FIG.mul(ax,-IN)));b=V.p(FIG.add(g.c,FIG.mul(ax,IN)));
-  x.strokeStyle=GO;x.lineWidth=4.5;x.lineCap='butt';x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();
-  head(near);
+  function bar(){
+    a=V.p(FIG.add(g.c,FIG.mul(ax,-IN)));b=V.p(FIG.add(g.c,FIG.mul(ax,IN)));
+    x.strokeStyle=col;x.lineWidth=4.5;x.lineCap='butt';x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();
+  }
+  if(pt===2){bar();return;}
+  if(pt){head(pt);return;}
+  head(-near);bar();head(near);
+};
+// a weight plate on a horn that sticks out sideways: c is the middle of the plate, th half its thickness
+FIG.gear.g3_plate=function(x,V,g){
+  var h=FIG.hull(FIG.ringPts(V,g.c,[1,0,0],-g.th,g.r).concat(FIG.ringPts(V,g.c,[1,0,0],g.th,g.r))), c=V.p(g.c);
+  FIG.poly(x,h);x.fillStyle=GO;x.fill();x.strokeStyle="#15120f";x.lineWidth=1.6;x.lineJoin='round';x.stroke();
+  if(V.k==='side'){
+    x.strokeStyle="rgba(21,18,15,.55)";x.lineWidth=2;x.beginPath();x.arc(c[0],c[1],g.r-6,0,7);x.stroke();
+    x.fillStyle=GREY;x.beginPath();x.arc(c[0],c[1],4,0,7);x.fill();
+  }
 };
 // a flat seat on a post, the lifter's hips over z=0
 function seat(z0,z1,top){
@@ -539,18 +553,22 @@ function seat(z0,z1,top){
 // the wrist curls: the forearm lies along the thigh with the wrist just past the knee, and only the hand moves.
 // This body has no wrist joint, so the grip rides a short arc about where the wrist is: the bone follows part of
 // the way (a few degrees of forearm) and the dumbbell, fist drawn on it, rolls the whole arc.
-function wristPose(k,lo,hi){
+function wristPose(k,lo,hi,rev){
   var hip=[0,112,0], lean=38, sh=sho(hip,lean);
   var E=[-33,127.8,59.5], W=[-31,113.5,109.5];
 
   var e=FIG.norm(FIG.sub(W,E)), up=FIG.norm([0,e[2],-e[1]]), al=lerp(lo,hi,k)*R, hl=B.farm*(1-B.wrist);
   function at(a){return FIG.add(W,FIG.add(FIG.mul(e,hl*Math.cos(a)),FIG.mul(up,hl*Math.sin(a))));}
-  var hand=at(al*.8), c=at(al);
-  return {p:{hip:hip,lean:lean,neck:-24,ank:[-32,B.ankH,92],kneePole:[-.22,1,.6],footDir:[-.15,0,1],
-             // from the front and off to the right, the left shoulder is the far one: its upper arm stays behind the trunk
-             hand:hand,elbPole:pin(sh,E,hand),layer:{quarter:{uarmL:'back'}}},
-          gear:seat(-28,46,92)
-.concat([{t:'db',c:c,ax:[1,0,0]},{t:'db',c:[-c[0],c[1],c[2]],ax:[1,0,0]}])};
+  var hand=at(al*.8), c=at(al), sg=rev?-1:1;
+  // the palm turns with the hand: square to it, facing up for the curl and down for the reverse
+  var palm=FIG.mul(FIG.add(FIG.mul(e,-Math.sin(al)),FIG.mul(up,Math.cos(al))),sg);
+  c=FIG.add(c,FIG.mul(palm,4.5));      // the handle lies IN the palm: a little to the palm side of the middle of the hand
+  // seen from above, a palm up hand has the handle lying across it (handle drawn over the hand);
+  // a palm down hand is over the handle (handle drawn under it)
+  function db(x){return {t:'g3_dumb',c:[x,c[1],c[2]],ax:[1,0,0],inn:10.5,r:10,dim:x>0,d:{side:-x+12,top:c[1]+sg*8,quarter:-x*.616+c[2]*.788+sg*6}};}
+  return {p:{hip:hip,lean:lean,neck:-24,ank:[-32,B.ankH,66],kneePole:[-.22,1,.6],footDir:[-.15,0,1],
+             hand:hand,elbPole:pin(sh,E,hand),palm:palm,thumb:[-sg,0,0],layer:{quarter:{uarmL:'back'}}},      // palms up the thumbs are outside, palms down inside
+          gear:seat(-28,46,92).concat([db(c[0]),db(-c[0])])};
 }
 
 Object.assign(LIFTS,{
@@ -571,8 +589,12 @@ sdbcurl:{name:'Seated Dumbbell Curl',views:['side','front'],cx:[214,240],ground:
   says:'The front of the arm does the work. Sitting against the pad stops the body from helping.',
   pose:function(k){
     var hip=[0,112,0], lean=-5, sh=sho(hip,lean), u=U(lean), n=Nn(lean);
-    var E=[-47,sh[1]-63.4,sh[2]+3], th=lerp(6,134,k)*R;
-    var hand=swing(E,-54,B.farm,th);
+    // The lit front of the arm faces opposite the way the elbow points. With the hand straight under the elbow the
+    // elbow pointed a hair toward the camera, so the muscle faced a hair away from it and sat right on the edge of
+    // being drawn. The hand now rides a little wider than the elbow, in step with the bend, so the muscle faces
+    // the side camera by the same small amount from the bottom to the top. Ten degrees of bend is kept at the bottom.
+    var E=[-45,sh[1]-63.4,sh[2]+3], th=lerp(10,134,k)*R;
+    var hand=swing(E,2*(E[0]-.1*B.farm*Math.sin(th/2))-sh[0],B.farm,th);
     var a=[0,hip[1]-n[1]*27-u[1]*18,hip[2]-n[2]*27-u[2]*18], b=[0,hip[1]-n[1]*27+u[1]*128,hip[2]-n[2]*27+u[2]*128];
     return {p:{hip:hip,lean:lean,neck:5,ank:[-22,B.ankH,92],kneePole:[-.05,1,.6],footDir:[-.1,0,1],
                hand:hand,elbPole:pin(sh,E,hand),layer:{front:{arms:'front'}}},
@@ -603,8 +625,11 @@ cbcurl:{name:'Cable Bicep Curl',views:['side','front'],cx:[196,240],ground:[80,4
   says:'The front of the arm does the work, and the cable keeps pulling all the way down.',
   pose:function(k){
     var hip=[0,188.3,0], lean=1, sh=sho(hip,lean);
-    var E=[-42,sh[1]-63.6,sh[2]+6], th=lerp(15,138,k)*R;
-    var hand=swing(E,-40,B.farm,th), bar=[0,hand[1],hand[2]], PU=[0,17,112];
+    // elbows at the sides, hands a touch wider on the bar: the elbow then points a little IN, never out toward the
+    // side camera, so the lit front of the arm faces that camera the whole way (see sdbcurl)
+    // The elbow tucks in a touch as the arm bends, by just enough that the muscle faces the camera the same all the way.
+    var th=lerp(15,138,k)*R, E=[(sh[0]-50)/2+.11*B.farm*Math.sin(th/2),sh[1]-63.6,sh[2]+6];
+    var hand=swing(E,-50,B.farm,th), bar=[0,hand[1],hand[2]], PU=[0,17,112];
     return {p:{hip:hip,lean:lean,neck:0,ank:[-22,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.2,0,1],
                hand:hand,elbPole:pin(sh,E,hand),layer:{front:{arms:'front'}}},
             // the low pulley tower stands in front of the lifter: it is shown from the side only (from the front
@@ -614,7 +639,7 @@ cbcurl:{name:'Cable Bicep Curl',views:['side','front'],cx:[196,240],ground:[80,4
                   {t:'line',a:[0,5,96],b:[0,5,170],w:8,v:['side'],d:{side:-112}},
                   {t:'box',a:[-9,8,104],b:[9,26,122],d:{side:-108,front:380}},
                   {t:'line',a:PU,b:bar,w:4,d:{side:-5,front:400}},        // the cable: mid line, behind the near arm, in front of the legs from the front
-                  {t:'bar',c:bar,half:52,r:5,d:{front:500}}]};
+                  {t:'bar',c:bar,half:60,r:5,d:{front:500}}]};
   }},
 preacher:{name:'Preacher Curl Machine',views:['side','front'],cx:[190,240],ground:[70,410],up:1,
   lit:{biceps:2,forearm:1},
@@ -630,7 +655,21 @@ preacher:{name:'Preacher Curl Machine',views:['side','front'],cx:[190,240],groun
     function onPad(t,o){return [0,sh[1]+d[1]*t+nU[1]*o,sh[2]+d[2]*t+nU[2]*o];}
     var T0=30,T1=80, pts=[];
     [-44,44].forEach(function(px){[T0,T1].forEach(function(t){[-10,-30].forEach(function(o){var q=onPad(t,o);pts.push([px,q[1],q[2]]);});});});
-    var pm=onPad(58,-30), Q=[0,hand[1]+out[1]*26,hand[2]+out[2]*26], hc=[0,hand[1],hand[2]];
+    // a plate loaded machine. The lever turns on the same line as the elbows, one beam each side outside the arms.
+    // Each beam runs out past the hands, a little under the forearm, to a horn that sticks out sideways with a
+    // plate on it; a short riser brings the handle up off the beam to the hands.
+    var pm=onPad(58,-30), hc=[0,hand[1],hand[2]], bb=a-20*R, wd=[0,Math.sin(bb),Math.cos(bb)];
+    var Q=[0,E[1]+wd[1]*59.9,E[2]+wd[2]*59.9], Wc=[0,E[1]+wd[1]*90,E[2]+wd[2]*90], g=[];
+    function X(q,x){return [x,q[1],q[2]];}
+    [-1,1].forEach(function(sx){
+      var x=54*sx, v=sx<0?['side','front']:['front'];      // from the side only the near lever shows: the far one is exactly behind it
+      // the near lever is outside the near arm, so it is in front of it from the side; from the front the whole lever is nearer than the lifter
+      g.push({t:'line',a:X(E,x),b:X(Wc,x),w:6,col:GREY,v:v,d:{side:60,front:1040}},
+             {t:'line',a:X(Q,x),b:X(hc,x),w:6,col:GREY,v:v,d:{side:60,front:1040}},
+             {t:'line',a:X(E,x),b:X(E,x),w:13,col:GREY,v:['side'],d:{side:61}},
+             {t:'line',a:X(Wc,x),b:X(Wc,x+30*sx),w:5,col:GREY,v:v,d:{side:72,front:1045}},
+             {t:'g3_plate',c:X(Wc,x+14*sx),th:5,r:24,v:v,d:{side:70,front:1050}});
+    });
     return {p:{hip:hip,lean:lean,neck:-10,shrug:shr,ank:[-27,B.ankH,84],kneePole:[-.3,1,.5],footDir:[-.2,0,1],
                hand:hand,elbPole:pin(sh,E,hand),layer:{front:{arms:'front'}}},
             gear:seat(-32,26,92).concat([
@@ -639,30 +678,27 @@ preacher:{name:'Preacher Curl Machine',views:['side','front'],cx:[190,240],groun
                   {t:'box',a:pts[0],b:pts[7],pts:pts,v:['front'],d:{front:300}},
                   {t:'line',a:pm,b:[0,4,pm[2]],w:8,d:{side:-101,front:-402}},
                   {t:'line',a:[0,5,-20],b:[0,5,pm[2]+26],w:8,v:['side'],d:{side:-105}},
-                  // the lever turns on the same line as the elbows and carries the plates and the handle
-                  {t:'line',a:[-52,E[1],E[2]],b:[-52,Q[1],Q[2]],w:6,col:GREY,v:['side'],d:{side:60}},
-                  {t:'line',a:[-52,Q[1],Q[2]],b:[-52,hc[1],hc[2]],w:6,col:GREY,v:['side'],d:{side:60}},
-                  {t:'line',a:[-52,E[1],E[2]],b:[-52,Q[1],Q[2]],w:6,col:GREY,v:['front'],d:{front:1040}},
-                  {t:'line',a:[52,E[1],E[2]],b:[52,Q[1],Q[2]],w:6,col:GREY,v:['front'],d:{front:1040}},
-                  {t:'bar',c:Q,half:66,r:14,d:{front:1050}},
-                  {t:'bar',c:hc,half:52,r:5,d:{front:1100}}])};
+                  // the handle the hands hold: in front of the pad, behind the fists that grip it
+                  {t:'bar',c:hc,half:54,r:5,d:{front:500}}]).concat(g)};
   }},
 skull:{name:'Dumbbell Skull Crusher',views:['side','rear'],labels:['Side','From the head end, off to one side'],cx:[250,216],ground:[60,420],up:1,
   lit:{triceps:2},
   says:'The back of the arm does all of it. Only the elbows bend.',
   pose:function(k){
     var hip=[0,108,44], lean=-90, sh=sho(hip,lean);
-    var E=swing(sh,-30,B.uarm,-160*R);                       // the upper arm tips a little past upright toward the head, and stays
-    var ph=lerp(128,12,k)*R, hand=swing(E,-9,B.farm,-(180*R-ph));
-    var fm=[0,Math.cos(ph),-Math.sin(ph)];
-    // one dumbbell, held by its top end in both hands, in line with the forearms
-    var c=[0,hand[1]+fm[1]*3,hand[2]+fm[2]*3];
-
+    var E=swing(sh,-30,B.uarm,-168*R);                       // the upper arm stands a little past upright toward the head, and stays
+    var ph=lerp(124,12,k)*R, hand=swing(E,-8,B.farm,-(180*R-ph));
+    // one dumbbell in both hands: the two fists side by side on the handle, a head clear either side of them
+    var c=[0,hand[1],hand[2]], f=38*R, vr=[-Math.sin(f),0,-Math.cos(f)];
+    function rd(x,o){return x*vr[0]+c[2]*vr[2]+o;}
     return {p:{hip:hip,lean:lean,neck:0,ank:[-36,B.ankH,124],kneePole:[-.1,1,.5],footDir:[-.2,0,1],
                hand:hand,elbPole:pin(sh,E,hand)},
             gear:[{t:'box',a:[-30,74,-140],b:[30,88,54],d:{side:-100,rear:-200}},        // the bench is under the whole body in both views
                   {t:'line',a:[0,70,-116],b:[0,4,-116],w:7,d:{side:-101,rear:-201}},{t:'line',a:[0,70,36],b:[0,4,36],w:7,d:{side:-101,rear:-201}},
-                  {t:'g3_db',c:c,ax:fm}]};
+                  // far head, then the far hand, the handle, the near hand, the near head: each at its own true depth
+                  {t:'g3_dumb',c:c,ax:[1,0,0],inn:16,r:13,part:1,d:{side:-40,rear:rd(22,0)}},
+                  {t:'g3_dumb',c:c,ax:[1,0,0],inn:16,r:13,part:2,d:{side:0,rear:rd(0,0)}},
+                  {t:'g3_dumb',c:c,ax:[1,0,0],inn:16,r:13,part:-1,d:{side:40,rear:rd(-22,6)}}]};
   }},
 dip:{name:'Assisted Dip',views:['side','rear'],labels:['Side','From behind, off to one side'],cx:[226,214],ground:[70,410],up:1,
   lit:{triceps:2,chest:1,delt:1},
@@ -701,15 +737,14 @@ bdip:{name:'Bench Dip',views:['side','rear'],labels:['Side','From behind, off to
                   {t:'line',a:[-96,72,-37],b:[-96,4,-37],w:7,d:{side:-101,rear:19}},
                   {t:'line',a:[96,72,-37],b:[96,4,-37],w:7,v:['rear'],d:{rear:-300}}]};
   }},
-wcurl:{name:'Wrist Curl',views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[196,236],ground:[80,400],up:1,
+wcurl:{name:'Wrist Curl',views:['quarter','top'],labels:['From the front, off to one side','From above'],cx:[236,190],ground:[80,400],up:1,
   lit:{forearm:2},
-  says:'The forearm does all of it. Only the hand moves.',
-  pose:function(k){return wristPose(k,-55,52);}},
-rwcurl:{name:'Reverse Wrist Curl',views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[196,236],ground:[80,400],up:1,
+  says:'The forearm does all of it. Only the hand moves, palms up.',
+  pose:function(k){return wristPose(k,-55,52,0);}},
+rwcurl:{name:'Reverse Wrist Curl',views:['quarter','top'],labels:['From the front, off to one side','From above'],cx:[236,190],ground:[80,400],up:1,
   lit:{forearm:2},
-  says:'The top of the forearm does all of it. Only the hand moves, knuckles up.',
-  pose:function(k){return wristPose(k,-50,40)
-;}}
+  says:'The top of the forearm does all of it. Only the hand moves, palms down and knuckles up.',
+  pose:function(k){return wristPose(k,-50,40,1);}}
 });
 })();
 
@@ -953,17 +988,19 @@ FIG.gear.g5_plate=function(x,V,g){
 };
 // one dumbbell held by its top end in both hands: the same dumbbell the core draws, without the fist on the handle
 FIG.gear.g5_db=function(x,V,g){
-  var ax=FIG.norm(g.ax), e1=FIG.norm(FIG.cross(ax,Math.abs(ax[1])>.9?[1,0,0]:[0,1,0])), e2=FIG.cross(ax,e1), HR=11.5, IN=8.5, OUT=19;
+  var ax=FIG.norm(g.ax), e1=FIG.norm(FIG.cross(ax,Math.abs(ax[1])>.9?[1,0,0]:[0,1,0])), e2=FIG.cross(ax,e1), HR=g.hr||11.5, IN=g.inn||8.5, OUT=g.out||19;
   var tw=FIG.dot(ax,V.v), near=tw>=0?1:-1, a, b;
   function ring(off){var o=[],i,t;for(i=0;i<18;i++){t=i/18*6.2832;
     o.push(V.p(FIG.add(FIG.add(g.c,FIG.mul(ax,off)),FIG.add(FIG.mul(e1,HR*Math.cos(t)),FIG.mul(e2,HR*Math.sin(t))))));}return o;}
   function head(sg){
-    FIG.poly(x,FIG.hull(ring(sg*IN).concat(ring(sg*OUT))));
+    var pts=ring(sg*IN).concat(ring(sg*OUT));
+    if(g.bev){HR-=g.bev;pts=pts.concat(ring(sg*(IN-g.bev)),ring(sg*(OUT+g.bev)));HR+=g.bev;}   // a big bell has rounded edges
+    FIG.poly(x,FIG.hull(pts));
     x.fillStyle=GO;x.fill();x.strokeStyle="#15120f";x.lineWidth=1.6;x.lineJoin='round';x.stroke();
   }
   head(-near);
   a=V.p(FIG.add(g.c,FIG.mul(ax,-IN)));b=V.p(FIG.add(g.c,FIG.mul(ax,IN)));
-  x.strokeStyle=GO;x.lineWidth=4.5;x.lineCap='butt';x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();
+  x.strokeStyle=GO;x.lineWidth=g.hw||4.5;x.lineCap='butt';x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();
   head(near);
 };
 
@@ -1065,12 +1102,15 @@ sumo:{name:'Dumbbell Sumo Squat',views:['front','quarter'],labels:['Front','From
     // feet wide and turned out; the knees go out over the toes, so the hips only need to go a little way back
     var lean=lerp(3,22,k), hip=[0,lerp(180.4,104,k),lerp(2,-38,k)], S=S_of(hip,lean);
     // standing, the bell hangs in front of the thighs; at the bottom the thighs have gone out sideways and it hangs under the shoulders
-    var hz=lerp(hip[2]+30,S[2]+6,smooth(k/.6)), dz=hz-S[2];
-    var hand=[-8,S[1]-Math.sqrt(124*124-31*31-dz*dz),hz], c=[0,hand[1]-13,hand[2]];
+    var hz=lerp(hip[2]+30,S[2]+6,smooth(k/.8)), dz=hz-S[2];
+    // a heavy bell: heads 40 across (the lifter's head is 34 to 40), 26 deep, an 18 handle showing between them. The hands
+    // cup the two sides of the TOP head, low on it, so the head shows between and above them and the handle and the
+    // bottom head hang below. Lowest point of the bell: hand - 53.
+    var hand=[-21,S[1]-Math.sqrt(124*124-18*18-dz*dz),hz], c=[0,hand[1]-18,hand[2]];
     return {p:{hip:hip,lean:lean,neck:-lean*.55,ank:[-72,B.ankH,0],kneePole:[-1,0,.62],footDir:[-.7,0,.7],
                hand:hand,elbPole:[-1,-.1,-.5],layer:{front:{arms:'front',legs:'back'},quarter:{farmL:'front',handL:'front',farmR:'front',handR:'front',uarmR:'front'}}},
             // the bell hangs on the centre line between the two hands that cup its top end
-            gear:[{t:'g5_db',c:c,ax:[0,1,0],d:{front:hand[2]-9,quarter:.788*hand[2]-1}}]};
+            gear:[{t:'g5_db',c:c,ax:[0,1,0],hr:20,inn:10,out:32,bev:3,hw:9,d:{front:hand[2]-9,quarter:.788*hand[2]-1}}]};
   }},
 hack:{name:'Hack Squat',views:['side','front'],cx:[282,240],ground:[60,420],up:1,
   lit:{quad:2,glute:1},
@@ -1135,18 +1175,22 @@ lpress:{name:'Machine Leg Press',views:['side','top'],labels:['Side','From above
                   {t:'line',a:[-66,30,PZ+16],b:[66,30,PZ+16],w:7,col:GREY,v:['top'],d:{top:-15}},
                   {t:'line',a:[-58,150,PZ+4],b:[58,150,PZ+4],w:9,col:GO,v:['top'],d:{top:150}}]};
   }},
-lunge:{name:'Walking Lunge',cycle:1,period:3400,views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[236,232],ground:[50,430],
+lunge:{name:'Walking Lunge',cycle:1,period:6800,views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[236,232],ground:[50,430],
   lit:{quad:2,glute:2,ham:1,calf:1},
   says:'Thighs and backside do the work, mostly on the front leg. The back leg and calves steady you.',
   pose:function(k){
-    k=k-Math.floor(k);
+    // one loop is two strides: the right leg steps and lunges, then the same stride mirrored for the left leg
+    k=k-Math.floor(k);k*=2;var m=k>=1;if(m)k-=1;
     var w=lungeWorld(k), hip=[0,w.hy,0], S=S_of(hip,w.lean), z0=w.hz;
     var hand=[-53,S[1]-124.5,S[2]+1];
-    return {p:{hip:hip,lean:w.lean,neck:-w.lean*.5,
-               ankR:[w.rA[0],w.rA[1],w.rA[2]-z0],ankL:[w.lA[0],w.lA[1],w.lA[2]-z0],
-               kneePoleR:[-.08,0,1],kneePoleL:[.08,w.pl,1],footDirR:w.rF,footDirL:w.lF,
-               hand:hand,elbPole:[0,0,-1],layer:{quarter:{thighL:'back'}}},
-            gear:dbs(hand,[0,0,1])};
+    var lead=[w.rA[0],w.rA[1],w.rA[2]-z0], trail=[w.lA[0],w.lA[1],w.lA[2]-z0], q;
+    function fx(v){return [-v[0],v[1],v[2]];}
+    if(!m)q={ankR:lead,ankL:trail,kneePoleR:[-.08,0,1],kneePoleL:[.08,w.pl,1],footDirR:w.rF,footDirL:w.lF};
+    else q={ankL:fx(lead),ankR:fx(trail),kneePoleL:[.08,0,1],kneePoleR:[-.08,w.pl,1],footDirL:fx(w.rF),footDirR:fx(w.lF)};
+    q.hip=hip;q.lean=w.lean;q.neck=-w.lean*.5;q.hand=hand;q.elbPole=[0,0,-1];
+    // seen from off to the right, the left thigh is the far one in both strides: it stays behind the trunk and the right thigh
+    q.layer={quarter:{thighL:'back'}};
+    return {p:q,gear:dbs(hand,[0,0,1])};
   }},
 stepup:{name:'Dumbbell Step-Up',views:['side','front'],cx:[206,240],ground:[60,420],tall:1,up:1,
   lit:{gluteR:2,quadR:2,hamR:1,calfR:1},
