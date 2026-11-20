@@ -193,7 +193,7 @@ function buildParts(J,V){
     var sh=limb('shin',q.knee,q.ank,[10.5,11.5,8.5,6.5],[0,.3,.7,1],q.legF,[0,-3,-1,0],q.knee,12,21);
     lm(sh,'calf',.3,.24,11,-1);
     var fd=q.footDir, dn=[0,-1,0];
-    part('foot',[sph(add(add(q.ank,mul(fd,-5)),mul(dn,5)),7),sph(add(add(q.ank,mul(fd,20)),mul(dn,6.5)),5.5),sph(add(add(q.ank,mul(fd,31)),mul(dn,7.6)),4.4)],
+    part('foot',[sph(add(add(q.ank,mul(fd,-5)),mul(dn,5)),7),sph(add(add(q.ank,mul(fd,23)),mul(dn,6.3)),5.7),sph(add(add(q.ank,mul(fd,36)),mul(dn,7.4)),4.6)],
          q.ank,8,far,22);
     var ua=limb('uarm',q.shoJ,q.elb,[12.5,10.5,8.5],[0,.45,1],mul(q.armB,-1),null,q.shoJ,15,30);
     ua.mus.push({key:'delt',c:q.shoJ,ax:[[11.5,0,0],[0,11.5,0],[0,0,11.5]],N:V.v});
@@ -237,11 +237,11 @@ function drawGear(x,V,g){
   if(g.t==='bar'){                               // a loaded bar lying across the body
     c=V.p(g.c);
     if(V.k==='side'){
-      if(g.end){x.fillStyle=GO;x.beginPath();x.arc(c[0],c[1],g.r>8?6:5,0,7);x.fill();}
-      else if(g.r>8){
-        x.fillStyle="#15171b";x.beginPath();x.arc(c[0],c[1],g.r,0,7);x.fill();
+      if(g.r>8){
+        x.fillStyle="rgba(18,16,14,.62)";x.beginPath();x.arc(c[0],c[1],g.r,0,7);x.fill();
         x.strokeStyle=GO;x.lineWidth=7;x.beginPath();x.arc(c[0],c[1],g.r-3.5,0,7);x.stroke();
       }
+      x.fillStyle=GO;x.beginPath();x.arc(c[0],c[1],g.r>8?6:5,0,7);x.fill();
     }else{
       x.strokeStyle=GO;x.lineWidth=7;x.lineCap='round';
       x.beginPath();x.moveTo(c[0]-g.half,c[1]);x.lineTo(c[0]+g.half,c[1]);x.stroke();
@@ -259,7 +259,7 @@ function drawGear(x,V,g){
   }
 }
 function gearDepth(V,g){
-  if(g.t==='bar')return V.k==='side'?(g.end?200:-200):V.p(g.c)[2];
+  if(g.t==='bar'){if(V.k==='side')return 200;if(g.d&&g.d[V.k]!=null)return g.d[V.k];return V.p(g.c)[2];}
   if(g.d!=null)return g.d[V.k]!=null?g.d[V.k]:0;
   return (V.p(g.a)[2]+V.p(g.b)[2])/2;
 }
@@ -269,82 +269,105 @@ function draw(x,kind,pose,gear,lit,cx,ground){
   x.strokeStyle=LINE;x.lineWidth=6;x.lineCap='round';
   x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();
   var J=solve(pose), items=[];
-  buildParts(J,V).forEach(function(P){items.push({d:P.d,o:P.o,P:P});});
+  var lay=pose.layer&&pose.layer[kind];
+  buildParts(J,V).forEach(function(P){
+    if(lay){
+      var grp=P.o>=30?'arms':(P.o>=20?'legs':null);
+      if(grp&&lay[grp])P.d=(lay[grp]==='front'?1:-1)*(grp==='arms'?1000:900);
+    }
+    items.push({d:Math.round(P.d*50)/50,o:P.o,P:P});
+  });
   (gear||[]).forEach(function(g){
     items.push({d:gearDepth(V,g),o:g.t==='bar'?99:0,g:g});
-    if(g.t==='bar'&&V.k==='side'){var e={};for(var q in g)e[q]=g[q];e.end=1;items.push({d:200,o:99,g:e});}
   });
   items.sort(function(a,b){return a.d-b.d||a.o-b.o;});
   items.forEach(function(it){if(it.P)drawPart(x,V,it.P,lit);else drawGear(x,V,it.g);});
   return J;
 }
-return {draw:draw,solve:solve,B:B,lerp:lerp,add:add,mul:mul};
+return {draw:draw,solve:solve,B:B,lerp:lerp,add:add,mul:mul,view:view,parts:buildParts,blobPts:blobPts,gearDepth:gearDepth,TOR:TOR};
 })();
 
 // ---------------- the five lifts ----------------
+// stand: a standing lift, so the bar must stay over the middle of the foot.
+// tall: the end of the rep (k) where the lifter stands fully upright.
 var LIFTS=(function(){
 "use strict";
-var B=FIG.B, lerp=FIG.lerp, R=Math.PI/180, ARM=B.uarm+B.farm-.6;
+var B=FIG.B, lerp=FIG.lerp, R=Math.PI/180, ARM=B.uarm+B.farm-.6, PL=44;
 function S_of(hip,lean){return [0,hip[1]+B.trunk*Math.cos(lean*R),hip[2]+B.trunk*Math.sin(lean*R)];}
+function smooth(v){v=Math.max(0,Math.min(1,v));return v*v*(3-2*v);}
 return {
-squat:{name:'Back Squat',views:['side','front'],cx:[236,240],
+squat:{name:'Back Squat',views:['side','front'],cx:[236,240],stand:1,tall:0,
   lit:{quad:2,glute:2,ham:1,lowback:1,abs:1},
   says:'Thighs and backside do the work. The back and stomach hold you steady.',
   pose:function(k){
-    var lean=lerp(3,40,k), hip=[0,lerp(187,82,k),lerp(-2,-50,k)];
+    var lean=lerp(6,40,k), hip=[0,lerp(188.3,89,k),lerp(6,-50,Math.pow(k,.85))];
     var S=S_of(hip,lean), n=[0,-Math.sin(lean*R),Math.cos(lean*R)], u=[0,Math.cos(lean*R),Math.sin(lean*R)];
-    var bar=[0,S[1]+u[1]*3-n[1]*14,S[2]+u[2]*3-n[2]*14];
-    return {p:{hip:hip,lean:lean,neck:-lean*.55,ank:[-31,B.ankH,0],kneePole:[-.42,0,1],footDir:[-.36,0,1],
-               hand:[-60,bar[1],bar[2]],elbPole:[-.25,-1,-.35]},
-            gear:[{t:'bar',c:bar,half:104,r:40}]};
+    var bar=[0,S[1]+u[1]*5-n[1]*15,S[2]+u[2]*5-n[2]*15];
+    return {p:{hip:hip,lean:lean,neck:-lean*.5,ank:[-36,B.ankH,0],kneePole:[-.5,0,1],footDir:[-.5,0,1],
+               hand:[-84,bar[1],bar[2]],elbPole:[-.25,-1,-.35],layer:{front:{arms:'back',legs:'front'}}},
+            gear:[{t:'bar',c:bar,half:112,r:PL,d:{front:-500}}]};
   }},
-dead:{name:'Deadlift',views:['side','back'],cx:[236,240],
-  lit:{glute:2,ham:2,lowback:2,quad:1,traps:1,lats:1,forearm:1},
-  says:'Backside, back of the thighs and lower back. The grip and upper back hold on.',
+dead:{name:'Deadlift',views:['side','back'],cx:[236,240],stand:1,tall:1,
+  lit:{glute:2,ham:2,lowback:2,quad:2,traps:1,lats:1,forearm:1,abs:1},
+  says:'Backside, thighs and lower back lift it. The grip, upper back and stomach hold on.',
   pose:function(k){
-    var lean=lerp(67,2,k), hz=lerp(-66,-2,k), bz=lerp(14,18,k), by=lerp(40,162,k);
-    var Sz=hz+B.trunk*Math.sin(lean*R), dz=Sz-bz, dx=9;
-    var Sy=by+Math.sqrt(Math.max(0,ARM*ARM-dz*dz-dx*dx));
-    var hy=Math.min(187,Sy-B.trunk*Math.cos(lean*R));
-    return {p:{hip:[0,hy,hz],lean:lean,neck:-lean*.45,ank:[-19,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.12,0,1],
-               hand:[-30,by,bz],elbPole:[-.2,0,-1]},
-            gear:[{t:'bar',c:[0,by,bz],half:104,r:40}]};
+    // The hips rise on the legs' schedule. The shoulders stay just ahead of the bar until the
+    // last part of the pull, and the back angle is whatever keeps the arms straight to the bar.
+    // The bar rides up the front of the leg: its place is worked out FROM the leg, never set by hand.
+    var hyT=lerp(150,188.6,1-Math.pow(1-k,1.7)), by=lerp(PL,162,k), w=smooth((k-.5)/.5);
+    var lean=60, hz=-60, bz=15, p, dx=2;
+    for(var it=0;it<6;it++){
+      var Sz=lerp(bz+5,-1,w), dz=Sz-bz, Sy=by+Math.sqrt(Math.max(0,ARM*ARM-dz*dz-dx*dx));
+      var c=Math.max(-1,Math.min(1,(Sy-Math.min(188.6,hyT))/B.trunk));
+      lean=Math.acos(c)/R; hz=Sz-B.trunk*Math.sin(lean*R);
+      var hyN=Sy-B.trunk*c, far=Math.sqrt(Math.max(0,177*177-(hyN-B.ankH)*(hyN-B.ankH)-25));
+      if(hz<-far){                              // never further back than the legs can reach:
+        hz=-far; Sz=hz+B.trunk*Math.sin(lean*R); dz=Sz-bz;   // the shoulders come forward instead,
+        Sy=by+Math.sqrt(Math.max(0,ARM*ARM-dz*dz-dx*dx)); hyN=Sy-B.trunk*c;   // and the hips settle to keep the arms on the bar
+      }
+      p={hip:[0,hyN,hz],lean:lean,neck:-lean*.25,ank:[-22,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.15,0,1],
+         hand:[-41,by,bz],elbPole:[-.2,0,-1],layer:{back:{arms:'back',legs:'back'}}};
+      var q=FIG.solve(p).side[-1], lo=by<=q.knee[1], a=lo?q.ank:q.knee, b=lo?q.knee:q.hipJ;
+      var t=Math.max(0,Math.min(1,(by-a[1])/((b[1]-a[1])||1))), rr=lo?lerp(6.5,11,t):lerp(11,16,t);
+      bz=Math.max(13,a[2]+(b[2]-a[2])*t+rr+5);
+    }
+    return {p:p,gear:[{t:'bar',c:[0,by,bz],half:112,r:PL,d:{back:-500}}]};
   }},
 bench:{name:'Bench Press',views:['side','back'],labels:['Side','From the head end'],cx:[236,240],ground:[60,420],
-  lit:{chest:2,delt:1,triceps:1},
-  says:'The chest pushes. The shoulders and the back of the arms help.',
+  lit:{chest:2,triceps:2,delt:1},
+  says:'The chest and the back of the arms push. The shoulders help.',
   pose:function(k){
-    var hip=[0,138,44], lean=-87, S=S_of(hip,lean);
-    var bar=[0,lerp(168,S[1]+ARM-5,k),lerp(-28,S[2]+2,k)];
-    return {p:{hip:hip,lean:lean,neck:0,ank:[-36,B.ankH,128],kneePole:[-.1,1,.5],footDir:[-.2,0,1],
-               hand:[-72,bar[1],bar[2]],elbPole:[-.6,-1,.5]},
-            gear:[{t:'box',a:[-30,104,-134],b:[30,118,70],d:{side:-100,back:-40,front:-200}},
-                  {t:'line',a:[0,100,-112],b:[0,4,-112],w:7,d:{side:-101,back:-41}},{t:'line',a:[0,100,50],b:[0,4,50],w:7,d:{side:-101,back:-300}},
-                  {t:'bar',c:bar,half:104,r:40}]};
+    var hip=[0,108,44], lean=-90, S=S_of(hip,lean);
+    var bar=[0,lerp(135.5,S[1]+ARM-5,k),lerp(-28,S[2]+2,k)];
+    return {p:{hip:hip,lean:lean,neck:0,ank:[-36,B.ankH,124],kneePole:[-.1,1,.5],footDir:[-.2,0,1],
+               hand:[-76,bar[1],bar[2]],elbPole:[-.35,-1,.5]},
+            gear:[{t:'box',a:[-30,74,-140],b:[30,88,54],d:{side:-100,back:-40,front:-200}},
+                  {t:'line',a:[0,70,-116],b:[0,4,-116],w:7,d:{side:-101,back:-41}},{t:'line',a:[0,70,36],b:[0,4,36],w:7,d:{side:-101,back:-300}},
+                  {t:'bar',c:bar,half:112,r:PL,d:{back:500}}]};
   }},
-row:{name:'Barbell Row',views:['side','back'],cx:[232,240],
+row:{name:'Barbell Row',views:['side','back'],cx:[236,240],stand:1,
   lit:{lats:2,traps:2,biceps:1,delt:1,lowback:1,forearm:1},
   says:'The big muscles of the back pull. The arms and lower back help.',
   pose:function(k){
-    var hip=[0,170,-42], lean=58, S=S_of(hip,lean);
-    var bar=[0,lerp(S[1]-ARM+1,181,k),lerp(S[2]+1,13,k)];
-    return {p:{hip:hip,lean:lean,neck:-28,ank:[-19,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.12,0,1],
+    var hip=[0,168,-67], lean=63, S=S_of(hip,lean);
+    var bar=[0,lerp(S[1]-ARM+1,178,k),lerp(S[2]+1,8,k)];
+    return {p:{hip:hip,lean:lean,neck:-16,ank:[-22,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.15,0,1],
                hand:[-46,bar[1],bar[2]],elbPole:[-.25,.5,-1]},
-            gear:[{t:'bar',c:bar,half:104,r:40}]};
+            gear:[{t:'bar',c:bar,half:112,r:PL,d:{back:-500}}]};
   }},
 pull:{name:'Lat Pulldown',views:['side','back'],cx:[214,240],ground:[80,400],
-  lit:{lats:2,biceps:1,forearm:1,traps:1},
-  says:'The wide muscles down the sides of the back. The arms help.',
+  lit:{lats:2,biceps:1,forearm:1,traps:1,delt:1},
+  says:'The wide muscles down the sides of the back. The arms and shoulders help.',
   pose:function(k){
-    var hip=[0,114,0], lean=-9, S=S_of(hip,lean);
-    var bar=[0,lerp(S[1]+ARM-7,209,k),lerp(8,17,k)];
+    var hip=[0,112,0], lean=-9, S=S_of(hip,lean);
+    var bar=[0,lerp(S[1]+ARM-8,221,k),lerp(8,16,k)];
     return {p:{hip:hip,lean:lean,neck:10,ank:[-22,B.ankH,92],kneePole:[-.05,1,.6],footDir:[-.1,0,1],
-               hand:[-66,bar[1],bar[2]],elbPole:[-.9,-1,-.45]},
-            gear:[{t:'box',a:[-26,84,-26],b:[26,96,44],d:{side:-100,back:-200}},
-                  {t:'line',a:[0,82,8],b:[0,4,8],w:7,d:{side:-101,back:-201}},
-                  {t:'box',a:[-30,131,40],b:[30,144,80],d:{side:100,back:-150}},
-                  {t:'line',a:[0,440,bar[2]],b:bar,w:4,d:{side:-5,back:-90}},
-                  {t:'bar',c:bar,half:84,r:5}]};
+               hand:[-72,bar[1],bar[2]],elbPole:[-.6,-1,-.12],layer:{back:{arms:'back'}}},
+            gear:[{t:'box',a:[-26,80,-26],b:[26,92,44],d:{side:-100,back:-200}},
+                  {t:'line',a:[0,78,8],b:[0,4,8],w:7,d:{side:-101,back:-201}},
+                  {t:'box',a:[-30,120,40],b:[30,133,80],d:{side:100,back:-150}},
+                  {t:'line',a:[0,440,8],b:bar,w:4,d:{side:-5,back:-90}},
+                  {t:'bar',c:bar,half:96,r:5,d:{back:-500}}]};
   }}
 };
 })();
