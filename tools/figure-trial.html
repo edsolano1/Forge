@@ -30,12 +30,16 @@ td.n,th.n{text-align:right}
 .ask b{display:block}
 h3.grp{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:26px;margin:34px 0 0;scroll-margin-top:12px}
 #jump a{color:inherit;text-decoration:none}
+#jump[hidden],.lift[hidden],h3.grp[hidden]{display:none}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
+.tabs button{font:inherit;font-size:15px;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--txt);cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--hot);border-color:var(--hot);color:#1a120b}
+#none{color:var(--dim);margin:18px 2px}
 </style></head><body><main>
-<h1>One body, every lift</h1>
-<p class="lead">Every exercise in the app that has a drawing, done by the same body and seen from two sides. The muscles doing the work glow. Nothing here is in the app yet.</p>
-<p class="lead">The fifteen you have reviewed come first. Everything after that is new, built and checked overnight, and has not had your eye on it.</p>
-<p class="lead">Lifts play at one second up and two seconds down. Walking, running and the other cardio loop at their own rhythm. Holds and stretches stay still.</p>
-<nav id="jump" class="key"></nav>
+<h1>Lifts to review</h1>
+<p class="lead">Only the lifts waiting on your eye are shown first. Approved ones move to their own tab. Everything else waits in the third tab until its turn.</p>
+<div class="tabs" id="tabs"></div>
+<nav id="jump" class="key" hidden></nav>
 <div id="lifts"></div>
 <div class="lift">
 <h2>Proof that nothing stretches</h2>
@@ -2936,6 +2940,9 @@ var GROUPS=[["Reviewed","squat dead bench row pull ohp curl lat push incl crow t
 ["Midsection","crunch bike hollow legraise hipraise plank kneeraise abmach rtwist sideplank"],
 ["Cardio","walk treadwalk treadrun outrun stairs cbike assault ellip rower jumprope swim"],
 ["Stretches","hipflex chestdr pigeon hamstr"]];
+// REVIEW: fixed since he last looked, waiting on his eye. APPROVED: he has said these are right.
+var REVIEW="lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl".split(" ");
+var APPROVED="squat dead bench row pull".split(" ");
 var seen={},IDS=[],HEAD={};
 GROUPS.forEach(function(g){g[1].split(" ").forEach(function(id,n){if(LIFTS[id]&&!seen[id]){seen[id]=1;IDS.push(id);if(!HEAD[g[0]]){HEAD[g[0]]=1;HEAD[id]=g[0];}}});});
 Object.keys(LIFTS).forEach(function(id){if(!seen[id]){IDS.push(id);if(!HEAD.Other){HEAD.Other=1;HEAD[id]="Other";}}});
@@ -2943,7 +2950,7 @@ var jump=document.getElementById("jump");
 IDS.forEach(function(id){
   if(HEAD[id]){var h=document.createElement("h3");h.className="grp";h.id="g-"+id;h.textContent=HEAD[id];host.appendChild(h);
     var a=document.createElement("a");a.className="chip";a.href="#g-"+id;a.textContent=HEAD[id];jump.appendChild(a);}
-  var L=LIFTS[id],d=document.createElement("section");d.className="lift";
+  var L=LIFTS[id],d=document.createElement("section");d.className="lift";d.setAttribute("data-id",id);
   var hard=[],help=[];Object.keys(L.lit).forEach(function(m){var nm=NAMES[m]||NAMES[m.replace(/[RL]$/,"")]||m;var to=L.lit[m]===2?hard:help;if(to.indexOf(nm)<0)to.push(nm);});
   d.innerHTML="<h2>"+L.name+"</h2><p class=\"says\">"+L.says+"</p><div class=\"pair\"></div>"+
     "<div class=\"key\"><div class=\"kt\">Does the work</div>"+hard.map(function(n){return "<span class=\"chip\"><i></i>"+n+"</span>";}).join("")+
@@ -2964,6 +2971,21 @@ if("IntersectionObserver" in window){
   var io=new IntersectionObserver(function(es){es.forEach(function(e){stages.forEach(function(st){if(st.el===e.target)st.on=e.isIntersecting;});});},{rootMargin:"120px"});
   stages.forEach(function(st){io.observe(st.el);});
 }
+var TABS=[["review","To review"],["approved","Approved"],["rest","Not yet reviewed"]],tabsEl=document.getElementById("tabs");
+function bucket(id){return REVIEW.indexOf(id)>=0?"review":APPROVED.indexOf(id)>=0?"approved":"rest";}
+var none=document.createElement("p");none.id="none";host.appendChild(none);
+function show(tab){
+  var n=0;
+  host.querySelectorAll(".lift").forEach(function(el){var on=bucket(el.getAttribute("data-id"))===tab;el.hidden=!on;if(on)n++;});
+  host.querySelectorAll("h3.grp").forEach(function(el){el.hidden=tab!=="rest";});
+  jump.hidden=tab!=="rest";
+  none.textContent=n?"":"Nothing here yet.";
+  tabsEl.querySelectorAll("button").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-t")===tab?"true":"false");});
+}
+TABS.forEach(function(t){var b=document.createElement("button");b.type="button";b.setAttribute("data-t",t[0]);
+  var c=IDS.filter(function(id){return bucket(id)===t[0];}).length;b.textContent=t[1]+" ("+c+")";
+  b.addEventListener("click",function(){show(t[0]);});tabsEl.appendChild(b);});
+show("review");
 var FIX=/[?&]k=([0-9.]+)/.exec(location.search);
 stages.forEach(function(st){paint(st,FIX?+FIX[1]:(reduce?.5:0));});
 if(!reduce&&!FIX)(function loop(t){stages.forEach(function(st){if(st.on)paint(st,kOf(st.L,t));});requestAnimationFrame(loop);})(0);
