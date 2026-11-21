@@ -559,7 +559,8 @@ function wristPose(k,lo,hi,rev){
 
   var e=FIG.norm(FIG.sub(W,E)), up=FIG.norm([0,e[2],-e[1]]), al=lerp(lo,hi,k)*R, hl=B.farm*(1-B.wrist);
   function at(a){return FIG.add(W,FIG.add(FIG.mul(e,hl*Math.cos(a)),FIG.mul(up,hl*Math.sin(a))));}
-  var hand=at(al*.8), c=at(al), sg=rev?-1:1;
+  // the forearm lies still on the thigh: the hand TARGET never moves, only the wrist direction swings through the curl
+  var hand=at(0), wdir=FIG.add(FIG.mul(e,Math.cos(al)),FIG.mul(up,Math.sin(al))), c=at(al), sg=rev?-1:1;
   // the palm turns with the hand: square to it, facing up for the curl and down for the reverse
   var palm=FIG.mul(FIG.add(FIG.mul(e,-Math.sin(al)),FIG.mul(up,Math.cos(al))),sg);
   c=FIG.add(c,FIG.mul(palm,4.5));      // the handle lies IN the palm: a little to the palm side of the middle of the hand
@@ -567,7 +568,7 @@ function wristPose(k,lo,hi,rev){
   // a palm down hand is over the handle (handle drawn under it)
   function db(x){return {t:'g3_dumb',c:[x,c[1],c[2]],ax:[1,0,0],inn:10.5,r:10,dim:x>0,d:{side:-x+12,top:c[1]+sg*8,quarter:-x*.616+c[2]*.788+sg*6}};}
   return {p:{hip:hip,lean:lean,neck:-24,ank:[-32,B.ankH,66],kneePole:[-.22,1,.6],footDir:[-.15,0,1],
-             hand:hand,elbPole:pin(sh,E,hand),palm:palm,thumb:[-sg,0,0],layer:{quarter:{uarmL:'back'}}},      // palms up the thumbs are outside, palms down inside
+             hand:hand,wrist:wdir,elbPole:pin(sh,E,hand),palm:palm,thumb:[-sg,0,0],layer:{quarter:{uarmL:'back'}}},      // palms up the thumbs are outside, palms down inside
           gear:seat(-28,46,92).concat([db(c[0]),db(-c[0])])};
 }
 
@@ -1104,9 +1105,9 @@ sumo:{name:'Dumbbell Sumo Squat',views:['front','quarter'],labels:['Front','From
     // standing, the bell hangs in front of the thighs; at the bottom the thighs have gone out sideways and it hangs under the shoulders
     var hz=lerp(hip[2]+30,S[2]+6,smooth(k/.8)), dz=hz-S[2];
     // a heavy bell: heads 40 across (the lifter's head is 34 to 40), 26 deep, an 18 handle showing between them. The hands
-    // cup the two sides of the TOP head, low on it, so the head shows between and above them and the handle and the
-    // bottom head hang below. Lowest point of the bell: hand - 53.
-    var hand=[-21,S[1]-Math.sqrt(124*124-18*18-dz*dz),hz], c=[0,hand[1]-18,hand[2]];
+    // cup the UNDERSIDE of the top head, fingers under its lower rim on either side, so the whole top head
+    // shows above the hands and the handle and the bottom head hang below. Lowest point of the bell: hand - 40.
+    var hand=[-23,S[1]-Math.sqrt(124*124-16*16-dz*dz),hz], c=[0,hand[1]-5,hand[2]];
     return {p:{hip:hip,lean:lean,neck:-lean*.55,ank:[-72,B.ankH,0],kneePole:[-1,0,.62],footDir:[-.7,0,.7],
                hand:hand,elbPole:[-1,-.1,-.5],layer:{front:{arms:'front',legs:'back'},quarter:{farmL:'front',handL:'front',farmR:'front',handR:'front',uarmR:'front'}}},
             // the bell hangs on the centre line between the two hands that cup its top end
@@ -2209,17 +2210,21 @@ jumprope:{name:'Jump Rope',cycle:1,period:900,views:JR_VIEWS,labels:['Front','Si
     var hip=[0,F.ank[1]+Math.sqrt(Math.pow(174.5-dip*1.6,2)-196),F.ank[2]+14], lean=2;
     // the wrists turn the rope: each hand goes round a very small circle, a little AHEAD of the rope. A rope is not a
     // hoop: the hands lead and the middle of it trails behind, so it bows, and that bow is what shows it turning.
-    var LAG=JR_LAG*R, hc=[-58,hip[1]-4,14], hy=hc[1]+4*Math.cos(ph+LAG), hz=hc[2]+4*Math.sin(ph+LAG), hand=[hc[0],hy,hz];
+    // The hands are held well out to the sides at hip height, elbows in by the ribs, and the rope leaves the OUTER end
+    // of each fist (RX, just outside the hand), so it never has to cross a forearm to get anywhere.
+    var LAG=JR_LAG*R, hc=[-78,hip[1]+2,18], RX=83, hy=hc[1]+4*Math.cos(ph+LAG), hz=hc[2]+4*Math.sin(ph+LAG), hand=[hc[0],hy,hz];
     // over the head it stands tall and narrow, under the feet it is short and wide and brushes the floor
     var rho=lerp(hc[1]-3.5,198,.5+.5*Math.cos(ph)), bul=.26-.14*Math.cos(ph), N=18, i, t, pts=[], gear=[];
     for(i=0;i<=N;i++){t=(1-i/N)*Math.PI/2;                    // from the hand in to the middle of the rope
       var f=Math.pow(Math.cos(t),.8), an=ph+LAG*(1-f);
-      pts.push([58*Math.sin(t)*(1+bul*Math.cos(t)),hy+rho*f*Math.cos(an),hz+rho*f*Math.sin(an)]);}
+      pts.push([RX*Math.sin(t)*(1+bul*Math.cos(t)),hy+rho*f*Math.cos(an),hz+rho*f*Math.sin(an)]);}
     // drawn in short lengths, because part of a bowed rope can be in front of the body while the rest is still behind
     // it. Each length is in front while it is forward of the hands and behind while it is back of them; it changes
     // over only above the head or under the feet. From the side the near half is this side of the body, the far half beyond.
+    // A length forward of the hands is nearer the camera than the arms too (which are forced to the front of the trunk),
+    // so it is drawn over them, never cut off behind them; a length back of the hands is beyond everything.
     for(i=0;i<N;i+=3){
-      var seg=pts.slice(i,i+4), zm=(seg[0][2]+seg[3][2])/2-hc[2], fr=zm>=0?700:-700;
+      var seg=pts.slice(i,i+4), zm=(seg[0][2]+seg[3][2])/2-hc[2], fr=zm>=0?1100:-1100;
       [-1,1].forEach(function(s){
         gear.push({t:'g8_path',pts:seg.map(function(q){return [s*q[0],q[1],q[2]];}),col:GO,w:3.5,v:['front','quarter','rear','back'],
                    d:{front:fr,quarter:fr,rear:-fr,back:-fr}});

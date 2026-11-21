@@ -71,6 +71,10 @@ function solve(p){
     q.elb=ar.mid;q.hand=ar.end;q.armB=ar.bend;
     if(p.palm||p['palm'+(s<0?'R':'L')])q.palm=norm(get('palm'));       // the way the palm faces
     if(p.thumb||p['thumb'+(s<0?'R':'L')])q.thumb=norm(get('thumb'));   // the way the thumb points
+    // a bent wrist: the forearm stays exactly where the arm put it and only the hand turns, to point along `wrist`.
+    // q.tip is then the middle of the grip (hang anything held on q.tip, not on the hand target).
+    q.wr=mix(q.elb,q.hand,B.wrist); q.tip=q.hand;
+    if(p.wrist||p['wrist'+(s<0?'R':'L')])q.tip=add(q.wr,mul(norm(get('wrist')),len(sub(q.hand,q.wr))));
     J.side[s]=q;
   });
   return J;
@@ -183,11 +187,11 @@ function buildParts(J,V){
     var wr=mix(q.elb,q.hand,B.wrist);
     var fa=limb('farm',q.elb,wr,[8.5,9.2,6.2,5.6],[0,.3,.8,1],mul(q.armB,-1),null,q.elb,10,31);
     lm(fa,'forearm',.3,.24,8,1,true);
-    var hb=[sph(mix(wr,q.hand,.35),6),sph(q.hand,7.6)];
-    if(q.thumb)hb.push(sph(add(q.hand,mul(q.thumb,8.5)),3.6));
+    var hb=[sph(mix(wr,q.tip,.35),6),sph(q.tip,7.6)];
+    if(q.thumb)hb.push(sph(add(q.tip,mul(q.thumb,8.5)),3.6));
     var hp=part('hand',hb,wr,7,far,32);hp.s=s;
-    if(q.palm){var fdir=norm(sub(q.hand,wr)), sdir=norm(cross(fdir,q.palm));
-      hp.mus.push({key:'palm',c:add(q.hand,mul(q.palm,3.5)),ax:[mul(fdir,5.2),mul(sdir,4.6),mul(q.palm,3)],N:q.palm,sd:''});}
+    if(q.palm){var fdir=norm(sub(q.tip,wr)), sdir=norm(cross(fdir,q.palm));
+      hp.mus.push({key:'palm',c:add(q.tip,mul(q.palm,3.5)),ax:[mul(fdir,5.2),mul(sdir,4.6),mul(q.palm,3)],N:q.palm,sd:''});}
   });
   // the neck sits behind both the trunk and the head, always: left to its own depth it swaps with them mid rep
   parts[1].d=Math.min(parts[0].d,parts[2].d)-.02;
