@@ -9,6 +9,12 @@ var PUSH_HZ=-4,PUSH_LEAN=16,PUSH_TH0=100,PUSH_PZ=78;
 var FIG=(function(){
 "use strict";
 var INK="#e8ded2", FAR="#8d8378", GO="#d97b2e", LINE="#514a43", HOT="#ff7a1a", DEF="rgba(70,48,30,.20)";
+// THE SKIN: everything about how the lifter LOOKS, and nothing about how it moves. A skin is a handful of
+// colours and a face. Poses, bones and lifts never read it, so a new skin can never break a lift.
+//   ink: the body. far: the far limbs seen from the side. hot: a muscle doing the work. help: one helping.
+//   def: the quiet shape of a muscle at rest. mark: the face. face: 'plate' | 'nose' | 'visor' | 'eyes' | 'none'.
+var SKIN0={ink:INK,far:FAR,hot:HOT,help:"rgba(255,122,26,.42)",def:DEF,mark:"rgba(52,38,28,.8)",face:'plate'}, SK=SKIN0;
+function skin(o){SK={};var k;for(k in SKIN0)SK[k]=SKIN0[k];if(o)for(k in o)SK[k]=o[k];return SK;}
 var FLOOR=432;
 // ---- the body. Nothing below this line may set a length of its own. ----
 var B={ankH:12, shin:86, thigh:92, trunk:100, uarm:64, farm:64, wrist:.81, shoW:39, hipW:17, neck:12, headR:[17,23.5,20.5]};
@@ -140,10 +146,15 @@ function buildParts(J,V){
   // neck and head
   part('neck',[sph(add(J.S,mul(u,2)),9),sph(add(J.neck0,mul(J.nu,B.neck)),8)],add(J.S,mul(u,4)),13,false,11);
   var hr=B.headR;
-  part('head',[{c:J.head,ax:[mul(J.Xs,hr[0]),mul(J.nu,hr[1]),mul(J.nn,hr[2])]},
-               {c:add(add(J.head,mul(J.nu,-12)),mul(J.nn,6)),ax:[mul(J.Xs,11),mul(J.nu,10),mul(J.nn,12)]}],
-       add(J.neck0,mul(J.nu,B.neck)),10,false,12)
-    .mus.push({key:'face',c:add(add(J.head,mul(J.nn,13)),mul(J.nu,-3)),ax:[mul(J.Xs,9.5),mul(J.nu,13),mul(J.nn,7)],N:J.nn});
+  var hbl=[{c:J.head,ax:[mul(J.Xs,hr[0]),mul(J.nu,hr[1]),mul(J.nn,hr[2])]},
+           {c:add(add(J.head,mul(J.nu,-12)),mul(J.nn,6)),ax:[mul(J.Xs,11),mul(J.nu,10),mul(J.nn,12)]}];
+  var fc=SK.face, hpt=function(f,up,x){return add(add(add(J.head,mul(J.nn,f)),mul(J.nu,up)),mul(J.Xs,x||0));};
+  if(fc==='nose'||fc==='eyes')hbl.push(sph(hpt(21.5,-6),4.2));          // a nose: the one thing a head needs to face somewhere
+  var hd=part('head',hbl,add(J.neck0,mul(J.nu,B.neck)),10,false,12);
+  if(fc==='plate')hd.mus.push({key:'face',c:hpt(13,-3),ax:[mul(J.Xs,9.5),mul(J.nu,13),mul(J.nn,7)],N:J.nn});
+  if(fc==='nose')hd.mus.push({key:'face',col:SK.mark,c:hpt(17,2.5),ax:[mul(J.Xs,11),mul(J.nu,1.7),mul(J.nn,5)],N:J.nn});   // a brow
+  if(fc==='visor')hd.mus.push({key:'face',col:SK.mark,c:hpt(11,2),ax:[mul(J.Xs,15),mul(J.nu,4.6),mul(J.nn,11)],N:J.nn});
+  if(fc==='eyes')[-1,1].forEach(function(e){hd.mus.push({key:'face',col:SK.mark,c:hpt(17,2,e*6.2),ax:[mul(J.Xs,2.5),mul(J.nu,3),mul(J.nn,3)],N:J.nn});});
   [-1,1].forEach(function(s){
     var q=J.side[s], far=(V.k==='side'&&s>0&&q.hipJ[0]>4);   // the far side is dimmed from the side, unless the body is turned on its side
     function limb(name,a,b,rs,ts,front,bulge,joint,jr,order){
@@ -195,7 +206,7 @@ function drawPart(x,V,P,lit){
   }
   x.globalCompositeOperation='destination-out';x.lineWidth=5;x.lineJoin='round';x.stroke(path);
   x.restore();
-  x.fillStyle=P.far?FAR:INK;x.fill(path);
+  x.fillStyle=P.far?SK.far:SK.ink;x.fill(path);
   if(P.far||!P.mus.length)return;
   x.save();x.clip(path);
   P.mus.forEach(function(m){
@@ -203,9 +214,10 @@ function drawPart(x,V,P,lit){
     var fd=Math.max(0,Math.min(1,(dt+.5)/.4));fd=fd*fd*(3-2*fd);     // turning away it fades, it never blinks off
     var sd=m.sd!=null?m.sd:(P.s?(P.s<0?'R':'L'):'');          // lit:{quad:2} lights both sides, lit:{quadR:2} the right only
     var lv=lit&&(lit[m.key]||(sd&&lit[m.key+sd]));
-    x.fillStyle=lv===2?HOT:DEF;
+    x.fillStyle=lv===2?SK.hot:SK.def;
     x.globalAlpha=fd;
-    if(lv===1)x.fillStyle="rgba(255,122,26,.42)";
+    if(lv===1)x.fillStyle=SK.help;
+    if(m.col)x.fillStyle=m.col;
     if(m.key==='palm')x.fillStyle="rgba(70,48,30,.5)";
     var pts=blobPts(V,m.c,m.ax,20);
     x.beginPath();x.moveTo(pts[0][0],pts[0][1]);for(var i=1;i<pts.length;i++)x.lineTo(pts[i][0],pts[i][1]);x.closePath();x.fill();
@@ -250,7 +262,7 @@ function drawGear(x,V,g){
     head(-near);
     a=V.p(add(g.c,mul(ax,-IN)));b=V.p(add(g.c,mul(ax,IN)));
     x.strokeStyle=dim?"#8a5a2c":GO;x.lineWidth=4.5;x.lineCap='butt';x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();
-    c=V.p(g.c);x.fillStyle=dim?FAR:INK;x.beginPath();x.arc(c[0],c[1],6.9,0,7);x.fill();   // the fist, closed over the handle
+    c=V.p(g.c);x.fillStyle=dim?SK.far:SK.ink;x.beginPath();x.arc(c[0],c[1],6.9,0,7);x.fill();   // the fist, closed over the handle
     head(near);
   }else if(g.t==='line'){
     a=V.p(g.a);b=V.p(g.b);
@@ -315,7 +327,7 @@ function zoomOf(L,kind){
   if(!z._at){var at=z.on;if(at==='hands'||!at){var J=solve(L.pose(.5).p),a=J.side[-1].hand,b=J.side[1].hand;at=[(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2];}z._at=at;}
   return {s:z.s||2,at:z._at};
 }
-return {zoomOf:zoomOf,draw:draw,solve:solve,B:B,lerp:lerp,add:add,sub:sub,mul:mul,dot:dot3,len:len,norm:norm,cross:cross,mix:mix,hull:hull,poly:poly,ringPts:ringPts,ik:ik,
+return {skin:skin,zoomOf:zoomOf,draw:draw,solve:solve,B:B,lerp:lerp,add:add,sub:sub,mul:mul,dot:dot3,len:len,norm:norm,cross:cross,mix:mix,hull:hull,poly:poly,ringPts:ringPts,ik:ik,
         view:view,parts:buildParts,blobPts:blobPts,gearDepth:gearDepth,TOR:TOR,gear:GX,col:{INK:INK,FAR:FAR,GO:GO,LINE:LINE,PAD:"#2f2a26"}};
 })();
 
