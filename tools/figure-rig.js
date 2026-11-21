@@ -13,7 +13,7 @@ var INK="#e8ded2", FAR="#8d8378", GO="#d97b2e", LINE="#514a43", HOT="#ff7a1a", D
 // colours and a face. Poses, bones and lifts never read it, so a new skin can never break a lift.
 //   ink: the body. far: the far limbs seen from the side. hot: a muscle doing the work. help: one helping.
 //   def: the quiet shape of a muscle at rest. mark: the face. face: 'plate' | 'nose' | 'visor' | 'eyes' | 'none'.
-var SKIN0={ink:INK,far:FAR,hot:HOT,help:"rgba(255,122,26,.42)",def:DEF,mark:"rgba(52,38,28,.8)",face:'plate'}, SK=SKIN0;
+var SKIN0={ink:INK,far:FAR,hot:HOT,help:"rgba(255,122,26,.42)",def:DEF,mark:"rgba(52,38,28,.8)",face:'none'}, SK=SKIN0;
 function skin(o){SK={};var k;for(k in SKIN0)SK[k]=SKIN0[k];if(o)for(k in o)SK[k]=o[k];return SK;}
 var FLOOR=432;
 // ---- the body. Nothing below this line may set a length of its own. ----
