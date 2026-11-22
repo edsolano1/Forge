@@ -1161,7 +1161,8 @@ ohext:{name:'Cable Rope Overhead Extension',views:['side','front'],cx:[306,240],
     var hand=[hx,E[1]+fl*Math.cos(be),E[2]+fl*Math.sin(be)];
     var pul=[0,18,-196], mid=[0,hand[1],hand[2]], dir=norm(sub(pul,mid)), knot=add(mid,mul(dir,34));
     return {p:{hip:hip,lean:lean,neck:-10,ankR:[-18,B.ankH,30],ankL:[18,B.ankH,-46],kneePole:[-.1,0,1],footDir:[-.15,0,1],
-               hand:hand,elbPole:poleTo(sho,hand,E),layer:{front:{farmR:'back',farmL:'back',handR:'back',handL:'back'}}},
+               // the elbow points forward the whole way. Reading it off the arm itself went wild as the arm straightened: a straight arm has no elbow direction, so the muscles spun at the top
+               hand:hand,elbPole:[0,lerp(.9,-.1,k),1],layer:{front:{farmR:'back',farmL:'back',handR:'back',handL:'back'}}},
             gear:[line([0,4,-206],[0,50,-206],8,null,{side:-120,front:-500}),
                   line([0,5,-236],[0,5,-176],8,null,{side:-121},['side']),
                   {t:'box',a:[-28,8,-250],b:[28,120,-222],d:{side:-125,front:-520}},
@@ -3055,7 +3056,7 @@ var GROUPS=[["Reviewed","squat dead bench row pull ohp curl lat push incl crow t
 ["Cardio","walk treadwalk treadrun outrun stairs cbike assault ellip rower jumprope swim"],
 ["Stretches","hipflex chestdr pigeon hamstr"]];
 // REVIEW: fixed since he last looked, waiting on his eye. APPROVED: he has said these are right.
-var REVIEW="ohext rdl bwcalf".split(" ");
+var REVIEW="ohext rdl bwcalf ohp curl lat push incl crow thrust legx pullup calf dbbench smbench".split(" ");
 var APPROVED="squat dead bench row pull bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl".split(" ");
 var seen={},IDS=[],HEAD={};
 GROUPS.forEach(function(g){g[1].split(" ").forEach(function(id,n){if(LIFTS[id]&&!seen[id]){seen[id]=1;IDS.push(id);if(!HEAD[g[0]]){HEAD[g[0]]=1;HEAD[id]=g[0];}}});});

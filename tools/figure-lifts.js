@@ -488,7 +488,8 @@ ohext:{name:'Cable Rope Overhead Extension',views:['side','front'],cx:[306,240],
     var hand=[hx,E[1]+fl*Math.cos(be),E[2]+fl*Math.sin(be)];
     var pul=[0,18,-196], mid=[0,hand[1],hand[2]], dir=norm(sub(pul,mid)), knot=add(mid,mul(dir,34));
     return {p:{hip:hip,lean:lean,neck:-10,ankR:[-18,B.ankH,30],ankL:[18,B.ankH,-46],kneePole:[-.1,0,1],footDir:[-.15,0,1],
-               hand:hand,elbPole:poleTo(sho,hand,E),layer:{front:{farmR:'back',farmL:'back',handR:'back',handL:'back'}}},
+               // the elbow points forward the whole way. Reading it off the arm itself went wild as the arm straightened: a straight arm has no elbow direction, so the muscles spun at the top
+               hand:hand,elbPole:[0,lerp(.9,-.1,k),1],layer:{front:{farmR:'back',farmL:'back',handR:'back',handL:'back'}}},
             gear:[line([0,4,-206],[0,50,-206],8,null,{side:-120,front:-500}),
                   line([0,5,-236],[0,5,-176],8,null,{side:-121},['side']),
                   {t:'box',a:[-28,8,-250],b:[28,120,-222],d:{side:-125,front:-520}},
