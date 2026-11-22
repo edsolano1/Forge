@@ -248,7 +248,7 @@ main constraint on how to work in it. See **Traps** below before editing.
   drawn BEFORE the state changes and the open after, and the next step waits on the fold's
   `onfinish` with a timer only as backstop: a timer alone cut the fold short on a busy page.
   A fold holds its last frame (`fill:forwards`), so anything that takes over first must call
-  `sfStill()`, or the card stays pinned one line tall. Tapping a shut card still opens at once.
+  `sfStill()`, or the card stays pinned one line tall. A TAP on a shut card is answered at once but is not a snap (v5.294, owner): the card he left closes while the one he picked opens, both together over `SF_TAP` (450), no glow.
   **Ease in** (`backAsk`, `backPlan`, `backDown`, `#backOvl`). A lift not logged in `BACK_DAYS`
   (21) is offered one notch lighter, two past `BACK_LONG` (35), asked ONCE before the first set,
   one tap for the lot, in cooled steel so it is never mistaken for a level up. Measured per

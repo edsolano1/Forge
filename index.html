@@ -10030,7 +10030,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.293';
+var APPV='v5.294';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13944,19 +13944,19 @@ function sfApply(fresh){
 // The fold is drawn BEFORE the state changes and the open after it, so anything that calls
 // sfApply in between finds the truth either way. Timers drive it, never an animation's finish
 // event: a hidden page freezes its animations and the next lift would never open.
-var SF_MS=600;
+var SF_MS=600,SF_TAP=450;
 function sfBoxH(ex){
   var h=ex.getBoundingClientRect().height,cs=getComputedStyle(ex);
   if(cs.boxSizing!=='border-box')h-=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth);
   return h;
 }
-function sfSpan(ex,shutFirst){
+function sfSpan(ex,shutFirst,ms){
   var was=ex.classList.contains('shut');
   ex.classList.toggle('shut',!was);var other=sfBoxH(ex);
   ex.classList.toggle('shut',was);var now=sfBoxH(ex);
   try{
     var an=ex.animate(shutFirst?[{height:other+'px'},{height:now+'px'}]:[{height:now+'px'},{height:other+'px'}],
-                 {duration:SF_MS,easing:'cubic-bezier(.3,.7,.2,1)',fill:shutFirst?'none':'forwards'});
+                 {duration:ms||SF_MS,easing:'cubic-bezier(.3,.7,.2,1)',fill:shutFirst?'none':'forwards'});
     an.id='sf';return an;
   }catch(e){return null;}
 }
@@ -14004,11 +14004,16 @@ function sfTap(id){
   var el=document.getElementById('exc-'+id);
   if(!el||!el.classList.contains('shut'))return;
   var sb=document.getElementById('sBody');if(sb&&sb.classList.contains('rearrange'))return;
-  clearTimeout(SF.t);sfStill();SF.id=id;
+  clearTimeout(SF.t);sfStill();var from=SF.id;SF.id=id;
   var u=null;sfUnits().forEach(function(x){if(x.has(id))u=x;});
   SF.was=u?u.done:false;
   sfApply(true);
-  sfShow(id);
+  // A tap is answered at once, so both cards travel together (v5.294, owner: it just snaps):
+  // the one he left closes while the one he picked opens. No glow, he knows where he tapped.
+  if(MOTION==='off'||document.hidden||!Element.prototype.animate){sfShow(id);return;}
+  if(from&&from!==id)sfCards(from).forEach(function(ex){sfSpan(ex,true,SF_TAP);});
+  sfCards(id).forEach(function(ex){sfSpan(ex,true,SF_TAP);});
+  SF.t=setTimeout(function(){sfShow(id);},SF_TAP+60);
 }
 function openExMore(id){
   var m=XMORE[id];if(!m)return;
