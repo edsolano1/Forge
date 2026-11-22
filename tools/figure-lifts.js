@@ -85,6 +85,8 @@ smbench:{name:'Smith Machine Bench Press',views:['side','back'],labels:['Side','
              {t:'line',a:[s*RX,bar[1],bz],b:[s*RX,bar[1],rz],w:9,col:GREY});
     });
     g.push({t:'line',a:[-RX,338,rz],b:[RX,338,rz],w:6});
+    // the frame post behind each rail, joined to it across the top: from the side a lone rail read as a stand, not a machine
+    [-1,1].forEach(function(s){g.push({t:"line",a:[s*RX,4,rz-46],b:[s*RX,338,rz-46],w:8,v:["side"]},{t:"line",a:[s*RX,338,rz-46],b:[s*RX,338,rz],w:8,v:["side"]});});
     g.push({t:'bar',c:bar,half:112,r:PL,d:{back:500}});
     return {p:{hip:hip,lean:lean,neck:0,ank:[-36,B.ankH,124],kneePole:[-.1,1,.5],footDir:[-.2,0,1],
                hand:hand,elbPole:under([-B.shoW,S[1],S[2]],hand,[-.35,-1,.5])},gear:g};
@@ -484,7 +486,7 @@ ohext:{name:'Cable Rope Overhead Extension',views:['side','front'],cx:[306,240],
     var hip=[0,180,-10], lean=20, S=S_of(hip,lean), sho=[-B.shoW,S[1],S[2]];
     // the upper arm stays up beside the head and the forearm swings from behind the head to straight overhead
     var ud=norm(mix([.16,.86,.47],[.22,.96,.13],k)), E=add(sho,mul(ud,B.uarm));
-    var be=lerp(-112,8,k)*R, hx=-12, fl=Math.sqrt(B.farm*B.farm-(hx-E[0])*(hx-E[0]));
+    var be=lerp(-112,8,k)*R, hx=lerp(-12,-36,k*k), fl=Math.sqrt(B.farm*B.farm-(hx-E[0])*(hx-E[0]));
     var hand=[hx,E[1]+fl*Math.cos(be),E[2]+fl*Math.sin(be)];
     var pul=[0,18,-196], mid=[0,hand[1],hand[2]], dir=norm(sub(pul,mid)), knot=add(mid,mul(dir,34));
     return {p:{hip:hip,lean:lean,neck:-10,ankR:[-18,B.ankH,30],ankL:[18,B.ankH,-46],kneePole:[-.1,0,1],footDir:[-.15,0,1],

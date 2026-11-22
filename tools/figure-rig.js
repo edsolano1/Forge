@@ -20,7 +20,7 @@ var FLOOR=432;
 var B={ankH:12, shin:86, thigh:92, trunk:100, uarm:64, farm:64, wrist:.81, shoW:39, hipW:17, neck:12, headR:[17,23.5,20.5]};
 // torso cross-sections: [how far up the trunk, half width, depth in front, depth behind]
 var TOR=[[-.13,19,10,12],[-.04,27,15,20],[.06,29,16,22],[.18,27,16,18],[.32,23,15,14],[.48,27,18,16],
-         [.62,32,22,18],[.76,35,24,19],[.90,37,20,19],[1.0,35,14,15],[1.06,22,10,12],[1.11,11,8,10]];
+         [.62,32,22,18],[.76,35,24,19],[.90,37,20,19],[1.0,36,14,15],[1.06,31,11,13],[1.11,21,9,11],[1.15,11,7,9]];   // the top slopes from the neck out to the shoulder: stopping at 22 wide left the shoulders standing up as humps
 
 function add(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]];}
 function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
@@ -475,7 +475,7 @@ ohp:{name:'Overhead Press',batch:2,views:['side','front'],cx:[236,240],stand:1,u
     // from the collarbone, forward round the chin, then back to over the ears
     var bar=[0,lerp(S[1]+3,S[1]+ARM+2.6,k),lerp(S[2]+26,S[2]-1,k)+13*Math.sin(Math.PI*k)*(1-k*.4)];
     return {p:{hip:hip,lean:lean,neck:-7*Math.sin(Math.PI*k),ank:[-24,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.2,0,1],
-               hand:[-65,bar[1],bar[2]],shrug:[6*k,0],elbPole:[-.3,-1,.45]},
+               hand:[-65,bar[1],bar[2]],shrug:[6*k,0],elbPole:[-.3,-1,.45],layer:{front:{legs:'front'}}},
             gear:[{t:'bar',c:bar,half:104,r:13,d:{front:bar[2]-2}}]};
   }},
 curl:{name:'Barbell Curl',batch:2,views:['side','front'],cx:[228,240],up:1,

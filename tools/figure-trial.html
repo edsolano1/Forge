@@ -76,7 +76,7 @@ var FLOOR=432;
 var B={ankH:12, shin:86, thigh:92, trunk:100, uarm:64, farm:64, wrist:.81, shoW:39, hipW:17, neck:12, headR:[17,23.5,20.5]};
 // torso cross-sections: [how far up the trunk, half width, depth in front, depth behind]
 var TOR=[[-.13,19,10,12],[-.04,27,15,20],[.06,29,16,22],[.18,27,16,18],[.32,23,15,14],[.48,27,18,16],
-         [.62,32,22,18],[.76,35,24,19],[.90,37,20,19],[1.0,35,14,15],[1.06,22,10,12],[1.11,11,8,10]];
+         [.62,32,22,18],[.76,35,24,19],[.90,37,20,19],[1.0,36,14,15],[1.06,31,11,13],[1.11,21,9,11],[1.15,11,7,9]];   // the top slopes from the neck out to the shoulder: stopping at 22 wide left the shoulders standing up as humps
 
 function add(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]];}
 function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
@@ -531,7 +531,7 @@ ohp:{name:'Overhead Press',batch:2,views:['side','front'],cx:[236,240],stand:1,u
     // from the collarbone, forward round the chin, then back to over the ears
     var bar=[0,lerp(S[1]+3,S[1]+ARM+2.6,k),lerp(S[2]+26,S[2]-1,k)+13*Math.sin(Math.PI*k)*(1-k*.4)];
     return {p:{hip:hip,lean:lean,neck:-7*Math.sin(Math.PI*k),ank:[-24,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.2,0,1],
-               hand:[-65,bar[1],bar[2]],shrug:[6*k,0],elbPole:[-.3,-1,.45]},
+               hand:[-65,bar[1],bar[2]],shrug:[6*k,0],elbPole:[-.3,-1,.45],layer:{front:{legs:'front'}}},
             gear:[{t:'bar',c:bar,half:104,r:13,d:{front:bar[2]-2}}]};
   }},
 curl:{name:'Barbell Curl',batch:2,views:['side','front'],cx:[228,240],up:1,
@@ -758,6 +758,8 @@ smbench:{name:'Smith Machine Bench Press',views:['side','back'],labels:['Side','
              {t:'line',a:[s*RX,bar[1],bz],b:[s*RX,bar[1],rz],w:9,col:GREY});
     });
     g.push({t:'line',a:[-RX,338,rz],b:[RX,338,rz],w:6});
+    // the frame post behind each rail, joined to it across the top: from the side a lone rail read as a stand, not a machine
+    [-1,1].forEach(function(s){g.push({t:"line",a:[s*RX,4,rz-46],b:[s*RX,338,rz-46],w:8,v:["side"]},{t:"line",a:[s*RX,338,rz-46],b:[s*RX,338,rz],w:8,v:["side"]});});
     g.push({t:'bar',c:bar,half:112,r:PL,d:{back:500}});
     return {p:{hip:hip,lean:lean,neck:0,ank:[-36,B.ankH,124],kneePole:[-.1,1,.5],footDir:[-.2,0,1],
                hand:hand,elbPole:under([-B.shoW,S[1],S[2]],hand,[-.35,-1,.5])},gear:g};
@@ -1157,7 +1159,7 @@ ohext:{name:'Cable Rope Overhead Extension',views:['side','front'],cx:[306,240],
     var hip=[0,180,-10], lean=20, S=S_of(hip,lean), sho=[-B.shoW,S[1],S[2]];
     // the upper arm stays up beside the head and the forearm swings from behind the head to straight overhead
     var ud=norm(mix([.16,.86,.47],[.22,.96,.13],k)), E=add(sho,mul(ud,B.uarm));
-    var be=lerp(-112,8,k)*R, hx=-12, fl=Math.sqrt(B.farm*B.farm-(hx-E[0])*(hx-E[0]));
+    var be=lerp(-112,8,k)*R, hx=lerp(-12,-36,k*k), fl=Math.sqrt(B.farm*B.farm-(hx-E[0])*(hx-E[0]));
     var hand=[hx,E[1]+fl*Math.cos(be),E[2]+fl*Math.sin(be)];
     var pul=[0,18,-196], mid=[0,hand[1],hand[2]], dir=norm(sub(pul,mid)), knot=add(mid,mul(dir,34));
     return {p:{hip:hip,lean:lean,neck:-10,ankR:[-18,B.ankH,30],ankL:[18,B.ankH,-46],kneePole:[-.1,0,1],footDir:[-.15,0,1],
@@ -3056,8 +3058,8 @@ var GROUPS=[["Reviewed","squat dead bench row pull ohp curl lat push incl crow t
 ["Cardio","walk treadwalk treadrun outrun stairs cbike assault ellip rower jumprope swim"],
 ["Stretches","hipflex chestdr pigeon hamstr"]];
 // REVIEW: fixed since he last looked, waiting on his eye. APPROVED: he has said these are right.
-var REVIEW="ohext rdl bwcalf ohp curl lat push incl crow thrust legx pullup calf dbbench smbench".split(" ");
-var APPROVED="squat dead bench row pull bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl".split(" ");
+var REVIEW="ohp smbench ohext incbb dbfly pushup mbench lvchest mfly xover lowchest dbohp mohp machlat clat".split(" ");
+var APPROVED="squat dead bench row pull bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl curl lat push incl crow thrust legx pullup calf dbbench rdl bwcalf".split(" ");
 var seen={},IDS=[],HEAD={};
 GROUPS.forEach(function(g){g[1].split(" ").forEach(function(id,n){if(LIFTS[id]&&!seen[id]){seen[id]=1;IDS.push(id);if(!HEAD[g[0]]){HEAD[g[0]]=1;HEAD[id]=g[0];}}});});
 Object.keys(LIFTS).forEach(function(id){if(!seen[id]){IDS.push(id);if(!HEAD.Other){HEAD.Other=1;HEAD[id]="Other";}}});
