@@ -239,6 +239,29 @@ main constraint on how to work in it. See **Traps** below before editing.
   by CSS in the Forge theme; the swap icon left the card for the menu.
   Tested in the preview on his real Push day by clicking the real buttons. **Not yet seen on the
   phone or against the watch.**
+- **Three notes from the gym** (v5.293, 21 Nov, owner picked 1A, 2B slower, 3A).
+  **The set that is waiting is a hollow ring** (`.exc .srow.next .chk`: dark, 2px gold border,
+  gold anvil). Filled orange is what a set that beat the record looks like, so never fill the
+  waiting one again: it read as done, and as a best.
+  **The move to the next lift is shown** (`sfMove`, `sfSpan`, `SF_MS` 600). The finished card
+  folds to its line, then the next opens and is lit round its edge (`.sf-glow`). The fold is
+  drawn BEFORE the state changes and the open after, and the next step waits on the fold's
+  `onfinish` with a timer only as backstop: a timer alone cut the fold short on a busy page.
+  A fold holds its last frame (`fill:forwards`), so anything that takes over first must call
+  `sfStill()`, or the card stays pinned one line tall. Tapping a shut card still opens at once.
+  **Ease in** (`backAsk`, `backPlan`, `backDown`, `#backOvl`). A lift not logged in `BACK_DAYS`
+  (21) is offered one notch lighter, two past `BACK_LONG` (35), asked ONCE before the first set,
+  one tap for the lot, in cooled steel so it is never mistaken for a level up. Measured per
+  LIFT from its last logged day, never by counting workouts. A notch is the level up's own
+  chain pointed down (`latticeNext`, `dbWalk`, `plateNext`), **never a percentage**: owner, 60
+  less 10% is 54 and no rack has it. No recalibrate button, owner's call: the prompt is enough.
+  `DB.backDone[wk|slot]` holds `e` or `k` plus the last session's date, so one break is one
+  question and logging the lift ends it. `backHeld` keeps `isReady` false for an eased lift, or
+  the card would offer a raise off the heavier session from before the break. A target already
+  under what he last lifted is not eased, and a second notch that would take off more than a
+  quarter is refused. Backing out records nothing. Pump Day is outside it.
+  Tested in the preview by clicking the real buttons. **The fold's speed cannot be judged in
+  the preview pane and nothing here has been seen on the phone or the watch.**
 - **The exercise card is buttons, and you say what it shows** (v5.238, owner picked B). The row
   under the name is four plates, icon over word (`body.forge .ex-links a`): HOW TO, NOTE,
   HISTORY, PLATES. `openExHist` is every session that lift appears in (`histForEx`), best at the

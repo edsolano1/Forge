@@ -3379,8 +3379,33 @@ body.forge .exc .srow:has(.inp.wide):has(.hold){grid-template-columns:18px 1fr 1
 body.forge .exc .sno{font-size:12px;}
 body.forge .exc .srow .inp{font-size:18px;padding:9px 0;}
 body.forge .exc .srow .chk{width:48px;height:42px;border-radius:12px;}
-body.forge .exc .srow.next .chk{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);border-color:#ffb35c;color:#1b0f06;}
-body.forge .exc .srow.next .chk svg{color:#1b0f06;}
+/* v5.293, owner picked 1A: the set that is WAITING is a hollow ring. Filled orange is what a
+   set that beat the record looks like, so a filled button on a set nobody has done yet read as
+   already done, and as a best. Empty means not done; it fills when it is logged. */
+body.forge .exc .srow.next .chk{background:#130c09;border:2px solid var(--gold);color:var(--gold);}
+body.forge .exc .srow.next .chk svg,body.forge .exc .srow.next .chk svg.glyph{color:var(--gold);}
+/* v5.293, owner picked 2B: the lift just opened is lit round its edge for a moment (sfMove). */
+body.forge .exc.sf-glow{animation:sfGlow 2.2s ease-out 1;}
+@keyframes sfGlow{0%,45%{border-color:var(--gold);box-shadow:0 0 0 1px rgba(255,138,31,.4),0 0 24px rgba(255,138,31,.26);}100%{box-shadow:0 0 0 1px rgba(255,138,31,0),0 0 24px rgba(255,138,31,0);}}
+/* Ease in (v5.293, owner picked 3A): the level up sheet turned around, in cooled steel so it
+   can never be mistaken for one. */
+#backOvl .sheet.bk-s{position:relative;overflow:hidden;background:#0a0605;border-color:#3b4a5a;padding-top:30px;}
+.bk-beam{position:relative;margin:0 -30px;padding:14px 32px 16px;text-align:center;transform:skewY(-2deg);
+  background:linear-gradient(90deg,transparent,rgba(111,134,158,.85) 18%,rgba(201,216,230,.95) 50%,rgba(111,134,158,.85) 82%,transparent);
+  box-shadow:0 0 40px rgba(143,166,189,.35);}
+.bk-beam b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#0d141b;line-height:1;}
+.bk-beam small{display:block;font-family:var(--mono);font-weight:600;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:#22303d;margin-top:6px;}
+.bk-list{position:relative;max-height:calc(var(--usablevh) * .42);overflow-y:auto;overflow-x:hidden;margin:26px 2px 0;display:flex;flex-direction:column;}
+.bk-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid rgba(143,166,189,.16);}
+.bk-w{display:flex;align-items:baseline;gap:7px;font-family:var(--mono);white-space:nowrap;}
+.bk-w s{font-size:15px;color:var(--txt3);}
+.bk-w i{font-style:normal;font-size:11px;color:#8fa6bd;}
+.bk-w b{font-size:24px;font-weight:700;color:#dfe9f3;}
+.bk-w small{font-size:10px;color:var(--txt2);}
+#backOvl .bk-note{margin:16px 0 0;text-align:center;font-size:13px;color:var(--txt2);}
+#backOvl .bk-foot{position:relative;margin-top:18px;}
+#backOvl .bk-go{width:100%;box-sizing:border-box;padding:14px;text-align:center;justify-content:center;font-weight:800;letter-spacing:.16em;font-size:13px;
+  background:linear-gradient(180deg,#c9d8e6,#8fa6bd 60%,#6c8298);color:#0d141b;border-color:transparent;box-shadow:inset 0 1px 0 rgba(240,248,255,.7);}
 body.forge .exc .srow.next .inp{border-color:#6a3f26;}
 body.forge .ex-rest,body.forge .ex-pr{font-size:12px;}
 body.forge .xm-list{display:flex;flex-direction:column;margin:4px 0 12px;border:1px solid #4a2c1c;border-radius:14px;overflow:hidden;}
@@ -3777,6 +3802,19 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
       <div class="btn btn-go lvl-go" id="lvlGo" onclick="applyLevel()">RAISE ALL</div>
       <div class="lvl-hint" id="lvlHint">Tap a lift to raise just that one. Tap its number to change it first.</div>
       <div class="lvl-skip" id="lvlSkipRow" onclick="skipLevel()">Not this time</div>
+    </div>
+  </div>
+</div>
+
+<!-- Ease in (v5.293): asked once before the first set, for lifts not done in three weeks. -->
+<div class="ovl" id="backOvl">
+  <div class="sheet bk-s" style="max-width:440px">
+    <div class="bk-beam"><b>Ease in</b><small id="bkTitle"></small></div>
+    <div id="bkList" class="bk-list"></div>
+    <p class="bk-note">Just for getting going again. Level ups bring you back.</p>
+    <div class="bk-foot">
+      <div class="btn btn-go bk-go" id="bkGo" onclick="backGo()">EASE ALL</div>
+      <div class="lvl-skip" onclick="backKeep()">Keep my weights</div>
     </div>
   </div>
 </div>
@@ -9992,7 +10030,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.292';
+var APPV='v5.293';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10608,7 +10646,126 @@ function gradeClass(e){
   var g=e.g||(e.pr?'pr':'');               // entries logged before grading existed
   return isTop(g)?' ispr':g==='match'?' ismatch':'';
 }
+// ---- EASE IN (v5.293, owner picked 3A) ----
+// Progression only went up, and a break is the one time it should not. A lift not done in
+// BACK_DAYS is offered one notch lighter before the first set of the workout, two past
+// BACK_LONG, and the lifter says yes or no ONCE for the lot: he asked for as little phone as
+// possible in the gym. Measured per LIFT from the last day it was logged, not by counting
+// workouts, so a month off legs eases the legs and leaves the rest alone.
+// A notch is a weight the machine HAS: the same chain a level up walks, pointed the other way,
+// so 60 becomes 55 and never the 54 a percentage would ask for. Nothing is written without the
+// tap, and backing out records nothing, so it is asked again.
+// DB.backDone[wk|slot] remembers which break was answered ('e' eased, 'k' kept, then the date
+// of the last session), so one break is one question, and logging the lift ends it by itself.
+var BACK_DAYS=21,BACK_LONG=35,BKPLAN=null,BKWK=null;
+function backGap(exId){
+  var L=lastFor(exId);if(!L||!L.date)return null;
+  var a=new Date(L.date+'T12:00:00'),b=new Date(today()+'T12:00:00');
+  return Math.round((b-a)/864e5);
+}
+function backDown(id,name,w,n){
+  var dn=!invEx(id),isdb=isDb(id,name),x=w;
+  for(var i=0;i<n;i++){
+    var ln=isdb?null:latticeNext(id,x,dn),nx;
+    if(ln!=null)nx=ln;
+    else{
+      var st=stepFor(id,x),plate=(x>=40?5:2.5);
+      if(isdb)nx=dbWalk(x,dn,st);
+      else if(st!==plate)nx=dn?Math.max(0,x-st):x+st;
+      else nx=plateNext(x,dn);
+    }
+    nx=Math.round(nx*100)/100;
+    if(dn&&nx<=0)break;      // a loaded lift is never eased to nothing
+    // The second notch is refused when it would take off more than a quarter: on a light stack
+    // two notches of four is 10 down to 2, which is not easing in, it is starting again.
+    if(i>0&&dn&&nx<w*0.75)break;
+    x=nx;
+  }
+  return x;
+}
+function backPlan(wk){
+  var out=[];
+  if(!W[wk]||wk==='pump')return out;
+  var A=DB.active[wk],done=DB.backDone||{};
+  edAllRows(wk).forEach(function(row){
+    var rf=rowFor(A&&A.swaps,row,wk),id=rf.exId;
+    var g=backGap(id);if(g===null||g<BACK_DAYS)return;
+    var sk=(String(rf.id).indexOf('~')>=0)?rf.id:id,last=lastFor(id).date;
+    var was=done[wk+'|'+sk];
+    if(was&&was.slice(1)===last)return;
+    var n=g>BACK_LONG?2:1,lines=rf.data.sets.split('\n'),ch=false;
+    // A target already lighter than what he last lifted needs no easing: he is under it as it is.
+    var inv=!!invEx(id),top=null;
+    lastFor(id).sets.forEach(function(e){if(e&&typeof e.w==='number'&&(top===null||(inv?e.w<top:e.w>top)))top=e.w;});
+    var to=lines.map(function(s){
+      var t=parseTarget(s);
+      if(t.type!=='wr'||!(t.w>0))return s;
+      if(top!==null&&(inv?t.w>top:t.w<top))return s;
+      var nw=backDown(id,rf.data.name,t.w,n);
+      if(nw===t.w)return s;
+      ch=true;return nw+'x'+t.r;
+    });
+    if(!ch)return;
+    out.push({id:id,name:rf.data.name,from:lines,to:to,slot:rf.id,baseId:rf.baseId,swapped:!!rf.swapId,sk:sk,gap:g,last:last});
+  });
+  return out;
+}
+// The row shows the heaviest line (the lightest on an assisted machine): one number a lift.
+function backTop(lines,inv){
+  var b=null;
+  lines.forEach(function(s){var t=parseTarget(s);if(t.type!=='wr')return;if(b===null||(inv?t.w<b:t.w>b))b=t.w;});
+  return b;
+}
+function backAsk(wk){
+  if(SANDBOX||CUR!==wk)return false;
+  var A=DB.active[wk];
+  if(A&&Object.keys(A.entries||{}).length)return false;     // only ever before the first set
+  if(document.querySelector('.ovl.on'))return false;
+  var plan=backPlan(wk);if(!plan.length)return false;
+  BKPLAN=plan;BKWK=wk;
+  var mn=plan[0].gap,mixed=false;
+  plan.forEach(function(p){if(p.gap<mn)mn=p.gap;if(Math.floor(p.gap/7)!==Math.floor(plan[0].gap/7))mixed=true;});
+  var n=plan.length,wks=Math.floor(mn/7);
+  document.getElementById('bkTitle').textContent=(n===1?'1 lift has':n+' lifts have')+' waited '+wks+' weeks'+(mixed?' or more':'');
+  document.getElementById('bkGo').textContent=n===1?'EASE IT':'EASE ALL '+n;
+  document.getElementById('bkList').innerHTML=plan.map(function(p){
+    var inv=!!invEx(p.id);
+    return '<div class="bk-row"><span class="lvl-n">'+esc(p.name)+'</span><span class="bk-w"><s>'+fmtW(backTop(p.from,inv))+'</s><i>'+(inv?'▲':'▼')+'</i><b>'+fmtW(backTop(p.to,inv))+'</b><small>'+wUnitName()+'</small></span></div>';
+  }).join('');
+  document.getElementById('backOvl').classList.add('on');
+  return true;
+}
+function backEnd(mark){
+  var plan=BKPLAN||[],wk=BKWK;
+  DB.backDone=DB.backDone||{};
+  plan.forEach(function(p){DB.backDone[wk+'|'+p.sk]=mark+p.last;});
+  BKPLAN=null;
+  saveDB();closeOvl('backOvl');renderHome();
+  if(sessionOpen())renderSession();
+  try{wearPush();}catch(e){}
+}
+function backGo(){
+  var plan=BKPLAN||[];
+  if(plan.length){
+    var keep=LVLWK;LVLWK=BKWK;lvlWrite(plan);LVLWK=keep;
+    // lvlWrite stamps what it writes as a raise. This is the opposite of one, and the check
+    // on raises that have not stuck must never judge it.
+    plan.forEach(function(p){if(DB.upSet)delete DB.upSet[p.sk];});
+  }
+  backEnd('e');
+}
+function backKeep(){backEnd('k');}
+// An eased lift is not offered a raise off the heavier session from before the break: that
+// would hand back the very weight he just stepped down from. Logging it once ends this.
+function backHeld(exId,slot){
+  var b=DB.backDone;if(!b)return false;
+  var L=lastFor(exId);if(!L)return false;
+  var sk=(String(slot||'').indexOf('~')>=0)?slot:exId,v='e'+L.date;
+  for(var k in b)if(b[k]===v&&k.slice(k.indexOf('|')+1)===sk)return true;
+  return false;
+}
 function isReady(exId,tgts,slot){
+  if(backHeld(exId,slot))return false;
   var L=lastForSlot(exId,slot);
   if(!L||L.sets.length<tgts.length)return false;
   for(var i=0;i<tgts.length;i++){
@@ -13115,6 +13272,8 @@ function openWNow(wk,dk){
   // which is how a fresh day opened halfway down the page.
   sv.classList.add('on');sv.scrollTop=0;
   syncPumpBtn();
+  // Back after a break: asked once the screen has settled, and only before the first set.
+  setTimeout(function(){try{backAsk(wk);}catch(e){}},650);
 }
 function rowFor(swaps,row,wk){
   var base=typeof row==='string'?row:row[0];
@@ -13751,7 +13910,7 @@ function sfApply(fresh){
     if(nx>=0){
       var to=us[nx].cards[0].id.slice(4);
       clearTimeout(SF.t);
-      SF.t=setTimeout(function(){if(SF.wk!==CUR)return;SF.id=to;SF.was=false;sfApply(true);sfShow(to);},700);
+      SF.t=setTimeout(function(){if(SF.wk!==CUR)return;sfMove(to);},700);
     }
   }else if(!us[cur].done)SF.was=false;
   // The one bright button. In a superset it is on whichever half has done fewer, so it takes turns.
@@ -13779,6 +13938,64 @@ function sfApply(fresh){
     });
   });
 }
+// The move to the next lift is SHOWN (v5.293, owner picked 2B and asked for it slow): the
+// finished card folds to its line, then the next one opens and is lit round its edge, so the
+// eye is carried to where the app has gone instead of finding the page rearranged.
+// The fold is drawn BEFORE the state changes and the open after it, so anything that calls
+// sfApply in between finds the truth either way. Timers drive it, never an animation's finish
+// event: a hidden page freezes its animations and the next lift would never open.
+var SF_MS=600;
+function sfBoxH(ex){
+  var h=ex.getBoundingClientRect().height,cs=getComputedStyle(ex);
+  if(cs.boxSizing!=='border-box')h-=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom)+parseFloat(cs.borderTopWidth)+parseFloat(cs.borderBottomWidth);
+  return h;
+}
+function sfSpan(ex,shutFirst){
+  var was=ex.classList.contains('shut');
+  ex.classList.toggle('shut',!was);var other=sfBoxH(ex);
+  ex.classList.toggle('shut',was);var now=sfBoxH(ex);
+  try{
+    var an=ex.animate(shutFirst?[{height:other+'px'},{height:now+'px'}]:[{height:now+'px'},{height:other+'px'}],
+                 {duration:SF_MS,easing:'cubic-bezier(.3,.7,.2,1)',fill:shutFirst?'none':'forwards'});
+    an.id='sf';return an;
+  }catch(e){return null;}
+}
+// A fold holds its last frame until the state lands. Anything that takes over first (a tap on
+// another lift) has to let go of it, or the card stays pinned at the height of one line.
+function sfStill(){
+  [].forEach.call(document.querySelectorAll('#sBody .exc'),function(ex){
+    (ex.getAnimations?ex.getAnimations():[]).forEach(function(a){if(a.id==='sf')a.cancel();});
+  });
+}
+function sfCards(id){var u=null;sfUnits().forEach(function(x){if(x.has(id))u=x;});return u?u.cards:[];}
+function sfMove(to){
+  var from=SF.id;
+  var land=function(){
+    if(SF.wk!==CUR)return;
+    sfStill();
+    SF.id=to;SF.was=false;sfApply(true);
+  };
+  if(MOTION==='off'||document.hidden||!Element.prototype.animate){land();sfShow(to);return;}
+  // The next step waits for the fold to really finish, not for the clock: a busy phone starts an
+  // animation late, and a timer alone cut the fold off a third of the way down. The timer stays
+  // as the backstop for a page whose animations are frozen.
+  var went=false,last=null;
+  sfCards(from).forEach(function(ex){var an=sfSpan(ex,false);if(an)last=an;});
+  clearTimeout(SF.t);
+  var next=function(){
+    if(went)return;went=true;clearTimeout(SF.t);
+    if(SF.wk!==CUR||SF.id!==from)return;
+    land();
+    sfCards(to).forEach(function(ex){
+      sfSpan(ex,true);
+      ex.classList.remove('sf-glow');void ex.offsetWidth;ex.classList.add('sf-glow');
+      setTimeout(function(){ex.classList.remove('sf-glow');},2300);
+    });
+    SF.t=setTimeout(function(){sfShow(to);},SF_MS+80);
+  };
+  if(last)last.onfinish=next;
+  SF.t=setTimeout(next,SF_MS+900);
+}
 function sfShow(id){
   var el=document.getElementById('exc-'+id);if(!el)return;
   try{el.scrollIntoView({block:'center',behavior:MOTION==='off'?'auto':'smooth'});}catch(e){el.scrollIntoView();}
@@ -13787,7 +14004,7 @@ function sfTap(id){
   var el=document.getElementById('exc-'+id);
   if(!el||!el.classList.contains('shut'))return;
   var sb=document.getElementById('sBody');if(sb&&sb.classList.contains('rearrange'))return;
-  clearTimeout(SF.t);SF.id=id;
+  clearTimeout(SF.t);sfStill();SF.id=id;
   var u=null;sfUnits().forEach(function(x){if(x.has(id))u=x;});
   SF.was=u?u.done:false;
   sfApply(true);
