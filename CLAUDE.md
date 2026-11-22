@@ -249,6 +249,7 @@ main constraint on how to work in it. See **Traps** below before editing.
   `onfinish` with a timer only as backstop: a timer alone cut the fold short on a busy page.
   A fold holds its last frame (`fill:forwards`), so anything that takes over first must call
   `sfStill()`, or the card stays pinned one line tall. A TAP on a shut card is answered at once but is not a snap (v5.294, owner): the card he left closes while the one he picked opens, both together over `SF_TAP` (450), no glow.
+  **A finished lift is stamped** (v5.295, owner's idea; he picked the anvil over the word DONE, because the line under it already says Done). `sfStamp` drops the app's own `ANVIL` in a seal onto the card 350ms after the last set, sparks (`sfSpark`, fixed on the body because `.exc` clips) fly from where it lands, the card takes the blow, and the move waits 1050ms instead of 700. Motion Off or a hidden page skips it. No sound of its own: gold already has one.
   **Ease in** (`backAsk`, `backPlan`, `backDown`, `#backOvl`). A lift not logged in `BACK_DAYS`
   (21) is offered one notch lighter, two past `BACK_LONG` (35), asked ONCE before the first set,
   one tap for the lot, in cooled steel so it is never mistaken for a level up. Measured per
