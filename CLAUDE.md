@@ -239,6 +239,16 @@ main constraint on how to work in it. See **Traps** below before editing.
   by CSS in the Forge theme; the swap icon left the card for the menu.
   Tested in the preview on his real Push day by clicking the real buttons. **Not yet seen on the
   phone or against the watch.**
+- **A new week asks about what it left behind** (v5.296, owner picked 1 of three; he was a
+  workout behind and the reset left him not knowing where he was). `weekHello` asks one question
+  per missed workout, crest NEW WEEK, DO IT TODAY or LET IT GO, capped at three, and says nothing
+  else on such a week. **The days stay: a "next workout" list was weighed and parked.**
+  `carryAdd` keeps it in `DB.carry={ws,items:[{id,dk}]}`, never in `DB.days`, and `carryCard`
+  draws it on the day it was answered with a Last week pill. Its session is stamped `wk:'lw'`,
+  which is no weekday on purpose: the workout's own day this week is still owed, no bonus card
+  is drawn, and `bonusHeal` skips it. Anything new that reads a log's `wk` as a weekday must
+  expect `'lw'`. The card cannot be removed once accepted and expires with the week.
+  Tested in the preview by clicking the question and the card; the finish was simulated.
 - **Three notes from the gym** (v5.293, 21 Nov, owner picked 1A, 2B slower, 3A).
   **The set that is waiting is a hollow ring** (`.exc .srow.next .chk`: dark, 2px gold border,
   gold anvil). Filled orange is what a set that beat the record looks like, so never fill the

@@ -326,6 +326,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .pill-bonus{background:transparent;border:1px solid color-mix(in srgb,var(--match) 60%,transparent);color:var(--match);}
 .card.bonus{opacity:.72;border-style:dashed;}
 .card.bonus:hover{opacity:.85;}
+.card.carry{border-style:dashed;border-color:color-mix(in srgb,var(--match) 60%,transparent);}
 .cardgap{display:inline-flex;width:23px;padding:13px 4px 13px 13px;margin:-13px -4px -13px 6px;
   border-left:1px solid transparent;pointer-events:none;}
 .card.waiting .card-name{color:var(--txt2);}
@@ -10034,7 +10035,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.295';
+var APPV='v5.296';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12086,8 +12087,8 @@ function dayBox(d,nx,n0){
   // Every piece off this day's fire is finished: the whole bench cools, header and all.
   var ltw=loggedThisWeek();
   var quenched=!offw&&ids.length&&ids.every(function(id){return loggedCount(id)===0&&lwOn(ltw,id,d.k);});
-  var bon=bonusOn(d.k);
-  var h='<div class="daybox'+(isToday?' today':'')+((ids.length||bon.length)?'':' empty')+(quenched?' quenched':'')+'" data-day="'+d.k+'">'+(isToday?'<i class="dayglow"></i>':'');
+  var bon=bonusOn(d.k),car=carryOn(d.k);
+  var h='<div class="daybox'+(isToday?' today':'')+((ids.length||bon.length||car.length)?'':' empty')+(quenched?' quenched':'')+'" data-day="'+d.k+'">'+(isToday?'<i class="dayglow"></i>':'');
   // No count. How many a day can hold is not something to be reminded of on every day you own -
   // it only matters at the moment you try to exceed it, and it says so then.
   // The add for a day that already holds something rides IN the header now, not on a dashed
@@ -12109,12 +12110,13 @@ function dayBox(d,nx,n0){
   // Add a workout was the clutter, not the plus.
   // The bonus card goes FIRST on a day that holds nothing else, because it is what happened there;
   // the plus follows it, still offering to put a real workout on the day (v5.230).
+  car.forEach(function(id){h+=carryCard(id);});
   if(bon.length&&!ids.length)bon.forEach(function(id){h+=bonusCard(id,d.k);});
   if(!ids.length){var bare0=!DAYS.some(function(x){return (DB.days[x.k]||[]).length;});
     // REST belongs to a day with nothing on it at all. A day that already carries a bonus is not a
     // rest day, so it keeps the plus and loses the label.
     h+='<div class="dayempty dayadd'+(bare0?'':' quiet')+'" onclick="openNewDay(\''+d.k+'\')" title="Add or forge a workout">'+PLUS+(bare0?'Add a workout':'')+
-       (bon.length?'':'<button class="dayrest" onclick="event.stopPropagation();markRest(\''+d.k+'\')" title="This is a rest day">REST</button>')+'</div>';}
+       ((bon.length||car.length)?'':'<button class="dayrest" onclick="event.stopPropagation();markRest(\''+d.k+'\')" title="This is a rest day">REST</button>')+'</div>';}
   else{
     ids.forEach(function(id,n){h+=planCard(id,n0+n,nx,d.k);});
     bon.forEach(function(id){h+=bonusCard(id,d.k);});
@@ -12243,6 +12245,40 @@ function bonusDay(L){
   if(isNaN(t))return null;
   var d=DAYS[new Date(t).getDay()];
   return d?d.k:null;
+}
+// ---- Carried over from last week (v5.296) ----
+// DO IT TODAY on the new week's question puts the workout on the day it was answered, for this
+// week only. It never enters DB.days, so the normal week is untouched, and its session is stamped
+// wk 'lw', which is no weekday: the workout's own day this week is still owed (lwOn asks for the
+// weekday), no bonus card is drawn for it, and bonusHeal leaves it alone.
+function carryAdd(id){
+  if(!W[id])return;
+  var ws=weekStartTs(),dk=DAYS[new Date().getDay()].k;
+  if(!DB.carry||DB.carry.ws!==ws)DB.carry={ws:ws,items:[]};
+  if(!DB.carry.items.some(function(x){return x.id===id;}))DB.carry.items.push({id:id,dk:dk});
+  saveDB();renderHome();
+}
+function carryOn(dk){
+  if(twoOff()||!DB.carry||DB.carry.ws!==weekStartTs())return [];
+  return (DB.carry.items||[]).filter(function(x){return x.dk===dk&&W[x.id];}).map(function(x){return x.id;});
+}
+function carryDone(id){
+  var ws=weekStartTs();
+  return (DB.logs||[]).some(function(L){
+    if(!L||L.day!==id||!L.sealed||L.unsealed||L.wk!=='lw')return false;
+    var t=new Date(L.date+'T12:00:00').getTime();return !isNaN(t)&&t>=ws;
+  });
+}
+function carryTap(id){
+  if(carryDone(id)){showHistory();return;}
+  openW(id,'lw');
+}
+function carryCard(id){
+  var w=W[id];if(!w)return '';
+  var done=carryDone(id);
+  return '<div class="card carry'+(done?' sealed':'')+'" data-carry="'+id+'" style="--c:'+dayC(id)+'" onclick="carryTap(\''+id+'\')">'+
+    '<div class="card-top"><span class="card-name">'+esc(w.name.replace('Optional: ',''))+'</span>'+
+      '<span class="card-r">'+(done?'<span class="pill pill-done">'+TXT('done')+'</span>':'<span class="pill pill-bonus">Last week</span>')+'<span class="cardgap"></span></span></div></div>';
 }
 function bonusOn(dk){
   if(twoOff())return [];                       // the other week's board is a plan, not a record
@@ -12455,7 +12491,7 @@ function weekHello(){
   // Name what did not happen, so the quiet reset never reads as the app not noticing (v5.108).
   // Judged against the board as it stands now: each placed workout with no finished log inside
   // last week. Rest and optional days are not things you miss.
-  var missed=[];
+  var missed=[],missIds=[];
   try{
     // On a two week program the board that was live LAST week is the one to judge.
     var LD=twoOn()?(DB.two.view===DB.two.live?(DB.two.other||{}):DB.days):DB.days;
@@ -12466,9 +12502,19 @@ function weekHello(){
         if(l.day!==id||!l.sealed||l.unsealed)return false;
         var t=new Date(l.date+'T12:00:00').getTime();return t>=prev&&t<+ws;
       });
-      if(!hit)missed.push(W[id].name.replace('Optional: ',''));
+      if(!hit&&missIds.indexOf(id)<0){missed.push(W[id].name.replace('Optional: ',''));missIds.push(id);}
     });});
   }catch(e){}
+  // A workout left behind is ASKED about, one question each (v5.296, owner picked 1 of three).
+  // He was a workout behind, the week turned over, and he no longer knew where he was. The
+  // question is the notice: nothing else is said on a week that left something behind.
+  if(missIds.length){
+    missIds.slice(0,3).forEach(function(id,i){
+      askCrest('NEW WEEK');
+      ask('',function(){carryAdd(id);},'You did not get to '+missed[i]+' last week','DO IT TODAY',function(){},null,'LET IT GO');
+    });
+    return;
+  }
   // One sentence (owner, 30 Sep: "just say week has been reset, something super simple"). The
   // four line version was right about what it said and wrong about when it said it: this lands
   // at launch, before anybody has asked a question. It waits behind the i now.
@@ -14693,7 +14739,7 @@ function bonusHeal(){
     if(SANDBOX||twoOff())return 0;
     var ws=weekStartTs(),we=ws+7*864e5,n=0;
     (DB.logs||[]).forEach(function(L){
-      if(!L||!L.sealed||L.unsealed||L.marked||!L.wk||L.wk==='*')return;
+      if(!L||!L.sealed||L.unsealed||L.marked||!L.wk||L.wk==='*'||L.wk==='lw')return;
       var t=new Date(L.date+'T12:00:00').getTime();
       if(isNaN(t)||t<ws||t>=we)return;
       if((DB.days[L.wk]||[]).indexOf(L.day)>=0)return;      // its own day still plans it
