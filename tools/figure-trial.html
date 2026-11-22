@@ -2251,7 +2251,7 @@ crunch:{name:'Crunch',views:['side','rear'],labels:['Side','From the head end, o
   }},
 
 // ---- BICYCLE CRUNCH, the ordinary one: lying on the back, the weight on the backside and the back, only the
-// shoulder blades lifted. The trunk is rigid, so the lift is a small tip (about 11 degrees) with the head and neck
+// shoulder blades lifted. The trunk is rigid, so the lift is a very small tip (2 to 5 degrees, so the lower back reads as ON the floor) with the head and neck
 // leading, and the hip height is worked out from the trunk's own thickness so its back rests ON the floor.
 // One full loop is both sides. Right knee in while the shoulders turn to the right, so the left elbow comes across.
 bike:{name:'Bicycle Crunch',views:['side','top'],labels:['Side','From above'],cx:[196,196],ground:[50,430],up:1,cycle:1,period:2600,
@@ -2259,7 +2259,7 @@ bike:{name:'Bicycle Crunch',views:['side','top'],labels:['Side','From above'],cx
   says:'The stomach and the muscles down its sides, which do the turning.',
   pose:function(k){
     var s=Math.sin(k*2*Math.PI);                 // +1: right knee in, shoulders turned to the right
-    var lean=-81+3*s*s, twist=30*s, neck=24+4*s*s, a=(90+lean)*R, hy=0;
+    var lean=-88+3*s*s, twist=30*s, neck=32+6*s*s, a=(90+lean)*R, hy=0;
     FIG.TOR.forEach(function(t){if(t[0]>=0&&t[0]<.6)hy=Math.max(hy,t[3]*Math.cos(a)-t[0]*B.trunk*Math.sin(a));});   // the lowest point of the back touches the floor
     var hip=[0,hy,10];
     // from above a leg is over the trunk wherever the two meet (the knee comes in above the belly)
@@ -3055,8 +3055,8 @@ var GROUPS=[["Reviewed","squat dead bench row pull ohp curl lat push incl crow t
 ["Cardio","walk treadwalk treadrun outrun stairs cbike assault ellip rower jumprope swim"],
 ["Stretches","hipflex chestdr pigeon hamstr"]];
 // REVIEW: fixed since he last looked, waiting on his eye. APPROVED: he has said these are right.
-var REVIEW="bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl".split(" ");
-var APPROVED="squat dead bench row pull".split(" ");
+var REVIEW="bike".split(" ");
+var APPROVED="squat dead bench row pull jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl".split(" ");
 var seen={},IDS=[],HEAD={};
 GROUPS.forEach(function(g){g[1].split(" ").forEach(function(id,n){if(LIFTS[id]&&!seen[id]){seen[id]=1;IDS.push(id);if(!HEAD[g[0]]){HEAD[g[0]]=1;HEAD[id]=g[0];}}});});
 Object.keys(LIFTS).forEach(function(id){if(!seen[id]){IDS.push(id);if(!HEAD.Other){HEAD.Other=1;HEAD[id]="Other";}}});
