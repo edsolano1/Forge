@@ -243,7 +243,7 @@ xover:{name:'Cable Crossover',views:['side','front'],cx:[236,240],ground:[40,440
              {t:'line',a:[hh[0],hh[1],hh[2]-13],b:[hh[0],hh[1],hh[2]+13],w:7,col:GO,d:dp(hh,-3)});
     });
     g.push({t:'line',a:[-TX,352,TZ],b:[TX,352,TZ],w:7});
-    return {p:{hip:hip,lean:lean,neck:-8,ankR:[-20,B.ankH,-36],ankL:[20,B.ankH,42],kneePoleR:[-.1,0,1],kneePoleL:[.1,0,1],
+    return {p:{squeeze:Math.max(0,(k-.7)/.3),hip:hip,lean:lean,neck:-8,ankR:[-20,B.ankH,-36],ankL:[20,B.ankH,42],kneePoleR:[-.1,0,1],kneePoleL:[.1,0,1],
                footDirR:[-.2,0,1],footDirL:[.15,0,1],hand:hand,elbPole:[-.3,-.35,-1],layer:{front:{arms:'front'}}},gear:g};
   }},
 lowchest:{name:'Cable Lower Chest Raise',views:['side','front'],cx:[236,240],ground:[40,440],up:1,
@@ -262,7 +262,7 @@ lowchest:{name:'Cable Lower Chest Raise',views:['side','front'],cx:[236,240],gro
              {t:'line',a:pu,b:hh,w:3.5,d:{front:hh[2]-14,side:-hh[0]-12}},
              {t:'line',a:[hh[0]-11,hh[1],hh[2]],b:[hh[0]+11,hh[1],hh[2]],w:7,col:GO,d:dp(hh,-3)});
     });
-    return {p:{hip:hip,lean:lean,neck:-3,ankR:[-20,B.ankH,-36],ankL:[20,B.ankH,42],kneePoleR:[-.1,0,1],kneePoleL:[.1,0,1],
+    return {p:{squeeze:Math.max(0,(k-.7)/.3),hip:hip,lean:lean,neck:-3,ankR:[-20,B.ankH,-36],ankL:[20,B.ankH,42],kneePoleR:[-.1,0,1],kneePoleL:[.1,0,1],
                footDirR:[-.2,0,1],footDirL:[.15,0,1],hand:hand,elbPole:[-.4,-.6,-.7],layer:{front:{arms:'front'}}},gear:g};
   }}
 });
@@ -323,10 +323,11 @@ mohp:{name:'Machine Shoulder Press',views:['side','front'],cx:[250,240],ground:[
   says:'The shoulders and the back of the arms push. The machine keeps the path steady.',
   pose:function(k){
     var hip=[0,112,0], lean=-8, S=S_of(hip,lean), sh=5*k;
-    // each handle hangs from a lever that turns on an axle behind and above the head, so the hands
-    // travel up and a little back. The lever runs over the head and a drop link comes down to the grip.
+    // each handle is the end of a horn: a lever that turns on an axle behind the head and comes forward round
+    // the shoulder to the grip, so the handles start AT the shoulders and the hands travel up and a little back.
+    // (It used to run high over the head with a drop link down to the grip, which is not the machine people know.)
     var h0=[S[1]+12,S[2]+27], h1=[S[1]+121,S[2]+6], cy=h1[0]-h0[0], cz=h1[1]-h0[1], cl=Math.sqrt(cy*cy+cz*cz);
-    var Py=(h0[0]+h1[0])/2+108*cz/cl, Pz=(h0[1]+h1[1])/2-108*cy/cl, RR=Math.sqrt((h0[0]-Py)*(h0[0]-Py)+(h0[1]-Pz)*(h0[1]-Pz));
+    var Py=(h0[0]+h1[0])/2+92*cz/cl, Pz=(h0[1]+h1[1])/2-92*cy/cl, RR=Math.sqrt((h0[0]-Py)*(h0[0]-Py)+(h0[1]-Pz)*(h0[1]-Pz));
     var a0=Math.atan2(h0[0]-Py,h0[1]-Pz), a=lerp(a0,Math.atan2(h1[0]-Py,h1[1]-Pz),k), da=a-a0;
     var Hy=Py+RR*Math.sin(a), Hz=Pz+RR*Math.cos(a), Qy=Hy+78*Math.cos(da), Qz=Hz-78*Math.sin(da);
     var hand=[-72,Hy,Hz], gear=pressSeat(hip,lean,112);
@@ -336,8 +337,7 @@ mohp:{name:'Machine Shoulder Press',views:['side','front'],cx:[250,240],ground:[
               line([-80,Py,Pz],[80,Py,Pz],9,null,{side:-119,front:-499}));           // the axle
     [-1,1].forEach(function(s){
       var X=s*72, ds=s<0?300:-300;
-      gear.push(line([X,Py,Pz],[X,Qy,Qz],6,GREY,{side:ds,front:-480}),
-                line([X,Qy,Qz],[X,Hy+3,Hz],5,GO,{side:ds+1,front:-470}),
+      gear.push(line([X,Py,Pz],[X,Hy,Hz],7,GO,{side:ds,front:-480}),
                 line([X-15,Hy,Hz],[X+15,Hy,Hz],8,GO,{side:s<0?40:-340,front:Hz-2}));  // the grip: the fist closes over it
     });
     return {p:{hip:hip,lean:lean,neck:6,ank:[-26,B.ankH,86],kneePole:[-.1,1,.5],footDir:[-.15,0,1],shrug:[sh,0],
