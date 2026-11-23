@@ -217,7 +217,7 @@ function buildParts(J,V){
   parts.forEach(function(P){if(!P.s||!P.nbs)return;
     parts.forEach(function(T){if(T===P||T.name!==P.name||T.s!==-P.s||T.blobs.length!==P.blobs.length)return;
       var d=0;P.blobs.forEach(function(b,i){var a=V.p(b.c), c=V.p(T.blobs[i].c);d=Math.max(d,Math.sqrt((a[0]-c[0])*(a[0]-c[0])+(a[1]-c[1])*(a[1]-c[1])));});
-      var t=Math.max(0,Math.min(1,(d-5)/12));P.nbs.push({b:T.blobs,f:t*t*(3-2*t)});});});
+      var t=Math.max(0,Math.min(1,(d-3)/6));P.nbs.push({b:T.blobs,f:t*t*(3-2*t)});});});
   // the neck sits behind both the trunk and the head, always: left to its own depth it swaps with them mid rep
   parts[1].d=Math.min(parts[0].d,parts[2].d)-.02;
   return parts;
@@ -342,7 +342,7 @@ function draw(x,kind,pose,gear,lit,cx,ground,zoom){
   buildParts(J,V).forEach(function(P){
     if(lay){
       var grp=P.o>=30?'arms':(P.o>=20?'legs':null);
-      if(grp&&lay[grp])P.d=(lay[grp]==='front'?1:-1)*(grp==='arms'?1000:900);
+      if(grp&&lay[grp])P.d=(lay[grp]==='front'?1:-1)*(grp==='arms'?1000:900)+((kind==='quarter'||kind==='rear'||kind==='side')&&P.s<0?.02:0);     // pinned together, the near limb still lies over the far one
       // one part on one side, e.g. uarmR:'front': from off to one side the near shoulder is always over the trunk
       var one=P.s&&lay[P.name+(P.s<0?'R':'L')];
       if(one)P.d=(one==='front'?1:-1)*1000;

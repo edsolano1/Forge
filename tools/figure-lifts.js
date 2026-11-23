@@ -1237,31 +1237,33 @@ hthrust:{name:'Machine Hip Thrust',views:['side','front'],labels:['Side','From t
   lit:{glute:2,ham:1,quad:1},
   says:'The backside does the work. The thighs help.',
   pose:function(k){
-    // as the bench hip thrust: the upper back rests on the pad edge and the body turns about it.
-    // The load is a padded belt across the hips, on two lever arms that turn about a post at the foot end.
+    // the upper back rests on the pad edge and the body turns about it. The load is under the lower back: a lever each
+    // side that turns low at the head end and carries its plates beneath the hips, tied to them by a belt across the lap.
+    // The feet are on a plate tilted 45 degrees.
     var lean=lerp(-58,-90,k), u=uv(lean), n=nv(lean);
-    var P=[0,101,-78], hip=at(P,u,-80,n,0), PV=[0,84,178], LEN=179, s=0, i, belt;
-    // the arms cannot stretch: the pad sits wherever on the lap the arm's end comes down
-    for(i=0;i<8;i++){belt=at(hip,u,3+s,n,25);var dy=belt[1]-PV[1],dz=belt[2]-PV[2],dd=Math.sqrt(dy*dy+dz*dz),g=(u[1]*dy+u[2]*dz)/dd;
-      s+=(LEN-dd)/(Math.abs(g)<.4?(g<0?-.4:.4):g);}
-    belt=at(hip,u,3+s,n,25);
-    var hornC=[0,lerp(PV[1],belt[1],.3),lerp(PV[2],belt[2],.3)];
-    return {p:{hip:hip,lean:lean,neck:lerp(38,22,k),ank:[-25,B.ankH,96],kneePole:[-.15,1,.3],footDir:[-.2,0,1],
-               hand:[-62,lerp(belt[1],PV[1],.12),lerp(belt[2],PV[2],.12)],elbPole:[-.8,-.4,-.3],layer:{front:{legs:'front'}}},
+    var P=[0,101,-78], hip=at(P,u,-80,n,0), belt=at(hip,u,6,n,24);
+    var Q=[0,26,-128], E=[0,hip[1]-36,hip[2]+16], W=[0,lerp(Q[1],E[1],.72),lerp(Q[2],E[2],.72)];
+    function sx(q,x){return [x,q[1],q[2]];}
+    return {p:{hip:hip,lean:lean,neck:lerp(38,22,k),ank:[-25,45,101],kneePole:[-.15,1,.3],footDir:[-.15,.7,.7],
+               hand:[-60,80,-34],elbPole:[-.8,-.4,-.3],layer:{front:{legs:'front'}}},
             gear:[{t:'box',a:[-42,72,-134],b:[42,86,-74],d:{side:-100,front:-400}},
                   {t:'line',a:[0,70,-126],b:[0,5,-126],w:7,d:{side:-101,front:-401}},{t:'line',a:[0,70,-84],b:[0,5,-84],w:7,v:['side'],d:{side:-101}},
-                  {t:'line',a:[0,5,-130],b:[0,5,186],w:8,v:['side'],d:{side:-102}},
-                  // the post at the foot end and the two lever arms, one each side of the legs
-                  {t:'line',a:[-62,5,PV[2]],b:[-62,PV[1],PV[2]],w:8,d:{side:44,front:1100}},
-                  {t:'line',a:[62,5,PV[2]],b:[62,PV[1],PV[2]],w:8,d:{side:-160,front:1100}},
-                  {t:'line',a:[-76,5,PV[2]],b:[76,5,PV[2]],w:8,v:['front'],d:{front:1090}},
-                  {t:'line',a:[-62,PV[1],PV[2]],b:[-62,belt[1],belt[2]],w:6,col:GREY,d:{side:45,front:1110}},
-                  {t:'line',a:[62,PV[1],PV[2]],b:[62,belt[1],belt[2]],w:6,col:GREY,d:{side:-150,front:1110}},
-                  {t:'g5_plate',c:[-70,hornC[1],hornC[2]],r:22,d:{side:46,front:1120}},
-                  {t:'g5_plate',c:[70,hornC[1],hornC[2]],r:22,v:['front'],d:{front:1120}},
-                  // the belt pad across the hips
-                  {t:'line',a:[-62,belt[1],belt[2]],b:[62,belt[1],belt[2]],w:13,col:GO,v:['front'],d:{front:belt[2]}},
-                  {t:'line',a:at(belt,u,-13,n,0),b:at(belt,u,13,n,0),w:10,col:GO,v:['side'],d:{side:40}}]};
+                  {t:'line',a:[0,5,-130],b:[0,5,150],w:8,v:['side'],d:{side:-102}},
+                  // the foot plate, tilted 45 degrees, and its strut
+                  {t:'line',a:[0,22,94],b:[0,66,138],w:9,v:['side'],d:{side:-103}},
+                  {t:'line',a:[0,52,126],b:[0,5,140],w:7,v:['side'],d:{side:-104}},
+                  {t:'box',a:[-52,22,116],b:[52,66,118],v:['front'],d:{front:-300}},
+                  // the levers under the body, a plate on each beneath the lower back, and the handles by the hips
+                  {t:'line',a:sx(Q,-58),b:sx(E,-58),w:6,col:GREY,d:{side:44,front:-350}},
+                  {t:'line',a:sx(Q,58),b:sx(E,58),w:6,col:GREY,d:{side:-160,front:-350}},
+                  {t:'g5_plate',c:sx(W,-66),r:22,d:{side:46,front:-340}},
+                  {t:'g5_plate',c:sx(W,66),r:22,v:['front'],d:{front:-340}},
+                  {t:'line',a:[-60,5,-34],b:[-60,82,-34],w:5,col:GREY,v:['side'],d:{side:-99}},
+                  // the belt: a strap up from each lever and the pad across the lap
+                  {t:'line',a:sx(E,-58),b:sx(belt,-40),w:4,col:GO,d:{side:47,front:-330}},
+                  {t:'line',a:sx(E,58),b:sx(belt,40),w:4,col:GO,v:['front'],d:{front:-330}},
+                  {t:'line',a:[-40,belt[1],belt[2]],b:[40,belt[1],belt[2]],w:11,col:GO,v:['front'],d:{front:belt[2]}},
+                  {t:'line',a:at(belt,u,-13,n,0),b:at(belt,u,13,n,0),w:9,col:GO,v:['side'],d:{side:48}}]};
   }}
 });
 })();
@@ -1457,7 +1459,7 @@ dcalfr:{name:'Diagonal/Slanted Calf Raise',views:['side','rear'],labels:['Side',
     var r0=[0,Bc[1]+pu[1]*(c-36)+d[1]*4,Bc[2]+pu[2]*(c-36)+d[2]*4], r1=[0,r0[1]-d[1]*300,r0[2]-d[2]*300];
     function rx(q,x){return [x,q[1],q[2]];}
     return {p:{hip:hip,lean:lean,neck:6,ank:ank,kneePole:[0,1,1],footDir:fd,hand:hand,elbPole:[-.3,0,-1]},
-            gear:[{t:'line',a:rx(r0,-32),b:rx(r1,-32),w:7,d:{side:-105}},{t:'line',a:rx(r0,32),b:rx(r1,32),w:7,d:{side:-106}},
+            gear:[{t:'line',a:rx(r0,-32),b:rx(r1,-32),w:7,d:{side:-105,rear:-610}},{t:'line',a:rx(r0,32),b:rx(r1,32),w:7,d:{side:-106,rear:-611}},
                   {t:'line',a:rx(r1,-32),b:[-32,4,r1[2]],w:7,d:{side:-105}},{t:'line',a:rx(r1,32),b:[32,4,r1[2]],w:7,d:{side:-106}},
                   {t:'line',a:[0,5,r1[2]],b:[0,5,Bc[2]+34],w:8,d:{side:-107}},
                   // the foot plate, square to the slope, the toes on it and the heels hanging off its lower edge.
@@ -1465,9 +1467,9 @@ dcalfr:{name:'Diagonal/Slanted Calf Raise',views:['side','rear'],labels:['Side',
                   {t:'box',a:[0,0,0],b:[0,0,0],pts:slab(Bc,d,0,8,pu,-13,30,46),d:{side:300,rear:-600}},
                   {t:'line',a:[0,Bc[1]+d[1]*8+pu[1]*8,Bc[2]+d[2]*8+pu[2]*8],b:[0,5,Bc[2]+30],w:8,d:{side:-104,rear:-601}},
                   // the seat under the thighs and the rest behind the back, both riding with the hips
-                  {t:'g6_box',col:FIG.col.PAD,rim:FIG.col.LINE,pts:slab(hip,d,-24,62,pu,-27,-17,27),d:{side:-100,rear:-40}},
+                  {t:'g6_box',col:FIG.col.PAD,rim:FIG.col.LINE,pts:slab(hip,d,-24,62,pu,-30,-20,27),d:{side:-100,rear:-590}},     // from behind the seat is drawn under the legs, not across them
                   {t:'g6_box',col:FIG.col.PAD,rim:FIG.col.LINE,pts:slab(hip,u,-10,84,nb,21,31,27),d:{side:-100,rear:400}},
-                  {t:'line',a:at(-30,-27),b:at(-30,-36),w:8,v:['side'],d:{side:-103}},{t:'line',a:at(50,-27),b:at(50,-36),w:8,v:['side'],d:{side:-103}},
+                  {t:'line',a:at(-30,-30),b:at(-30,-36),w:8,v:['side'],d:{side:-103}},{t:'line',a:at(50,-30),b:at(50,-36),w:8,v:['side'],d:{side:-103}},
                   {t:'line',a:rx(at(4,-12),-41),b:rx(at(22,-12),-41),w:5,col:GREY,v:['side'],d:{side:20}},
                   {t:'bar',c:plates,half:58,r:24,v:['side']}]};
   }},
@@ -1671,11 +1673,11 @@ hipraise:{name:'Parallel Bar Hip Raise',views:['side','quarter'],labels:['Side',
               {t:'box',a:[-21,232,-34],b:[21,336,-22],d:{side:-130}}];
     [-1,1].forEach(function(s){
       gear.push({t:'line',a:[s*PX,240,-48],b:[s*PX,240,-22],w:8,d:{side:s<0?28:-62}});
-      gear.push({t:'box',a:[s*(PX-10),236,-24],b:[s*(PX+10),245,48],d:{side:s<0?30:-60}});
-      gear.push({t:'line',a:[s*PX,243,63],b:[s*PX,270,63],w:6,col:STEEL,d:{side:s<0?31:-59}});
+      gear.push({t:'box',a:[s*(PX-10),236,-24],b:[s*(PX+10),245,48],d:{side:s<0?30:-60,quarter:s<0?950:null}});     // the near pad and handle are outside the near knee, so over the legs
+      gear.push({t:'line',a:[s*PX,243,63],b:[s*PX,270,63],w:6,col:STEEL,d:{side:s<0?31:-59,quarter:s<0?951:null}});
     });
     return {p:{hip:hip,lean:lean,neck:lerp(0,6,k),ank:ank,kneePole:[-.02,.3,1],footDir:[0,-.45,.9],
-               hand:[-PX,257,63],elbPole:[0,-1,-.2],layer:{quarter:{legs:'front'}}},     // seen from the front the legs are in front of or below the trunk all the way
+               hand:[-PX,257,63],elbPole:[0,-1,-.2],layer:{quarter:{legs:'front',farmR:'front',handR:'front'}}},     // seen from the front the legs are in front of or below the trunk all the way
             gear:gear};
   }},
 
