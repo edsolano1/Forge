@@ -3,11 +3,11 @@
 .c b{position:absolute;left:4px;top:2px;font-weight:400;font-size:13px;color:#ccc}</style><body>
 <script src="RIGSRC"></script>
 <script>
-var q=location.search.slice(1).split('&'),id=q[0],N=+(q[1]||5),Z=+(q[2]||1);
+var q=location.search.slice(1).split("&"),id=q[0],N=+(q[1]||5),Z=+(q[2]||1),K0=+(q[3]||0),K1=+(q[4]||1);
 var L=LIFTS[id];
 L.views.forEach(function(v,i){
   var r=document.createElement('div');r.className='r';document.body.appendChild(r);
-  for(var f=0;f<N;f++){var k=N===1?.5:f/(N-1);
+  for(var f=0;f<N;f++){var k=N===1?.5:K0+(K1-K0)*f/(N-1);
     var c=document.createElement('canvas');c.width=c.height=480;c.style.width=c.style.height=(480*Z)+'px';
     var d=document.createElement('div');d.className='c';d.appendChild(c);
     var b=document.createElement('b');b.textContent=id+' '+v+' k='+k.toFixed(2);d.appendChild(b);r.appendChild(d);

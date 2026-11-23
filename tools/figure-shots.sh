@@ -11,6 +11,6 @@ IDS="$@"; [ -z "$IDS" ] && IDS="squat dead bench row pull ohp curl lat push incl
 W=$(python -c "print(int($N*(480*$Z+4)+8))"); H=$(python -c "print(int(2*(480*$Z+4)+8))")
 for id in $IDS; do
   "/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --disable-gpu --hide-scrollbars --allow-file-access-from-files \
-    --user-data-dir="$(cygpath -w "$OUT/_chrome")" --window-size=$W,$H --screenshot="$(cygpath -w "$OUT/$id.png")" "file:///$(cygpath -m "$OUT/_sheet.html")?$id&$N&$Z" >/dev/null 2>&1
+    --user-data-dir="$(cygpath -w "$OUT/_chrome")" --window-size=$W,$H --screenshot="$(cygpath -w "$OUT/$id.png")" "file:///$(cygpath -m "$OUT/_sheet.html")?$id&$N&$Z&${K0:-0}&${K1:-1}" >/dev/null 2>&1
 done
 ls "$OUT" | grep png
