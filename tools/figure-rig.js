@@ -148,6 +148,7 @@ function buildParts(J,V){
   tm('obl',.34,-19,1,19,5.5,13);tm('obl',.34,19,1,19,5.5,13);
   tm('lats',.56,-20,-1,27,12,15);tm('lats',.56,20,-1,27,12,15);
   tm('traps',.93,0,-1,15,21,14);
+  tm('uptrap',1.045,0,-1,8,27,11);     // the top of the same muscle, from the neck out to the shoulders: what a shrug works
   tm('lowback',.20,-8,-1,19,6,14);tm('lowback',.20,8,-1,19,6,14);
   tm('glute',-.02,-14,-1,15,12,18);tm('glute',-.02,14,-1,15,12,18);
   // neck and head
@@ -307,6 +308,7 @@ function draw(x,kind,pose,gear,lit,cx,ground,zoom){
   if(kind!=='top'){x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();}
   var J=solve(pose), items=[], handD={};
   SQ=pose.squeeze||0;
+  if(pose.unlit&&pose.unlit.indexOf(kind)>=0)lit=null;     // a view the working muscle cannot be seen from shows none
   var lay=pose.layer&&pose.layer[kind];
   buildParts(J,V).forEach(function(P){
     if(lay){
@@ -518,7 +520,7 @@ push:{name:'Rope Pushdown',batch:2,views:['side','front'],cx:[206,240],up:1,
     var hand=[E[0]+dx,E[1]-fl*Math.cos(th),E[2]+fl*Math.sin(th)];
     var knot=[0,hand[1]+Math.sqrt(36*36-hand[0]*hand[0]-9),hand[2]+3];
     return {p:{hip:hip,lean:lean,neck:-8,ank:[-22,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.2,0,1],
-               hand:hand,elbPole:[E[0]-(-39+hand[0])/2,E[1]-(S[1]+hand[1])/2,E[2]-(S[2]+hand[2])/2],layer:{front:{arms:'front'}}},
+               hand:hand,elbPole:[E[0]-(-39+hand[0])/2,E[1]-(S[1]+hand[1])/2,E[2]-(S[2]+hand[2])/2],unlit:['front'],layer:{front:{arms:'front'}}},
             gear:[{t:'line',a:[0,440,PUSH_PZ],b:knot,w:4,d:{side:-5,front:400}},
                   {t:'line',a:knot,b:hand,w:5,col:'#0b0a09',rim:'#7a7066',d:{side:300,front:1500}},
                   {t:'line',a:knot,b:[-hand[0],hand[1],hand[2]],w:5,col:'#0b0a09',rim:'#7a7066',d:{side:-300,front:1500}}]};
