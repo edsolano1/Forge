@@ -279,6 +279,10 @@ function buildParts(J,V){
       var t=Math.max(0,Math.min(1,(d-3)/6));P.nbs.push({b:T.blobs,f:t*t*(3-2*t)});});});
   // the neck sits behind both the trunk and the head, always: left to its own depth it swaps with them mid rep
   parts[1].d=Math.min(parts[0].d,parts[2].d)-.02;
+  // the trunk and the neck are one piece of body: neither cuts its outline into the other, or a line comes and goes
+  // across the base of the neck as the shoulders turn
+  parts[0].nbs=(parts[0].nbs||[]).concat([{b:parts[1].blobs,f:0}]);parts[1].nbs=(parts[1].nbs||[]).concat([{b:parts[0].blobs,f:0}]);
+  parts.forEach(function(P){if(P.name==='uarm'&&P.nbs)P.nbs.push({b:parts[1].blobs,f:0});});     // nor does a shoulder swinging forward cut one into the neck
   return parts;
 }
 
