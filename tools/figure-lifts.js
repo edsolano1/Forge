@@ -2364,3 +2364,46 @@ hamstr:{name:'Hamstring Floor Stretch',hold:1,views:['side','quarter'],labels:['
 });
 })();
 
+// ======== kettlebells ========
+// A kettlebell is its own lift, not a switch on the dumbbell one (owner, 23 Nov): the weights come in different steps and
+// the app learns each lift's steps from its own history. Each is the dumbbell lift with the same body and a different thing
+// in the hands: c is the middle of the handle where the hands close, up points from the ball to the handle.
+(function(){
+"use strict";
+var GO=FIG.col.GO;
+FIG.gear.g9_kb=function(x,V,g){
+  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||18, hw=g.hw||11, drop=g.drop||9;
+  var b=FIG.add(g.c,FIG.mul(up,-(r+drop)));                                  // the middle of the ball
+  var foot=function(sg){return V.p(FIG.add(FIG.add(b,FIG.mul(up,r*.72)),FIG.mul(ax,sg*hw)));},
+      top=function(sg){return V.p(FIG.add(g.c,FIG.mul(ax,sg*hw)));};
+  // the handle: up one side, across where the hands hold it, down the other
+  var p=[foot(-1),top(-1),top(1),foot(1)];
+  x.lineJoin='round';x.lineCap='round';
+  x.strokeStyle="#15120f";x.lineWidth=8.2;x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);x.stroke();
+  x.strokeStyle=GO;x.lineWidth=5.6;x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);x.stroke();
+  // the ball, with a flat foot to stand on
+  var pts=FIG.blobPts(V,b,[[r,0,0],[0,r,0],[0,0,r]],28), base=FIG.add(b,FIG.mul(up,-r*.9));
+  pts=pts.concat(FIG.blobPts(V,base,[FIG.mul(ax,r*.5),FIG.mul(FIG.cross(up,ax),r*.5),FIG.mul(up,.5)],10));
+  FIG.poly(x,FIG.hull(pts));
+  x.fillStyle=GO;x.fill();x.strokeStyle="#15120f";x.lineWidth=1.6;x.stroke();
+};
+function twin(base,name,says,fn){
+  var L=LIFTS[base], o={}, k;for(k in L)o[k]=L[k];
+  o.name=name;if(says)o.says=says;
+  o.pose=function(t){var r=L.pose(t);fn(r);return r;};
+  return o;
+}
+// goblet: held by the sides of the handle at the chest, the ball hanging below the hands
+LIFTS.kbgoblet=twin('goblet','Kettlebell Goblet Squat',null,function(r){
+  var g=r.gear[0], u=FIG.norm(g.ax), G=FIG.add(g.c,FIG.mul(u,10));
+  r.p.hand=[-12,G[1],G[2]];
+  r.gear=[{t:'g9_kb',c:[0,G[1],G[2]],up:u,r:17,hw:12,drop:8,d:g.d}];
+});
+// sumo: both hands on the handle, the bell hanging straight down between the legs
+LIFTS.kbsumo=twin('sumo','Kettlebell Sumo Squat',null,function(r){
+  var g=r.gear[0], h=r.p.hand, y=h[1]+3;
+  r.p.hand=[-10,y,h[2]];
+  r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:20,hw:11,drop:9,d:g.d}];
+});
+})();
+
