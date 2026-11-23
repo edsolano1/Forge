@@ -257,9 +257,15 @@ main constraint on how to work in it. See **Traps** below before editing.
   draws it. **The old hand drawn figures are gone** (v5.299, owner: remove the old drawings from the app): `ANIM`, its 4,892
   lines, and everything in it (`held`, `saPullPose`, `SAP`, `drawSaPullS` and the rest). Older notes in this file about those
   drawings, the straight arm pulldown, the sumo squat side view, the even tempo, describe pictures that no longer exist; the
-  DECISIONS in them still bind the lifter. `FIGSTILL` took over from `ANIM.still`. **The lifter only holds a dumbbell**: on the
-  goblet and sumo squats the Kettlebell switch (`KBNOW`) still changes the WORDS, and the picture shows a dumbbell. A
-  kettlebell for the lifter is a new drawing and wants his eye first.
+  DECISIONS in them still bind the lifter. `FIGSTILL` took over from `ANIM.still`.
+  **A kettlebell is its own exercise, never a switch on the dumbbell one** (v5.300, owner). `kbgoblet` and `kbsumo` are full
+  entries with their own history, records and weight steps; the reason is the lattice, which is learned per lift, and a
+  kettlebell and a dumbbell do not go up in the same steps. The Dumbbell / Kettlebell switch (`KBNOW`, `KB_OK`, `kbSet`,
+  `#insKb`) is gone and must not come back; `DB.kb` may still sit in old data and nothing reads it. Sessions logged with the
+  switch on stay under the dumbbell lift, because nothing ever recorded which they were. The kit tag is `kb`, which no
+  wizard kit owns, so neither lift is ever generated: they are picked on purpose in the builder. On the lifter a kettlebell
+  lift is the dumbbell lift with different gear (`twin`, `g9_kb` in tools/figure-lifts.js). No kettlebell only moves were
+  added; swings and the like are a separate decision.
   The sheet is three named parts, **Set up, Do, Avoid**, with thin rules. **The only orange on it is the muscle at work on the
   lifter and those three headers (v5.298, his words: in that orange as headers, but that is it), and every word is one colour.**
   A changed lift is rebuilt into the app with `node tools/figure-build.js`. His words on the version before: the orange brings my attention all over

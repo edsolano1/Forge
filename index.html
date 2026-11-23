@@ -2333,11 +2333,6 @@ body.forge #instrOvl .sheet.ins{position:relative;background:linear-gradient(180
   box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
 body.forge #instrOvl .sheet.ins h3{font-family:'Marcellus',serif;font-weight:400;font-size:21px;line-height:1.15;letter-spacing:.01em;text-transform:none;color:#fff6e6;margin:0 0 12px;}
 body.forge #insAnim canvas{border-radius:12px;background:#0e0806;border:1px solid #3a2214;}
-body.forge #insKb{display:flex;gap:8px;margin:12px 0 14px;}
-body.forge #insKb[style*="display: none"],body.forge #insKb[style*="display:none"]{display:none;}
-body.forge #insKb .preset.sm{flex:1;height:38px;padding:0;border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);
-  font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
-body.forge #insKb .preset.sm.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:0 0 14px -4px rgba(255,122,26,.7),inset 0 1px 0 rgba(255,240,210,.5);}
 /* The calm sheet (v5.297, owner picked C). Three named parts, Set up, Do, Avoid. The orange is the muscle at work on the
    lifter and those three headers (v5.298, his call: in that orange as headers, but that is it). Every word is the same cream. */
 body.forge .ins-part{padding:10px 0;border-top:1px solid #2c1b11;}
@@ -4145,7 +4140,6 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
       <figure style="flex:1;max-width:190px;margin:0"><canvas id="insCvF" width="480" height="480" style="width:100%;height:auto"></canvas></figure>
       <figure style="flex:1;max-width:190px;margin:0"><canvas id="insCvS" width="480" height="480" style="width:100%;height:auto"></canvas></figure>
     </div>
-    <div class="presets" id="insKb" style="display:none;grid-template-columns:1fr 1fr;margin:0 0 12px"></div>
     <div class="ins-part"><span class="ins-lab">Set up</span><div class="ins-s" id="insSetup"></div></div>
     <div class="ins-part"><span class="ins-lab">Do</span><ul class="ins-c" id="insCues"></ul></div>
     <div class="ins-part ins-m"><span class="ins-lab">Avoid</span><em id="insMistake"></em></div>
@@ -4419,6 +4413,10 @@ var ALT={
   machlat:  {name:"Machine Lateral Raise",note:"The machine guides the arms on a set path, easier on the shoulder than dumbbells",sets:"30x12\n30x12\n30x12",rest:"60 sec"},
   facepull: {name:"Cable Rope Face Pull",note:"Rope at upper chest height, pull to the bridge of the nose, elbows high. Back of the shoulders",sets:"25x15\n25x15\n25x15",rest:"60 sec"},
   goblet:   {name:"Goblet Squat",note:"One dumbbell at the chest, body upright. Easy on the knees",sets:"25x10\n25x10\n25x10",rest:"90 sec"},
+  // v5.300: a kettlebell is its own lift, never a switch on the dumbbell one. Its weights come in different steps, and the app
+  // learns each lift's steps from that lift's own history, so the two must not share one.
+  kbgoblet: {name:"Kettlebell Goblet Squat",note:"One kettlebell at the chest, body upright. Easy on the knees",sets:"35x10\n35x10\n35x10",rest:"90 sec"},
+  kbsumo:   {name:"Kettlebell Sumo Squat",note:"One kettlebell hanging from both hands. Feet wide, toes out",sets:"35x12\n35x12\n35x12",rest:""},
   smsquat:  {name:"Smith Machine Squat",note:"The bar runs on rails. Stands in for the hack squat when it is taken",sets:"70x10\n70x10\n70x10",rest:"2 min"},
   bbthrust: {name:"Barbell Hip Thrust",note:"Upper back on a bench, bar across the hips with a pad. Same move as the machine",sets:"65x10\n65x10\n65x10",rest:"90 sec"},
   stepup:   {name:"Dumbbell Step-Up",note:"Knee-height box, drive through the top foot. One leg at a time",sets:"15x10\n15x10\n15x10",rest:"60 sec"},
@@ -4550,7 +4548,7 @@ var PUMPGRP={p_inc:'chest-press',p_xover:'chest-fly',p_fly:'chest-fly',p_lat:'de
 var ALTGRP={lvchest:'chest-press',dbbench:'chest-press',smbench:'chest-press',pushup:'chest-press',
   dbfly:'chest-fly',machrow:'back-horizontal',dbrow:'back-horizontal',machpd:'back-vertical',
   bbcurl:'biceps',inccurl:'biceps',dip:'triceps',bdip:'triceps',
-  machlat:'delt-side',facepull:'delt-rear',goblet:'quad',smsquat:'quad',
+  machlat:'delt-side',facepull:'delt-rear',goblet:'quad',kbgoblet:'quad',kbsumo:'quad',smsquat:'quad',
   bbthrust:'glute',stepup:'glute',stcalf:'calf',kneeraise:'core',abmach:'core',
   // the nine that were drawn but unreachable. 'traps' is a new group: nothing in the library
   // trained them directly, so the shrug had nowhere to sit and no comparable swap to offer.
@@ -4571,7 +4569,7 @@ function grpOf(id){return GRP[id]||'other';}
 // an absent id needs NOTHING, which is the right default for an app that should work at home.
 // Several lifts need two things and say so - a barbell bench press is a bar AND a bench, and
 // owning one without the other does not get you the lift.
-var KITLABEL={db:'Dumbbells',bar:'Barbell + plates',rack:'A rack',bench:'A bench',
+var KITLABEL={db:'Dumbbells',kb:'A kettlebell',bar:'Barbell + plates',rack:'A rack',bench:'A bench',
               machine:'Gym machine or cable',hang:'A bar to hang from',band:'Resistance band',
               rope:'Jump rope',pool:'A pool'};
 var KIT={
@@ -4594,7 +4592,7 @@ var KIT={
   // legs
   bsquat:['bar','rack'], frontsq:['bar','rack'], bbcalf:['bar','rack'],
   deadlift:['bar'], rdl:['bar'], bbthrust:['bar','bench'],
-  goblet:['db'], sumo:['db'], lunge:['db'], stepup:['db','bench'],
+  goblet:['db'], sumo:['db'], lunge:['db'], stepup:['db','bench'], kbgoblet:['kb'], kbsumo:['kb'],
   hack:['machine'], lpress:['machine'], lext:['machine'], hthrust:['machine'],
   slegcurl:['machine'], plegcurl:['machine'], dcalfr:['machine'], scalfr:['machine'],
   stcalf:['machine'], smsquat:['machine'],
@@ -8156,6 +8154,49 @@ hamstr:{name:'Hamstring Floor Stretch',hold:1,views:['side','quarter'],labels:['
 });
 })();
 
+// ======== kettlebells ========
+// A kettlebell is its own lift, not a switch on the dumbbell one (owner, 23 Nov): the weights come in different steps and
+// the app learns each lift's steps from its own history. Each is the dumbbell lift with the same body and a different thing
+// in the hands: c is the middle of the handle where the hands close, up points from the ball to the handle.
+(function(){
+"use strict";
+var GO=FIG.col.GO;
+FIG.gear.g9_kb=function(x,V,g){
+  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||18, hw=g.hw||11, drop=g.drop||9;
+  var b=FIG.add(g.c,FIG.mul(up,-(r+drop)));                                  // the middle of the ball
+  var foot=function(sg){return V.p(FIG.add(FIG.add(b,FIG.mul(up,r*.72)),FIG.mul(ax,sg*hw)));},
+      top=function(sg){return V.p(FIG.add(g.c,FIG.mul(ax,sg*hw)));};
+  // the handle: up one side, across where the hands hold it, down the other
+  var p=[foot(-1),top(-1),top(1),foot(1)];
+  x.lineJoin='round';x.lineCap='round';
+  x.strokeStyle="#15120f";x.lineWidth=8.2;x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);x.stroke();
+  x.strokeStyle=GO;x.lineWidth=5.6;x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);x.stroke();
+  // the ball, with a flat foot to stand on
+  var pts=FIG.blobPts(V,b,[[r,0,0],[0,r,0],[0,0,r]],28), base=FIG.add(b,FIG.mul(up,-r*.9));
+  pts=pts.concat(FIG.blobPts(V,base,[FIG.mul(ax,r*.5),FIG.mul(FIG.cross(up,ax),r*.5),FIG.mul(up,.5)],10));
+  FIG.poly(x,FIG.hull(pts));
+  x.fillStyle=GO;x.fill();x.strokeStyle="#15120f";x.lineWidth=1.6;x.stroke();
+};
+function twin(base,name,says,fn){
+  var L=LIFTS[base], o={}, k;for(k in L)o[k]=L[k];
+  o.name=name;if(says)o.says=says;
+  o.pose=function(t){var r=L.pose(t);fn(r);return r;};
+  return o;
+}
+// goblet: held by the sides of the handle at the chest, the ball hanging below the hands
+LIFTS.kbgoblet=twin('goblet','Kettlebell Goblet Squat',null,function(r){
+  var g=r.gear[0], u=FIG.norm(g.ax), G=FIG.add(g.c,FIG.mul(u,10));
+  r.p.hand=[-12,G[1],G[2]];
+  r.gear=[{t:'g9_kb',c:[0,G[1],G[2]],up:u,r:17,hw:12,drop:8,d:g.d}];
+});
+// sumo: both hands on the handle, the bell hanging straight down between the legs
+LIFTS.kbsumo=twin('sumo','Kettlebell Sumo Squat',null,function(r){
+  var g=r.gear[0], h=r.p.hand, y=h[1]+3;
+  r.p.hand=[-10,y,h[2]];
+  r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:20,hw:11,drop:9,d:g.d}];
+});
+})();
+
 
 var PACE={lift:1000,squeeze:400,lower:2000,pause:400};
 function ease(v){return .5-.5*Math.cos(Math.max(0,Math.min(1,v))*Math.PI);}
@@ -8202,11 +8243,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-// Which weight the WORDS name on the lifts that take either. DB.kb[exId]=1 means kettlebell. The lifter itself only
-// holds a dumbbell (v5.299): the old drawing that swapped the weight went with the rest of the old drawings.
-var KBNOW=false;var KB_OK={sumo:1,goblet:1};
-function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.299';
+var APPV='v5.300';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8563,6 +8600,8 @@ vbar:{s:"V-shaped handle on the high pulley, elbows tight to your sides.",c:["Pu
 dbrow:{s:"One knee and one hand on a bench, other foot on the floor, dumbbell hanging at arm's length.",c:["Pull the dumbbell to the hip, not the shoulder","Elbow close to the body, back flat throughout","Full stretch at the bottom of every rep"],m:"Twisting the body to heave the weight up. The chest stays facing the floor."},
 goblet:{s:"Dumbbell held upright against the chest, hands under the top end, feet shoulder width.",c:["Sit down between the heels, chest tall","Elbows travel inside the knees at the bottom","Drive up through the whole foot"],m:"Letting the weight pull the chest forward. It rests on the chest. The legs do the lifting."},
 lunge:{s:"Standing tall, dumbbells at the sides or hands free.",c:["Step far enough that the front shin stays upright","Lower the back knee toward the floor, torso upright","Push through the front heel into the next step"],m:"Short steps. If the front knee sails past the toes, lengthen the stride."},
+kbgoblet:{s:"Kettlebell held by the sides of its handle against the chest, feet shoulder width.",c:["Sit down between the heels, chest tall","Elbows travel inside the knees at the bottom","Drive up through the whole foot"],m:"Letting the weight pull the chest forward. It rests on the chest. The legs do the lifting."},
+kbsumo:{s:"Feet wide, toes out at 45 degrees, kettlebell hanging from both hands at the center.",c:["Knees track over the toes: out, not forward","Sit straight down, torso tall","Squeeze the inner thighs and glutes on the way up"],m:"Narrowing into a regular squat as you tire. The wide stance is the exercise."},
 sumo:{s:"Feet wide, toes out at 45 degrees, dumbbell hanging at the center.",c:["Knees track over the toes: out, not forward","Sit straight down, torso tall","Squeeze the inner thighs and glutes on the way up"],m:"Narrowing into a regular squat as you tire. The wide stance is the exercise."},
 kneeraise:{s:"Hanging from the bar or on elbow pads, shoulders down away from the ears.",c:["Draw the knees up past the hips","Roll the hips up at the top. That is the ab part","Lower slow, no swinging"],m:"Swinging into a rhythm. Come to a full stop between reps if you have to."},
 legraise:{s:"On your back, hands under the hips or flat at the sides.",c:["Raise the legs together to straight up","Lower slowly, stop before the lower back lifts off the floor","The slower the lowering, the better the set"],m:"Letting the lower back lift off the floor at the bottom. Do not lower as far."},
@@ -8659,14 +8698,10 @@ function openInstr(exId){
   if(!d&&!figOf(exId))return;                // nothing to show at all
   var name=(EX[exId]&&EX[exId].name)||exId;
   document.getElementById('insName').textContent=name;
-  KBNOW=!!(KB_OK[exId]&&DB.kb&&DB.kb[exId]);
-  var kbRow=document.getElementById('insKb');
-  if(kbRow){kbRow.style.display=KB_OK[exId]?'':'none';
-    if(KB_OK[exId])kbRow.innerHTML='<button class="preset sm'+(KBNOW?'':' on')+'" onclick="kbSet(\''+exId+'\',false)">Dumbbell</button><button class="preset sm'+(KBNOW?' on':'')+'" onclick="kbSet(\''+exId+'\',true)">Kettlebell</button>';}
   var su=document.getElementById('insSetup'),ul=document.getElementById('insCues'),mi=document.getElementById('insMistake');
   if(d){                                     // the written half, when the lift has words
     su.parentNode.style.display='';ul.parentNode.style.display='';mi.parentNode.style.display='';
-    su.textContent=KBNOW?d.s.replace(/dumbbell/gi,function(m){return m[0]==='D'?'Kettlebell':'kettlebell';}):d.s;
+    su.textContent=d.s;
     ul.innerHTML='';
     d.c.forEach(function(c){var li=document.createElement('li');li.textContent=c;ul.appendChild(li);});
     mi.textContent=d.m;
