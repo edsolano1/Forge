@@ -2405,5 +2405,18 @@ LIFTS.kbsumo=twin('sumo','Kettlebell Sumo Squat',null,function(r){
   r.p.hand=[-10,y,h[2]];
   r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:20,hw:11,drop:9,d:g.d}];
 });
+// the lifts where a dumbbell just hangs from the hand: the kettlebell hangs the same way, ball under the fist
+function hang(base,name){
+  return twin(base,name,null,function(r){
+    r.gear=(r.gear||[]).map(function(g){
+      if(g.t!=='db')return g;
+      return {t:'g9_kb',c:g.c,up:[0,1,0],ax:g.ax,r:15,hw:8,drop:6,hand:1};
+    });
+  });
+}
+LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge');
+LIFTS.kbstepup=hang('stepup','Kettlebell Step-Up');
+LIFTS.kbsldl=hang('sldl','Kettlebell Single-Leg Romanian Deadlift');
+LIFTS.kbrow=hang('dbrow','One-Arm Kettlebell Row');
 })();
 

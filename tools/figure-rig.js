@@ -361,7 +361,8 @@ function draw(x,kind,pose,gear,lit,cx,ground,zoom){
   (gear||[]).forEach(function(g){
     if(g.v&&g.v.indexOf(kind)<0)return;
     // a dumbbell goes wherever its hand goes: just over it, never over the whole body
-    items.push({d:g.t==='db'?handD[g.c[0]<0?-1:1]+.03:gearDepth(V,g),o:g.t==='bar'?99:(g.t==='db'?98:0),g:g});
+    var tied=g.t==='db'||g.hand;               // anything held in one hand goes wherever that hand goes
+    items.push({d:tied?handD[g.c[0]<0?-1:1]+.03:gearDepth(V,g),o:g.t==='bar'?99:(tied?98:0),g:g});
   });
   items.sort(function(a,b){return a.d-b.d||a.o-b.o;});
   items.forEach(function(it){if(it.P)drawPart(x,V,it.P,lit);else drawGear(x,V,it.g);});

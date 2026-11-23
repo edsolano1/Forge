@@ -417,7 +417,8 @@ function draw(x,kind,pose,gear,lit,cx,ground,zoom){
   (gear||[]).forEach(function(g){
     if(g.v&&g.v.indexOf(kind)<0)return;
     // a dumbbell goes wherever its hand goes: just over it, never over the whole body
-    items.push({d:g.t==='db'?handD[g.c[0]<0?-1:1]+.03:gearDepth(V,g),o:g.t==='bar'?99:(g.t==='db'?98:0),g:g});
+    var tied=g.t==='db'||g.hand;               // anything held in one hand goes wherever that hand goes
+    items.push({d:tied?handD[g.c[0]<0?-1:1]+.03:gearDepth(V,g),o:g.t==='bar'?99:(tied?98:0),g:g});
   });
   items.sort(function(a,b){return a.d-b.d||a.o-b.o;});
   items.forEach(function(it){if(it.P)drawPart(x,V,it.P,lit);else drawGear(x,V,it.g);});
@@ -3122,6 +3123,19 @@ LIFTS.kbsumo=twin('sumo','Kettlebell Sumo Squat',null,function(r){
   r.p.hand=[-10,y,h[2]];
   r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:20,hw:11,drop:9,d:g.d}];
 });
+// the lifts where a dumbbell just hangs from the hand: the kettlebell hangs the same way, ball under the fist
+function hang(base,name){
+  return twin(base,name,null,function(r){
+    r.gear=(r.gear||[]).map(function(g){
+      if(g.t!=='db')return g;
+      return {t:'g9_kb',c:g.c,up:[0,1,0],ax:g.ax,r:15,hw:8,drop:6,hand:1};
+    });
+  });
+}
+LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge');
+LIFTS.kbstepup=hang('stepup','Kettlebell Step-Up');
+LIFTS.kbsldl=hang('sldl','Kettlebell Single-Leg Romanian Deadlift');
+LIFTS.kbrow=hang('dbrow','One-Arm Kettlebell Row');
 })();
 
 
@@ -3152,14 +3166,14 @@ var GROUPS=[["Reviewed","squat dead bench row pull ohp curl lat push incl crow t
 ["Chest","dbbench smbench incbb dbfly pushup mbench lvchest mfly xover lowchest"],
 ["Shoulders","dbohp mohp machlat clat revfly dbrfly facepull shrug vbar ohext"],
 ["Arms","hammer sdbcurl inccurl cbcurl preacher skull dip bdip wcurl rwcurl"],
-["Back","machrow dbrow dbrow2 invrow doorrow machpd sapd pullover hang"],
-["Legs","bwsquat goblet kbgoblet frontsq smsquat sumo kbsumo hack lpress lunge stepup hthrust"],
-["Back of the leg and calves","slegcurl plegcurl rdl sldl nordic glutebr dcalfr scalfr bbcalf bwcalf stcalf"],
+["Back","machrow dbrow kbrow dbrow2 invrow doorrow machpd sapd pullover hang"],
+["Legs","bwsquat goblet kbgoblet frontsq smsquat sumo kbsumo hack lpress lunge kblunge stepup kbstepup hthrust"],
+["Back of the leg and calves","slegcurl plegcurl rdl sldl kbsldl nordic glutebr dcalfr scalfr bbcalf bwcalf stcalf"],
 ["Midsection","crunch bike hollow legraise hipraise plank kneeraise abmach rtwist sideplank"],
 ["Cardio","walk treadwalk treadrun outrun stairs cbike assault ellip rower jumprope swim"],
 ["Stretches","hipflex chestdr pigeon hamstr"]];
 // REVIEW: fixed since he last looked, waiting on his eye. APPROVED: he has said these are right.
-var REVIEW="".split(" ");
+var REVIEW="kblunge kbstepup kbsldl kbrow".split(" ");
 var APPROVED="squat dead bench row pull bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl curl lat push incl crow thrust legx pullup calf dbbench rdl bwcalf ohp smbench ohext incbb dbfly pushup mbench lvchest mfly dbohp mohp xover lowchest machlat clat revfly dbrfly facepull hammer dip vbar shrug inccurl bdip machrow dbrow dbrow2 machpd sapd hang bwsquat goblet frontsq smsquat lpress stepup invrow pullover hack doorrow slegcurl plegcurl sldl nordic glutebr scalfr bbcalf stcalf crunch hollow legraise plank hthrust dcalfr hipraise kneeraise abmach sideplank treadwalk cbike assault ellip rower hipflex pigeon hamstr rtwist walk swim chestdr kbgoblet kbsumo".split(" ");
 var seen={},IDS=[],HEAD={};
 GROUPS.forEach(function(g){g[1].split(" ").forEach(function(id,n){if(LIFTS[id]&&!seen[id]){seen[id]=1;IDS.push(id);if(!HEAD[g[0]]){HEAD[g[0]]=1;HEAD[id]=g[0];}}});});
