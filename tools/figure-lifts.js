@@ -2010,7 +2010,7 @@ function ellSide(th){
 }
 
 Object.assign(LIFTS,{
-walk:{name:'Power Walk',cycle:1,period:1000,views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[226,226],up:1,
+walk:{name:'Power Walk',cycle:1,period:780,views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[226,226],up:1,
   lit:{glute:2,calf:2,quad:1,ham:1},
   says:'The backside and the calves push you along. The thighs carry each step.',
   pose:function(k){
@@ -2262,10 +2262,13 @@ swim:{name:'Swim',okFlip:1,cycle:1,period:2700,views:['side','top'],labels:['Sid
     var J=FIG.solve(p);
     [-1,1].forEach(function(s){
       var nm=s<0?'R':'L', kk=k+(s<0?0:.5), a=TAU*kk-.12*Math.sin(TAU*kk), sn=Math.sin(a), cs=Math.cos(a), rec=Math.max(0,-sn), sh=J.side[s].shoJ;
-      // under the water the hand goes down and back under the body, elbow high; over it the elbow leads and the hand swings wide and low
-      var rel=[-s*(sn>0?18*sn:72*sn),2+(sn>0?-84*sn:20*rec),3+120*cs];
+      // under the water the hand goes down and straight back under the shoulder, elbow high; over it the elbow leads and the
+      // hand comes forward low, out to the side at arm's bend. Each half eases in and out of the other: a path with a corner in it
+      // at the entry or the exit is what jerks the elbow.
+      var pu=sn>0?sn*sn*(3-2*sn):0, ov=sn<0?sn*sn*(3+2*sn):0;
+      var rel=[s*(68*ov-10*pu),2-80*pu+14*ov,3+112*cs];
       p['hand'+nm]=[sh[0]+rel[0],YB+(sh[1]-YB)*.6+rel[1],sh[2]+rel[2]];
-      p['elbPole'+nm]=[s,.25+.5*rec*rec,-.15];
+      p['elbPole'+nm]=[s*(.9+.5*ov),.3+1.1*ov-.2*pu,-.15];
       var kp=TAU*3*k+(s<0?0:Math.PI);
       p['ank'+nm]=[s*12,YB+3+10*Math.sin(kp),-52-175.5];
       p['footDir'+nm]=[s*.05,-.12-.2*Math.cos(kp),-1];p['kneePole'+nm]=[0,-1,.2];
@@ -2317,10 +2320,10 @@ chestdr:{name:'Chest Doorway Stretch',hold:1,views:['front','quarter'],labels:['
     var E=[sj[0]-Math.sqrt(B.uarm*B.uarm-dz*dz),sj[1],ARM_Z], hand=[E[0],E[1]+B.farm,ARM_Z];
     var pole=[E[0]-(sj[0]+hand[0])/2,E[1]-(sj[1]+hand[1])/2,E[2]-(sj[2]+hand[2])/2];
     return {p:{hip:hip,lean:lean,neck:lerp(-2,-6,k),shrug:[0,back],
-               ankR:[-17,B.ankH,-46],kneePoleR:[-.1,0,1],footDirR:[-.15,0,1],        // the back foot
-               ankL:[17,B.ankH,36],kneePoleL:[.1,0,1],footDirL:[.15,0,1],            // one foot through the door
+               ankR:[-17,B.ankH,-34],kneePoleR:[-.1,0,1],footDirR:[-.15,0,1],        // the back foot
+               ankL:[17,B.ankH,26],kneePoleL:[.1,0,1],footDirL:[.15,0,1],            // one foot through the door
                hand:hand,elbPole:pole,
-               layer:{quarter:{thighL:'front',thighR:'back'}}},     // the leg stepped through the door is ahead of the hips and the other behind them, seen from in front
+               layer:{front:{thighL:'front',thighR:'front'},quarter:{thighL:'front',thighR:'front'}}},     // both thighs sit over the hips the whole hold, as on any standing lift: one over and one under reads as a leg growing out of the groin
             // the posts stand in the door plane (z=0), the forearms 13 behind it on the lifter's side. From the front and
             // from the front quarter the camera is on the far side of the door, so each post is nearer than the
             // forearm that rests on it, and nothing else of the body crosses a post on the screen.

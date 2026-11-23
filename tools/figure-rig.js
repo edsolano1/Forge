@@ -254,6 +254,7 @@ function drawPart(x,V,P,lit){
     var fd=Math.max(0,Math.min(1,(dt+.5)/.4));fd=fd*fd*(3-2*fd);     // turning away it fades, it never blinks off
     var sd=m.sd!=null?m.sd:(P.s?(P.s<0?'R':'L'):'');          // lit:{quad:2} lights both sides, lit:{quadR:2} the right only
     var lv=lit&&(lit[m.key]||(sd&&lit[m.key+sd]));
+    if(m.key==='uptrap'&&!lv)return;                          // drawn only when it is the muscle at work: at rest, seen edge on, it is a line across the neck
     x.fillStyle=lv===2?SK.hot:SK.def;
     x.globalAlpha=fd;
     if(lv===1)x.fillStyle=SK.help;
