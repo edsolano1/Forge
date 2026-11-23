@@ -3091,23 +3091,18 @@ hamstr:{name:'Hamstring Floor Stretch',hold:1,views:['side','quarter'],labels:['
 "use strict";
 var GO=FIG.col.GO, EDGE="#15120f";
 FIG.gear.g9_kb=function(x,V,g){
-  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||20, hw=g.hw||11, drop=g.drop||8, LW=5.4;
+  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||20, hw=g.hw||11, drop=g.drop||13, LW=6.6;
   var b=FIG.add(g.c,FIG.mul(up,-(r+drop)));                                  // the middle of the ball
-  // the handle is a thick loop standing on the ball: two posts and the bar the hand holds. It is drawn where it really
-  // is, so from the side you look straight through its window, from a slant the window is narrower, and only dead end on
-  // do the two posts close into one.
-  var at=function(sg,h,w){return V.p(FIG.add(FIG.add(b,FIG.mul(up,h)),FIG.mul(ax,sg*w)));};
-  var p=[at(-1,r*.62,hw*1.25),at(-1,r+drop,hw),at(1,r+drop,hw),at(1,r*.62,hw*1.25)];
-  var span=Math.sqrt(Math.pow(p[2][0]-p[1][0],2)+Math.pow(p[2][1]-p[1][1],2));
-  var loop=function(){x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);};
+  // the handle is one thick arch standing on the ball, as on the real thing (owner's photos, 23 Nov): it springs from the
+  // ball's shoulders, curves in and over, and the hand closes on the top of it. It is drawn where it really is, so from the
+  // side you look through its window, from a slant the arch narrows and the window with it, and end on it is one post.
+  var foot=r*.72, rise=r+drop-foot, arch=[], i, t;
+  for(i=0;i<=16;i++){t=i/16*Math.PI;
+    arch.push(V.p(FIG.add(FIG.add(b,FIG.mul(up,foot+rise*Math.sin(t))),FIG.mul(ax,-hw*Math.cos(t)*(1+.22*(1-Math.sin(t)))))));}
+  var loop=function(){x.beginPath();arch.forEach(function(q,j){if(j)x.lineTo(q[0],q[1]);else x.moveTo(q[0],q[1]);});};
   x.lineJoin='round';x.lineCap='round';
-  if(span-LW<1.5){                               // seen dead end on there is no window to see through: one solid horn
-    loop();x.closePath();x.fillStyle=GO;x.fill();
-    x.strokeStyle=EDGE;x.lineWidth=LW+2.6;x.stroke();x.strokeStyle=GO;x.lineWidth=LW;x.stroke();
-  }else{
-    loop();x.strokeStyle=EDGE;x.lineWidth=LW+2.6;x.stroke();
-    loop();x.strokeStyle=GO;x.lineWidth=LW;x.stroke();
-  }
+  loop();x.strokeStyle=EDGE;x.lineWidth=LW+2.6;x.stroke();
+  loop();x.strokeStyle=GO;x.lineWidth=LW;x.stroke();
   // the ball, with a flat foot to stand on
   var pts=FIG.blobPts(V,b,[[r,0,0],[0,r,0],[0,0,r]],28), base=FIG.add(b,FIG.mul(up,-r*.9));
   pts=pts.concat(FIG.blobPts(V,base,[FIG.mul(ax,r*.5),FIG.mul(FIG.cross(up,ax),r*.5),FIG.mul(up,.5)],10));
@@ -3128,13 +3123,13 @@ function twin(base,name,says,fn){
 LIFTS.kbgoblet=twin('goblet','Kettlebell Goblet Squat',null,function(r){
   var g=r.gear[0], u=FIG.norm(g.ax), G=FIG.add(g.c,FIG.mul(u,12));
   r.p.hand=[-13,G[1],G[2]];
-  r.gear=[{t:'g9_kb',c:[0,G[1],G[2]],up:u,r:20,hw:13,drop:8,d:g.d}];
+  r.gear=[{t:'g9_kb',c:[0,G[1],G[2]],up:u,r:20,hw:12,drop:12,d:g.d}];
 });
 // sumo: both hands on the handle, the bell hanging straight down between the legs
 LIFTS.kbsumo=twin('sumo','Kettlebell Sumo Squat',null,function(r){
   var g=r.gear[0], h=r.p.hand, y=h[1]+5;
   r.p.hand=[-11,y,h[2]];
-  r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:23,hw:12,drop:9,d:g.d}];
+  r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:23,hw:13,drop:14,d:g.d}];
 });
 // the lifts where a dumbbell just hangs from the hand: the kettlebell hangs the same way, ball under the fist.
 // out: how far from the centre line the hands must be for the wider bell to clear the legs. dy, dz: a little up and
@@ -3147,7 +3142,7 @@ function hang(base,name,out,dy,dz){
     r.gear=(r.gear||[]).map(function(g){
       if(g.t!=='db')return g;
       var cx=out&&Math.abs(g.c[0])<out?(g.c[0]<0?-out:out):g.c[0];
-      return {t:'g9_kb',c:[cx,g.c[1]+(out?dy:0),g.c[2]+(out?dz:0)],up:[0,1,0],ax:g.ax,r:18,hw:12,drop:7,hand:1};
+      return {t:'g9_kb',c:[cx,g.c[1]+(out?dy:0),g.c[2]+(out?dz:0)],up:[0,1,0],ax:g.ax,r:19,hw:11,drop:13,hand:1};
     });
   });
 }
