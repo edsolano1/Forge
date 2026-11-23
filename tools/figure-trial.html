@@ -1467,7 +1467,7 @@ function root(f,lo,hi){for(var i=0;i<40;i++){var m=(lo+hi)/2;if(f(lo)*f(m)<=0)hi
 
 // ---- numbers ----
 // MACHINE ROW: lever pivots low under the knees, the handles swing through chest height
-var MR_P=[-50,40,150], MR_R=134;     // a plate loaded row: each lever turns low on the frame in front and rises to a handle at the chest
+var MR_P=[-50,40,150], MR_R=134;     // the row machine's one arm turns low on the frame in front and rises to the handles at the chest
 // MACHINE PULLDOWN: levers pivot on the tower in front, the handles swing down an arc from overhead
 var MP_P=[-52,277.5,160], MP_R=141, MP_A0=22.74, MP_A1=-20.55;
 // INVERTED ROW: the body is a plank turning on the heels; the bar is where the chest arrives
@@ -1496,7 +1496,6 @@ machrow:{name:'Machine Seated Row',okFlip:1,views:['side','rear'],labels:['Side'
   pose:function(k){
     var hip=[0,112,0], lean=4, a=lerp(10,38,k)*R;
     var hand=[MR_P[0],MR_P[1]+MR_R*Math.cos(a),MR_P[2]-MR_R*Math.sin(a)];
-    var horn=[MR_P[0],MR_P[1]+62*Math.sin(a),MR_P[2]+62*Math.cos(a)];
     return {p:{hip:hip,lean:lean,neck:2,ank:[-22,B.ankH,106],kneePole:[-.05,1,.3],footDir:[-.1,0,1],
                hand:hand,elbPole:[-.25,-.3,-1],shrug:[0,lerp(5,-5,k)],layer:{rear:{uarmR:'front'}}},
             // side: the seat, tower and rail sit behind everything, as in the other seated lifts. The chest pad is on
@@ -1507,15 +1506,15 @@ machrow:{name:'Machine Seated Row',okFlip:1,views:['side','rear'],labels:['Side'
                   {t:'line',a:[0,78,8],b:[0,6,8],w:7,d:{side:-101,rear:-201}},
                   {t:'line',a:[0,6,-22],b:[0,6,160],w:8,d:{side:-105,rear:-202}},
                   {t:'box',a:[-22,158,29.5],b:[22,200,40],d:{side:-20,rear:-27}},
-                  {t:'line',a:[0,180,42],b:[0,180,150],w:8,d:{side:-21,rear:-76}},
-                  {t:'box',a:[-14,8,150],b:[14,196,164],d:{side:-110,rear:-128}},
-                  {t:'line',a:[0,6,160],b:[0,6,236],w:8,d:{side:-105,rear:-202}},
-                  {t:'line',a:[MR_P[0],MR_P[1],MR_P[2]],b:horn,w:6,col:GREY,d:{side:31,rear:-140}},
-                  {t:'line',a:[-MR_P[0],MR_P[1],MR_P[2]],b:[-horn[0],horn[1],horn[2]],w:6,col:GREY,d:{side:-112,rear:-141}},
-                  {t:'g2_wheel',c:horn,r:28,d:{side:32,rear:-139}},
-                  {t:'g2_wheel',c:[-horn[0],horn[1],horn[2]],r:28,d:{side:-113,rear:-142}},
-                  {t:'line',a:[MR_P[0],MR_P[1],MR_P[2]],b:[-MR_P[0],MR_P[1],MR_P[2]],w:9,col:GREY,d:{side:33,rear:-64}}
-                 ].concat(levers(MR_P,hand,[32,-60],'rear'))};
+                  {t:'line',a:[0,160,35],b:[0,6,35],w:8,d:{side:-21,rear:-29}},
+                  {t:'box',a:[-26,8,196],b:[26,250,222],d:{side:-110,rear:-165}},
+                  {t:'line',a:[0,6,MR_P[2]],b:[0,MR_P[1]+4,MR_P[2]],w:9,d:{side:-106,rear:-203}},
+                  // one arm in the middle: it turns low on the frame in front, rises between the feet, and carries a handle out to each side
+                  {t:'line',a:[0,MR_P[1],MR_P[2]],b:[0,hand[1]-12,hand[2]],w:8,col:GREY,d:{side:-22,rear:RD([0,0,hand[2]])-4}},
+                  {t:'line',a:[MR_P[0],hand[1]-12,hand[2]],b:[-MR_P[0],hand[1]-12,hand[2]],w:6,col:GREY,d:{side:-22.5,rear:RD([0,0,hand[2]])-3.5}},
+                  {t:'line',a:[MR_P[0],hand[1]-13,hand[2]],b:[MR_P[0],hand[1]+13,hand[2]],w:7,col:GO,d:{side:32.5,rear:RD(hand)-2}},
+                  {t:'line',a:[-MR_P[0],hand[1]-13,hand[2]],b:[-MR_P[0],hand[1]+13,hand[2]],w:7,col:GO,d:{side:-60,rear:RD([-hand[0],0,hand[2]])-2}}
+                 ]};
   }},
 // ------------------------------------------------------------------ ONE ARM DUMBBELL ROW
 dbrow:{name:'One-Arm Dumbbell Row',okFlip:1,views:['side','quarter'],labels:['Side','From in front, off to one side'],cx:[232,232],ground:[50,430],up:1,
