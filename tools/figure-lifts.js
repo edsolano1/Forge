@@ -2373,16 +2373,17 @@ hamstr:{name:'Hamstring Floor Stretch',hold:1,views:['side','quarter'],labels:['
 "use strict";
 var GO=FIG.col.GO, EDGE="#15120f";
 FIG.gear.g9_kb=function(x,V,g){
-  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||20, hw=g.hw||11, drop=g.drop||8, LW=6.5;
+  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||20, hw=g.hw||11, drop=g.drop||8, LW=5.4;
   var b=FIG.add(g.c,FIG.mul(up,-(r+drop)));                                  // the middle of the ball
   // the handle is a thick loop standing on the ball: two posts and the bar the hand holds. It is drawn where it really
-  // is, so from the side you look through its window and from a slant the two posts close up and the window narrows.
+  // is, so from the side you look straight through its window, from a slant the window is narrower, and only dead end on
+  // do the two posts close into one.
   var at=function(sg,h,w){return V.p(FIG.add(FIG.add(b,FIG.mul(up,h)),FIG.mul(ax,sg*w)));};
   var p=[at(-1,r*.62,hw*1.25),at(-1,r+drop,hw),at(1,r+drop,hw),at(1,r*.62,hw*1.25)];
   var span=Math.sqrt(Math.pow(p[2][0]-p[1][0],2)+Math.pow(p[2][1]-p[1][1],2));
   var loop=function(){x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);};
   x.lineJoin='round';x.lineCap='round';
-  if(span-LW<5){                                 // seen nearly end on there is no window to see through: one solid horn
+  if(span-LW<1.5){                               // seen dead end on there is no window to see through: one solid horn
     loop();x.closePath();x.fillStyle=GO;x.fill();
     x.strokeStyle=EDGE;x.lineWidth=LW+2.6;x.stroke();x.strokeStyle=GO;x.lineWidth=LW;x.stroke();
   }else{
@@ -2428,7 +2429,7 @@ function hang(base,name,out,dy,dz){
     r.gear=(r.gear||[]).map(function(g){
       if(g.t!=='db')return g;
       var cx=out&&Math.abs(g.c[0])<out?(g.c[0]<0?-out:out):g.c[0];
-      return {t:'g9_kb',c:[cx,g.c[1]+(out?dy:0),g.c[2]+(out?dz:0)],up:[0,1,0],ax:g.ax,r:18,hw:9,drop:6,hand:1};
+      return {t:'g9_kb',c:[cx,g.c[1]+(out?dy:0),g.c[2]+(out?dz:0)],up:[0,1,0],ax:g.ax,r:18,hw:12,drop:7,hand:1};
     });
   });
 }
