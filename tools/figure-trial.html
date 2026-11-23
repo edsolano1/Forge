@@ -204,7 +204,7 @@ function buildParts(J,V){
   tm('obl',.34,-19,1,19,5.5,13);tm('obl',.34,19,1,19,5.5,13);
   tm('lats',.56,-20,-1,27,12,15);tm('lats',.56,20,-1,27,12,15);
   tm('traps',.93,0,-1,15,21,14);
-  tm('uptrap',1.045,0,-1,8,27,11);     // the top of the same muscle, from the neck out to the shoulders: what a shrug works
+  tm('uptrap',1.02,0,-1,11,35,11);     // the top of the same muscle, from the neck out to the shoulders: what a shrug works
   tm('lowback',.20,-8,-1,19,6,14);tm('lowback',.20,8,-1,19,6,14);
   tm('glute',-.02,-14,-1,15,12,18);tm('glute',-.02,14,-1,15,12,18);
   // neck and head
@@ -1128,7 +1128,7 @@ facepull:{name:'Cable Rope Face Pull',views:['side','rear'],labels:['Side','From
   }},
 // ---------------- Barbell Shrug ----------------
 shrug:{name:'Barbell Shrug',views:['side','back'],cx:[236,240],stand:1,tall:1,up:1,
-  lit:{uptrap:2,forearm:1},
+  lit:{uptrap:2,traps:1,forearm:1},
   says:'The muscles between the neck and shoulders lift. The grip just holds on.',
   pose:function(k){
     var hip=[0,189.4,0], lean=1, S=S_of(hip,lean), sh=lerp(-4,11,k), bz=23, dz=bz-S[2];
@@ -1293,7 +1293,7 @@ inccurl:{name:'Incline Dumbbell Curl',views:['side','quarter'],cx:[250,240],grou
   pose:function(k){
     var hip=[0,103,40], lean=-38, sh=sho(hip,lean), u=U(lean), n=Nn(lean);
     var E=[-48,sh[1]-63.3,sh[2]], th=lerp(3,128,k)*R;         // the elbow hangs plumb under the shoulder and stays there
-    var hand=swing(E,-56,B.farm,th);
+    var hand=swing(E,-70,B.farm,th);          // wide enough that the dumbbells pass outside the thighs
     var a=[0,hip[1]-n[1]*24-u[1]*14,hip[2]-n[2]*24-u[2]*14], b=[0,hip[1]-n[1]*24+u[1]*158,hip[2]-n[2]*24+u[2]*158];
     return {p:{hip:hip,lean:lean,neck:14,ank:[-30,B.ankH,120],kneePole:[-.1,1,.6],footDir:[-.2,0,1],
                hand:hand,elbPole:pin(sh,E,hand)},
@@ -1409,15 +1409,16 @@ dip:{name:'Assisted Dip',views:['side','rear'],labels:['Side','From behind, off 
                   {t:'line',a:[0,py,z0],b:[0,py,z1],w:13,col:GO,v:['side'],d:{side:-20}},
                   {t:'line',a:[-34,py,z1],b:[34,py,z0],w:13,col:GO,v:['rear'],d:{rear:5}}]};
   }},
-bdip:{name:'Bench Dip',views:['side','rear'],labels:['Side','From behind, off to one side'],cx:[200,240],ground:[50,430],up:1,
+bdip:{name:'Bench Dip',views:['side','rear'],labels:['Side','From behind, off to one side'],cx:[180,225],ground:[50,430],up:1,
   lit:{triceps:2,delt:1,chest:1},
   says:'The back of the arms pushes you up. The shoulders and chest help.',
   pose:function(k){
     // the hips go straight down and up, close to the bench; the heels stay put and the legs barely change
-    var lean=lerp(-2,-6,k), u1=U(-6);
-    var hip=[0,219-u1[1]*B.trunk-45*(1-k),-6-u1[2]*B.trunk];
-    return {p:{hip:hip,lean:lean,neck:4,ank:[-18,14,146],kneePole:[-.05,1,.2],footDir:[-.1,.9,.42],
-               hand:[-44,94.5,-20],elbPole:[-.1,.15,-1]},
+    // straight legs turning on the heels; the hips drop almost to the floor, close to the bench, until body and legs make a right angle
+    var lean=lerp(-6,-18,k), u=U(lean), hy=lerp(48,119.5,k), L=B.thigh+B.shin-2, AZ=10+Math.sqrt(L*L-34*34);
+    var hip=[0,hy,AZ-Math.sqrt(L*L-(hy-14)*(hy-14))];
+    return {p:{hip:hip,lean:lean,neck:4,ank:[-18,14,AZ],kneePole:[-.05,1,.2],footDir:[-.1,.9,.42],
+               hand:[-44,94.5,-20],elbPole:[-.1,.15,-1],layer:{rear:{uarmL:'back'}}},
             gear:[{t:'box',a:[-110,74,-62],b:[110,88,-12],d:{side:-100,rear:20}},   // from behind the bench is nearer than the trunk and legs, and under the near arm
                   {t:'line',a:[-96,72,-37],b:[-96,4,-37],w:7,d:{side:-101,rear:19}},
                   {t:'line',a:[96,72,-37],b:[96,4,-37],w:7,v:['rear'],d:{rear:-300}}]};
@@ -1466,7 +1467,7 @@ function root(f,lo,hi){for(var i=0;i<40;i++){var m=(lo+hi)/2;if(f(lo)*f(m)<=0)hi
 
 // ---- numbers ----
 // MACHINE ROW: lever pivots low under the knees, the handles swing through chest height
-var MR_P=[-50,300,81], MR_R=130, MR_A=21.2;     // the arms hang from the top of the console, not from the floor
+var MR_P=[-50,40,150], MR_R=134;     // a plate loaded row: each lever turns low on the frame in front and rises to a handle at the chest
 // MACHINE PULLDOWN: levers pivot on the tower in front, the handles swing down an arc from overhead
 var MP_P=[-52,277.5,160], MP_R=141, MP_A0=22.74, MP_A1=-20.55;
 // INVERTED ROW: the body is a plank turning on the heels; the bar is where the chest arrives
@@ -1493,8 +1494,9 @@ machrow:{name:'Machine Seated Row',okFlip:1,views:['side','rear'],labels:['Side'
   lit:{lats:2,traps:2,biceps:1,delt:1,forearm:1},
   says:'The big muscles of the back pull. The arms help, and the pad takes the lower back out of it.',
   pose:function(k){
-    var hip=[0,112,0], lean=4, a=lerp(MR_A,-MR_A,k)*R;
-    var hand=[MR_P[0],MR_P[1]-MR_R*Math.cos(a),MR_P[2]+MR_R*Math.sin(a)];
+    var hip=[0,112,0], lean=4, a=lerp(10,38,k)*R;
+    var hand=[MR_P[0],MR_P[1]+MR_R*Math.cos(a),MR_P[2]-MR_R*Math.sin(a)];
+    var horn=[MR_P[0],MR_P[1]+62*Math.sin(a),MR_P[2]+62*Math.cos(a)];
     return {p:{hip:hip,lean:lean,neck:2,ank:[-22,B.ankH,106],kneePole:[-.05,1,.3],footDir:[-.1,0,1],
                hand:hand,elbPole:[-.25,-.3,-1],shrug:[0,lerp(5,-5,k)],layer:{rear:{uarmR:'front'}}},
             // side: the seat, tower and rail sit behind everything, as in the other seated lifts. The chest pad is on
@@ -1506,8 +1508,12 @@ machrow:{name:'Machine Seated Row',okFlip:1,views:['side','rear'],labels:['Side'
                   {t:'line',a:[0,6,-22],b:[0,6,160],w:8,d:{side:-105,rear:-202}},
                   {t:'box',a:[-22,158,29.5],b:[22,200,40],d:{side:-20,rear:-27}},
                   {t:'line',a:[0,180,42],b:[0,180,150],w:8,d:{side:-21,rear:-76}},
-                  {t:'box',a:[-26,8,150],b:[26,312,176],d:{side:-110,rear:-128}},
-                  {t:'line',a:[0,300,152],b:[0,300,MR_P[2]],w:9,d:{side:-109,rear:-90}},
+                  {t:'box',a:[-14,8,150],b:[14,196,164],d:{side:-110,rear:-128}},
+                  {t:'line',a:[0,6,160],b:[0,6,236],w:8,d:{side:-105,rear:-202}},
+                  {t:'line',a:[MR_P[0],MR_P[1],MR_P[2]],b:horn,w:6,col:GREY,d:{side:31,rear:-140}},
+                  {t:'line',a:[-MR_P[0],MR_P[1],MR_P[2]],b:[-horn[0],horn[1],horn[2]],w:6,col:GREY,d:{side:-112,rear:-141}},
+                  {t:'g2_wheel',c:horn,r:28,d:{side:32,rear:-139}},
+                  {t:'g2_wheel',c:[-horn[0],horn[1],horn[2]],r:28,d:{side:-113,rear:-142}},
                   {t:'line',a:[MR_P[0],MR_P[1],MR_P[2]],b:[-MR_P[0],MR_P[1],MR_P[2]],w:9,col:GREY,d:{side:33,rear:-64}}
                  ].concat(levers(MR_P,hand,[32,-60],'rear'))};
   }},
@@ -3067,8 +3073,8 @@ var GROUPS=[["Reviewed","squat dead bench row pull ohp curl lat push incl crow t
 ["Cardio","walk treadwalk treadrun outrun stairs cbike assault ellip rower jumprope swim"],
 ["Stretches","hipflex chestdr pigeon hamstr"]];
 // REVIEW: fixed since he last looked, waiting on his eye. APPROVED: he has said these are right.
-var REVIEW="shrug vbar inccurl bdip machrow".split(" ");
-var APPROVED="squat dead bench row pull bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl curl lat push incl crow thrust legx pullup calf dbbench rdl bwcalf ohp smbench ohext incbb dbfly pushup mbench lvchest mfly dbohp mohp xover lowchest machlat clat revfly dbrfly facepull hammer dip".split(" ");
+var REVIEW="shrug inccurl bdip machrow".split(" ");
+var APPROVED="squat dead bench row pull bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl curl lat push incl crow thrust legx pullup calf dbbench rdl bwcalf ohp smbench ohext incbb dbfly pushup mbench lvchest mfly dbohp mohp xover lowchest machlat clat revfly dbrfly facepull hammer dip vbar".split(" ");
 var seen={},IDS=[],HEAD={};
 GROUPS.forEach(function(g){g[1].split(" ").forEach(function(id,n){if(LIFTS[id]&&!seen[id]){seen[id]=1;IDS.push(id);if(!HEAD[g[0]]){HEAD[g[0]]=1;HEAD[id]=g[0];}}});});
 Object.keys(LIFTS).forEach(function(id){if(!seen[id]){IDS.push(id);if(!HEAD.Other){HEAD.Other=1;HEAD[id]="Other";}}});

@@ -148,7 +148,7 @@ function buildParts(J,V){
   tm('obl',.34,-19,1,19,5.5,13);tm('obl',.34,19,1,19,5.5,13);
   tm('lats',.56,-20,-1,27,12,15);tm('lats',.56,20,-1,27,12,15);
   tm('traps',.93,0,-1,15,21,14);
-  tm('uptrap',1.045,0,-1,8,27,11);     // the top of the same muscle, from the neck out to the shoulders: what a shrug works
+  tm('uptrap',1.02,0,-1,11,35,11);     // the top of the same muscle, from the neck out to the shoulders: what a shrug works
   tm('lowback',.20,-8,-1,19,6,14);tm('lowback',.20,8,-1,19,6,14);
   tm('glute',-.02,-14,-1,15,12,18);tm('glute',-.02,14,-1,15,12,18);
   // neck and head
