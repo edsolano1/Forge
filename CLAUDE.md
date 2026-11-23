@@ -249,6 +249,22 @@ main constraint on how to work in it. See **Traps** below before editing.
   is drawn, and `bonusHeal` skips it. Anything new that reads a log's `wk` as a weekday must
   expect `'lw'`. The card cannot be removed once accepted and expires with the week.
   Tested in the preview by clicking the question and the card; the finish was simulated.
+- **The lifter is in the app, and the How To sheet is calm** (v5.297, 23 Nov; owner reviewed all 100 lifts one by one, then
+  picked two views side by side and option C of three). `FIGLIB` is `tools/figure-rig.js` plus `tools/figure-lifts.js` sealed in
+  one function, because the rig has its own `B`, `R` and `lerp` and the app has an `R()`. **Those two tool files stay the
+  source**: change a lift there, check it on the review page, then rebuild into `index.html`; never edit the copy in the app.
+  `figOf(exId)` finds the lifter (`FIGMAP` holds the ids that differ, a Pump Day `p_` id uses its twin), and `insAnimShow`
+  draws it; the old `ANIM` drawings are still in the file and are used ONLY for a kettlebell (`KBNOW`), which the lifter cannot
+  hold. Deleting `ANIM` is a later build of its own, about 4,800 lines, and wants the kettlebell answered first.
+  The sheet is three named parts, **Set up, Do, Avoid**, with quiet labels and thin rules. **The only orange on it is the muscle
+  at work on the lifter, and every word is one colour.** His words on the version before: the orange brings my attention all over
+  the place, and the muted text looks cluttered. The How To eyebrow, the round stamp, the glowing dots, the dashed box round the
+  mistake and the FRONT and SIDE captions are gone and must not come back; he had already ruled that the figures carry no view
+  labels. Three rig rules came out of the review and hold for every lift: a part never cuts its outline into the part it is
+  joined to unless the joint is folded right back (`foldOf`, `nbs`); limbs pinned together by `layer` still draw near over far;
+  and a muscle that is not lit is not drawn if, seen edge on, it would read as a line (`uptrap`).
+  Checked in the preview by measurement, because the pane draws no frames: all 131 exercises find a lifter, both canvases draw
+  with the lit muscle, the three text blocks compute to the same colour, no sideways scroll at 375px. **Not seen on the phone.**
 - **Three notes from the gym** (v5.293, 21 Nov, owner picked 1A, 2B slower, 3A).
   **The set that is waiting is a hollow ring** (`.exc .srow.next .chk`: dark, 2px gold border,
   gold anvil). Filled orange is what a set that beat the record looks like, so never fill the

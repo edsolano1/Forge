@@ -952,11 +952,11 @@ xover:{name:'Cable Crossover',views:['side','front'],cx:[236,240],ground:[40,440
     [-1,1].forEach(function(s){
       var hh=[s<0?hand[0]:-hand[0],hand[1],hand[2]], pu=[s*TX,PY,TZ];
       // the towers stand a step behind the lifter. The cable runs from the pulley, high and behind, to the hand:
-      // it is drawn just behind the hand it ends in
+      // from the front it is drawn just behind the hand it ends in
       g.push({t:'line',a:[s*TX,4,TZ],b:[s*TX,352,TZ],w:7},
              {t:'line',a:[s*TX,5,TZ-26],b:[s*TX,5,TZ+26],w:7},
              {t:'g1_wheel',c:pu,r:7},
-             {t:'line',a:pu,b:hh,w:3.5,d:{front:hh[2]-14,side:s<0?-hh[0]-12:-hh[0]-12}},
+             {t:'line',a:pu,b:hh,w:3.5,d:{front:hh[2]-14,side:-400}},     // from the side both cables pass behind the lifter: over the arm, a cable reads as cutting through it
              {t:'line',a:[hh[0],hh[1],hh[2]-13],b:[hh[0],hh[1],hh[2]+13],w:7,col:GO,d:dp(hh,-3)});
     });
     g.push({t:'line',a:[-TX,352,TZ],b:[TX,352,TZ],w:7});
