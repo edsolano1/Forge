@@ -2367,25 +2367,37 @@ hamstr:{name:'Hamstring Floor Stretch',hold:1,views:['side','quarter'],labels:['
 // ======== kettlebells ========
 // A kettlebell is its own lift, not a switch on the dumbbell one (owner, 23 Nov): the weights come in different steps and
 // the app learns each lift's steps from its own history. Each is the dumbbell lift with the same body and a different thing
-// in the hands: c is the middle of the handle where the hands close, up points from the ball to the handle.
+// in the hands: c is the middle of the handle where the hand closes, up points from the ball to the handle, ax runs along
+// the handle's top bar.
 (function(){
 "use strict";
-var GO=FIG.col.GO;
+var GO=FIG.col.GO, EDGE="#15120f";
 FIG.gear.g9_kb=function(x,V,g){
-  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||18, hw=g.hw||11, drop=g.drop||9;
+  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||20, hw=g.hw||11, drop=g.drop||8, LW=6.5;
   var b=FIG.add(g.c,FIG.mul(up,-(r+drop)));                                  // the middle of the ball
-  var foot=function(sg){return V.p(FIG.add(FIG.add(b,FIG.mul(up,r*.72)),FIG.mul(ax,sg*hw)));},
-      top=function(sg){return V.p(FIG.add(g.c,FIG.mul(ax,sg*hw)));};
-  // the handle: up one side, across where the hands hold it, down the other
-  var p=[foot(-1),top(-1),top(1),foot(1)];
+  // the handle is a thick loop standing on the ball: two posts and the bar the hand holds. It is drawn where it really
+  // is, so from the side you look through its window and from a slant the two posts close up and the window narrows.
+  var at=function(sg,h,w){return V.p(FIG.add(FIG.add(b,FIG.mul(up,h)),FIG.mul(ax,sg*w)));};
+  var p=[at(-1,r*.62,hw*1.25),at(-1,r+drop,hw),at(1,r+drop,hw),at(1,r*.62,hw*1.25)];
+  var span=Math.sqrt(Math.pow(p[2][0]-p[1][0],2)+Math.pow(p[2][1]-p[1][1],2));
+  var loop=function(){x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);};
   x.lineJoin='round';x.lineCap='round';
-  x.strokeStyle="#15120f";x.lineWidth=8.2;x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);x.stroke();
-  x.strokeStyle=GO;x.lineWidth=5.6;x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);x.stroke();
+  if(span-LW<5){                                 // seen nearly end on there is no window to see through: one solid horn
+    loop();x.closePath();x.fillStyle=GO;x.fill();
+    x.strokeStyle=EDGE;x.lineWidth=LW+2.6;x.stroke();x.strokeStyle=GO;x.lineWidth=LW;x.stroke();
+  }else{
+    loop();x.strokeStyle=EDGE;x.lineWidth=LW+2.6;x.stroke();
+    loop();x.strokeStyle=GO;x.lineWidth=LW;x.stroke();
+  }
   // the ball, with a flat foot to stand on
   var pts=FIG.blobPts(V,b,[[r,0,0],[0,r,0],[0,0,r]],28), base=FIG.add(b,FIG.mul(up,-r*.9));
   pts=pts.concat(FIG.blobPts(V,base,[FIG.mul(ax,r*.5),FIG.mul(FIG.cross(up,ax),r*.5),FIG.mul(up,.5)],10));
   FIG.poly(x,FIG.hull(pts));
-  x.fillStyle=GO;x.fill();x.strokeStyle="#15120f";x.lineWidth=1.6;x.stroke();
+  x.fillStyle=GO;x.fill();x.strokeStyle=EDGE;x.lineWidth=1.6;x.stroke();
+  // one hand on the bar: the fist closes over the top of the handle, so the grip is seen and not guessed
+  if(g.hand){var c=V.p(g.c), far=V.k==='side'&&g.c[0]>0;
+    x.fillStyle=far?FIG.col.FAR:FIG.col.INK;x.beginPath();x.arc(c[0],c[1],7.4,0,7);x.fill();
+    x.strokeStyle=EDGE;x.lineWidth=1.2;x.stroke();}
 };
 function twin(base,name,says,fn){
   var L=LIFTS[base], o={}, k;for(k in L)o[k]=L[k];
@@ -2395,28 +2407,32 @@ function twin(base,name,says,fn){
 }
 // goblet: held by the sides of the handle at the chest, the ball hanging below the hands
 LIFTS.kbgoblet=twin('goblet','Kettlebell Goblet Squat',null,function(r){
-  var g=r.gear[0], u=FIG.norm(g.ax), G=FIG.add(g.c,FIG.mul(u,10));
-  r.p.hand=[-12,G[1],G[2]];
-  r.gear=[{t:'g9_kb',c:[0,G[1],G[2]],up:u,r:17,hw:12,drop:8,d:g.d}];
+  var g=r.gear[0], u=FIG.norm(g.ax), G=FIG.add(g.c,FIG.mul(u,12));
+  r.p.hand=[-13,G[1],G[2]];
+  r.gear=[{t:'g9_kb',c:[0,G[1],G[2]],up:u,r:20,hw:13,drop:8,d:g.d}];
 });
 // sumo: both hands on the handle, the bell hanging straight down between the legs
 LIFTS.kbsumo=twin('sumo','Kettlebell Sumo Squat',null,function(r){
-  var g=r.gear[0], h=r.p.hand, y=h[1]+3;
-  r.p.hand=[-10,y,h[2]];
-  r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:20,hw:11,drop:9,d:g.d}];
+  var g=r.gear[0], h=r.p.hand, y=h[1]+5;
+  r.p.hand=[-11,y,h[2]];
+  r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:23,hw:12,drop:9,d:g.d}];
 });
-// the lifts where a dumbbell just hangs from the hand: the kettlebell hangs the same way, ball under the fist
-function hang(base,name){
+// the lifts where a dumbbell just hangs from the hand: the kettlebell hangs the same way, ball under the fist.
+// out: how far from the centre line the hands must be for the wider bell to clear the legs.
+function hang(base,name,out){
   return twin(base,name,null,function(r){
+    if(out)['hand','handR','handL'].forEach(function(k){var h=r.p[k];
+      if(h&&Math.abs(h[0])<out&&r.gear.some(function(g){return g.t==='db'&&Math.abs(Math.abs(g.c[0])-Math.abs(h[0]))<.01;}))r.p[k]=[h[0]<0?-out:out,h[1],h[2]];});
     r.gear=(r.gear||[]).map(function(g){
       if(g.t!=='db')return g;
-      return {t:'g9_kb',c:g.c,up:[0,1,0],ax:g.ax,r:15,hw:8,drop:6,hand:1};
+      var cx=out&&Math.abs(g.c[0])<out?(g.c[0]<0?-out:out):g.c[0];
+      return {t:'g9_kb',c:[cx,g.c[1],g.c[2]],up:[0,1,0],ax:g.ax,r:18,hw:9,drop:6,hand:1};
     });
   });
 }
-LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge');
-LIFTS.kbstepup=hang('stepup','Kettlebell Step-Up');
-LIFTS.kbsldl=hang('sldl','Kettlebell Single-Leg Romanian Deadlift');
-LIFTS.kbrow=hang('dbrow','One-Arm Kettlebell Row');
+LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge',62);
+LIFTS.kbstepup=hang('stepup','Kettlebell Step-Up',62);
+LIFTS.kbsldl=hang('sldl','Kettlebell Single-Leg Romanian Deadlift',0);
+LIFTS.kbrow=hang('dbrow','One-Arm Kettlebell Row',0);
 })();
 
