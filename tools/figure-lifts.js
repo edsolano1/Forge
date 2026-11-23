@@ -879,7 +879,8 @@ invrow:{name:'Inverted Row',views:['side','quarter'],labels:['Side','From the fe
             // lifter, so the near one does not stand across the arms. From the feet the bar is nearer than the head and
             // further than the near hand and forearm. The far hand is beyond the bar's middle but closes round it, so that hand
             // and forearm are drawn over it (they overlap nothing else). The uprights are at their true depth.
-            gear:[{t:'line',a:[0,4,bar[2]-9],b:[0,236,bar[2]-9],w:8,v:['side'],d:{side:-300}},
+            gear:[{t:'line',a:[0,4,bar[2]-30],b:[0,236,bar[2]-30],w:8,v:['side'],d:{side:-300}},     // the upright stands back from the bar, which sits out on a hook: the arm never hangs along the post
+                  {t:'line',a:[0,bar[1]-5,bar[2]-30],b:[0,bar[1]-5,bar[2]+2],w:5,v:['side'],d:{side:-300}},
                   {t:'line',a:[0,5,bar[2]-52],b:[0,5,bar[2]+44],w:8,v:['side'],d:{side:-301}},
                   {t:'line',a:[-90,4,bar[2]-9],b:[-90,236,bar[2]-9],w:8,v:['quarter']},
                   {t:'line',a:[90,4,bar[2]-9],b:[90,236,bar[2]-9],w:8,v:['quarter']},
@@ -1127,14 +1128,15 @@ hack:{name:'Hack Squat',views:['side','front'],cx:[282,240],ground:[60,420],up:1
   lit:{quad:2,glute:1},
   says:'The front of the thighs does nearly all of it. The backside helps.',
   pose:function(k){
-    // everything leans back 38 degrees: the rails, the back pad that slides on them, and the lifter on the pad.
+    // everything leans back 52 degrees, a long low sled with its plates up by the shoulders: the rails, the back pad that slides on them, and the lifter on the pad.
     // The foot plate is square to the rails, so the feet stand flat on it with the toes pointing up the slope.
-    var lean=-38, u=uv(lean), n=nv(lean), A=[0,58,78];                 // A: the ankle line, middle of the plate
+    var lean=-52, u=uv(lean), n=nv(lean), A=[0,52,96];                 // A: the ankle line, middle of the plate
     var t=lerp(92,171,k), hip=at(A,u,t,n,-36), S=at(hip,u,100,n,0);
     var hand=at(S,u,2,n,44,-54);
     var padA=at(hip,u,-16,n,-21), padB=at(hip,u,128,n,-21), rn=[0,-n[1],-n[2]];
     var plA=at(A,u,-12,n,-24), plB=at(A,u,-12,n,48);
-    var r0=at(A,u,-12,n,-70), r1=at(A,u,318,n,-70), hornC=at(hip,u,62,n,-54);
+    var r0=at(A,u,-12,n,-70), r1=at(A,u,300,n,-70), hornC=at(hip,u,104,n,-56);
+    if(r0[1]<5)r0=at(r0,u,(5-r0[1])/u[1],n,0);          // the rails stop at the floor
     return {p:{hip:hip,lean:lean,neck:2,ank:at(A,u,0,n,0,-25),kneePole:[-.42,n[1],n[2]],footDir:[-.22,n[1],n[2]],
                hand:hand,elbPole:[-.5,-1,.3],layer:{front:{legs:'front'}}},
             gear:[// fixed: the rails, a post holding their top end, the base, the foot plate and its strut
@@ -1149,8 +1151,10 @@ hack:{name:'Hack Squat',views:['side','front'],cx:[282,240],ground:[60,420],up:1
                   // the sled: back pad, shoulder pads, handles, and a plate on a horn each side
                   {t:'box',pts:slab(padA,padB,27,rn,9),d:{side:-200,front:-1000}},
                   {t:'line',a:[-74,hornC[1],hornC[2]],b:[74,hornC[1],hornC[2]],w:6,col:GREY,v:['front'],d:{front:-1100}},
-                  {t:'g5_plate',c:[-70,hornC[1],hornC[2]],r:26,d:{side:-250,front:-1090}},
-                  {t:'g5_plate',c:[70,hornC[1],hornC[2]],r:26,v:['front'],d:{front:-1090}},
+                  {t:'g5_plate',c:[-70,hornC[1],hornC[2]],r:34,d:{side:-250,front:-1090}},
+                  {t:'g5_plate',c:[-70,62,r1[2]+26],r:30,v:['side'],d:{side:-330}},
+                  {t:'g5_plate',c:[-70,r1[1]*.62,r1[2]+26],r:30,v:['side'],d:{side:-331}},
+                  {t:'g5_plate',c:[70,hornC[1],hornC[2]],r:34,v:['front'],d:{front:-1090}},
                   {t:'line',a:at(S,u,15,n,-24,-40),b:at(S,u,15,n,16,-40),w:10,col:GO,d:{side:60}},
                   {t:'line',a:at(S,u,15,n,-24,40),b:at(S,u,15,n,16,40),w:10,col:GO,d:{side:-60}},
                   {t:'line',a:at(S,u,15,n,14,-54),b:at(S,u,-2,n,44,-54),w:5,col:GREY,d:{side:58}},

@@ -124,6 +124,14 @@ function chainPath(V,blobs){
   });
   return path;
 }
+// the same hulls one at a time, so a region can be cut round each of them
+function chainHulls(V,blobs){
+  var out=[], prev=null;
+  blobs.forEach(function(b){var pts=blobPts(V,b.c,b.ax);if(prev||blobs.length===1)out.push(hull(prev?prev.concat(pts):pts));prev=pts;});
+  return out;
+}
+// how far a joint is folded, 0 to 1: straight and half bent are 0, folded right back is 1
+function foldOf(P,Q){var a=Math.acos(Math.max(-1,Math.min(1,dot3(P.dir,Q.dir))))*180/Math.PI, t=Math.max(0,Math.min(1,(a-85)/40));return t*t*(3-2*t);}
 function sph(c,r){return {c:c,ax:[[r,0,0],[0,r,0],[0,0,r]]};}
 
 function buildParts(J,V){
@@ -186,8 +194,8 @@ function buildParts(J,V){
     var fd=q.footDir, dn=Math.abs(fd[1])+Math.abs(fd[2])<.05?[0,-1,0]:norm([0,-fd[2],fd[1]]);          // the sole faces square away from the way the toes point
     var toe=add(add(q.ank,mul(fd,36)),mul(dn,7.4)), flat=q.ank[1]<40&&fd[1]<-.05;
     if(flat&&toe[1]<4.6)toe=[toe[0],4.6,toe[2]+2];       // up on the ball of the foot, the toes bend and stay down
-    part('foot',[sph(add(add(q.ank,mul(fd,-5)),mul(dn,5)),7),sph(add(add(q.ank,mul(fd,23)),mul(dn,6.3)),5.7),sph(toe,4.6)],
-         q.ank,15,far,22).s=s;       // a wide joint, or the heel cuts a moving line across the shin as the foot tilts
+    var ft=part('foot',[sph(add(add(q.ank,mul(fd,-5)),mul(dn,5)),7),sph(add(add(q.ank,mul(fd,23)),mul(dn,6.3)),5.7),sph(toe,4.6)],
+         q.ank,15,far,22);ft.s=s;       // a wide joint, or the heel cuts a moving line across the shin as the foot tilts
     var ua=limb('uarm',q.shoJ,q.elb,[12.5,10.5,8.5],[0,.45,1],mul(q.armB,-1),null,q.shoJ,15,30);
     ua.mus.push({key:'delt',c:q.shoJ,ax:[[11.5,0,0],[0,11.5,0],[0,0,11.5]],N:V.v});
     lm(ua,'biceps',.58,.28,10,1);lm(ua,'triceps',.52,.32,10,-1);
@@ -197,9 +205,19 @@ function buildParts(J,V){
     var hb=[sph(mix(wr,q.tip,.35),6),sph(q.tip,7.6)];
     if(q.thumb)hb.push(sph(add(q.tip,mul(q.thumb,8.5)),3.6));
     var hp=part('hand',hb,wr,7,far,32);hp.s=s;
+    // a part never cuts its outline into the part it is joined to, unless the joint is folded right back on itself:
+    // seen end on, a forearm lies over its own upper arm and a line there is a line that was not there a frame ago
+    var ef=foldOf(ua,fa), kf=foldOf(th,sh);
+    ua.nbs=[{b:fa.blobs,f:ef}];fa.nbs=[{b:ua.blobs,f:ef},{b:hp.blobs,f:0}];hp.nbs=[{b:fa.blobs,f:0}];
+    th.nbs=[{b:sh.blobs,f:kf}];sh.nbs=[{b:th.blobs,f:kf},{b:ft.blobs,f:0}];ft.nbs=[{b:sh.blobs,f:0}];
     if(q.palm){var fdir=norm(sub(q.tip,wr)), sdir=norm(cross(fdir,q.palm));
       hp.mus.push({key:'palm',c:add(q.tip,mul(q.palm,3.5)),ax:[mul(fdir,5.2),mul(sdir,4.6),mul(q.palm,3)],N:q.palm,sd:''});}
   });
+  // the same limb on the other side, lying right behind this one: no line between the two until they come apart on screen
+  parts.forEach(function(P){if(!P.s||!P.nbs)return;
+    parts.forEach(function(T){if(T===P||T.name!==P.name||T.s!==-P.s||T.blobs.length!==P.blobs.length)return;
+      var d=0;P.blobs.forEach(function(b,i){var a=V.p(b.c), c=V.p(T.blobs[i].c);d=Math.max(d,Math.sqrt((a[0]-c[0])*(a[0]-c[0])+(a[1]-c[1])*(a[1]-c[1])));});
+      var t=Math.max(0,Math.min(1,(d-5)/12));P.nbs.push({b:T.blobs,f:t*t*(3-2*t)});});});
   // the neck sits behind both the trunk and the head, always: left to its own depth it swaps with them mid rep
   parts[1].d=Math.min(parts[0].d,parts[2].d)-.02;
   return parts;
@@ -209,14 +227,22 @@ function buildParts(J,V){
 function drawPart(x,V,P,lit){
   var path=chainPath(V,P.blobs);
   // a thin gap round the part so one limb reads against another, but not at its own joint
-  x.save();
-  if(P.joint){
+  function jclip(){
+    if(!P.joint)return;
     var j=V.p(P.joint), cl=new Path2D();
     cl.rect(-50,-50,600,600);cl.arc(j[0],j[1],P.jr,0,6.2832);
     x.clip(cl,'evenodd');
   }
+  x.save();jclip();
+  (P.nbs||[]).forEach(function(nb){chainHulls(V,nb.b).forEach(function(h){
+    var c=new Path2D();c.rect(-50,-50,600,600);c.moveTo(h[0][0],h[0][1]);for(var i=1;i<h.length;i++)c.lineTo(h[i][0],h[i][1]);c.closePath();
+    x.clip(c,'evenodd');});});
   x.globalCompositeOperation='destination-out';x.lineWidth=5;x.lineJoin='round';x.stroke(path);
   x.restore();
+  (P.nbs||[]).forEach(function(nb){if(!(nb.f>0))return;       // folded right back, the line fades in over the part it lies on
+    x.save();jclip();x.clip(chainPath(V,nb.b));
+    x.globalCompositeOperation='destination-out';x.globalAlpha=nb.f;x.lineWidth=5;x.lineJoin='round';x.stroke(path);
+    x.restore();});
   x.fillStyle=P.far?SK.far:SK.ink;x.fill(path);
   if(P.far||!P.mus.length)return;
   x.save();x.clip(path);

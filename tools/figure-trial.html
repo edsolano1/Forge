@@ -180,6 +180,14 @@ function chainPath(V,blobs){
   });
   return path;
 }
+// the same hulls one at a time, so a region can be cut round each of them
+function chainHulls(V,blobs){
+  var out=[], prev=null;
+  blobs.forEach(function(b){var pts=blobPts(V,b.c,b.ax);if(prev||blobs.length===1)out.push(hull(prev?prev.concat(pts):pts));prev=pts;});
+  return out;
+}
+// how far a joint is folded, 0 to 1: straight and half bent are 0, folded right back is 1
+function foldOf(P,Q){var a=Math.acos(Math.max(-1,Math.min(1,dot3(P.dir,Q.dir))))*180/Math.PI, t=Math.max(0,Math.min(1,(a-85)/40));return t*t*(3-2*t);}
 function sph(c,r){return {c:c,ax:[[r,0,0],[0,r,0],[0,0,r]]};}
 
 function buildParts(J,V){
@@ -242,8 +250,8 @@ function buildParts(J,V){
     var fd=q.footDir, dn=Math.abs(fd[1])+Math.abs(fd[2])<.05?[0,-1,0]:norm([0,-fd[2],fd[1]]);          // the sole faces square away from the way the toes point
     var toe=add(add(q.ank,mul(fd,36)),mul(dn,7.4)), flat=q.ank[1]<40&&fd[1]<-.05;
     if(flat&&toe[1]<4.6)toe=[toe[0],4.6,toe[2]+2];       // up on the ball of the foot, the toes bend and stay down
-    part('foot',[sph(add(add(q.ank,mul(fd,-5)),mul(dn,5)),7),sph(add(add(q.ank,mul(fd,23)),mul(dn,6.3)),5.7),sph(toe,4.6)],
-         q.ank,15,far,22).s=s;       // a wide joint, or the heel cuts a moving line across the shin as the foot tilts
+    var ft=part('foot',[sph(add(add(q.ank,mul(fd,-5)),mul(dn,5)),7),sph(add(add(q.ank,mul(fd,23)),mul(dn,6.3)),5.7),sph(toe,4.6)],
+         q.ank,15,far,22);ft.s=s;       // a wide joint, or the heel cuts a moving line across the shin as the foot tilts
     var ua=limb('uarm',q.shoJ,q.elb,[12.5,10.5,8.5],[0,.45,1],mul(q.armB,-1),null,q.shoJ,15,30);
     ua.mus.push({key:'delt',c:q.shoJ,ax:[[11.5,0,0],[0,11.5,0],[0,0,11.5]],N:V.v});
     lm(ua,'biceps',.58,.28,10,1);lm(ua,'triceps',.52,.32,10,-1);
@@ -253,9 +261,19 @@ function buildParts(J,V){
     var hb=[sph(mix(wr,q.tip,.35),6),sph(q.tip,7.6)];
     if(q.thumb)hb.push(sph(add(q.tip,mul(q.thumb,8.5)),3.6));
     var hp=part('hand',hb,wr,7,far,32);hp.s=s;
+    // a part never cuts its outline into the part it is joined to, unless the joint is folded right back on itself:
+    // seen end on, a forearm lies over its own upper arm and a line there is a line that was not there a frame ago
+    var ef=foldOf(ua,fa), kf=foldOf(th,sh);
+    ua.nbs=[{b:fa.blobs,f:ef}];fa.nbs=[{b:ua.blobs,f:ef},{b:hp.blobs,f:0}];hp.nbs=[{b:fa.blobs,f:0}];
+    th.nbs=[{b:sh.blobs,f:kf}];sh.nbs=[{b:th.blobs,f:kf},{b:ft.blobs,f:0}];ft.nbs=[{b:sh.blobs,f:0}];
     if(q.palm){var fdir=norm(sub(q.tip,wr)), sdir=norm(cross(fdir,q.palm));
       hp.mus.push({key:'palm',c:add(q.tip,mul(q.palm,3.5)),ax:[mul(fdir,5.2),mul(sdir,4.6),mul(q.palm,3)],N:q.palm,sd:''});}
   });
+  // the same limb on the other side, lying right behind this one: no line between the two until they come apart on screen
+  parts.forEach(function(P){if(!P.s||!P.nbs)return;
+    parts.forEach(function(T){if(T===P||T.name!==P.name||T.s!==-P.s||T.blobs.length!==P.blobs.length)return;
+      var d=0;P.blobs.forEach(function(b,i){var a=V.p(b.c), c=V.p(T.blobs[i].c);d=Math.max(d,Math.sqrt((a[0]-c[0])*(a[0]-c[0])+(a[1]-c[1])*(a[1]-c[1])));});
+      var t=Math.max(0,Math.min(1,(d-5)/12));P.nbs.push({b:T.blobs,f:t*t*(3-2*t)});});});
   // the neck sits behind both the trunk and the head, always: left to its own depth it swaps with them mid rep
   parts[1].d=Math.min(parts[0].d,parts[2].d)-.02;
   return parts;
@@ -265,14 +283,22 @@ function buildParts(J,V){
 function drawPart(x,V,P,lit){
   var path=chainPath(V,P.blobs);
   // a thin gap round the part so one limb reads against another, but not at its own joint
-  x.save();
-  if(P.joint){
+  function jclip(){
+    if(!P.joint)return;
     var j=V.p(P.joint), cl=new Path2D();
     cl.rect(-50,-50,600,600);cl.arc(j[0],j[1],P.jr,0,6.2832);
     x.clip(cl,'evenodd');
   }
+  x.save();jclip();
+  (P.nbs||[]).forEach(function(nb){chainHulls(V,nb.b).forEach(function(h){
+    var c=new Path2D();c.rect(-50,-50,600,600);c.moveTo(h[0][0],h[0][1]);for(var i=1;i<h.length;i++)c.lineTo(h[i][0],h[i][1]);c.closePath();
+    x.clip(c,'evenodd');});});
   x.globalCompositeOperation='destination-out';x.lineWidth=5;x.lineJoin='round';x.stroke(path);
   x.restore();
+  (P.nbs||[]).forEach(function(nb){if(!(nb.f>0))return;       // folded right back, the line fades in over the part it lies on
+    x.save();jclip();x.clip(chainPath(V,nb.b));
+    x.globalCompositeOperation='destination-out';x.globalAlpha=nb.f;x.lineWidth=5;x.lineJoin='round';x.stroke(path);
+    x.restore();});
   x.fillStyle=P.far?SK.far:SK.ink;x.fill(path);
   if(P.far||!P.mus.length)return;
   x.save();x.clip(path);
@@ -1562,7 +1588,8 @@ invrow:{name:'Inverted Row',views:['side','quarter'],labels:['Side','From the fe
             // lifter, so the near one does not stand across the arms. From the feet the bar is nearer than the head and
             // further than the near hand and forearm. The far hand is beyond the bar's middle but closes round it, so that hand
             // and forearm are drawn over it (they overlap nothing else). The uprights are at their true depth.
-            gear:[{t:'line',a:[0,4,bar[2]-9],b:[0,236,bar[2]-9],w:8,v:['side'],d:{side:-300}},
+            gear:[{t:'line',a:[0,4,bar[2]-30],b:[0,236,bar[2]-30],w:8,v:['side'],d:{side:-300}},     // the upright stands back from the bar, which sits out on a hook: the arm never hangs along the post
+                  {t:'line',a:[0,bar[1]-5,bar[2]-30],b:[0,bar[1]-5,bar[2]+2],w:5,v:['side'],d:{side:-300}},
                   {t:'line',a:[0,5,bar[2]-52],b:[0,5,bar[2]+44],w:8,v:['side'],d:{side:-301}},
                   {t:'line',a:[-90,4,bar[2]-9],b:[-90,236,bar[2]-9],w:8,v:['quarter']},
                   {t:'line',a:[90,4,bar[2]-9],b:[90,236,bar[2]-9],w:8,v:['quarter']},
@@ -1810,14 +1837,15 @@ hack:{name:'Hack Squat',views:['side','front'],cx:[282,240],ground:[60,420],up:1
   lit:{quad:2,glute:1},
   says:'The front of the thighs does nearly all of it. The backside helps.',
   pose:function(k){
-    // everything leans back 38 degrees: the rails, the back pad that slides on them, and the lifter on the pad.
+    // everything leans back 52 degrees, a long low sled with its plates up by the shoulders: the rails, the back pad that slides on them, and the lifter on the pad.
     // The foot plate is square to the rails, so the feet stand flat on it with the toes pointing up the slope.
-    var lean=-38, u=uv(lean), n=nv(lean), A=[0,58,78];                 // A: the ankle line, middle of the plate
+    var lean=-52, u=uv(lean), n=nv(lean), A=[0,52,96];                 // A: the ankle line, middle of the plate
     var t=lerp(92,171,k), hip=at(A,u,t,n,-36), S=at(hip,u,100,n,0);
     var hand=at(S,u,2,n,44,-54);
     var padA=at(hip,u,-16,n,-21), padB=at(hip,u,128,n,-21), rn=[0,-n[1],-n[2]];
     var plA=at(A,u,-12,n,-24), plB=at(A,u,-12,n,48);
-    var r0=at(A,u,-12,n,-70), r1=at(A,u,318,n,-70), hornC=at(hip,u,62,n,-54);
+    var r0=at(A,u,-12,n,-70), r1=at(A,u,300,n,-70), hornC=at(hip,u,104,n,-56);
+    if(r0[1]<5)r0=at(r0,u,(5-r0[1])/u[1],n,0);          // the rails stop at the floor
     return {p:{hip:hip,lean:lean,neck:2,ank:at(A,u,0,n,0,-25),kneePole:[-.42,n[1],n[2]],footDir:[-.22,n[1],n[2]],
                hand:hand,elbPole:[-.5,-1,.3],layer:{front:{legs:'front'}}},
             gear:[// fixed: the rails, a post holding their top end, the base, the foot plate and its strut
@@ -1832,8 +1860,10 @@ hack:{name:'Hack Squat',views:['side','front'],cx:[282,240],ground:[60,420],up:1
                   // the sled: back pad, shoulder pads, handles, and a plate on a horn each side
                   {t:'box',pts:slab(padA,padB,27,rn,9),d:{side:-200,front:-1000}},
                   {t:'line',a:[-74,hornC[1],hornC[2]],b:[74,hornC[1],hornC[2]],w:6,col:GREY,v:['front'],d:{front:-1100}},
-                  {t:'g5_plate',c:[-70,hornC[1],hornC[2]],r:26,d:{side:-250,front:-1090}},
-                  {t:'g5_plate',c:[70,hornC[1],hornC[2]],r:26,v:['front'],d:{front:-1090}},
+                  {t:'g5_plate',c:[-70,hornC[1],hornC[2]],r:34,d:{side:-250,front:-1090}},
+                  {t:'g5_plate',c:[-70,62,r1[2]+26],r:30,v:['side'],d:{side:-330}},
+                  {t:'g5_plate',c:[-70,r1[1]*.62,r1[2]+26],r:30,v:['side'],d:{side:-331}},
+                  {t:'g5_plate',c:[70,hornC[1],hornC[2]],r:34,v:['front'],d:{front:-1090}},
                   {t:'line',a:at(S,u,15,n,-24,-40),b:at(S,u,15,n,16,-40),w:10,col:GO,d:{side:60}},
                   {t:'line',a:at(S,u,15,n,-24,40),b:at(S,u,15,n,16,40),w:10,col:GO,d:{side:-60}},
                   {t:'line',a:at(S,u,15,n,14,-54),b:at(S,u,-2,n,44,-54),w:5,col:GREY,d:{side:58}},
@@ -3075,8 +3105,8 @@ var GROUPS=[["Reviewed","squat dead bench row pull ohp curl lat push incl crow t
 ["Cardio","walk treadwalk treadrun outrun stairs cbike assault ellip rower jumprope swim"],
 ["Stretches","hipflex chestdr pigeon hamstr"]];
 // REVIEW: fixed since he last looked, waiting on his eye. APPROVED: he has said these are right.
-var REVIEW="dbrow dbrow2 invrow doorrow machpd sapd pullover hang bwsquat goblet frontsq smsquat hack lpress stepup".split(" ");
-var APPROVED="squat dead bench row pull bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl curl lat push incl crow thrust legx pullup calf dbbench rdl bwcalf ohp smbench ohext incbb dbfly pushup mbench lvchest mfly dbohp mohp xover lowchest machlat clat revfly dbrfly facepull hammer dip vbar shrug inccurl bdip machrow".split(" ");
+var REVIEW="invrow doorrow pullover hack".split(" ");
+var APPROVED="squat dead bench row pull bike jumprope stairs outrun treadrun lunge sumo preacher skull cbcurl sdbcurl wcurl rwcurl curl lat push incl crow thrust legx pullup calf dbbench rdl bwcalf ohp smbench ohext incbb dbfly pushup mbench lvchest mfly dbohp mohp xover lowchest machlat clat revfly dbrfly facepull hammer dip vbar shrug inccurl bdip machrow dbrow dbrow2 machpd sapd hang bwsquat goblet frontsq smsquat lpress stepup".split(" ");
 var seen={},IDS=[],HEAD={};
 GROUPS.forEach(function(g){g[1].split(" ").forEach(function(id,n){if(LIFTS[id]&&!seen[id]){seen[id]=1;IDS.push(id);if(!HEAD[g[0]]){HEAD[g[0]]=1;HEAD[id]=g[0];}}});});
 Object.keys(LIFTS).forEach(function(id){if(!seen[id]){IDS.push(id);if(!HEAD.Other){HEAD.Other=1;HEAD[id]="Other";}}});
