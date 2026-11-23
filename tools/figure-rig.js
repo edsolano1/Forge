@@ -16,10 +16,9 @@ var INK="#e8ded2", FAR="#8d8378", GO="#d97b2e", LINE="#514a43", HOT="#ff7a1a", D
 var SKIN0={ink:INK,far:FAR,hot:HOT,help:"rgba(255,122,26,.42)",def:DEF,mark:"rgba(52,38,28,.8)",face:'none'}, SK=SKIN0;
 function skin(o){SK={};var k;for(k in SKIN0)SK[k]=SKIN0[k];if(o)for(k in o)SK[k]=o[k];return SK;}
 var FLOOR=432;
-// THE SQUEEZE: a pose may say squeeze:0..1 and the working muscles deepen from orange to a hot red orange,
+// THE SQUEEZE: a pose may say squeeze:0..1 and the working muscles swell a little, colour unchanged,
 // so the end of a rep that wants a hard squeeze is seen, not read.
 var SQ=0;
-function squeezeCol(t){t=Math.max(0,Math.min(1,t));return 'rgb('+Math.round(255-27*t)+','+Math.round(122-74*t)+','+Math.round(26-18*t)+')';}
 // ---- the body. Nothing below this line may set a length of its own. ----
 var B={ankH:12, shin:86, thigh:92, trunk:100, uarm:64, farm:64, wrist:.81, shoW:39, hipW:17, neck:12, headR:[17,23.5,20.5]};
 // torso cross-sections: [how far up the trunk, half width, depth in front, depth behind]
@@ -222,12 +221,13 @@ function drawPart(x,V,P,lit){
     var fd=Math.max(0,Math.min(1,(dt+.5)/.4));fd=fd*fd*(3-2*fd);     // turning away it fades, it never blinks off
     var sd=m.sd!=null?m.sd:(P.s?(P.s<0?'R':'L'):'');          // lit:{quad:2} lights both sides, lit:{quadR:2} the right only
     var lv=lit&&(lit[m.key]||(sd&&lit[m.key+sd]));
-    x.fillStyle=lv===2?(SQ>0?squeezeCol(SQ):SK.hot):SK.def;
+    x.fillStyle=lv===2?SK.hot:SK.def;
     x.globalAlpha=fd;
     if(lv===1)x.fillStyle=SK.help;
     if(m.col)x.fillStyle=m.col;
     if(m.key==='palm')x.fillStyle="rgba(70,48,30,.5)";
-    var pts=blobPts(V,m.c,m.ax,20);
+    var fx=(lv===2&&SQ>0)?1+.16*SQ*SQ*(3-2*SQ):1;      // the squeeze: the working muscle swells, its colour holds
+    var pts=blobPts(V,m.c,fx===1?m.ax:m.ax.map(function(a){return mul(a,fx);}),20);
     x.beginPath();x.moveTo(pts[0][0],pts[0][1]);for(var i=1;i<pts.length;i++)x.lineTo(pts[i][0],pts[i][1]);x.closePath();x.fill();
   });
   x.restore();
