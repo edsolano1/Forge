@@ -894,7 +894,7 @@ doorrow:{name:'Doorway Row',okFlip:1,views:['side','rear'],labels:['Side','From 
     var a=lerp(DW_A0,DW_A1,k), S=doorS(a), hip=[0,S[1]-B.trunk*Math.cos(a*R),S[2]+B.trunk*Math.sin(a*R)];
     var hand=[-DW_HX,DW_HY,DW_F-2];
     return {p:{hip:hip,lean:-a,neck:a*.35,ank:[-17,B.ankH,DW_AZ],kneePole:[0,0,1],footDir:[-.06,0,1],
-               hand:hand,elbPole:[-.6,-1,-.35]},
+               hand:hand,elbPole:[-1,-.9,-.35]},
             // the door frame: a post each side and the top. Each hand closes round its post, so the post is drawn just
             // behind the hand. The top and the far post are at their true depth.
             gear:[{t:'line',a:[-90,2,DW_F],b:[-90,404,DW_F],w:9,d:{side:46,rear:RD(hand)-1}},

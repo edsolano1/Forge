@@ -130,8 +130,8 @@ function chainHulls(V,blobs){
   blobs.forEach(function(b){var pts=blobPts(V,b.c,b.ax);if(prev||blobs.length===1)out.push(hull(prev?prev.concat(pts):pts));prev=pts;});
   return out;
 }
-// how far a joint is folded, 0 to 1: straight and half bent are 0, folded right back is 1
-function foldOf(P,Q){var a=Math.acos(Math.max(-1,Math.min(1,dot3(P.dir,Q.dir))))*180/Math.PI, t=Math.max(0,Math.min(1,(a-85)/40));return t*t*(3-2*t);}
+// how far a joint is folded, 0 to 1: straight, and bent as far as a row bends an elbow, are 0; folded right back is 1
+function foldOf(P,Q){var a=Math.acos(Math.max(-1,Math.min(1,dot3(P.dir,Q.dir))))*180/Math.PI, t=Math.max(0,Math.min(1,(a-118)/32));return t*t*(3-2*t);}
 function sph(c,r){return {c:c,ax:[[r,0,0],[0,r,0],[0,0,r]]};}
 
 function buildParts(J,V){
