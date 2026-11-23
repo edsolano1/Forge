@@ -19,6 +19,9 @@ var FLOOR=432;
 // THE SQUEEZE: a pose may say squeeze:0..1 and the working muscles swell a little, colour unchanged,
 // so the end of a rep that wants a hard squeeze is seen, not read.
 var SQ=0;
+// THE RISE: a pose may say rise:n and the top of the trunk lifts that far with the shoulders, as it does in a shrug.
+var RISE=0;
+function riseAt(f){var w=Math.max(0,Math.min(1,(f-.78)/.22));return RISE*.8*w*w*(3-2*w);}
 // ---- the body. Nothing below this line may set a length of its own. ----
 var B={ankH:12, shin:86, thigh:92, trunk:100, uarm:64, farm:64, wrist:.81, shoW:39, hipW:17, neck:12, headR:[17,23.5,20.5]};
 // torso cross-sections: [how far up the trunk, half width, depth in front, depth behind]
@@ -134,11 +137,11 @@ function buildParts(J,V){
   }
   // torso
   var tb=TOR.map(function(t){
-    var F=fr(t[0]), c=add(add(J.H,mul(u,t[0]*B.trunk)),mul(F.n,(t[2]-t[3])/2));
+    var F=fr(t[0]), c=add(add(J.H,mul(u,t[0]*B.trunk+riseAt(t[0]))),mul(F.n,(t[2]-t[3])/2));
     return {c:c,ax:[mul(F.X,t[1]),mul(F.n,(t[2]+t[3])/2),mul(u,3)]};
   });
   var torso=part('torso',tb,null,0,false,10);
-  function tpt(f){return add(J.H,mul(u,f*B.trunk));}
+  function tpt(f){return add(J.H,mul(u,f*B.trunk+riseAt(f)));}
   function tm(key,f,lat,face,hh,hw,dep){
     var F=fr(f), N=mul(F.n,face), c=add(add(tpt(f),mul(F.X,lat)),mul(N,dep*.72));
     torso.mus.push({key:key,c:c,ax:[mul(u,hh),mul(F.X,hw),mul(N,dep*.5)],N:N,sd:lat<0?'R':lat>0?'L':''});
@@ -307,7 +310,7 @@ function draw(x,kind,pose,gear,lit,cx,ground,zoom){
   x.strokeStyle=LINE;x.lineWidth=6;x.lineCap='round';
   if(kind!=='top'){x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();}
   var J=solve(pose), items=[], handD={};
-  SQ=pose.squeeze||0;
+  SQ=pose.squeeze||0;RISE=pose.rise||0;
   if(pose.unlit&&pose.unlit.indexOf(kind)>=0)lit=null;     // a view the working muscle cannot be seen from shows none
   var lay=pose.layer&&pose.layer[kind];
   buildParts(J,V).forEach(function(P){

@@ -453,7 +453,7 @@ shrug:{name:'Barbell Shrug',views:['side','back'],cx:[236,240],stand:1,tall:1,up
   pose:function(k){
     var hip=[0,189.4,0], lean=1, S=S_of(hip,lean), sh=lerp(-4,11,k), bz=23, dz=bz-S[2];
     var by=S[1]+sh-Math.sqrt(ARM*ARM-dz*dz-81);
-    return {p:{hip:hip,lean:lean,neck:0,ank:[-22,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.2,0,1],shrug:[sh,0],
+    return {p:{hip:hip,lean:lean,neck:0,ank:[-22,B.ankH,0],kneePole:[-.1,0,1],footDir:[-.2,0,1],shrug:[sh,0],rise:sh,squeeze:Math.max(0,(k-.6)/.4),
                hand:[-48,by,bz],elbPole:[-.2,0,-1],layer:{back:{arms:'back',legs:'front'}}},
             gear:[{t:'bar',c:[0,by,bz],half:112,r:PL,d:{back:-1100}}]};
   }},
