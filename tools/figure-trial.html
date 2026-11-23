@@ -3136,19 +3136,21 @@ LIFTS.kbsumo=twin('sumo','Kettlebell Sumo Squat',null,function(r){
   r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:23,hw:12,drop:9,d:g.d}];
 });
 // the lifts where a dumbbell just hangs from the hand: the kettlebell hangs the same way, ball under the fist.
-// out: how far from the centre line the hands must be for the wider bell to clear the legs.
-function hang(base,name,out){
+// out: how far from the centre line the hands must be for the wider bell to clear the legs. dy, dz: a little up and
+// forward, where a bell hanging dead under the shoulder would sit square over the back knee from the side.
+function hang(base,name,out,dy,dz){
+  dy=dy||0;dz=dz||0;
   return twin(base,name,null,function(r){
     if(out)['hand','handR','handL'].forEach(function(k){var h=r.p[k];
-      if(h&&Math.abs(h[0])<out&&r.gear.some(function(g){return g.t==='db'&&Math.abs(Math.abs(g.c[0])-Math.abs(h[0]))<.01;}))r.p[k]=[h[0]<0?-out:out,h[1],h[2]];});
+      if(h&&Math.abs(h[0])<out&&r.gear.some(function(g){return g.t==='db'&&Math.abs(Math.abs(g.c[0])-Math.abs(h[0]))<.01;}))r.p[k]=[h[0]<0?-out:out,h[1]+dy,h[2]+dz];});
     r.gear=(r.gear||[]).map(function(g){
       if(g.t!=='db')return g;
       var cx=out&&Math.abs(g.c[0])<out?(g.c[0]<0?-out:out):g.c[0];
-      return {t:'g9_kb',c:[cx,g.c[1],g.c[2]],up:[0,1,0],ax:g.ax,r:18,hw:9,drop:6,hand:1};
+      return {t:'g9_kb',c:[cx,g.c[1]+(out?dy:0),g.c[2]+(out?dz:0)],up:[0,1,0],ax:g.ax,r:18,hw:9,drop:6,hand:1};
     });
   });
 }
-LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge',62);
+LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge',62,4,20);
 LIFTS.kbstepup=hang('stepup','Kettlebell Step-Up',62);
 LIFTS.kbsldl=hang('sldl','Kettlebell Single-Leg Romanian Deadlift',0);
 LIFTS.kbrow=hang('dbrow','One-Arm Kettlebell Row',0);
