@@ -1152,8 +1152,6 @@ hack:{name:'Hack Squat',views:['side','front'],cx:[282,240],ground:[60,420],up:1
                   {t:'box',pts:slab(padA,padB,27,rn,9),d:{side:-200,front:-1000}},
                   {t:'line',a:[-74,hornC[1],hornC[2]],b:[74,hornC[1],hornC[2]],w:6,col:GREY,v:['front'],d:{front:-1100}},
                   {t:'g5_plate',c:[-70,hornC[1],hornC[2]],r:34,d:{side:-250,front:-1090}},
-                  {t:'g5_plate',c:[-70,62,r1[2]+26],r:30,v:['side'],d:{side:-330}},
-                  {t:'g5_plate',c:[-70,r1[1]*.62,r1[2]+26],r:30,v:['side'],d:{side:-331}},
                   {t:'g5_plate',c:[70,hornC[1],hornC[2]],r:34,v:['front'],d:{front:-1090}},
                   {t:'line',a:at(S,u,15,n,-24,-40),b:at(S,u,15,n,16,-40),w:10,col:GO,d:{side:60}},
                   {t:'line',a:at(S,u,15,n,-24,40),b:at(S,u,15,n,16,40),w:10,col:GO,d:{side:-60}},

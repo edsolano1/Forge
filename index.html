@@ -2338,10 +2338,10 @@ body.forge #insKb[style*="display: none"],body.forge #insKb[style*="display:none
 body.forge #insKb .preset.sm{flex:1;height:38px;padding:0;border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);
   font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
 body.forge #insKb .preset.sm.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:0 0 14px -4px rgba(255,122,26,.7),inset 0 1px 0 rgba(255,240,210,.5);}
-/* The calm sheet (v5.297, owner picked C). Three named parts, Set up, Do, Avoid. The only orange is the muscle at work on
-   the lifter, and every word is the same cream: quiet labels and thin rules carry the structure, never a colour or a box. */
+/* The calm sheet (v5.297, owner picked C). Three named parts, Set up, Do, Avoid. The orange is the muscle at work on the
+   lifter and those three headers (v5.298, his call: in that orange as headers, but that is it). Every word is the same cream. */
 body.forge .ins-part{padding:10px 0;border-top:1px solid #2c1b11;}
-body.forge .ins-lab{display:block;font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt3);margin:0 0 3px;}
+body.forge .ins-lab{display:block;font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:0 0 3px;}
 body.forge .ins-s{font-size:14px;line-height:1.5;color:var(--txt);margin:0;}
 body.forge .ins-c{list-style:none;margin:0;padding:0;}
 body.forge .ins-c li{position:relative;padding-left:14px;margin:0 0 6px;font-size:14px;line-height:1.5;color:var(--txt);}
@@ -11834,8 +11834,6 @@ hack:{name:'Hack Squat',views:['side','front'],cx:[282,240],ground:[60,420],up:1
                   {t:'box',pts:slab(padA,padB,27,rn,9),d:{side:-200,front:-1000}},
                   {t:'line',a:[-74,hornC[1],hornC[2]],b:[74,hornC[1],hornC[2]],w:6,col:GREY,v:['front'],d:{front:-1100}},
                   {t:'g5_plate',c:[-70,hornC[1],hornC[2]],r:34,d:{side:-250,front:-1090}},
-                  {t:'g5_plate',c:[-70,62,r1[2]+26],r:30,v:['side'],d:{side:-330}},
-                  {t:'g5_plate',c:[-70,r1[1]*.62,r1[2]+26],r:30,v:['side'],d:{side:-331}},
                   {t:'g5_plate',c:[70,hornC[1],hornC[2]],r:34,v:['front'],d:{front:-1090}},
                   {t:'line',a:at(S,u,15,n,-24,-40),b:at(S,u,15,n,16,-40),w:10,col:GO,d:{side:60}},
                   {t:'line',a:at(S,u,15,n,-24,40),b:at(S,u,15,n,16,40),w:10,col:GO,d:{side:-60}},
@@ -13105,7 +13103,7 @@ function insAnimShow(exId){
 // KBNOW is what the drawing reads, set on the way into the instruction sheet (v5.124).
 var KBNOW=false;var KB_OK={sumo:1,goblet:1};
 function kbSet(exId,on){if(!DB.kb)DB.kb={};if(on)DB.kb[exId]=1;else delete DB.kb[exId];saveDB();openInstr(exId);}
-var APPV='v5.297';
+var APPV='v5.298';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;

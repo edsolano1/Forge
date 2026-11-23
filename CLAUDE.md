@@ -256,8 +256,9 @@ main constraint on how to work in it. See **Traps** below before editing.
   `figOf(exId)` finds the lifter (`FIGMAP` holds the ids that differ, a Pump Day `p_` id uses its twin), and `insAnimShow`
   draws it; the old `ANIM` drawings are still in the file and are used ONLY for a kettlebell (`KBNOW`), which the lifter cannot
   hold. Deleting `ANIM` is a later build of its own, about 4,800 lines, and wants the kettlebell answered first.
-  The sheet is three named parts, **Set up, Do, Avoid**, with quiet labels and thin rules. **The only orange on it is the muscle
-  at work on the lifter, and every word is one colour.** His words on the version before: the orange brings my attention all over
+  The sheet is three named parts, **Set up, Do, Avoid**, with thin rules. **The only orange on it is the muscle at work on the
+  lifter and those three headers (v5.298, his words: in that orange as headers, but that is it), and every word is one colour.**
+  A changed lift is rebuilt into the app with `node tools/figure-build.js`. His words on the version before: the orange brings my attention all over
   the place, and the muted text looks cluttered. The How To eyebrow, the round stamp, the glowing dots, the dashed box round the
   mistake and the FRONT and SIDE captions are gone and must not come back; he had already ruled that the figures carry no view
   labels. Three rig rules came out of the review and hold for every lift: a part never cuts its outline into the part it is
