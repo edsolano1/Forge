@@ -1762,7 +1762,7 @@ rtwist:{name:'Russian Twist',views:['side','top'],labels:['Side','From above'],c
     var s=Math.sin(k*2*Math.PI), ph=s*90*R;           // +1: turned to the lifter's right, the weight down by the right hip
     var hip=[0,18,-20], lean=-45, twist=50*Math.sin(ph);
     var J=frame(hip,lean,{twist:twist,neck:6});
-    var W=[-50*Math.sin(ph),38+54*Math.cos(ph),hip[2]+4+8*Math.cos(ph)];
+    var W=[-48*Math.sin(ph),44+48*Math.cos(ph),hip[2]+24-14*Math.cos(ph)];     // the weight swings round in front of the stomach, never through it
     var ax=J.Xs;                                      // the handle stays square to the chest
     var p={hip:hip,lean:lean,twist:twist,neck:6,
            ank:[-13,44,hip[2]+142],kneePole:[-.05,1,.1],footDir:[0,.35,.94],
@@ -2010,7 +2010,7 @@ function ellSide(th){
 }
 
 Object.assign(LIFTS,{
-walk:{name:'Power Walk',cycle:1,period:1400,views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[226,226],up:1,
+walk:{name:'Power Walk',cycle:1,period:1000,views:['side','quarter'],labels:['Side','From the front, off to one side'],cx:[226,226],up:1,
   lit:{glute:2,calf:2,quad:1,ham:1},
   says:'The backside and the calves push you along. The thighs carry each step.',
   pose:function(k){
@@ -2250,7 +2250,7 @@ jumprope:{name:'Jump Rope',cycle:1,period:900,views:JR_VIEWS,labels:['Front','Si
     return {p:{hip:hip,lean:lean,neck:0,ank:F.ank,footDir:F.fd,kneePole:[-.12,0,1],hand:hand,elbPole:[-.25,-.3,-1],
                layer:{quarter:{arms:'front'},front:{arms:'front'},rear:{arms:'front'}}},gear:gear};
   }},
-swim:{name:'Swim',okFlip:1,cycle:1,period:1500,views:['side','top'],labels:['Side','From above'],cx:[285,285],ground:[-60,-50],up:1,
+swim:{name:'Swim',okFlip:1,cycle:1,period:2700,views:['side','top'],labels:['Side','From above'],cx:[285,285],ground:[-60,-50],up:1,
   lit:{lats:2,chest:2,delt:1,triceps:1,abs:1,glute:1,quad:1},
   says:'The big muscles of the back and the chest pull you through the water. The shoulders, arms and a steady kick help.',
   pose:function(k){

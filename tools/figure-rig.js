@@ -154,7 +154,10 @@ function buildParts(J,V){
     var F=fr(f), N=mul(F.n,face), c=add(add(tpt(f),mul(F.X,lat)),mul(N,dep*.72));
     torso.mus.push({key:key,c:c,ax:[mul(u,hh),mul(F.X,hw),mul(N,dep*.5)],N:N,sd:lat<0?'R':lat>0?'L':''});
   }
-  tm('chest',.77,-17,1,13,15,19);tm('chest',.77,17,1,13,15,19);
+  // each side of the chest is two overlapping pieces, a broad slab and a smaller one running up and out to the armpit,
+  // so it reads as a chest muscle and not as a round spot
+  tm('chest',.755,-18,1,10.5,16.5,19);tm('chest',.755,18,1,10.5,16.5,19);
+  tm('chest',.83,-25,1,7.5,11.5,17);tm('chest',.83,25,1,7.5,11.5,17);
   tm('abs',.36,0,1,25,10,14);
   tm('obl',.34,-19,1,19,5.5,13);tm('obl',.34,19,1,19,5.5,13);
   tm('lats',.56,-20,-1,27,12,15);tm('lats',.56,20,-1,27,12,15);
