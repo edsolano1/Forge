@@ -254,8 +254,12 @@ main constraint on how to work in it. See **Traps** below before editing.
   one function, because the rig has its own `B`, `R` and `lerp` and the app has an `R()`. **Those two tool files stay the
   source**: change a lift there, check it on the review page, then rebuild into `index.html`; never edit the copy in the app.
   `figOf(exId)` finds the lifter (`FIGMAP` holds the ids that differ, a Pump Day `p_` id uses its twin), and `insAnimShow`
-  draws it; the old `ANIM` drawings are still in the file and are used ONLY for a kettlebell (`KBNOW`), which the lifter cannot
-  hold. Deleting `ANIM` is a later build of its own, about 4,800 lines, and wants the kettlebell answered first.
+  draws it. **The old hand drawn figures are gone** (v5.299, owner: remove the old drawings from the app): `ANIM`, its 4,892
+  lines, and everything in it (`held`, `saPullPose`, `SAP`, `drawSaPullS` and the rest). Older notes in this file about those
+  drawings, the straight arm pulldown, the sumo squat side view, the even tempo, describe pictures that no longer exist; the
+  DECISIONS in them still bind the lifter. `FIGSTILL` took over from `ANIM.still`. **The lifter only holds a dumbbell**: on the
+  goblet and sumo squats the Kettlebell switch (`KBNOW`) still changes the WORDS, and the picture shows a dumbbell. A
+  kettlebell for the lifter is a new drawing and wants his eye first.
   The sheet is three named parts, **Set up, Do, Avoid**, with thin rules. **The only orange on it is the muscle at work on the
   lifter and those three headers (v5.298, his words: in that orange as headers, but that is it), and every word is one colour.**
   A changed lift is rebuilt into the app with `node tools/figure-build.js`. His words on the version before: the orange brings my attention all over
