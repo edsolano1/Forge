@@ -2428,12 +2428,11 @@ function hang(base,name,out,dy,dz){
     });
   });
 }
-LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge',62,4,20);
-// seen from the slant, the far bell really does hang behind the leading knee for half of every other stride, and a knee
-// drawn over a bell reads as the bell going through it (owner, 23 Nov; he also prefers this view to the one from straight
-// ahead). So the far hand and its bell are drawn over the legs: the bell is beside the knee, never cut by it.
-(function(){var base=LIFTS.kblunge.pose;LIFTS.kblunge.pose=function(t){var r=base(t),q=r.p.layer.quarter;
-  q.handL='front';q.farmL='front';return r;};})();
+LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge',70,8,30);
+// From the usual slant the far bell lands exactly on the leading shin: behind it reads as going through the knee, and drawn
+// over it reads as hanging between the legs (owner, 23 Nov, both). So this lift is seen from less far round, where the bell
+// stays outside the leg with a gap, and the bells are carried a little wider.
+(function(){var base=LIFTS.kblunge.pose;LIFTS.kblunge.pose=function(t){var r=base(t);r.p.slant=20;return r;};})();
 LIFTS.kbstepup=hang('stepup','Kettlebell Step-Up',62);
 LIFTS.kbsldl=hang('sldl','Kettlebell Single-Leg Romanian Deadlift',0);
 LIFTS.kbrow=hang('dbrow','One-Arm Kettlebell Row',0);

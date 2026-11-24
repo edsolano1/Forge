@@ -89,10 +89,11 @@ function solve(p){
 // ---- views ----
 // side, front, back; rear (from behind, off to the lifter's right), quarter (from in front, off to the right),
 // top (looking straight down, head of a lying lifter to the left)
-function view(kind,cx){
+// slant: how far round to the side the two slanted views stand, in degrees. 38 unless the pose asks for another.
+function view(kind,cx,slant){
   if(kind==='side')return {k:kind,v:[-1,0,0],p:function(a){return [cx+a[2],FLOOR-a[1],-a[0]];},d:function(a){return [a[2],-a[1]];}};
   if(kind==='top')return {k:kind,v:[0,1,0],p:function(a){return [cx+a[2],250+a[0],a[1]];},d:function(a){return [a[2],a[0]];}};
-  var f=38*Math.PI/180, v=kind==='rear'?[-Math.sin(f),0,-Math.cos(f)]:kind==='quarter'?[-Math.sin(f),0,Math.cos(f)]:kind==='back'?[0,0,-1]:[0,0,1];
+  var f=(slant||38)*Math.PI/180, v=kind==='rear'?[-Math.sin(f),0,-Math.cos(f)]:kind==='quarter'?[-Math.sin(f),0,Math.cos(f)]:kind==='back'?[0,0,-1]:[0,0,1];
   var ex=v[2], ez=-v[0];
   return {k:kind,v:v,p:function(a){return [cx+a[0]*ex+a[2]*ez,FLOOR-a[1],a[0]*v[0]+a[2]*v[2]];},d:function(a){return [a[0]*ex+a[2]*ez,-a[1]];}};
 }
@@ -339,7 +340,7 @@ function gearDepth(V,g){
 // zoom: {s:scale, at:[x,y,z]} draws closer in, with that point of the scene held at the middle of the frame
 function draw(x,kind,pose,gear,lit,cx,ground,zoom){
   x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,480,480);
-  var V=view(kind,cx==null?240:cx);
+  var V=view(kind,cx==null?240:cx,pose.slant);
   if(zoom){var zf=V.p(zoom.at);x.translate(240,240);x.scale(zoom.s,zoom.s);x.translate(-zf[0],-zf[1]);}
   x.strokeStyle=LINE;x.lineWidth=6;x.lineCap='round';
   if(kind!=='top'){x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();}
