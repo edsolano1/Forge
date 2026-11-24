@@ -8272,7 +8272,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.302';
+var APPV='v5.303';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12359,6 +12359,11 @@ var swapTarget=null;
 // 'delt-press' has been a group since the overhead press was added and has never had a label, so
 // its swap sheet printed the raw key as a heading. 'traps' is new, for the shrug.
 var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly','back-vertical':'Pull-down and pull-up','back-horizontal':'Rowing','back-straight':'Straight arm, over the head','biceps':'Biceps','triceps':'Triceps','quad':'Squats and leg presses','glute':'Backside and hips','hamstring':'Back of the thigh','posterior':'Back of the body','calf':'Calves','delt-side':'Side of the shoulder','delt-rear':'Back of the shoulder','delt-press':'Overhead press','traps':'Upper back and neck','core':'Core','forearm':'Forearm','cardio':'Cardio','mobility':'Mobility','other':'Other'};
+// A list that is rebuilt as you type starts from its top again (v5.303). The scroll position
+// used to outlive the rebuild, so a search made after scrolling opened part way down a shorter
+// list, with the first heading cut through its letters. Only when the WORDS change: a rebuild
+// for any other reason leaves the list where the thumb left it.
+function listTop(id,q){var e=document.getElementById(id);if(!e)return;if(e._q!==q)e.scrollTop=0;e._q=q;}
 function swapItem(k){
   return '<div class="swapitem" onclick="doSwap(\''+k+'\')">'+esc(EX[k].name)+'<small>'+esc(EX[k].sets.split('\n').map(fmtLine).join(', '))+'</small></div>';
 }
@@ -12397,6 +12402,7 @@ function swapList(){
   }
   if(!same.length&&!other.length)html+='<div class="pg-note" style="padding:14px 4px">Nothing matches that.</div>';
   document.getElementById('swapList').innerHTML=html;
+  listTop('swapList',id+'|'+q);
 }
 function doSwap(k){
   // swapTarget is a SLOT, so a day running the same lift twice can swap one block and leave the
@@ -14117,6 +14123,7 @@ function mkPickList(){
                                  :'Nothing matches. Add it as your own exercise instead.')+'</div>';
   }
   document.getElementById('mkList').innerHTML=h;
+  listTop('mkList',q);
 }
 function mkAddEx(id){
   var p=mkParse(EX[id].sets);
@@ -20872,6 +20879,7 @@ function exAddList(){
     return '<div class="swapitem" onclick="exAddPick(\''+k+'\')">'+esc(EX[k].name)+
       '<small>'+esc(EX[k].sets.split('\n').map(fmtLine).join(', '))+'</small></div>';
   }).join(''):'<div class="exed-sub">Nothing matches that.</div>';
+  listTop('exAddList',q);
 }
 function exAddPick(id){
   ask(EX[id].name+' goes to the end of this workout with its usual targets.',
