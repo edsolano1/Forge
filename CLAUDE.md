@@ -333,10 +333,18 @@ main constraint on how to work in it. See **Traps** below before editing.
   older choice made to save typists a tap, and is the thing to revisit if he misses it.
   **The spotlight hint is approved** (his words: looks great). He wants to be walked through
   every hint in the app later; there are three, `log`, `grip` and `exhold`.
-  **A lifter beside each swap** (v5.306): `swapItem` draws a still, tap the picture to play it
-  (`swPlay`, one at a time), tap the row to swap. Stills are drawn by measuring in `swSee`, on open
-  and on scroll. **Never an IntersectionObserver for this**: it does not fire in a page that is not
-  being painted, and every picture came out blank in the preview with nothing to say why.
+  **The lifters in the swap list play by themselves** (v5.311, owner; v5.306 had a play button on
+  a still). A lifter costs real time to draw, so each lift's loop is drawn ONCE into a strip of
+  frames (`SWP.fr`, at most `SW_FRAMES` 28) and replayed from there. `swSee` measures which rows
+  are on screen, `swTick` runs on a 50ms interval while the sheet is open: it makes frames for a
+  few milliseconds a tick, never while the list is being scrolled, then shows each visible row
+  its current frame. Only the last `SW_CACHE` (14) lifts keep their frames. Motion Off and
+  reduced motion get stills. **It is an interval and a measurement on purpose, not rAF and not an
+  IntersectionObserver**: neither fires in a page that is not being painted, and the first
+  version came out blank in the preview with nothing to say why. `PACE` is sealed inside FIGLIB,
+  so `swSpan` carries the 3800ms loop as a number. Measured in the preview: five visible rows all
+  moving, a tick under a millisecond once cached. **Not felt on the phone**, which is the only
+  place scrolling smoothness can be judged; the fallback is fewer frames.
   Also in this stretch: a searched list starts from its top again (`listTop`, v5.303).
   **The builder lists every set, always** (v5.307, owner: the edit menu read as overcomplicated and
   as an afterthought). `mkSetsUI` has `open=true`; the All N line, the Set them one at a time link

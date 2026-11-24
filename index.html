@@ -2402,11 +2402,8 @@ body.forge .swapitem{background:#0e0806;border:1px solid #3a2214;border-radius:1
 body.forge .swapitem.sel{border-color:var(--gold);background:rgba(255,138,31,.08);}
 /* The lifter beside each swap (v5.306). */
 .swapitem.swf{display:flex;align-items:center;gap:11px;padding:9px 12px;}
-.swpic{position:relative;flex:none;width:58px;height:58px;cursor:pointer;}
+.swpic{position:relative;flex:none;width:58px;height:58px;}
 .swpic canvas{display:block;width:58px;height:58px;border-radius:9px;background:#1d1915;border:1px solid #2a1810;}
-.swpic i{position:absolute;right:-5px;bottom:-5px;width:22px;height:22px;border-radius:50%;background:var(--gold);
-  display:flex;align-items:center;justify-content:center;}
-.swpic i svg{width:10px;height:10px;fill:#1a0d05;}
 .swtx{flex:1;min-width:0;}
 body.forge .swaphead{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.18em;color:var(--gold);}
 /* the workout settings page and the builder's chrome */
@@ -8328,7 +8325,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.310';
+var APPV='v5.311';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12497,17 +12494,17 @@ var GLABEL={'chest-press':'Chest press','chest-fly':'Chest fly','back-vertical':
 // for any other reason leaves the list where the thumb left it.
 function listTop(id,q){var e=document.getElementById(id);if(!e)return;if(e._q!==q)e.scrollTop=0;e._q=q;}
 // The lifter beside each swap (v5.306, owner's idea): a still of the lift on every row, so an
-// overhead press and a machine press can be told apart without knowing the names. Tap the picture
-// and that one plays; tap the row and it swaps, as before. Stills are drawn only as a row scrolls
-// into view, because the list is the whole library.
-var SWP={off:null,t:0,raf:0,cv:null};
-var SW_PLAY='<svg viewBox="0 0 10 10"><path d="M3 1.6v6.8L8.4 5z"/></svg>',SW_STOP='<svg viewBox="0 0 10 10"><path d="M2.6 2h1.8v6H2.6zM5.6 2h1.8v6H5.6z"/></svg>';
+// overhead press and a machine press can be told apart without knowing the names. Tap the row
+// and it swaps, as before.
+var SWP={off:null,t:0,iv:0,fr:{},lru:[],q:[],vis:[],scr:0};
+var SW_CACHE=14,SW_FRAMES=28;
 function swapItem(k){
-  var pic=figOf(k)?'<span class="swpic" onclick="swPlay(event,this)"><canvas width="116" height="116" data-fig="'+k+'"></canvas>'+(FIGSTILL?'':'<i>'+SW_PLAY+'</i>')+'</span>':'';
+  var pic=figOf(k)?'<span class="swpic"><canvas width="116" height="116" data-fig="'+k+'"></canvas></span>':'';
   return '<div class="swapitem'+(pic?' swf':'')+'" onclick="doSwap(\''+k+'\')">'+pic+'<span class="swtx">'+esc(EX[k].name)+'<small>'+esc(EX[k].sets.split('\n').map(fmtLine).join(', '))+'</small></span></div>';
 }
-function swDraw(cv,k){
-  var L=figOf(cv.getAttribute('data-fig'));if(!L)return;
+// One pose of one lifter into a small canvas. Drawn big off screen and brought down, because the
+// rig draws to a 480 square.
+function swDraw(cv,L,k){
   if(!SWP.off){SWP.off=document.createElement('canvas');SWP.off.width=SWP.off.height=480;}
   var ox=SWP.off.getContext('2d'),F=FIGLIB.FIG,r=L.pose(k);
   ox.setTransform(1,0,0,1,0,0);ox.clearRect(0,0,480,480);
@@ -12515,46 +12512,71 @@ function swDraw(cv,k){
   ox.setTransform(1,0,0,1,0,0);
   var x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);x.drawImage(SWP.off,0,0,480,480,0,0,cv.width,cv.height);
 }
-function swStop(){
-  if(SWP.raf){cancelAnimationFrame(SWP.raf);SWP.raf=0;}
-  var cv=SWP.cv;SWP.cv=null;
-  if(cv&&cv.isConnected){try{swDraw(cv,.5);}catch(e){}var i=cv.parentNode.querySelector('i');if(i)i.innerHTML=SW_PLAY;}
-}
-function swPlay(ev,el){
-  ev.stopPropagation();
-  if(FIGSTILL)return;
-  var cv=el.querySelector('canvas'),was=SWP.cv===cv;
-  swStop();if(was)return;
-  var L=figOf(cv.getAttribute('data-fig'));if(!L)return;
-  SWP.cv=cv;var i=el.querySelector('i');if(i)i.innerHTML=SW_STOP;
-  var ov=document.getElementById('swapOvl');
-  var lf=function(t){
-    if(SWP.cv!==cv||!cv.isConnected||!ov.classList.contains('on')){if(SWP.cv===cv){SWP.raf=0;SWP.cv=null;}return;}
-    try{swDraw(cv,FIGLIB.kOf(L,t));}catch(e){}
-    SWP.raf=requestAnimationFrame(lf);
-  };
-  SWP.raf=requestAnimationFrame(lf);
-}
-// Which stills are owed is worked out by measuring, on open and as the list scrolls. It was an
-// IntersectionObserver first, and that never fired in a page that is not being painted, which
-// left every picture blank with nothing to say why.
+// How long one loop of a lift is, the same three cases kOf answers.
+// 3800 is the rig's own lift, squeeze, lower and pause added up; PACE is sealed inside FIGLIB.
+function swSpan(L){return L.cycle?(L.period||1600):L.hold?4000:3800;}
+function swMoves(){return !FIGSTILL&&MOTION!=='off';}
+// The lifters play by themselves (v5.311, owner). Drawing a lifter costs real time, so a lift's
+// loop is drawn ONCE into a short strip of frames and replayed from there, which is nearly free.
+// Only rows on screen are drawn or played, frames are made a few at a time between ticks and
+// never while the list is being scrolled, and only the last SW_CACHE lifts keep their frames.
 function swSee(){
   SWP.t=0;
   var list=document.getElementById('swapList');if(!list)return;
-  var lr=list.getBoundingClientRect(),cvs=list.querySelectorAll('canvas[data-fig]:not([data-done])');
+  var lr=list.getBoundingClientRect(),cvs=list.querySelectorAll('canvas[data-fig]');
   if(!lr.height)return;
+  var vis=[];
   for(var i=0;i<cvs.length;i++){
-    var r=cvs[i].getBoundingClientRect();
+    var c=cvs[i],r=c.getBoundingClientRect();
     if(r.bottom<lr.top-200)continue;
     if(r.top>lr.bottom+200)break;
-    cvs[i].setAttribute('data-done','1');
-    try{swDraw(cvs[i],.5);}catch(e){}
+    var key=c.getAttribute('data-fig'),L=figOf(key);if(!L)continue;
+    if(!c.hasAttribute('data-done')){c.setAttribute('data-done','1');try{swDraw(c,L,.5);}catch(e){}}
+    if(r.bottom>lr.top&&r.top<lr.bottom){
+      vis.push(c);
+      if(swMoves()&&!SWP.fr[key]&&SWP.q.indexOf(key)<0)SWP.q.push(key);
+    }
+  }
+  SWP.vis=vis;
+  if(swMoves()&&!SWP.iv)SWP.iv=setInterval(swTick,50);
+}
+function swTick(){
+  var ov=document.getElementById('swapOvl');
+  if(!ov||!ov.classList.contains('on')){clearInterval(SWP.iv);SWP.iv=0;SWP.q=[];SWP.vis=[];return;}
+  var now=Date.now(),t0=now;
+  // make frames, a few milliseconds' worth, unless a finger is moving the list
+  if(now-SWP.scr>160){
+    while(SWP.q.length&&Date.now()-t0<18){
+      var key=SWP.q[0],L=figOf(key),f=SWP.fr[key];
+      var seen=SWP.vis.some(function(c){return c.getAttribute('data-fig')===key;});
+      if(!L||(!f&&!seen)){SWP.q.shift();continue;}      // scrolled away before its turn
+      if(!f){
+        var T=swSpan(L),n=Math.max(10,Math.min(SW_FRAMES,Math.round(T/125)));
+        f=SWP.fr[key]={T:T,n:n,fs:[],ok:0};SWP.lru.push(key);
+        while(SWP.lru.length>SW_CACHE){
+          var old=SWP.lru[0];
+          if(SWP.vis.some(function(c){return c.getAttribute('data-fig')===old;}))break;
+          SWP.lru.shift();delete SWP.fr[old];
+        }
+      }
+      var c=document.createElement('canvas');c.width=c.height=116;
+      try{swDraw(c,L,FIGLIB.kOf(L,f.fs.length*f.T/f.n));}catch(e){}
+      f.fs.push(c);
+      if(f.fs.length>=f.n){f.ok=1;SWP.q.shift();}
+    }
+  }
+  // play what is ready
+  for(var i=0;i<SWP.vis.length;i++){
+    var cv=SWP.vis[i],g=SWP.fr[cv.getAttribute('data-fig')];
+    if(!g||!g.ok||!cv.isConnected)continue;
+    var idx=Math.floor((now%g.T)/g.T*g.n)%g.n;
+    if(cv._f===idx)continue;cv._f=idx;
+    var x=cv.getContext('2d');x.clearRect(0,0,116,116);x.drawImage(g.fs[idx],0,0);
   }
 }
 function swFigs(){
-  swStop();
   var list=document.getElementById('swapList');if(!list)return;
-  if(!list._sw){list._sw=1;list.addEventListener('scroll',function(){if(!SWP.t)SWP.t=setTimeout(swSee,60);},{passive:true});}
+  if(!list._sw){list._sw=1;list.addEventListener('scroll',function(){SWP.scr=Date.now();if(!SWP.t)SWP.t=setTimeout(swSee,60);},{passive:true});}
   swSee();
 }
 function openSwap(id){
