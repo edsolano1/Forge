@@ -2341,8 +2341,11 @@ body.forge .mk-row{background:linear-gradient(180deg,#1a100b,#100907);border:1px
   box-shadow:inset 0 1px 0 rgba(255,215,170,.14),0 12px 24px -12px rgba(0,0,0,.95);}
 body.forge .mk-row.ing{border-left-color:#4a3a6a;}
 body.forge .mk-rn{font-family:'Marcellus',serif;font-weight:400;font-size:16px;color:#fff6e6;white-space:normal;line-height:1.2;}
-body.forge .mk-row .mk-grip,body.forge .mk-row .mk-ic{width:32px;height:32px;border-radius:50%;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);}
-body.forge .mk-row .mk-grip svg{width:12px;height:12px;}
+body.forge .mk-row .mk-ic{width:32px;height:32px;border-radius:50%;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);}
+/* One drag handle for the whole app (v5.307, owner): three lines, bare, the mark the board and
+   the workout screen already use. The builder had six dots in a ring, which read as a button. */
+body.forge .mk-grip{width:26px;height:32px;border:0;background:transparent;color:var(--txt3);margin-left:-5px;}
+body.forge .mk-grip svg{width:20px;height:20px;stroke-width:1.6;stroke-linecap:round;}
 body.forge .mk-meas{display:flex;align-items:center;gap:8px;}
 body.forge .mk-meas > span:first-child{font-family:var(--mono);font-weight:600;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
 body.forge .mk-row .mk-sel{border-radius:999px;background:#0e0806;border:1px solid #3a2214;color:var(--txt2);font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;}
@@ -3770,7 +3773,7 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
       <div class="mk-hint" id="extraHint" hidden>Not part of the week. Open one whenever you want it.</div>
       <div id="extraCards"></div>
       <!-- The scrap heap sits with the workouts, and only when it holds something (v5.236). -->
-      <div id="scrapLine" hidden><button class="sv-btn" onclick="openScrap()"><svg viewBox="0 0 20 20"><path d="M4.5 6.5h11M8.5 6.5V5h3v1.5M6 6.5l.7 9h6.6l.7-9"/></svg><span id="scrapLineTxt">Scrap heap</span></button></div>
+      <div id="scrapLine" hidden><button class="sv-btn" onclick="openScrap()"><svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V4.5h4V6M6.5 6l.7 10h5.6l.7-10M9 9v4M11 9v4"/></svg><span id="scrapLineTxt">Scrap heap</span></button></div>
     </div>
     <!-- It said HOLD ONE TO PLACE IT ON A DAY, and holding a card opens a menu with no day in
          it: edit, duplicate, send, delete. The gesture that really carries a workout to the
@@ -8301,7 +8304,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.306';
+var APPV='v5.307';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -13226,7 +13229,7 @@ var DSI={
   copy:'<rect x="7" y="7" width="9" height="9" rx="1.6"/><path d="M12 4H5a1 1 0 0 0-1 1v7"/>',
   add:'<path d="M10 4.5v11M4.5 10h11"/>',
   shelf:'<path d="M3.5 5.5h13v4h-13zM3.5 12h13v3.5h-13"/><path d="M7 5.5v4"/>',
-  bin:'<path d="M4.5 6.5h11M8.5 6.5V5h3v1.5M6 6.5l.7 9h6.6l.7-9"/>',
+  bin:'<path d="M4 6h12M8 6V4.5h4V6M6.5 6l.7 10h5.6l.7-10M9 9v4M11 9v4"/>',
   send:'<path d="M10 14V4M10 4L6.6 7.4M10 4l3.4 3.4M4 14.5v2h12v-2"/>',
   unlock:'<rect x="5" y="9.5" width="10" height="7" rx="2"/><path d="M7.5 9.5V6.8A2.5 2.5 0 0 1 12 5.4"/>',
   forge:'<path d="M3.5 15.5h13"/><path d="M6 15.5c0-3 1.6-4.4 4-4.4s4 1.4 4 4.4"/><path d="M10 10.6V4.5M7.6 6.3L10 4.5l2.4 1.8"/>',
@@ -13879,14 +13882,12 @@ function mkMeasureUI(r,i){
   // The label went (v5.246): "Counted in" in front of a dropdown that says WEIGHT AND REPS was
   // one row spent on a word. The state of the sets rides along instead, so the line says what
   // this exercise counts AND whether its sets are alike, which is what the switch used to.
-  var sameTxt=(mkVaries(r)||r.exp)?'set by set':'same every set';
-  return '<div class="mk-meas quiet">'+
+  return '<div class="mk-meas">'+
     '<select class="mk-sel auto" onchange="mkSetUnit('+i+',this.value)">'+
       opts.map(function(m){
         return '<option value="'+m[0]+'"'+(u===m[0]?' selected':'')+'>'+m[1]+'</option>';
       }).join('')+
     '</select>'+
-    '<span class="mk-same">&middot; '+sameTxt+'</span>'+
     (invEx(r.id)
       ? '<span class="mk-inv" title="An assisted machine: the number is how much help you are taking, so less of it means you did more of the work">assisted &middot; less is more</span>'
       : '')+
@@ -13957,7 +13958,10 @@ function mkSetRestOpen(i,k){
   mkRender();
 }
 function mkSetsUI(r,i){
-  var u=mkUnitOf(r),varies=mkVaries(r),open=r.exp||varies;
+  // Every set on its own line, always (v5.307, owner): the card shows at a glance how many sets
+  // there are and each one can be changed where it stands. The All N line and the switch between
+  // the two views are gone; that choice was the part that read as complicated.
+  var u=mkUnitOf(r),open=true;
   var unitTxt=u==='sec'?'sec':u==='min'?'min':u==='cal'?'cal':'reps';
   var L=open?mkLinesFor(r):[mkLine(r)];
   var RS=mkRestsFor(r);
@@ -14004,9 +14008,6 @@ function mkSetsUI(r,i){
   // A word rides with the icon - at the card's foot a bare chain has nothing to borrow meaning
   // from, where at the head it sat next to the name it acted on. Only on a row not already in
   // a run, exactly as before.
-  h+='<button class="mk-ps-link" onclick="mkSetExp('+i+','+(open?0:1)+')">'+
-     (open?'Make every set the same':'Set them one at a time')+
-     '<span>'+(open?'\u2039':'\u203a')+'</span></button>';
   h+='<div class="mk-foot"><div class="mk-setadj">'+
      '<button class="mk-adj'+((r.n||1)<2?' off':'')+'" '+((r.n||1)<2?'disabled':'onclick="mkSets('+i+',-1)"')+' title="One fewer set">&minus;</button>'+
      '<span>'+(r.n||1)+' set'+((r.n||1)===1?'':'s')+'</span>'+
@@ -14088,8 +14089,7 @@ var mkK=0;
 function mkKey(r){if(!r.k)r.k='k'+(++mkK);return r.k;}
 function mkGripSvg(){
   return '<span class="mk-grip" onpointerdown="mkDragStart(event,this)" title="Drag to reorder">'+
-         '<svg viewBox="0 0 20 20"><path d="M7 5h.01M13 5h.01M7 10h.01M13 10h.01M7 15h.01M13 15h.01" '+
-         'stroke-linecap="round" stroke-width="2.6"/></svg></span>';
+         '<svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/></svg></span>';
 }
 var MKDRAG=null;
 function mkDragStart(ev,el){
@@ -21750,6 +21750,12 @@ function ezScale(n,max){
        (i<n?'fill="currentColor" class="au" stroke="none"':'stroke="currentColor" stroke-width="1.2"')+'/>';}
   return h+'</svg>';
 }
+// Somebody new to all this is asked less (v5.307, owner): no four or five day week, because that
+// is how a beginner burns out, and no question about alternating weeks, which is a programming
+// idea he has no use for yet. New means the three experience answers add up to two or less; a
+// veteran coming back after a break is not new and is still asked everything.
+function ezNew(){return EZ&&EZ.xp1!=null&&((EZ.xp1||0)+(EZ.xp2||0)+(EZ.xp3||0))<=2;}
+function ezSkip(i){var st=EZ_STEPS[i];return !!(st&&st.skip&&st.skip());}
 function ezDays(){
   var dots=function(n){var h='<svg viewBox="0 0 52 52" fill="none">';
     for(var i=0;i<7;i++){var x=8+i*6;h+='<circle cx="'+x+'" cy="26" r="2.4" '+(i<n?'fill="currentColor" class="au" stroke="none"':'stroke="currentColor" stroke-width="1.2"')+'/>';}
@@ -21761,7 +21767,7 @@ function ezDays(){
           [2,'Two days','The least that still gets you somewhere',WZ.days[1]],
           [3,'Three days','The classic: a rest day between every workout',WZ.days[2]],
           [4,'Four days','Each half of the body gets its own two days',WZ.days[3]],
-          [5,'Five days','A day for every part, weekend off',WZ.days[4]]];
+          [5,'Five days','A day for every part, weekend off',WZ.days[4]]].slice(0,ezNew()?3:5);
 }
 var EZ_STEPS=[
   {t:'Have you followed a real program?',s:'A structured plan followed for a continuous stretch, not the odd gym visit.',
@@ -21780,13 +21786,13 @@ var EZ_STEPS=[
     [0,'Not training right now','Starting fresh, or coming back',WZ.xp3[0]],
     [1,'On and off','Some weeks yes, some weeks no',WZ.xp3[1]],
     [2,'Twice a week or more','Nearly every week, showing up',WZ.xp3[2]]];}},
-  {t:'How many days a week?',s:'Only count days you will actually show up.',
+  {t:'How many days a week?',s:function(){return ezNew()?'Only count days you will actually show up. You can add more once it is a habit.':'Only count days you will actually show up.';},
    k:'days',opts:function(){return ezDays().map(function(d){return [d[0],d[1],d[2],d[3]];});}},
   // Still a constraint, not a preference: how the person's weeks RUN. Most repeat; the classic
   // beginner barbell programs alternate two workouts across three days, A B A then B A B,
   // which one board cannot say (v5.114).
   {t:'One week, or two that alternate?',s:'Most plans repeat the same week. Some swap two workouts back and forth, so one week is A B A and the next is B A B.',
-   k:'weeks',opts:function(){return [
+   k:'weeks',skip:function(){return ezNew();},opts:function(){return [
     [1,'One week','The same days every week',WZ.weeks[0]],
     [2,'Two weeks','They take turns. You get a second board to flip to',WZ.weeks[1]]];}},
   {t:'How long is a session?',s:'Count the time you actually have, door to door. The week is trimmed to fit, not crammed.',
@@ -21823,7 +21829,7 @@ function ezOpen(into){
 }
 function ezClose(){document.getElementById('ez').classList.remove('on');}
 function ezBack(){
-  if(EZ.step>0){EZ.step--;ezRender();return;}
+  if(EZ.step>0){EZ.step--;while(EZ.step>0&&ezSkip(EZ.step))EZ.step--;ezRender();return;}
   // Forge me a week, opened from Saved, has no welcome behind it: backing out of its first
   // question used to open the first-run welcome anyway, which asked "welcome to Forge" of
   // somebody with a week already built and had no way back to it (owner, 21 Sep). It just
@@ -21846,7 +21852,7 @@ function ezBack(){
 function ezPick(k,v,el){
   if(EZ.done||EZ.picking)return;
   EZ[k]=v;
-  var go=function(){EZ.picking=false;if(EZ.step<EZ_STEPS.length-1){EZ.step++;ezRender();return;}EZ.done=true;ezForge();};
+  var go=function(){EZ.picking=false;if(EZ.step<EZ_STEPS.length-1){EZ.step++;while(EZ.step<EZ_STEPS.length-1&&ezSkip(EZ.step)){EZ[EZ_STEPS[EZ.step].k]=1;EZ.step++;}ezRender();return;}EZ.done=true;ezForge();};
   // The tapped card lights and its icon answers once before the screen moves on (v5.127).
   // Motion off skips the beat entirely.
   if(!el||MOTION==='off'){go();return;}
@@ -21857,7 +21863,7 @@ function ezRender(){
   var st=EZ_STEPS[EZ.step];
   document.getElementById('ezDots').innerHTML=EZ_STEPS.map(function(_,i){
     return '<i'+(i<=EZ.step?' class="on"':'')+'></i>';}).join('');
-  var h='<div class="ez-t">'+st.t+'</div><div class="ez-s">'+st.s+'</div>';
+  var h='<div class="ez-t">'+st.t+'</div><div class="ez-s">'+(typeof st.s==='function'?st.s():st.s)+'</div>';
   st.opts().forEach(function(o,n){
     h+='<button class="ez-card" style="--i:'+n+'" onclick="ezPick(\''+st.k+'\','+(typeof o[0]==='string'?'\''+o[0]+'\'':o[0])+',this)">'+
        '<span class="ez-art">'+o[3]+'</span><span><b>'+o[1]+'</b><small>'+o[2]+'</small></span></button>';

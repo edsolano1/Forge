@@ -334,6 +334,16 @@ main constraint on how to work in it. See **Traps** below before editing.
   and on scroll. **Never an IntersectionObserver for this**: it does not fire in a page that is not
   being painted, and every picture came out blank in the preview with nothing to say why.
   Also in this stretch: a searched list starts from its top again (`listTop`, v5.303).
+  **The builder lists every set, always** (v5.307, owner: the edit menu read as overcomplicated and
+  as an afterthought). `mkSetsUI` has `open=true`; the All N line, the Set them one at a time link
+  and the same every set words are gone. **This reverses v5.246's collapsed rows on his say.** The
+  measure picker wears its pill again, because a control that looks like a line of text is the
+  thing he objected to. **One drag handle for the whole app: three bare lines** (`mkGripSvg` now
+  matches `CARDGRIP` and `DRAGSVG`), and one bin drawing everywhere. A new list uses those two.
+  **A beginner is asked less by the wizard** (v5.307): `ezNew()` is the three experience answers
+  adding up to two or less; he is offered one, two or three days only and is never asked about
+  alternating weeks (`skip` on a step, honoured by `ezPick` and `ezBack`). A veteran coming back
+  after a break is not new. Offering to add a day later, which the owner mentioned, is not built.
 - **Never draw a dot as a path** (v5.259, owner picked B of three). The dot of the How To i was
   `M10 6.2v.1`, a tenth of a unit of line, and `.ex-links a svg` set no `stroke-linecap`, so a
   butt cap drew it **0.095px tall** on the phone: a hairline, and the mark read as a bare stem in
@@ -704,6 +714,7 @@ main constraint on how to work in it. See **Traps** below before editing.
   `walkRowHtml`, `WALKI` (the walking mark), `emberPill`. The streak is the ember and nothing
   else: nothing at zero, lit at seven, never a headline figure. Never put a streak back in the
   totals, and never let a missed day say anything at all.
+- **REVERSED in v5.307, see the walk entry: every set is always listed.** What follows is history.
 - **A builder row opens collapsed unless it has something to show** (v5.246, owner picked C).
   `mkExpNeed(lines,rest)` decides `exp` at load and on add: differing lines or differing rests
   only. One line reading `All 4`, a quiet `Set them one at a time` link, the measure and the
