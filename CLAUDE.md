@@ -344,6 +344,18 @@ main constraint on how to work in it. See **Traps** below before editing.
   adding up to two or less; he is offered one, two or three days only and is never asked about
   alternating weeks (`skip` on a step, honoured by `ezPick` and `ezBack`). A veteran coming back
   after a break is not new. Offering to add a day later, which the owner mentioned, is not built.
+  **Pump Day shows all three to earn** (v5.308): the locked card lists Upper body, Lower body and
+  Full body with a bar each. Naming only the nearest read to him as if Upper were the only one.
+  `pumpHello` says a newly earned kind once, with the Unlocked crest; `DB.pumpSeen` is seeded at
+  launch so nobody is told about one they already had. **Pump Day can be removed and put back**:
+  the bin in its sheet sets `DB.pumpHide`, the card is not drawn, and Settings shows PUT IT BACK
+  only while the flag is set. A running Pump session always shows its card. The unlock ANIMATION
+  he described is not built, and achievements are backlog for a later version, his words.
+  **Forge me a day is in the Saved workouts plus menu** (`svForgeDay`): it asks which day, then
+  runs the same forge as a day's own plus.
+  **The quick timer is one drag** (`#qtCol`, `qtSet`, `qtStart`): a column you drag up, 0:15 to
+  5:00 in fifteens. He was shown five (ring, bar, heat, wheel, tap to add) and had not picked;
+  this is my pick, the heat, so expect it to be swapped.
 - **Never draw a dot as a path** (v5.259, owner picked B of three). The dot of the How To i was
   `M10 6.2v.1`, a tenth of a unit of line, and `.ex-links a svg` set no `stroke-linecap`, so a
   butt cap drew it **0.095px tall** on the phone: a hairline, and the mark read as a bare stem in

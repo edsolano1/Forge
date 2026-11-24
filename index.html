@@ -2564,6 +2564,18 @@ body.forge .inp::placeholder{color:#7a5c46;}
 .pump-bar u{display:block;height:100%;text-decoration:none;border-radius:3px;
   background:linear-gradient(90deg,#8a4a16,var(--go));transition:width .4s cubic-bezier(.2,.7,.2,1);}
 .card-meta.pump-n{margin-top:5px;}
+/* The quick timer's heat column (v5.308). */
+.qt{display:flex;align-items:center;justify-content:center;gap:26px;margin:14px 0 4px;}
+.qt-col{position:relative;width:78px;height:220px;border-radius:999px;border:1px solid #3a2214;background:#0e0806;overflow:hidden;touch-action:none;cursor:grab;flex:none;}
+.qt-col i{position:absolute;left:0;right:0;bottom:0;box-shadow:0 -1px 0 #ffd9a0;background:linear-gradient(0deg,#5a2408,var(--gold) 75%,#ffd9a0);}
+.qt-side{min-width:110px;text-align:left;}
+.qt-time{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:46px;line-height:1.1;letter-spacing:-.03em;color:var(--txt);}
+.qt-sub{font-size:12px;color:var(--txt3);margin-top:4px;}
+/* All three kinds on the locked card (v5.308, owner: naming only the nearest read as if Upper
+   were the only one to earn). */
+.pump-row{display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:10px;margin-top:9px;font-size:12.5px;color:var(--txt2);}
+.pump-row .pump-bar{margin:0;}
+.pump-row b{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--txt3);}
 .pk-kind.on{border-color:var(--gold);background:#1f1109;box-shadow:0 0 14px -5px rgba(255,138,31,.8),inset 0 1px 0 rgba(255,190,130,.2);color:#ffd9b5;}
 .pk-lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);text-align:center;margin:14px 0 8px;}
 .pk-kits{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
@@ -3552,7 +3564,9 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
 
 <div class="ovl" id="pumpOvl">
   <div class="sheet" style="max-width:400px">
-    <h3>Pump Day</h3>
+    <div class="exed-h"><h3 style="margin-bottom:0">Pump Day</h3>
+      <button class="dayact del" title="Remove Pump Day" aria-label="Remove Pump Day from Saved workouts" onclick="pumpHideAsk()">
+        <svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V4.5h4V6M6.5 6l.7 10h5.6l.7-10M9 9v4M11 9v4"/></svg></button></div>
     <p>High reps, light weight, short rests. Its numbers stay separate, so nothing here touches your real progression.</p>
     <div class="pk-kinds" id="pkKinds"></div>
     <div class="pk-lbl">What do you have today?</div>
@@ -3592,7 +3606,7 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
       <div class="fin-miss" id="finMiss" hidden><b id="finMissT"></b><small id="finMissN"></small></div>
     </div>
     <p class="fin-note" id="sumNote" hidden></p>
-    <div class="sheet-btns"><div class="btn btn-go fin-done" onclick="closeOvl('exportOvl');offerReopen()">DONE</div></div>
+    <div class="sheet-btns"><div class="btn btn-go fin-done" onclick="closeOvl('exportOvl');offerReopen();pumpHello()">DONE</div></div>
   </div>
 </div>
 
@@ -3864,8 +3878,16 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
   <div class="sheet" style="max-width:400px">
     <h3>Quick timer</h3>
     <p>Start a rest timer on its own, without logging a set.</p>
-    <div class="presets" id="presets"></div>
-    <div class="sheet-btns"><div class="btn" onclick="closeOvl('timerOvl')">CLOSE</div></div>
+    <!-- The heat (v5.308): drag up and the metal heats, fifteen seconds to five minutes. One of five
+         the owner was shown; built on my pick while he walked, so it may be swapped for another. -->
+    <div class="qt">
+      <div class="qt-col" id="qtCol"><i id="qtFill"></i></div>
+      <div class="qt-side"><div class="qt-time" id="qtTime">0:15</div><div class="qt-sub">Drag up for more</div></div>
+    </div>
+    <div class="sheet-btns">
+      <div class="btn" onclick="closeOvl('timerOvl')">CLOSE</div>
+      <div class="btn btn-go" id="qtGo" onclick="qtStart()">START</div>
+    </div>
   </div>
 </div>
 
@@ -3957,6 +3979,10 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
     <div class="sfx-lbl" style="margin-top:14px"><span>Week</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="twoRow"></div>
     <div class="footnote" style="margin:6px 2px 0">Two weeks take turns by the calendar, and you flip to the other one from the week label.</div>
+    <div id="pumpBackSec" hidden>
+    <div class="sfx-lbl" style="margin-top:14px"><span>Pump Day</span></div>
+    <div class="presets" style="grid-template-columns:1fr"><button class="preset sm" onclick="pumpBack()">PUT IT BACK IN SAVED WORKOUTS</button></div>
+    </div>
     </div>
     <!-- Walks flow in from Health Connect, the phone's own health vault - Samsung Health and
          watch apps write into it, Forge reads walks back out. Only shown where the native
@@ -8304,7 +8330,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.307';
+var APPV='v5.308';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11375,12 +11401,14 @@ function renderHome(){
   // vanishing: a thing you can see is something to aim at, and a thing that is simply absent
   // teaches nobody anything. The bar is the nearest kind's progress.
   var pu=pumpUnlock(),plock=!pu.any&&!po;
-  var pumpCard=plock
+  var pumpGone=!!DB.pumpHide&&!po;
+  var pumpCard=pumpGone?'':plock
     ?'<div class="card pumpcard pumplk" onclick="openPump()"><div class="card-top"><span class="card-name">'+esc(W.pump.name)+'</span>'+
       '<span class="card-r"><span class="pill">LOCKED</span></span></div>'+
-      '<div class="card-meta">'+esc(PUMP_LBL[pu.next.k])+' opens after '+pu.next.need+' workouts, built from your own lifts</div>'+
-      '<i class="pump-bar"><u style="width:'+Math.round(pu.next.have/pu.next.need*100)+'%"></u></i>'+
-      '<div class="card-meta pump-n">'+pu.next.have+' of '+pu.next.need+'</div></div>'
+      '<div class="card-meta">Three to earn, each built from your own lifts</div>'+
+      ['upper','lower','full'].map(function(k){var st=pu[k];
+        return '<div class="pump-row"><span>'+PUMP_LBL[k]+'</span><i class="pump-bar"><u style="width:'+Math.round(st.have/st.need*100)+'%"></u></i><b>'+st.have+' of '+st.need+'</b></div>';
+      }).join('')+'</div>'
     :'<div class="card pumpcard" style="--c:'+dayC('pump')+'" onclick="openPump()"><div class="card-top"><span class="card-name">'+esc(W.pump.name)+'</span>'+
     '<span class="card-r">'+(po?'<span class="pill pill-live">Resume '+po+'/'+totalSets('pump')+'</span>':
       (pumpRdy?'<span class="lvl" title="Level up" onclick="event.stopPropagation();openLevel(\'pump\')">'+ARROW+'</span>':''))+'</span></div>'+
@@ -11391,7 +11419,7 @@ function renderHome(){
        '<small>A balanced week, built for you</small></span></button>'+
      '<div class="bank-empty">Your own workouts sit here too, once you build one.</div>');
   document.getElementById('extraLabelTxt').textContent=MKTXT().xl;
-  savedApply(xs.length+1);
+  savedApply(xs.length+(pumpGone?0:1));
   mkBindCards();
   cardBind();
   syncPumpBtn();
@@ -13030,10 +13058,23 @@ function svAdd(){
     '<small>Pick the exercises yourself</small></span></button>'+
     '<button class="ez-card" style="--i:1" onclick="closeOvl(\'dfOvl\');ezOpen(\'saved\')"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Forge me a week</b>'+
     '<small>A balanced week, built for you</small></span></button>'+
-    '<button class="ez-card" style="--i:2" onclick="closeOvl(\'dfOvl\');openBring()"><span class="ez-art">'+SV_IN+'</span><span><b>Bring one in</b>'+
+    // Forging one day lived only on each day's plus, so somebody looking here for it found a week
+    // or nothing (v5.308, owner). Same forge, it just asks which day first.
+    '<button class="ez-card" style="--i:2" onclick="svForgeDay()"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Forge me a day</b>'+
+    '<small>The day your week is missing</small></span></button>'+
+    '<button class="ez-card" style="--i:3" onclick="closeOvl(\'dfOvl\');openBring()"><span class="ez-art">'+SV_IN+'</span><span><b>Bring one in</b>'+
     '<small>A file or a code somebody sent you</small></span></button>';
   document.getElementById('dfOvl').classList.add('on');
 }
+function svForgeDay(){
+  document.getElementById('dfTtl').textContent='Which day?';
+  dfSay('It goes straight onto that day.');
+  document.getElementById('dfPicks').innerHTML='<div class="presets" style="grid-template-columns:1fr 1fr">'+DAYS.map(function(d){
+    var full=dayFull(d.k);
+    return '<button class="preset sm"'+(full?' disabled style="opacity:.4"':' onclick="svForgeOn(\''+d.k+'\')"')+'>'+d.n+(full?' &middot; full':'')+'</button>';
+  }).join('')+'</div>';
+}
+function svForgeOn(k){closeOvl('savedOvl');dfAsk(k);dfForge();}
 // drawn to the wizard's scale, 100 by 100 with the same weights: a workout coming down into the rack
 var SV_IN='<svg class="mo-still" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">'+
   '<path d="M50 14V54" stroke-width="4"/><path d="M36 41L50 55L64 41" stroke-width="4"/>'+
@@ -20708,7 +20749,36 @@ function pumpUnlock(){
   out.next=best;
   return out;
 }
-var PUMP_LBL={upper:'Upper',lower:'Lower',full:'Full body'};
+var PUMP_LBL={upper:'Upper body',lower:'Lower body',full:'Full body'};
+var PUMP_HOW={upper:'four workouts that are mostly chest, back, shoulders or arms',lower:'four workouts that are mostly legs',full:'twelve finished workouts of any kind'};
+// A kind that has just been earned is said once (v5.308). DB.pumpSeen is seeded at launch with
+// whatever is already open, so nobody is told about something they have had for months.
+function pumpHello(seedOnly){
+  if(SANDBOX)return;
+  var u=pumpUnlock(),first=!DB.pumpSeen,fresh=[];
+  DB.pumpSeen=DB.pumpSeen||{};
+  ['upper','lower','full'].forEach(function(k){if(u[k].open&&!DB.pumpSeen[k]){DB.pumpSeen[k]=1;fresh.push(k);}});
+  if(first||fresh.length)saveDB();
+  if(first||seedOnly||!fresh.length||DB.pumpHide)return;
+  var names=fresh.map(function(k){return PUMP_LBL[k].toLowerCase();}).join(' and ');
+  askCrest('Unlocked');
+  ask('Pump Day, '+names+', is in Saved workouts. It is built from the lifts you have been doing.',
+    function(){try{renderHome();savedShow();}catch(e){}},'You earned a Pump Day','SHOW ME',null,null,'LATER');
+}
+// Pump Day can be taken off the shelf and put back (v5.308, owner). Nothing is deleted: it is a
+// built in, so removing it is a flag, and Settings carries the way back for as long as it is set.
+function pumpHideAsk(){
+  ask('It leaves Saved workouts. Settings can put it back, and nothing you logged is lost.',function(){
+    DB.pumpHide=1;saveDB();closeOvl('pumpOvl');renderHome();pumpBackDraw();
+  },'Remove Pump Day?','REMOVE');
+}
+function pumpBack(){
+  delete DB.pumpHide;saveDB();renderHome();pumpBackDraw();
+  mkNote('Pump Day is back in Saved workouts.','Put back');
+}
+function pumpBackDraw(){
+  var e=document.getElementById('pumpBackSec');if(e)e.hidden=!DB.pumpHide;
+}
 function pumpLockLine(){
   var u=pumpUnlock();
   if(u.any)return '';
@@ -20720,7 +20790,7 @@ function openPump(){
   if(!u.any&&loggedCount('pump')===0){
     // Nothing to choose from yet. Say what opens the first one and leave it there: the card
     // already carries the bar, so this is the same fact and does not need repeating twice.
-    mkNote(pumpLockLine(),'Not yet');
+    mkNote('Upper body opens after '+PUMP_HOW.upper+'. Lower body after '+PUMP_HOW.lower+'. Full body after '+PUMP_HOW.full+'.','Three to earn');
     return;
   }
   if(loggedCount('pump')>0){openW('pump');return;}
@@ -20754,18 +20824,39 @@ function pumpGo(){
   closeOvl('pumpOvl');
   openW('pump');
 }
+// The quick timer is one drag (v5.308). Fifteen seconds at the foot, five minutes at the top, in
+// steps of fifteen, which is also the plus and minus the rest pill already uses.
+var QT=15;
+function qtFmt(x){return Math.floor(x/60)+':'+('0'+(x%60)).slice(-2);}
+function qtSet(x){
+  x=Math.max(15,Math.min(300,Math.round(x/15)*15));
+  var ch=x!==QT;QT=x;
+  var f=document.getElementById('qtFill'),t=document.getElementById('qtTime'),g=document.getElementById('qtGo');
+  if(f)f.style.height=(x/3)+'%';if(t)t.textContent=qtFmt(x);if(g)g.textContent='START '+qtFmt(x);
+  return ch;
+}
+function qtBind(){
+  var el=document.getElementById('qtCol');if(!el||el._qt)return;el._qt=1;
+  var on=false,mv=function(e){
+    if(!on)return;e.preventDefault();
+    var r=el.getBoundingClientRect();
+    if(qtSet((1-(e.clientY-r.top)/r.height)*300)){try{sfxTick&&sfxTick();}catch(x){}}
+  };
+  el.addEventListener('pointerdown',function(e){on=true;try{el.setPointerCapture(e.pointerId);}catch(x){}mv(e);});
+  el.addEventListener('pointermove',mv);
+  el.addEventListener('pointerup',function(){on=false;});
+  el.addEventListener('pointercancel',function(){on=false;});
+}
+function qtStart(){closeOvl('timerOvl');startTimer(QT);}
 function openTimerSheet(){
   initAudio();
-  var opts=[[30,'30 sec'],[45,'45 sec'],[60,'60 sec'],[90,'90 sec'],[120,'2 min'],[180,'3 min']];
-  document.getElementById('presets').innerHTML=opts.map(function(o){
-    return '<button class="preset" onclick="closeOvl(\'timerOvl\');startTimer('+o[0]+')">'+o[1]+'</button>';
-  }).join('');
+  qtBind();qtSet(15);
   document.getElementById('timerOvl').classList.add('on');
 }
 function openSettings(){
   initAudio();
   drawAlertLvl();drawThemePick();drawMotion();drawSfxKeys();drawUnitRow();drawDistRow();drawTwoRow();drawHintRow();ntDraw();hcDraw();autoBkDraw();vaultDraw();driveDraw();
-  scrapApply();
+  scrapApply();pumpBackDraw();
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   document.getElementById('settingsOvl').classList.add('on');
@@ -22353,6 +22444,7 @@ function sbEnd(){
   setTimeout(function(){try{driveAsk();}catch(e){}},7000);
   // A week left with a session stranded on the day a workout used to stand on (v5.240).
   try{if(bonusHeal())renderHome();}catch(e){}
+  try{pumpHello(true);}catch(e){}
   // The vault gets the launch too, not just a finished session: a week built on a day nobody
   // trained is still work worth keeping. It writes nothing when nothing changed, and the
   // day-coalescing means opening the app twice is still one entry.
