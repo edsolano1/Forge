@@ -8325,7 +8325,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.313';
+var APPV='v5.314';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -21866,8 +21866,11 @@ function ezDays(){
           [4,'Four days','Each half of the body gets its own two days',WZ.days[3]],
           [5,'Five days','A day for every part, weekend off',WZ.days[4]]].slice(0,ezNew()?3:5);
 }
+// The line under each question went in v5.314 (owner: bloat for somebody who has just opened the
+// app). Two stay, because each explains a term the question cannot be answered without: what
+// working weights are, and what alternating weeks means. An empty s draws nothing.
 var EZ_STEPS=[
-  {t:'Have you followed a real program?',s:'A structured plan followed for a continuous stretch, not the odd gym visit.',
+  {t:'Have you followed a real program?',s:'',
    k:'xp1',opts:function(){return [
     // Three choices (v5.312, owner): past six months the other two questions say more about a
     // lifter than whether it has been eighteen months or three years. The score now tops out at
@@ -21882,12 +21885,12 @@ var EZ_STEPS=[
     [0,'No, I don’t track','The weights and I are strangers',WZ.xp2[0]],
     [1,'For a couple of lifts','The big ones, roughly',WZ.xp2[1]],
     [2,'Yes, for most','Burned into memory',WZ.xp2[2]]];}},
-  {t:'The last three months, honestly?',s:'The week is built from what you actually do, not what you meant to.',
+  {t:'The last three months, honestly?',s:'',
    k:'xp3',opts:function(){return [
     [0,'Not training right now','Starting fresh, or coming back',WZ.xp3[0]],
     [1,'On and off','Some weeks yes, some weeks no',WZ.xp3[1]],
     [2,'Twice a week or more','Nearly every week, showing up',WZ.xp3[2]]];}},
-  {t:'How many days a week?',s:function(){return ezNew()?'Only count days you will actually show up. You can add more once it is a habit.':'Only count days you will actually show up.';},
+  {t:'How many days a week?',s:'',
    k:'days',opts:function(){return ezDays().map(function(d){return [d[0],d[1],d[2],d[3]];});}},
   // Still a constraint, not a preference: how the person's weeks RUN. Most repeat; the classic
   // beginner barbell programs alternate two workouts across three days, A B A then B A B,
@@ -21896,7 +21899,7 @@ var EZ_STEPS=[
    k:'weeks',skip:function(){return !ezVet();},opts:function(){return [
     [1,'One week','The same days every week',WZ.weeks[0]],
     [2,'Two weeks','They take turns. You get a second board to flip to',WZ.weeks[1]]];}},
-  {t:'How long is a session?',s:'Count the time you actually have, door to door. The week is trimmed to fit, not crammed.',
+  {t:'How long is a session?',s:'',
    k:'len',opts:function(){return [
     [30,'30 minutes','The big lifts only. Nothing extra',WZ.len[0]],
     [45,'45 minutes','The big lifts plus a few smaller ones',WZ.len[1]],
@@ -21904,14 +21907,14 @@ var EZ_STEPS=[
   // A CONSTRAINT, not a preference - see the rule in CLAUDE.md. What you own changes which lift
   // fills a slot; it never changes which muscles the week trains. Asking "what do you want to
   // work" would; asking "what have you got" does not.
-  {t:'What do you train with?',s:'It picks the right lift for the room you are standing in.',
+  {t:'What do you train with?',s:'',
    k:'kit',opts:function(){return [
     ['gym','A gym','Machines, bars, cables: the full room',WZ.kit[0]],
     ['home','A barbell at home','Bar, plates, a rack and a bench',WZ.kit[1]],
     ['dbb','Dumbbells and a bench','Or a sturdy chair to lie back on',WZ.kit[2]],
     ['dbo','Just dumbbells','No bench, no bar',WZ.kit[3]],
     ['none','Nothing but a floor','Bodyweight only, anywhere',WZ.kit[4]]];}},
-  {t:'What is it for?',s:'This sets how heavy, how many reps, how long you rest, and whether the week carries cardio.',
+  {t:'What is it for?',s:'',
    k:'goal',opts:function(){return [
     ['strong','Get strong','Heavy weight, five reps at a time, long rests',WZ.goal[0]],
     ['muscle','Build muscle','Medium weight, 8 to 15 reps, steady pace',WZ.goal[1]],
@@ -21964,7 +21967,8 @@ function ezRender(){
   var st=EZ_STEPS[EZ.step];
   document.getElementById('ezDots').innerHTML=EZ_STEPS.map(function(_,i){
     return '<i'+(i<=EZ.step?' class="on"':'')+'></i>';}).join('');
-  var h='<div class="ez-t">'+st.t+'</div><div class="ez-s">'+(typeof st.s==='function'?st.s():st.s)+'</div>';
+  var sub=(typeof st.s==='function'?st.s():st.s)||'';
+  var h='<div class="ez-t">'+st.t+'</div>'+(sub?'<div class="ez-s">'+sub+'</div>':'<div class="ez-s" style="margin:0;height:14px"></div>');
   st.opts().forEach(function(o,n){
     h+='<button class="ez-card" style="--i:'+n+'" onclick="ezPick(\''+st.k+'\','+(typeof o[0]==='string'?'\''+o[0]+'\'':o[0])+',this)">'+
        '<span class="ez-art">'+o[3]+'</span><span><b>'+o[1]+'</b><small>'+o[2]+'</small></span></button>';
