@@ -317,6 +317,23 @@ main constraint on how to work in it. See **Traps** below before editing.
   more, now that one lift is open at a time). The coaching line, your note and Last are always
   on the open card; `exShow`, `exShowTick` and `exShowBox` no longer exist, and `DB.exShow` may
   sit in old data with nothing reading it. Do not bring the tick back.
+- **Built on a walk, 23 Nov, and NOT YET REVIEWED BY HIM** (v5.302 to v5.306). He gave feedback by
+  voice while walking, said to build and that he would evaluate everything at home, so these three
+  went in on my pick from the mockups and any of them may change or come out:
+  **A hint is a spotlight** (v5.304): `#hintSpot` is one element whose shadow is the dark, it takes
+  no taps, `HINT_TGT` names what each hint points at and `hintAim` follows it on a 150ms tick.
+  The first touch anywhere puts it away until next launch (`HINTQUIET`); touching the lit thing
+  marks the hint learned. With nothing to aim at it is the old bar at the foot, now labelled TIP.
+  **Plus and minus under the waiting set** (v5.305): `#sStep` is ONE element that `stepPlace`
+  moves after `.srow.next` from `sfApply`; it is not a `.srow`, so nothing that counts rows sees
+  it. `setStep` goes through `openEdit(...,quiet)` and `saveEdit`, so a step is saved exactly like
+  a typed number. Reps move by 1, seconds by 5, weight by `notchW`, one real step of that lift
+  (owner asked about a flat 2.5; a pulldown logged at 100 and 110 has no 102.5).
+  **A lifter beside each swap** (v5.306): `swapItem` draws a still, tap the picture to play it
+  (`swPlay`, one at a time), tap the row to swap. Stills are drawn by measuring in `swSee`, on open
+  and on scroll. **Never an IntersectionObserver for this**: it does not fire in a page that is not
+  being painted, and every picture came out blank in the preview with nothing to say why.
+  Also in this stretch: a searched list starts from its top again (`listTop`, v5.303).
 - **Never draw a dot as a path** (v5.259, owner picked B of three). The dot of the How To i was
   `M10 6.2v.1`, a tenth of a unit of line, and `.ex-links a svg` set no `stroke-linecap`, so a
   butt cap drew it **0.095px tall** on the phone: a hairline, and the mark read as a bare stem in
