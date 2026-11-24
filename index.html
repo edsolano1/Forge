@@ -2815,6 +2815,17 @@ body:has(.timer-pill.on) #hintBar{bottom:calc(86px + env(safe-area-inset-bottom,
 #hintBar .hint-no[hidden]{display:none;}
 html.mo-off #hintBar{transition:none;}
 @media (prefers-reduced-motion:reduce){#hintBar{transition:none;}}
+/* The spotlight (v5.304, owner: the hint was too subtle to notice). The screen dims, the thing the
+   hint is about stays lit, and the card is labelled TIP and sits beside it. The dark is one
+   element's shadow and takes no taps, so nothing is ever blocked: the first touch anywhere puts
+   the hint away, and touching the lit thing itself is the lesson learned. */
+#hintSpot{display:none;position:fixed;z-index:139;pointer-events:none;border-radius:999px;
+  box-shadow:0 0 0 5px rgba(255,138,31,.26),0 0 22px 6px rgba(255,138,31,.30),0 0 0 200vmax rgba(4,2,1,.74);}
+#hintSpot.on{display:block;}
+#hintBar{border-color:var(--gold);font-size:14px;flex-wrap:wrap;justify-content:flex-end;padding:13px 13px 12px 15px;}
+#hintBar .hint-w{flex:1 0 100%;min-width:0;}
+#hintBar .hint-tip{display:block;font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--gold);margin-bottom:3px;}
+#hintBar .hint-ok{background:var(--gold);border-color:var(--gold);color:#1a0d05;font-weight:500;}
 #sbxBar{display:none;position:fixed;left:0;right:0;top:0;z-index:150;
   align-items:center;gap:9px;padding:calc(7px + env(safe-area-inset-top,0px)) 14px 7px;
   background:color-mix(in srgb,var(--gold) 16%,#120a05);
@@ -3455,8 +3466,9 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
 <!-- One hint, at the bottom, where it cannot cover the thing it is talking about (v5.273).
      It is not a sheet and it does not block: you can ignore it entirely and carry on, which is
      the whole difference between this and the tour it replaces. -->
+<div id="hintSpot"></div>
 <div id="hintBar">
-  <span id="hintTxt"></span>
+  <span class="hint-w"><i class="hint-tip">TIP</i><span id="hintTxt"></span></span>
   <button class="hint-no" id="hintNo" onclick="hintsStop()" hidden>NO HINTS</button>
   <button class="hint-ok" onclick="hintGot()">GOT IT</button>
 </div>
@@ -8272,7 +8284,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.303';
+var APPV='v5.304';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11638,7 +11650,7 @@ function hintsStop(){
   // interrupting me" with a modal dialog would be the most intrusive thing in the app.
   var e=document.getElementById('hintBar');
   if(!e){hintHide();return;}
-  HINTNOW=null;HINTSCR=null;
+  HINTNOW=null;HINTSCR=null;hintSpotOff();
   document.getElementById('hintTxt').textContent='They are in Settings if you change your mind.';
   var no=document.getElementById('hintNo');if(no)no.hidden=true;
   var ok=e.querySelector('.hint-ok');if(ok)ok.hidden=true;
@@ -11652,8 +11664,46 @@ var HINTNOW=null,HINTSCR=null;
 function hintLeave(scr){if(HINTNOW&&HINTSCR!==scr)hintHide();}
 function hintHide(){
   var e=document.getElementById('hintBar');if(!e)return;
-  e.classList.remove('on');HINTNOW=null;HINTSCR=null;
+  e.classList.remove('on');HINTNOW=null;HINTSCR=null;hintSpotOff();
 }
+// What each hint points at. The spot is aimed on a slow tick because the session is redrawn and
+// its cards fold and open under it; with nothing to aim at the hint is the plain bar at the foot.
+var HINT_TGT={log:'#session .exc:not(.shut) .srow.next .chk',exhold:'#session .exc:not(.shut) .ex-n',grip:'#weekCards .card .carddrag'};
+var HINTIV=null,HINTQUIET={};
+function hintSpotOff(){
+  if(HINTIV){clearInterval(HINTIV);HINTIV=null;}
+  var sp=document.getElementById('hintSpot'),e=document.getElementById('hintBar');
+  if(sp)sp.classList.remove('on');
+  if(e){e.style.top='';e.style.bottom='';}
+}
+function hintAim(){
+  var sp=document.getElementById('hintSpot'),e=document.getElementById('hintBar');
+  if(!HINTNOW||!sp||!e)return;
+  var t=null;try{t=document.querySelector(HINT_TGT[HINTNOW]);}catch(x){}
+  var r=t&&t.getBoundingClientRect(),vh=window.innerHeight;
+  if(!r||!r.width||!r.height||r.top<40||r.bottom>vh-40||document.querySelector('.ovl.on')){
+    sp.classList.remove('on');e.style.top='';e.style.bottom='';return;
+  }
+  var pad=HINTNOW==='exhold'?7:5;
+  sp.style.left=(r.left-pad)+'px';sp.style.top=(r.top-pad)+'px';
+  sp.style.width=(r.width+pad*2)+'px';sp.style.height=(r.height+pad*2)+'px';
+  sp.style.borderRadius=HINTNOW==='exhold'?'10px':'999px';
+  sp.classList.add('on');
+  var bh=e.offsetHeight||90,top=r.bottom+pad+14;
+  if(top+bh>vh-12)top=r.top-pad-14-bh;
+  e.style.bottom='auto';e.style.top=Math.max(12,top)+'px';
+}
+// The first touch anywhere but the card puts the spotlight away, and it stays away until the
+// next launch, so an ignored hint never dims the screen twice in one sitting. Touching the lit
+// thing is doing what the hint says: that one is learned for good.
+document.addEventListener('pointerdown',function(ev){
+  if(!HINTNOW)return;
+  var sp=document.getElementById('hintSpot');if(!sp||!sp.classList.contains('on'))return;
+  if(ev.target.closest&&ev.target.closest('#hintBar'))return;
+  var k=HINTNOW,hit=false;try{hit=!!ev.target.closest(HINT_TGT[k]);}catch(x){}
+  if(hit)hintMark(k);else HINTQUIET[k]=1;
+  hintHide();try{drawHintRow();}catch(x){}
+},true);
 // The session screen owes two hints. Never both in one sitting: the anvil on the first visit,
 // and the hold only once a session has actually been finished, so a first timer is taught the
 // one thing they cannot do without and nothing else.
@@ -11675,7 +11725,7 @@ function hintGot(){
 // NOT called hint(): renderHome has a local `var hint=` for the empty board's footnote,
 // which shadowed this and made the call throw silently into its own catch (v5.273).
 function showHint(k,scr){
-  if(hintsOff()||SANDBOX||!HINTS[k]||hintSeen(k)||HINTNOW)return;
+  if(hintsOff()||SANDBOX||!HINTS[k]||hintSeen(k)||HINTNOW||HINTQUIET[k])return;
   // Not during the arrival. renderHome runs behind the splash and behind the welcome, so the
   // very first hint appeared over a man who had not answered the safety questions yet. Nothing
   // is taught until he is actually looking at his own week (v5.273).
@@ -11698,6 +11748,9 @@ function showHint(k,scr){
   document.getElementById('hintTxt').textContent=HINTS[k];
   var no=document.getElementById('hintNo');if(no)no.hidden=(k!=='log');
   e.classList.add('on');
+  if(HINTIV)clearInterval(HINTIV);
+  HINTIV=setInterval(hintAim,150);
+  requestAnimationFrame(hintAim);
 }
 function renderSession(){
   stopHold();resetHoldState();
