@@ -1202,7 +1202,9 @@ lunge:{name:'Walking Lunge',cycle:1,period:6800,views:['side','quarter'],labels:
     else q={ankL:fx(lead),ankR:fx(trail),kneePoleL:[.08,0,1],kneePoleR:[-.08,w.pl,1],footDirL:fx(w.rF),footDirR:fx(w.lF)};
     q.hip=hip;q.lean=w.lean;q.neck=-w.lean*.5;q.hand=hand;q.elbPole=[0,0,-1];
     // seen from off to the right, the left thigh is the far one in both strides: it stays behind the trunk and the right thigh
-    q.layer={quarter:{thighL:'back'}};
+    // The right thigh is the near one: it stays over the trunk even when it trails, or the trunk's outline is cut across
+    // it for a moment at the bottom of the left stride and a line flashes over the pelvis. Its hand hangs beside it, nearer still.
+    q.layer={quarter:{thighL:'back',thighR:'front',handR:'front',farmR:'front'}};
     return {p:q,gear:dbs(hand,[0,0,1])};
   }},
 stepup:{name:'Dumbbell Step-Up',views:['side','front'],cx:[206,240],ground:[60,420],tall:1,up:1,

@@ -247,7 +247,7 @@ function buildParts(J,V){
       var c=add(mix(P.a,P.b,t),mul(N,r*.5));
       P.mus.push({key:key,c:c,ax:[mul(P.dir,hl*P.L),mul(sd,r*.8),mul(N,r*.55)],N:N});
     }
-    var th=limb('thigh',q.hipJ,q.knee,[16.5,16,13,10.5],[0,.4,.75,1],q.legF,[0,1.5,0,0],q.hipJ,19,20);
+    var th=limb('thigh',q.hipJ,q.knee,[16.5,16,13,10.5],[0,.4,.75,1],q.legF,[0,1.5,0,0],q.hipJ,22,20);     // 22: the top of the thigh is 16.5 round and its outline 2.5 more, so at 19 a sliver of line showed and went at the hip
     lm(th,'quad',.5,.38,15,1);lm(th,'ham',.48,.38,15,-1);
     var sh=limb('shin',q.knee,q.ank,[10.5,11.5,8.5,6.5],[0,.3,.7,1],q.legF,[0,-3,-1,0],q.knee,12,21);
     lm(sh,'calf',.3,.24,11,-1);
@@ -1921,7 +1921,9 @@ lunge:{name:'Walking Lunge',cycle:1,period:6800,views:['side','quarter'],labels:
     else q={ankL:fx(lead),ankR:fx(trail),kneePoleL:[.08,0,1],kneePoleR:[-.08,w.pl,1],footDirL:fx(w.rF),footDirR:fx(w.lF)};
     q.hip=hip;q.lean=w.lean;q.neck=-w.lean*.5;q.hand=hand;q.elbPole=[0,0,-1];
     // seen from off to the right, the left thigh is the far one in both strides: it stays behind the trunk and the right thigh
-    q.layer={quarter:{thighL:'back'}};
+    // The right thigh is the near one: it stays over the trunk even when it trails, or the trunk's outline is cut across
+    // it for a moment at the bottom of the left stride and a line flashes over the pelvis. Its hand hangs beside it, nearer still.
+    q.layer={quarter:{thighL:'back',thighR:'front',handR:'front',farmR:'front'}};
     return {p:q,gear:dbs(hand,[0,0,1])};
   }},
 stepup:{name:'Dumbbell Step-Up',views:['side','front'],cx:[206,240],ground:[60,420],tall:1,up:1,

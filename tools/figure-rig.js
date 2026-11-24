@@ -191,7 +191,7 @@ function buildParts(J,V){
       var c=add(mix(P.a,P.b,t),mul(N,r*.5));
       P.mus.push({key:key,c:c,ax:[mul(P.dir,hl*P.L),mul(sd,r*.8),mul(N,r*.55)],N:N});
     }
-    var th=limb('thigh',q.hipJ,q.knee,[16.5,16,13,10.5],[0,.4,.75,1],q.legF,[0,1.5,0,0],q.hipJ,19,20);
+    var th=limb('thigh',q.hipJ,q.knee,[16.5,16,13,10.5],[0,.4,.75,1],q.legF,[0,1.5,0,0],q.hipJ,22,20);     // 22: the top of the thigh is 16.5 round and its outline 2.5 more, so at 19 a sliver of line showed and went at the hip
     lm(th,'quad',.5,.38,15,1);lm(th,'ham',.48,.38,15,-1);
     var sh=limb('shin',q.knee,q.ank,[10.5,11.5,8.5,6.5],[0,.3,.7,1],q.legF,[0,-3,-1,0],q.knee,12,21);
     lm(sh,'calf',.3,.24,11,-1);
