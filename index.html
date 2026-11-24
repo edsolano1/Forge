@@ -3395,15 +3395,12 @@ body.forge .exc.shut .ex-n{color:var(--txt2);}
 body.forge #sBody.rearrange .exc.shut .exdrag{display:flex;}
 body.forge .shead{display:grid;grid-template-columns:18px 1fr 1fr 48px;gap:8px;padding:8px 12px 2px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--txt3);text-align:center;}
 body.forge .exc .srow{grid-template-columns:18px 1fr 1fr 48px;padding:6px 4px;}
-/* Plus and minus under the set that is waiting (v5.305, owner: one thumb, no keyboard). Only that
-   one row has them, so the card stays calm. Weight moves one real step of that lift. */
-.sstep{display:none;}
-body.forge .exc .sstep{display:grid;grid-template-columns:18px 1fr 1fr 48px;gap:8px;padding:0 4px 9px;}
-body.forge .exc.shut .sstep{display:none;}
-body.forge .sstep .ssp{display:flex;gap:6px;min-width:0;}
-body.forge .sstep button{flex:1;height:36px;padding:0;border-radius:999px;border:1px solid #6a3f26;background:#130c09;
-  color:var(--gold);font-family:var(--mono);font-size:19px;line-height:1;cursor:pointer;}
-body.forge .sstep button:active{background:rgba(255,138,31,.18);}
+/* Plus and minus live in the number sheet (v5.309, owner: only when a number is picked, never on
+   the exercise card itself). */
+.ed-pm{display:flex;justify-content:center;gap:14px;margin:0 0 6px;}
+.ed-pm button{width:84px;height:52px;padding:0;border-radius:999px;border:1px solid #6a3f26;background:#130c09;color:var(--gold);
+  font-family:var(--mono);font-size:26px;line-height:1;cursor:pointer;}
+.ed-pm button:active{background:rgba(255,138,31,.18);}
 body.forge .exc .srow:has(.inp.wide){grid-template-columns:18px 1fr 1fr 48px;}
 body.forge .exc .srow:has(.inp.wide):has(.hold){grid-template-columns:18px 1fr 1fr 40px 48px;}
 body.forge .exc .sno{font-size:12px;}
@@ -3614,8 +3611,9 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
   <div class="sheet edsheet">
     <div class="ed-ex" id="edEx"></div>
     <div class="ed-set" id="edSet"></div>
-    <input class="ed-big" id="edBig" inputmode="decimal" enterkeyhint="done">
+    <input class="ed-big" id="edBig" inputmode="decimal" enterkeyhint="done" oninput="if(edCtx)delete edCtx.lb" onfocus="this.select()">
     <div class="ed-unit" id="edUnit"></div>
+    <div class="ed-pm"><button aria-label="Less" onclick="edStep(-1)">&minus;</button><button aria-label="More" onclick="edStep(1)">+</button></div>
     <div class="ed-hint" id="edHint"></div>
     <div class="sheet-btns">
       <div class="btn" onclick="closeOvl('editOvl')">CANCEL</div>
@@ -8330,7 +8328,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.308';
+var APPV='v5.309';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11999,20 +11997,20 @@ function edPad(){
 }
 function openEdit(id,i,which,quiet){
   initAudio();
-  var A=DB.active[CUR],r=null;
+  var A=DB.active[CUR],r=null,rex=null;
   // Walk the day the way the session itself does. This read W[CUR].sections directly, which is
   // the day as PLANNED - it does not include anything added to the day, so tapping the weight on
   // an exercise you had just added found no row, threw on the next line, and the sheet never
   // opened. The field highlighted because the tap landed; nothing behind it ran.
   edAllRows(CUR).forEach(function(row){
     var rf=rowFor(A.swaps,row,CUR);
-    if(rf.id===id)r=rf.data;
+    if(rf.id===id){r=rf.data;rex=rf.swapId||rf.exId;}
   });
   if(!r)return;
   var curEl=document.getElementById((which==='w'?'w-':'r-')+id+'-'+i);
   var cur=parseFloat(curEl.value)||parseFloat(curEl.placeholder)||0;
   var isSec=(r.sets.split('\n')[i]||'').indexOf('sec')>-1;
-  edCtx={id:id,i:i,which:which,val:cur,open:cur,isSec:isSec};
+  edCtx={id:id,i:i,which:which,val:cur,open:cur,isSec:isSec,ex:rex,nm:r.name};
   document.getElementById('edEx').textContent=r.name;
   document.getElementById('edSet').textContent='Set '+(i+1)+' \u00b7 '+(which==='w'?'Weight':(isSec?'Seconds':'Reps'));
   // wUnitName itself, so this label cannot drift from the unit beside every number (v5.266).
@@ -12025,9 +12023,9 @@ function openEdit(id,i,which,quiet){
   edShow();
   if(quiet)return;      // the plus and minus set the number without the sheet
   document.getElementById('editOvl').classList.add('on');
-  // Focused on open, inside the tap that opened it, so the keyboard is already up. Without this
-  // every weight change was tap the row, tap the number, type, DONE - one tap too many mid-set.
-  try{var eb=document.getElementById('edBig');eb.focus();eb.select();}catch(e){}
+  // The keyboard stays down on open now (v5.309): the plus and minus are the one thumb way in,
+  // and a keyboard that jumps up over them defeats that. Tapping the number brings it up, and
+  // selects what is there so typing replaces it.
 }
 function edShow(){document.getElementById('edBig').value=(Math.round(edCtx.val*100)/100);}
 // Two things the pad used to wave through. A decimal COMMA is how half the world writes half
@@ -12127,41 +12125,24 @@ function notchW(id,name,x,dn){
   }
   return Math.max(0,Math.round(nx*100)/100);
 }
-// The pair of buttons lives in ONE element that follows the waiting row about. It is not a set
-// row, so nothing that counts rows sees it, and a redraw simply makes it again.
-function stepPlace(row){
-  var el=document.getElementById('sStep');
-  if(!row||!CUR){if(el)el.remove();return;}
-  var m=/^sr-(.*)-(\d+)$/.exec(row.id||'');if(!m){if(el)el.remove();return;}
-  var wi=document.getElementById('w-'+m[1]+'-'+m[2]),hasW=!!(wi&&wi.type!=='hidden');
-  var sig=m[1]+'|'+m[2]+'|'+(hasW?1:0);
-  if(!el){el=document.createElement('div');el.id='sStep';el.className='sstep';}
-  if(el.dataset.sig!==sig){
-    el.dataset.sig=sig;el.dataset.id=m[1];el.dataset.i=m[2];
-    var pair=function(k,what){return '<span class="ssp"><button aria-label="Less '+what+'" onclick="setStep(\''+k+'\',-1)">&minus;</button>'+
-      '<button aria-label="More '+what+'" onclick="setStep(\''+k+'\',1)">+</button></span>';};
-    el.innerHTML='<span></span>'+(hasW?pair('w','weight')+pair('r','reps'):pair('r','reps')+'<span></span>')+'<span></span>';
-  }
-  if(row.nextSibling!==el)row.parentNode.insertBefore(el,row.nextSibling);
-}
-function setStep(which,dir){
-  var el=document.getElementById('sStep');if(!el||!CUR)return;
-  var id=el.dataset.id,i=+el.dataset.i,A=DB.active[CUR];if(!A)return;
-  var inp=document.getElementById((which==='w'?'w-':'r-')+id+'-'+i);if(!inp)return;
-  openEdit(id,i,which,1);if(!edCtx||edCtx.id!==id)return;
+// Plus and minus in the number sheet (v5.309). Reps move by one, seconds by five, weight by one
+// real step of that lift. A weight stepped this way is kept as exact pounds in edCtx.lb, so a
+// kilogram lifter does not get a rounded number converted back; typing clears it again.
+function edStep(dir){
+  if(!edCtx)return;
   var big=document.getElementById('edBig');
-  if(which==='w'){
-    var ex=slotBase(id),nm='';
-    edAllRows(CUR).forEach(function(row){var rf=rowFor(A.swaps,row,CUR);if(rf.id===id){ex=rf.swapId||rf.exId;nm=rf.data.name;}});
-    var cur=(inp.dataset.lb!==undefined&&inp.dataset.lb!=='')?parseFloat(inp.dataset.lb)||0:inW(edCtx.val);
-    var nv=notchW(ex,nm,cur,dir<0);
-    if(nv<=0||nv===cur){edCtx=null;return;}
+  if(edCtx.which==='w'){
+    var el=document.getElementById('w-'+edCtx.id+'-'+edCtx.i),v=edRead(),cur;
+    if(edCtx.lb!==undefined)cur=edCtx.lb;
+    else if(v===edCtx.open&&el&&el.dataset.lb!==undefined&&el.dataset.lb!=='')cur=parseFloat(el.dataset.lb)||0;
+    else cur=inW(v);
+    var nv=notchW(edCtx.ex,edCtx.nm,cur,dir<0);
+    if(nv<=0||nv===cur)return;
     edCtx.lb=nv;big.value=fmtW(nv);
   }else{
     var st=edCtx.isSec?5:1;
-    big.value=Math.max(st,(edCtx.val||0)+dir*st);
+    big.value=Math.max(st,edRead()+dir*st);
   }
-  saveEdit();
   try{sfxTick&&sfxTick();}catch(e){}
 }
 function toggleSet(id,i,rest,unit){
@@ -12336,7 +12317,6 @@ function sfApply(fresh){
       }
     });
   });
-  try{stepPlace(tgt);}catch(e){}
 }
 // The move to the next lift is SHOWN (v5.293, owner picked 2B and asked for it slow): the
 // finished card folds to its line, then the next one opens and is lit round its edge, so the

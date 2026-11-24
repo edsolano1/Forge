@@ -324,11 +324,15 @@ main constraint on how to work in it. See **Traps** below before editing.
   no taps, `HINT_TGT` names what each hint points at and `hintAim` follows it on a 150ms tick.
   The first touch anywhere puts it away until next launch (`HINTQUIET`); touching the lit thing
   marks the hint learned. With nothing to aim at it is the old bar at the foot, now labelled TIP.
-  **Plus and minus under the waiting set** (v5.305): `#sStep` is ONE element that `stepPlace`
-  moves after `.srow.next` from `sfApply`; it is not a `.srow`, so nothing that counts rows sees
-  it. `setStep` goes through `openEdit(...,quiet)` and `saveEdit`, so a step is saved exactly like
-  a typed number. Reps move by 1, seconds by 5, weight by `notchW`, one real step of that lift
-  (owner asked about a flat 2.5; a pulldown logged at 100 and 110 has no 102.5).
+  **Plus and minus live in the number sheet** (v5.309; v5.305 put them on the card under the
+  waiting set and he rejected that the same evening: only when a number is picked, never on the
+  exercise panel). `edStep(dir)` in `#editOvl`: reps by 1, seconds by 5, weight by `notchW`, one
+  real step of that lift (owner asked about a flat 2.5; a pulldown logged at 100 and 110 has no
+  102.5). A stepped weight is kept as exact pounds in `edCtx.lb` and typing clears it. **The
+  keyboard no longer comes up when the sheet opens**; tapping the number raises it. That undoes an
+  older choice made to save typists a tap, and is the thing to revisit if he misses it.
+  **The spotlight hint is approved** (his words: looks great). He wants to be walked through
+  every hint in the app later; there are three, `log`, `grip` and `exhold`.
   **A lifter beside each swap** (v5.306): `swapItem` draws a still, tap the picture to play it
   (`swPlay`, one at a time), tap the row to swap. Stills are drawn by measuring in `swSee`, on open
   and on scroll. **Never an IntersectionObserver for this**: it does not fire in a page that is not
