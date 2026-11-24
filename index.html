@@ -4417,6 +4417,11 @@ var ALT={
   // learns each lift's steps from that lift's own history, so the two must not share one.
   kbgoblet: {name:"Kettlebell Goblet Squat",note:"One kettlebell at the chest, body upright. Easy on the knees",sets:"35x10\n35x10\n35x10",rest:"90 sec"},
   kbsumo:   {name:"Kettlebell Sumo Squat",note:"One kettlebell hanging from both hands. Feet wide, toes out",sets:"35x12\n35x12\n35x12",rest:""},
+  // v5.301: the four lifts where the bell simply hangs from the hand
+  kblunge:  {name:"Kettlebell Walking Lunge",note:"One kettlebell in each hand. Step, sink, stand, then the other leg",sets:"20x12\n20x12\n20x12",rest:"60 sec"},
+  kbstepup: {name:"Kettlebell Step-Up",note:"Knee-height box, drive through the top foot. One leg at a time",sets:"20x10\n20x10\n20x10",rest:"60 sec"},
+  kbsldl:   {name:"Kettlebell Single-Leg Romanian Deadlift",note:"One kettlebell, one leg. Hips back, the free leg rises behind",sets:"25x10\n25x10\n25x10",rest:"90 sec"},
+  kbrow:    {name:"One-Arm Kettlebell Row",note:"Knee and hand on the bench. Pull to the hip, not the shoulder",sets:"35x10\n35x10\n35x10",rest:"90 sec"},
   smsquat:  {name:"Smith Machine Squat",note:"The bar runs on rails. Stands in for the hack squat when it is taken",sets:"70x10\n70x10\n70x10",rest:"2 min"},
   bbthrust: {name:"Barbell Hip Thrust",note:"Upper back on a bench, bar across the hips with a pad. Same move as the machine",sets:"65x10\n65x10\n65x10",rest:"90 sec"},
   stepup:   {name:"Dumbbell Step-Up",note:"Knee-height box, drive through the top foot. One leg at a time",sets:"15x10\n15x10\n15x10",rest:"60 sec"},
@@ -4548,7 +4553,7 @@ var PUMPGRP={p_inc:'chest-press',p_xover:'chest-fly',p_fly:'chest-fly',p_lat:'de
 var ALTGRP={lvchest:'chest-press',dbbench:'chest-press',smbench:'chest-press',pushup:'chest-press',
   dbfly:'chest-fly',machrow:'back-horizontal',dbrow:'back-horizontal',machpd:'back-vertical',
   bbcurl:'biceps',inccurl:'biceps',dip:'triceps',bdip:'triceps',
-  machlat:'delt-side',facepull:'delt-rear',goblet:'quad',kbgoblet:'quad',kbsumo:'quad',smsquat:'quad',
+  machlat:'delt-side',facepull:'delt-rear',goblet:'quad',kbgoblet:'quad',kbsumo:'quad',kblunge:'quad',kbstepup:'glute',kbsldl:'hamstring',kbrow:'back-horizontal',smsquat:'quad',
   bbthrust:'glute',stepup:'glute',stcalf:'calf',kneeraise:'core',abmach:'core',
   // the nine that were drawn but unreachable. 'traps' is a new group: nothing in the library
   // trained them directly, so the shrug had nowhere to sit and no comparable swap to offer.
@@ -4592,7 +4597,7 @@ var KIT={
   // legs
   bsquat:['bar','rack'], frontsq:['bar','rack'], bbcalf:['bar','rack'],
   deadlift:['bar'], rdl:['bar'], bbthrust:['bar','bench'],
-  goblet:['db'], sumo:['db'], lunge:['db'], stepup:['db','bench'], kbgoblet:['kb'], kbsumo:['kb'],
+  goblet:['db'], sumo:['db'], lunge:['db'], stepup:['db','bench'], kbgoblet:['kb'], kbsumo:['kb'], kblunge:['kb'], kbstepup:['kb','bench'], kbsldl:['kb'], kbrow:['kb','bench'],
   hack:['machine'], lpress:['machine'], lext:['machine'], hthrust:['machine'],
   slegcurl:['machine'], plegcurl:['machine'], dcalfr:['machine'], scalfr:['machine'],
   stcalf:['machine'], smsquat:['machine'],
@@ -5217,10 +5222,11 @@ function solve(p){
 // ---- views ----
 // side, front, back; rear (from behind, off to the lifter's right), quarter (from in front, off to the right),
 // top (looking straight down, head of a lying lifter to the left)
-function view(kind,cx){
+// slant: how far round to the side the two slanted views stand, in degrees. 38 unless the pose asks for another.
+function view(kind,cx,slant){
   if(kind==='side')return {k:kind,v:[-1,0,0],p:function(a){return [cx+a[2],FLOOR-a[1],-a[0]];},d:function(a){return [a[2],-a[1]];}};
   if(kind==='top')return {k:kind,v:[0,1,0],p:function(a){return [cx+a[2],250+a[0],a[1]];},d:function(a){return [a[2],a[0]];}};
-  var f=38*Math.PI/180, v=kind==='rear'?[-Math.sin(f),0,-Math.cos(f)]:kind==='quarter'?[-Math.sin(f),0,Math.cos(f)]:kind==='back'?[0,0,-1]:[0,0,1];
+  var f=(slant||38)*Math.PI/180, v=kind==='rear'?[-Math.sin(f),0,-Math.cos(f)]:kind==='quarter'?[-Math.sin(f),0,Math.cos(f)]:kind==='back'?[0,0,-1]:[0,0,1];
   var ex=v[2], ez=-v[0];
   return {k:kind,v:v,p:function(a){return [cx+a[0]*ex+a[2]*ez,FLOOR-a[1],a[0]*v[0]+a[2]*v[2]];},d:function(a){return [a[0]*ex+a[2]*ez,-a[1]];}};
 }
@@ -5318,7 +5324,7 @@ function buildParts(J,V){
       var c=add(mix(P.a,P.b,t),mul(N,r*.5));
       P.mus.push({key:key,c:c,ax:[mul(P.dir,hl*P.L),mul(sd,r*.8),mul(N,r*.55)],N:N});
     }
-    var th=limb('thigh',q.hipJ,q.knee,[16.5,16,13,10.5],[0,.4,.75,1],q.legF,[0,1.5,0,0],q.hipJ,19,20);
+    var th=limb('thigh',q.hipJ,q.knee,[16.5,16,13,10.5],[0,.4,.75,1],q.legF,[0,1.5,0,0],q.hipJ,22,20);     // 22: the top of the thigh is 16.5 round and its outline 2.5 more, so at 19 a sliver of line showed and went at the hip
     lm(th,'quad',.5,.38,15,1);lm(th,'ham',.48,.38,15,-1);
     var sh=limb('shin',q.knee,q.ank,[10.5,11.5,8.5,6.5],[0,.3,.7,1],q.legF,[0,-3,-1,0],q.knee,12,21);
     lm(sh,'calf',.3,.24,11,-1);
@@ -5467,7 +5473,7 @@ function gearDepth(V,g){
 // zoom: {s:scale, at:[x,y,z]} draws closer in, with that point of the scene held at the middle of the frame
 function draw(x,kind,pose,gear,lit,cx,ground,zoom){
   x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,480,480);
-  var V=view(kind,cx==null?240:cx);
+  var V=view(kind,cx==null?240:cx,pose.slant);
   if(zoom){var zf=V.p(zoom.at);x.translate(240,240);x.scale(zoom.s,zoom.s);x.translate(-zf[0],-zf[1]);}
   x.strokeStyle=LINE;x.lineWidth=6;x.lineCap='round';
   if(kind!=='top'){x.beginPath();x.moveTo(ground?ground[0]:90,FLOOR+3);x.lineTo(ground?ground[1]:390,FLOOR+3);x.stroke();}
@@ -5489,7 +5495,8 @@ function draw(x,kind,pose,gear,lit,cx,ground,zoom){
   (gear||[]).forEach(function(g){
     if(g.v&&g.v.indexOf(kind)<0)return;
     // a dumbbell goes wherever its hand goes: just over it, never over the whole body
-    items.push({d:g.t==='db'?handD[g.c[0]<0?-1:1]+.03:gearDepth(V,g),o:g.t==='bar'?99:(g.t==='db'?98:0),g:g});
+    var tied=g.t==='db'||g.hand;               // anything held in one hand goes wherever that hand goes
+    items.push({d:tied?handD[g.c[0]<0?-1:1]+.03:gearDepth(V,g),o:g.t==='bar'?99:(tied?98:0),g:g});
   });
   items.sort(function(a,b){return a.d-b.d||a.o-b.o;});
   items.forEach(function(it){if(it.P)drawPart(x,V,it.P,lit);else drawGear(x,V,it.g);});
@@ -6992,7 +6999,9 @@ lunge:{name:'Walking Lunge',cycle:1,period:6800,views:['side','quarter'],labels:
     else q={ankL:fx(lead),ankR:fx(trail),kneePoleL:[.08,0,1],kneePoleR:[-.08,w.pl,1],footDirL:fx(w.rF),footDirR:fx(w.lF)};
     q.hip=hip;q.lean=w.lean;q.neck=-w.lean*.5;q.hand=hand;q.elbPole=[0,0,-1];
     // seen from off to the right, the left thigh is the far one in both strides: it stays behind the trunk and the right thigh
-    q.layer={quarter:{thighL:'back'}};
+    // The right thigh is the near one: it stays over the trunk even when it trails, or the trunk's outline is cut across
+    // it for a moment at the bottom of the left stride and a line flashes over the pelvis. Its hand hangs beside it, nearer still.
+    q.layer={quarter:{thighL:'back',thighR:'front',handR:'front',farmR:'front'}};
     return {p:q,gear:dbs(hand,[0,0,1])};
   }},
 stepup:{name:'Dumbbell Step-Up',views:['side','front'],cx:[206,240],ground:[60,420],tall:1,up:1,
@@ -8157,25 +8166,33 @@ hamstr:{name:'Hamstring Floor Stretch',hold:1,views:['side','quarter'],labels:['
 // ======== kettlebells ========
 // A kettlebell is its own lift, not a switch on the dumbbell one (owner, 23 Nov): the weights come in different steps and
 // the app learns each lift's steps from its own history. Each is the dumbbell lift with the same body and a different thing
-// in the hands: c is the middle of the handle where the hands close, up points from the ball to the handle.
+// in the hands: c is the middle of the handle where the hand closes, up points from the ball to the handle, ax runs along
+// the handle's top bar.
 (function(){
 "use strict";
-var GO=FIG.col.GO;
+var GO=FIG.col.GO, EDGE="#15120f";
 FIG.gear.g9_kb=function(x,V,g){
-  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||18, hw=g.hw||11, drop=g.drop||9;
+  var up=FIG.norm(g.up), ax=FIG.norm(g.ax||[1,0,0]), r=g.r||20, hw=g.hw||11, drop=g.drop||13, LW=6.6;
   var b=FIG.add(g.c,FIG.mul(up,-(r+drop)));                                  // the middle of the ball
-  var foot=function(sg){return V.p(FIG.add(FIG.add(b,FIG.mul(up,r*.72)),FIG.mul(ax,sg*hw)));},
-      top=function(sg){return V.p(FIG.add(g.c,FIG.mul(ax,sg*hw)));};
-  // the handle: up one side, across where the hands hold it, down the other
-  var p=[foot(-1),top(-1),top(1),foot(1)];
+  // the handle is one thick arch standing on the ball, as on the real thing (owner's photos, 23 Nov): it springs from the
+  // ball's shoulders, curves in and over, and the hand closes on the top of it. It is drawn where it really is, so from the
+  // side you look through its window, from a slant the arch narrows and the window with it, and end on it is one post.
+  var foot=r*.72, rise=r+drop-foot, arch=[], i, t;
+  for(i=0;i<=16;i++){t=i/16*Math.PI;
+    arch.push(V.p(FIG.add(FIG.add(b,FIG.mul(up,foot+rise*Math.sin(t))),FIG.mul(ax,-hw*Math.cos(t)*(1+.22*(1-Math.sin(t)))))));}
+  var loop=function(){x.beginPath();arch.forEach(function(q,j){if(j)x.lineTo(q[0],q[1]);else x.moveTo(q[0],q[1]);});};
   x.lineJoin='round';x.lineCap='round';
-  x.strokeStyle="#15120f";x.lineWidth=8.2;x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);x.stroke();
-  x.strokeStyle=GO;x.lineWidth=5.6;x.beginPath();x.moveTo(p[0][0],p[0][1]);x.lineTo(p[1][0],p[1][1]);x.lineTo(p[2][0],p[2][1]);x.lineTo(p[3][0],p[3][1]);x.stroke();
+  loop();x.strokeStyle=EDGE;x.lineWidth=LW+2.6;x.stroke();
+  loop();x.strokeStyle=GO;x.lineWidth=LW;x.stroke();
   // the ball, with a flat foot to stand on
   var pts=FIG.blobPts(V,b,[[r,0,0],[0,r,0],[0,0,r]],28), base=FIG.add(b,FIG.mul(up,-r*.9));
   pts=pts.concat(FIG.blobPts(V,base,[FIG.mul(ax,r*.5),FIG.mul(FIG.cross(up,ax),r*.5),FIG.mul(up,.5)],10));
   FIG.poly(x,FIG.hull(pts));
-  x.fillStyle=GO;x.fill();x.strokeStyle="#15120f";x.lineWidth=1.6;x.stroke();
+  x.fillStyle=GO;x.fill();x.strokeStyle=EDGE;x.lineWidth=1.6;x.stroke();
+  // one hand on the bar: the fist closes over the top of the handle, so the grip is seen and not guessed
+  if(g.hand){var c=V.p(g.c), far=V.k==='side'&&g.c[0]>0;
+    x.fillStyle=far?FIG.col.FAR:FIG.col.INK;x.beginPath();x.arc(c[0],c[1],7.4,0,7);x.fill();
+    x.strokeStyle=EDGE;x.lineWidth=1.2;x.stroke();}
 };
 function twin(base,name,says,fn){
   var L=LIFTS[base], o={}, k;for(k in L)o[k]=L[k];
@@ -8185,16 +8202,39 @@ function twin(base,name,says,fn){
 }
 // goblet: held by the sides of the handle at the chest, the ball hanging below the hands
 LIFTS.kbgoblet=twin('goblet','Kettlebell Goblet Squat',null,function(r){
-  var g=r.gear[0], u=FIG.norm(g.ax), G=FIG.add(g.c,FIG.mul(u,10));
-  r.p.hand=[-12,G[1],G[2]];
-  r.gear=[{t:'g9_kb',c:[0,G[1],G[2]],up:u,r:17,hw:12,drop:8,d:g.d}];
+  var g=r.gear[0], u=FIG.norm(g.ax), G=FIG.add(g.c,FIG.mul(u,12));
+  r.p.hand=[-13,G[1],G[2]];
+  r.gear=[{t:'g9_kb',c:[0,G[1],G[2]],up:u,r:20,hw:12,drop:12,d:g.d}];
 });
 // sumo: both hands on the handle, the bell hanging straight down between the legs
 LIFTS.kbsumo=twin('sumo','Kettlebell Sumo Squat',null,function(r){
-  var g=r.gear[0], h=r.p.hand, y=h[1]+3;
-  r.p.hand=[-10,y,h[2]];
-  r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:20,hw:11,drop:9,d:g.d}];
+  var g=r.gear[0], h=r.p.hand, y=h[1]+5;
+  r.p.hand=[-11,y,h[2]];
+  r.gear=[{t:'g9_kb',c:[0,y,h[2]],up:[0,1,0],r:23,hw:13,drop:14,d:g.d}];
 });
+// the lifts where a dumbbell just hangs from the hand: the kettlebell hangs the same way, ball under the fist.
+// out: how far from the centre line the hands must be for the wider bell to clear the legs. dy, dz: a little up and
+// forward, where a bell hanging dead under the shoulder would sit square over the back knee from the side.
+function hang(base,name,out,dy,dz){
+  dy=dy||0;dz=dz||0;
+  return twin(base,name,null,function(r){
+    if(out)['hand','handR','handL'].forEach(function(k){var h=r.p[k];
+      if(h&&Math.abs(h[0])<out&&r.gear.some(function(g){return g.t==='db'&&Math.abs(Math.abs(g.c[0])-Math.abs(h[0]))<.01;}))r.p[k]=[h[0]<0?-out:out,h[1]+dy,h[2]+dz];});
+    r.gear=(r.gear||[]).map(function(g){
+      if(g.t!=='db')return g;
+      var cx=out&&Math.abs(g.c[0])<out?(g.c[0]<0?-out:out):g.c[0];
+      return {t:'g9_kb',c:[cx,g.c[1]+(out?dy:0),g.c[2]+(out?dz:0)],up:[0,1,0],ax:g.ax,r:19,hw:11,drop:13,hand:1};
+    });
+  });
+}
+LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge',70,8,30);
+// From the usual slant the far bell lands exactly on the leading shin: behind it reads as going through the knee, and drawn
+// over it reads as hanging between the legs (owner, 23 Nov, both). So this lift is seen from less far round, where the bell
+// stays outside the leg with a gap, and the bells are carried a little wider.
+(function(){var base=LIFTS.kblunge.pose;LIFTS.kblunge.pose=function(t){var r=base(t);r.p.slant=20;return r;};})();
+LIFTS.kbstepup=hang('stepup','Kettlebell Step-Up',62);
+LIFTS.kbsldl=hang('sldl','Kettlebell Single-Leg Romanian Deadlift',0);
+LIFTS.kbrow=hang('dbrow','One-Arm Kettlebell Row',0);
 })();
 
 
@@ -8243,7 +8283,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.300';
+var APPV='v5.301';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8598,8 +8638,10 @@ hollow:{s:"On your back, arms overhead, legs long, lower back pressed into the f
 abmach:{s:"Sit up on the raised seat with the cushion across your thighs and your feet hanging free. Upper back against the pad, hands on the handles behind your head, elbows forward in a V.",c:["Crunch by ROUNDING the back. The ribs travel toward the hips","Exhale hard into every rep","The feet hang the whole set; they never reach for the floor","Return slowly. Do not let the weight stack pull you back open"],m:"Hauling on the handles with the arms. The hands only rest there; the stomach moves the weight."},
 vbar:{s:"V-shaped handle on the high pulley, elbows tight to your sides.",c:["Push to straight arms and squeeze","Elbows never leave the ribs","Slow return to a full forearm stretch"],m:"Shoulders creeping up as fatigue sets in. Pin them down."},
 dbrow:{s:"One knee and one hand on a bench, other foot on the floor, dumbbell hanging at arm's length.",c:["Pull the dumbbell to the hip, not the shoulder","Elbow close to the body, back flat throughout","Full stretch at the bottom of every rep"],m:"Twisting the body to heave the weight up. The chest stays facing the floor."},
+kbrow:{s:"One knee and one hand on a bench, other foot on the floor, kettlebell hanging at arm's length.",c:["Pull the kettlebell to the hip, not the shoulder","Elbow close to the body, back flat throughout","Full stretch at the bottom of every rep"],m:"Twisting the body to heave the weight up. The chest stays facing the floor."},
 goblet:{s:"Dumbbell held upright against the chest, hands under the top end, feet shoulder width.",c:["Sit down between the heels, chest tall","Elbows travel inside the knees at the bottom","Drive up through the whole foot"],m:"Letting the weight pull the chest forward. It rests on the chest. The legs do the lifting."},
 lunge:{s:"Standing tall, dumbbells at the sides or hands free.",c:["Step far enough that the front shin stays upright","Lower the back knee toward the floor, torso upright","Push through the front heel into the next step"],m:"Short steps. If the front knee sails past the toes, lengthen the stride."},
+kblunge:{s:"Standing tall, a kettlebell hanging in each hand.",c:["Step far enough that the front shin stays upright","Lower the back knee toward the floor, torso upright","Push through the front heel into the next step"],m:"Short steps. If the front knee sails past the toes, lengthen the stride."},
 kbgoblet:{s:"Kettlebell held by the sides of its handle against the chest, feet shoulder width.",c:["Sit down between the heels, chest tall","Elbows travel inside the knees at the bottom","Drive up through the whole foot"],m:"Letting the weight pull the chest forward. It rests on the chest. The legs do the lifting."},
 kbsumo:{s:"Feet wide, toes out at 45 degrees, kettlebell hanging from both hands at the center.",c:["Knees track over the toes: out, not forward","Sit straight down, torso tall","Squeeze the inner thighs and glutes on the way up"],m:"Narrowing into a regular squat as you tire. The wide stance is the exercise."},
 sumo:{s:"Feet wide, toes out at 45 degrees, dumbbell hanging at the center.",c:["Knees track over the toes: out, not forward","Sit straight down, torso tall","Squeeze the inner thighs and glutes on the way up"],m:"Narrowing into a regular squat as you tire. The wide stance is the exercise."},
@@ -8650,6 +8692,7 @@ inccurl:{s:"Bench at 45 to 60 degrees, sit back, arms hanging straight down behi
 machlat:{s:"Seat set so the pads rest just above the elbows, hands light on the grips.",c:["Raise the arms out to shoulder height, no higher","Push with the elbows against the pads, not the hands","Lower slow against the machine"],m:"Raising past shoulder height. Above that line the neck shrugs it up."},
 smsquat:{s:"Bar across the upper back, feet planted a half step in FRONT of the bar, shoulder width.",c:["Sit straight down. The rails allow what the forward feet create","Knees track over the toes","Drive through the whole foot to standing"],m:"Feet directly under the bar. On a Smith machine that folds you forward, so step them out."},
 stepup:{s:"Knee-height box, a dumbbell in each hand, one whole foot planted on top.",c:["Drive through the TOP foot. The bottom leg does not jump","Stand fully tall on the box","Lower slow. The way down is half the rep","All reps one leg, then switch"],m:"Bouncing off the bottom leg. If it pushes, the box is too high or the dumbbells too heavy."},
+kbstepup:{s:"Knee-height box, a kettlebell in each hand, one whole foot planted on top.",c:["Drive through the TOP foot. The bottom leg does not jump","Stand fully tall on the box","Lower slow. The way down is half the rep","All reps one leg, then switch"],m:"Bouncing off the bottom leg. If it pushes, the box is too high or the kettlebells too heavy."},
 stcalf:{s:"Shoulders under the pads, balls of the feet on the block, heels hanging free.",c:["Drop the heels for a full stretch at the bottom","Drive to full tiptoe and squeeze","Knees straight but never locked. The calves do all of it"],m:"Bouncing. One second up, one second down, every rep."}
 ,
 // ---------- the nine that had a finished animation and no exercise to reach it ----------
@@ -8672,6 +8715,7 @@ invrow:{s:"A bar set in a rack (the squat stand) at about hip height. Lie under 
 dbrow2:{s:"A dumbbell in each hand, feet hip width, push the hips back and lean over to about 45 degrees with a flat back. The dumbbells hang under the shoulders.",c:["Pull both dumbbells to the lower ribs, elbows close to the body","Hold the lean. The body does not bob up and down","Squeeze the shoulder blades together at the top","Lower to fully straight arms every rep"],m:"Standing up with each pull. Holding the lean is the exercise; the arms are only hooks."},
 doorrow:{s:"Stand facing a sturdy door frame, feet close to the base, grip both sides at chest height. Lean back with straight arms and a straight body.",c:["Keep the body one line from head to heels, no bending at the hips","Pull yourself in until the chest is near the frame, elbows down past the ribs","Push back out slowly to straight arms","Walk the feet closer to the frame to make it easier"],m:"Bending at the waist to get there. The body travels as one piece or the back does nothing."},
 sldl:{s:"One dumbbell, held in the hand opposite the standing leg. Stand on one foot with a soft knee that does not change.",c:["Push the hips STRAIGHT back and let the free leg rise behind you as a counterweight","Hips stay level. Do not let the free hip roll open","Go as low as the back of the thigh allows with a flat back, usually shin height","Stand up by driving the hips forward, not by pulling with the back"],m:"Turning it into a one-legged squat. The knee angle is set at the top and held all the way down."},
+kbsldl:{s:"One kettlebell, held in the hand opposite the standing leg. Stand on one foot with a soft knee that does not change.",c:["Push the hips STRAIGHT back and let the free leg rise behind you as a counterweight","Hips stay level. Do not let the free hip roll open","Go as low as the back of the thigh allows with a flat back, usually shin height","Stand up by driving the hips forward, not by pulling with the back"],m:"Turning it into a one-legged squat. The knee angle is set at the top and held all the way down."},
 nordic:{s:"Kneel on something soft with the heels held down: under a couch, under a heavy barbell, or a partner holding them.",c:["Body dead straight from knees to head, hips never bending","Lower forward as SLOWLY as you can hold it","Catch yourself with the hands and push back up to the start","A handful of honest reps is a real set. This one is genuinely hard"],m:"Bending at the hips to slow the fall. That takes the hamstrings out of it entirely."},
 dbcalf:{s:"A dumbbell in each hand, balls of the feet on a step or a thick book, heels hanging free.",c:["Drop the heels below the step for a full stretch at the bottom","Drive up to full tiptoe and squeeze for a beat","Knees straight but not pushed back hard. The calves do all of it","Hold something with one hand if balance is the limit"],m:"Bouncing. One second up, one second down, every rep."},
 bwcalf:{s:"Standing tall, feet hip width. A step under the balls of the feet if you have one, the flat floor if you do not.",c:["Rise onto the toes as high as you can go and hold a beat","Lower slowly. The way down is half the work","Fingertips on a wall for balance, not for help","Once the set is easy, do one leg at a time"],m:"Fast little pulses. Full height, full stretch, or it is not a rep."}

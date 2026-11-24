@@ -266,6 +266,16 @@ main constraint on how to work in it. See **Traps** below before editing.
   wizard kit owns, so neither lift is ever generated: they are picked on purpose in the builder. On the lifter a kettlebell
   lift is the dumbbell lift with different gear (`twin`, `g9_kb` in tools/figure-lifts.js). No kettlebell only moves were
   added; swings and the like are a separate decision.
+  **Four more in v5.301** (owner reviewed each): `kblunge`, `kbstepup`, `kbsldl`, `kbrow`, the lifts where the bell simply
+  hangs from the hand (`hang` in tools/figure-lifts.js). The bell's handle is one thick arch drawn from his photos, with the
+  fist over it. **A hanging bell is far wider than a dumbbell, and where it lands against the legs is decided by the camera,
+  not only the carry**: on the lunge the far bell sat exactly on the leading shin from the usual slant, and he rejected both
+  drawing it behind (reads as through the knee) and over (reads as between the legs). A pose may now ask for its own slant
+  (`p.slant`, degrees, 38 by default); the kettlebell lunge uses 20 with the bells carried wider. `tools/figure-check.js`
+  tests a kettlebell's ball against both legs. Two lines that flashed at the pelvis went in the same build: in the lunge the
+  near thigh is pinned over the trunk, and the hip joint hides a thigh's outline out to 22, not 19, on every lift.
+  The step-up keeps one foot on the box for the whole set on purpose; the words say all reps one leg, then switch.
+  Still owed, his words: the far side of the handle's arch should be drawn thinner than the near side.
   The sheet is three named parts, **Set up, Do, Avoid**, with thin rules. **The only orange on it is the muscle at work on the
   lifter and those three headers (v5.298, his words: in that orange as headers, but that is it), and every word is one colour.**
   A changed lift is rebuilt into the app with `node tools/figure-build.js`. His words on the version before: the orange brings my attention all over
