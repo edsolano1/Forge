@@ -54,6 +54,15 @@ Object.keys(LIFTS).forEach(function(id){
       // FLOOR
       ['knee','ank','elb','hand'].forEach(function(j){if(q[j][1]<4)say('FLOOR',nm+' '+j,k);});
       // THROUGH: each bar against thigh, shin, upper arm and the trunk
+      // THROUGH: a kettlebell's ball against either leg. The bell is far wider than the dumbbell it stands in for.
+      (r.gear||[]).forEach(function(g){
+        if(g.t!=='g9_kb'||!g.hand)return;
+        var un=FIG.norm(g.up),R=g.r||20,D=(g.drop||13)+R,bc=[g.c[0]-un[0]*D,g.c[1]-un[1]*D,g.c[2]-un[2]*D];
+        [['thigh',q.hipJ,q.knee,15,10.5],['shin',q.knee,q.ank,11,6.5]].forEach(function(c){
+          var o=segDist(c[1],c[2],bc,bc),pen=c[3]+(c[4]-c[3])*o.s+R-o.d;
+          if(pen>2)say('THROUGH','kettlebell ('+(g.c[0]<0?'right':'left')+' hand) in '+nm+' '+c[0],k,pen);
+        });
+      });
       (r.gear||[]).forEach(function(g){
         if(g.t!=='bar')return;
         var a=[-g.half,g.c[1],g.c[2]],b=[g.half,g.c[1],g.c[2]];

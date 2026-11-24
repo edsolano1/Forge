@@ -2429,6 +2429,12 @@ function hang(base,name,out,dy,dz){
   });
 }
 LIFTS.kblunge=hang('lunge','Kettlebell Walking Lunge',62,4,20);
+// seen from a slant, the far bell hangs behind the leading knee for half of every other stride, and that reads as the bell
+// going through the knee (owner, 23 Nov). From straight ahead both bells hang clear of both legs the whole way.
+LIFTS.kblunge.views=['side','front'];LIFTS.kblunge.labels=['Side','From the front'];LIFTS.kblunge.cx=[236,240];
+(function(){var base=LIFTS.kblunge.pose;LIFTS.kblunge.pose=function(t){var r=base(t),p=r.p,f={arms:'front'};
+  // from the front the trailing thigh is behind the trunk, whichever leg it is this stride
+  f[p.ankR[2]<p.ankL[2]?'thighR':'thighL']='back';p.layer.front=f;return r;};})();
 LIFTS.kbstepup=hang('stepup','Kettlebell Step-Up',62);
 LIFTS.kbsldl=hang('sldl','Kettlebell Single-Leg Romanian Deadlift',0);
 LIFTS.kbrow=hang('dbrow','One-Arm Kettlebell Row',0);
