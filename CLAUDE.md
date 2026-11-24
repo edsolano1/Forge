@@ -313,9 +313,10 @@ main constraint on how to work in it. See **Traps** below before editing.
 - **The exercise card is buttons, and you say what it shows** (v5.238, owner picked B). The row
   under the name is four plates, icon over word (`body.forge .ex-links a`): HOW TO, NOTE,
   HISTORY, PLATES. `openExHist` is every session that lift appears in (`histForEx`), best at the
-  head. The coaching line, your note and Last each have a switch in their own sheet, worded
-  **Show this on the exercise** every time (`exShowTick`, `exShowBox`), stored per exercise in
-  `DB.exShow` where **absent means shown**. Never make one of these default to hidden.
+  head. **The three Show this on the exercise ticks are gone** (v5.302, owner: not relevant any
+  more, now that one lift is open at a time). The coaching line, your note and Last are always
+  on the open card; `exShow`, `exShowTick` and `exShowBox` no longer exist, and `DB.exShow` may
+  sit in old data with nothing reading it. Do not bring the tick back.
 - **Never draw a dot as a path** (v5.259, owner picked B of three). The dot of the How To i was
   `M10 6.2v.1`, a tenth of a unit of line, and `.ex-links a svg` set no `stroke-linecap`, so a
   butt cap drew it **0.095px tall** on the phone: a hairline, and the mark read as a bare stem in

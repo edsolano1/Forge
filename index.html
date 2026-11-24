@@ -221,15 +221,6 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .xh-m svg{width:16px;height:16px;fill:none;stroke:var(--gold);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .xh-m.mt svg{stroke:var(--match);}
 .xh-none{color:var(--txt3);font-size:13.5px;text-align:center;padding:14px 0;}
-/* The switch, the same sentence in all three sheets. */
-.xs{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--txt);
-  border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:12px 13px;cursor:pointer;margin-top:14px;}
-.xs .bx{flex:none;width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:var(--bg);
-  display:flex;align-items:center;justify-content:center;}
-.xs .bx svg{width:14px;height:14px;fill:none;stroke:var(--gold);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
-.xs.on .bx{border-color:var(--go);background:color-mix(in srgb,var(--go) 18%,transparent);}
-.xs u{text-decoration:none;flex:1;min-width:0;font-size:14px;}
-.xs small{display:block;font-size:12px;line-height:1.45;color:var(--txt3);margin-top:2px;}
 /* An i beside a title: one sentence on the sheet, the long story behind the button (v5.238). */
 .ask-h{display:flex;align-items:center;gap:9px;}
 .ask-h h3{flex:1;margin:0;}
@@ -3660,7 +3651,6 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
         Assisted machine</button>
       <button class="dayact" title="What this means" aria-label="What assisted machine means" onclick="exInvInfo()"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 9v4.5M10 6.6v.3"/></svg>Info</button>
     </div>
-    <div id="exNoteShow"></div>
     <div class="sheet-btns">
       <div class="btn btn-go" onclick="saveExNote()">DONE</div>
     </div>
@@ -4143,7 +4133,6 @@ body.forge .xm-row small{margin-left:auto;color:var(--txt3);font-size:13px;}
     <div class="ins-part"><span class="ins-lab">Set up</span><div class="ins-s" id="insSetup"></div></div>
     <div class="ins-part"><span class="ins-lab">Do</span><ul class="ins-c" id="insCues"></ul></div>
     <div class="ins-part ins-m"><span class="ins-lab">Avoid</span><em id="insMistake"></em></div>
-    <div id="insShow"></div>
     <div class="sheet-btns"><div class="btn" onclick="closeOvl('instrOvl')">CLOSE</div></div>
   </div>
 </div>
@@ -8283,7 +8272,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.301';
+var APPV='v5.302';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8389,41 +8378,6 @@ function pretty(iso){var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);re
 // Anything the user typed goes through this before it is put into innerHTML. Their own exercise
 // notes are the first free text in the app that gets rendered rather than sat in a textarea.
 var exNoteFor=null;
-// What each exercise prints on its card (v5.238). Absent means shown: a switch nobody has
-// touched cannot take anything away. Keys: ref (the app's coaching line), note (your own),
-// last (the Last chip).
-function exShow(exId,k){
-  var o=(DB.exShow||{})[exId];
-  return !o||o[k]===undefined?true:!!o[k];
-}
-function exShowSet(exId,k,v){
-  DB.exShow=DB.exShow||{};
-  var o=DB.exShow[exId]=DB.exShow[exId]||{};
-  if(v)delete o[k];else o[k]=0;
-  var n=0;for(var x in o)n++;
-  if(!n)delete DB.exShow[exId];
-  saveDB();
-}
-// One sentence in all three sheets, with a line under it saying what would appear.
-function exShowTick(exId,k,sub){
-  var on=exShow(exId,k);
-  return '<button class="xs'+(on?' on':'')+'" onclick="exShowTap(\''+exId+'\',\''+k+'\')">'+
-    '<span class="bx">'+(on?'<svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9"/></svg>':'')+'</span>'+
-    '<u>Show this on the exercise<small>'+sub+'</small></u></button>';
-}
-function exShowTap(exId,k){
-  exShowSet(exId,k,!exShow(exId,k));
-  var box=document.getElementById(k==='last'?'xhShow':k==='note'?'exNoteShow':'insShow');
-  if(box)box.innerHTML=exShowTick(exId,k,box.getAttribute('data-sub')||'');
-  if(CUR)renderSession();
-  try{sfxTick&&sfxTick();}catch(e){}
-}
-function exShowBox(id,exId,k,sub){
-  var box=document.getElementById(id);
-  if(!box)return;
-  box.setAttribute('data-sub',sub);
-  box.innerHTML=exShowTick(exId,k,sub);
-}
 // Every session this lift appears in, newest first, each with what it did against the one before.
 function histForEx(exId){
   var out=[];
@@ -8459,9 +8413,7 @@ function openExHist(exId){
              '<span class="xh-s">'+esc(fmtSets(x.sets))+'</span>'+(mark||'<span class="xh-m"></span>')+'</div>';
     }).join('')+'</div>';
   }
-  h+='<div id="xhShow"></div>';
   document.getElementById('xhBody').innerHTML=h;
-  exShowBox('xhShow',exId,'last','Last time, as the line under the name.');
   document.getElementById('exHistOvl').classList.add('on');
 }
 // 25 SEP, in the mono the rest of the numbers use.
@@ -8475,7 +8427,6 @@ function openExNote(exId){
   document.getElementById('exNoteName').textContent=nm;
   document.getElementById('exNoteBox').value=(DB.exNotes||{})[exId]||'';
   exNoteInvSet(invEx(exId));
-  exShowBox('exNoteShow',exId,'note','Your note sits under the name while you lift.');
   document.getElementById('exNoteOvl').classList.add('on');
 }
 // Same tick the custom-exercise sheet wears, same drawing. It commits on SAVE with the
@@ -8753,12 +8704,6 @@ function openInstr(exId){
     su.parentNode.style.display='none';ul.parentNode.style.display='none';mi.parentNode.style.display='none';
   }
   insAnimShow(exId);
-  var isb=document.getElementById('insShow');
-  if(isb){
-    var cue=(EX[exId]&&EX[exId].note)||'';
-    if(cue)exShowBox('insShow',exId,'ref',esc(cue));
-    else isb.innerHTML='';
-  }
   document.getElementById('instrOvl').classList.add('on');
 }
 // External references are gone (owner call, 31 Aug): if videos ship one day they ship for
@@ -11811,17 +11756,18 @@ function renderSession(){
       // button below still read "Note" because that is written after the assignment, so the only
       // thing missing was the one thing it is for: seeing it without opening anything.
       var un=(DB.exNotes||{})[rf.exId]||'';
-      // Each of these three is now the owner's to show or hide, from the sheet it belongs to
-      // (v5.238). Absent means shown, so an untouched card is the card it always was.
-      if(r.note&&exShow(rf.swapId||rf.exId,'ref'))html+='<div class="ex-note">'+esc(r.note)+'</div>';
-      if(un&&exShow(rf.exId,'note'))html+='<div class="ex-unote">'+esc(un)+'</div>';
+      // The coaching line, your note and Last are always on the open card. The three Show this
+      // on the exercise ticks went in v5.302 (owner): one lift is open at a time, so there is
+      // nothing left to tidy away. DB.exShow may sit in old data and nothing reads it.
+      if(r.note)html+='<div class="ex-note">'+esc(r.note)+'</div>';
+      if(un)html+='<div class="ex-unote">'+esc(un)+'</div>';
       // TARGET and LAST only. The personal record used to sit here as a third chip, which
       // made a one-off heavy day look like the standard you were meant to hold every set
       // to. It moved to the foot of the card, beside the rest - present, not prescriptive.
       // Target left this line in v5.196: it is the ghost inside every set box now, where the
       // number is actually used. Last stays, because last time is the thing to beat and it is
       // nowhere else on the card.
-      html+=((L&&exShow(rf.exId,'last'))?'<div class="ex-stats"><span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span></div>':'')+
+      html+=(L?'<div class="ex-stats"><span class="ex-stat st-last">Last <b>'+fmtSets(L.sets)+'</b></span></div>':'')+
             '</div>';   // closes ex-body
       // The button sits beside the instructions because that is where you already look for
       // "how do I do this one".
