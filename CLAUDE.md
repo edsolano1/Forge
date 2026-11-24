@@ -353,7 +353,7 @@ main constraint on how to work in it. See **Traps** below before editing.
   thing he objected to. **One drag handle for the whole app: three bare lines** (`mkGripSvg` now
   matches `CARDGRIP` and `DRAGSVG`), and one bin drawing everywhere. A new list uses those two.
   **A beginner is asked less by the wizard** (v5.307): `ezNew()` is the three experience answers
-  adding up to two or less; he is offered one, two or three days only and is never asked about
+  adding up to two or less; he is offered one, two or three days only. **The alternating weeks question is asked only of `ezVet()`** (v5.313: more than six months of programs AND training now), and **question one is three choices** (v5.312: never, less than six months, more than six months, so the score tops out at six and ADVANCED takes all three top answers). Before v5.313 a beginner was simply never asked about
   alternating weeks (`skip` on a step, honoured by `ezPick` and `ezBack`). A veteran coming back
   after a break is not new. Offering to add a day later, which the owner mentioned, is not built.
   **Pump Day shows all three to earn** (v5.308): the locked card lists Upper body, Lower body and

@@ -8325,7 +8325,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.312';
+var APPV='v5.313';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -21848,6 +21848,10 @@ function ezScale(n,max){
 // idea he has no use for yet. New means the three experience answers add up to two or less; a
 // veteran coming back after a break is not new and is still asked everything.
 function ezNew(){return EZ&&EZ.xp1!=null&&((EZ.xp1||0)+(EZ.xp2||0)+(EZ.xp3||0))<=2;}
+// Two alternating weeks is asked only of somebody with more than six months of real programs
+// behind them who is training now (v5.313, owner: a beginner needs to lock down the basic lifts
+// and their form first). Everyone else gets one week and is never asked.
+function ezVet(){return EZ&&EZ.xp1===2&&(EZ.xp3||0)>0;}
 function ezSkip(i){var st=EZ_STEPS[i];return !!(st&&st.skip&&st.skip());}
 function ezDays(){
   var dots=function(n){var h='<svg viewBox="0 0 52 52" fill="none">';
@@ -21889,7 +21893,7 @@ var EZ_STEPS=[
   // beginner barbell programs alternate two workouts across three days, A B A then B A B,
   // which one board cannot say (v5.114).
   {t:'One week, or two that alternate?',s:'Most plans repeat the same week. Some swap two workouts back and forth, so one week is A B A and the next is B A B.',
-   k:'weeks',skip:function(){return ezNew();},opts:function(){return [
+   k:'weeks',skip:function(){return !ezVet();},opts:function(){return [
     [1,'One week','The same days every week',WZ.weeks[0]],
     [2,'Two weeks','They take turns. You get a second board to flip to',WZ.weeks[1]]];}},
   {t:'How long is a session?',s:'Count the time you actually have, door to door. The week is trimmed to fit, not crammed.',
