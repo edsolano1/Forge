@@ -3372,6 +3372,15 @@ body.forge .exc.shut .ex-n{color:var(--txt2);}
 body.forge #sBody.rearrange .exc.shut .exdrag{display:flex;}
 body.forge .shead{display:grid;grid-template-columns:18px 1fr 1fr 48px;gap:8px;padding:8px 12px 2px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--txt3);text-align:center;}
 body.forge .exc .srow{grid-template-columns:18px 1fr 1fr 48px;padding:6px 4px;}
+/* Plus and minus under the set that is waiting (v5.305, owner: one thumb, no keyboard). Only that
+   one row has them, so the card stays calm. Weight moves one real step of that lift. */
+.sstep{display:none;}
+body.forge .exc .sstep{display:grid;grid-template-columns:18px 1fr 1fr 48px;gap:8px;padding:0 4px 9px;}
+body.forge .exc.shut .sstep{display:none;}
+body.forge .sstep .ssp{display:flex;gap:6px;min-width:0;}
+body.forge .sstep button{flex:1;height:36px;padding:0;border-radius:999px;border:1px solid #6a3f26;background:#130c09;
+  color:var(--gold);font-family:var(--mono);font-size:19px;line-height:1;cursor:pointer;}
+body.forge .sstep button:active{background:rgba(255,138,31,.18);}
 body.forge .exc .srow:has(.inp.wide){grid-template-columns:18px 1fr 1fr 48px;}
 body.forge .exc .srow:has(.inp.wide):has(.hold){grid-template-columns:18px 1fr 1fr 40px 48px;}
 body.forge .exc .sno{font-size:12px;}
@@ -8284,7 +8293,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.304';
+var APPV='v5.305';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11949,7 +11958,7 @@ function edPad(){
   var e=document.getElementById('edBig');
   if(e)e.setAttribute('inputmode',(edCtx&&edCtx.which==='w')?'decimal':'numeric');
 }
-function openEdit(id,i,which){
+function openEdit(id,i,which,quiet){
   initAudio();
   var A=DB.active[CUR],r=null;
   // Walk the day the way the session itself does. This read W[CUR].sections directly, which is
@@ -11975,6 +11984,7 @@ function openEdit(id,i,which){
   var tgt=fmtLine((r.sets.split('\n')[i]||'').trim());
   document.getElementById('edHint').textContent='Target for this set: '+tgt;
   edShow();
+  if(quiet)return;      // the plus and minus set the number without the sheet
   document.getElementById('editOvl').classList.add('on');
   // Focused on open, inside the tap that opened it, so the keyboard is already up. Without this
   // every weight change was tap the row, tap the number, type, DONE - one tap too many mid-set.
@@ -12021,7 +12031,7 @@ function saveEdit(){
     // Opened and closed without a change: keep the exact pounds already in data-lb. Converting
     // the rounded kg display back would turn a 145 lb target into 145.5 (v5.100).
     var same=(edCtx.val===edCtx.open&&el.dataset.lb!==undefined&&el.dataset.lb!=='');
-    var lb=same?parseFloat(el.dataset.lb)||0:inW(edCtx.val);
+    var lb=edCtx.lb!==undefined?edCtx.lb:(same?parseFloat(el.dataset.lb)||0:inW(edCtx.val));
     el.dataset.lb=lb;
     inpOwn(el,fmtW(lb));
   }else{
@@ -12065,6 +12075,55 @@ function saveEdit(){
   }
   try{saveDB();}catch(e){}
   closeOvl('editOvl');edCtx=null;
+}
+// One real step of a lift's weight, up or down: the level up's own chain (v5.305).
+function notchW(id,name,x,dn){
+  var isdb=isDb(id,name),ln=isdb?null:latticeNext(id,x,dn),nx;
+  if(ln!=null)nx=ln;
+  else{
+    var st=stepFor(id,x),plate=(x>=40?5:2.5);
+    if(isdb)nx=dbWalk(x,dn,st);
+    else if(st!==plate)nx=dn?Math.max(0,x-st):x+st;
+    else nx=plateNext(x,dn);
+  }
+  return Math.max(0,Math.round(nx*100)/100);
+}
+// The pair of buttons lives in ONE element that follows the waiting row about. It is not a set
+// row, so nothing that counts rows sees it, and a redraw simply makes it again.
+function stepPlace(row){
+  var el=document.getElementById('sStep');
+  if(!row||!CUR){if(el)el.remove();return;}
+  var m=/^sr-(.*)-(\d+)$/.exec(row.id||'');if(!m){if(el)el.remove();return;}
+  var wi=document.getElementById('w-'+m[1]+'-'+m[2]),hasW=!!(wi&&wi.type!=='hidden');
+  var sig=m[1]+'|'+m[2]+'|'+(hasW?1:0);
+  if(!el){el=document.createElement('div');el.id='sStep';el.className='sstep';}
+  if(el.dataset.sig!==sig){
+    el.dataset.sig=sig;el.dataset.id=m[1];el.dataset.i=m[2];
+    var pair=function(k,what){return '<span class="ssp"><button aria-label="Less '+what+'" onclick="setStep(\''+k+'\',-1)">&minus;</button>'+
+      '<button aria-label="More '+what+'" onclick="setStep(\''+k+'\',1)">+</button></span>';};
+    el.innerHTML='<span></span>'+(hasW?pair('w','weight')+pair('r','reps'):pair('r','reps')+'<span></span>')+'<span></span>';
+  }
+  if(row.nextSibling!==el)row.parentNode.insertBefore(el,row.nextSibling);
+}
+function setStep(which,dir){
+  var el=document.getElementById('sStep');if(!el||!CUR)return;
+  var id=el.dataset.id,i=+el.dataset.i,A=DB.active[CUR];if(!A)return;
+  var inp=document.getElementById((which==='w'?'w-':'r-')+id+'-'+i);if(!inp)return;
+  openEdit(id,i,which,1);if(!edCtx||edCtx.id!==id)return;
+  var big=document.getElementById('edBig');
+  if(which==='w'){
+    var ex=slotBase(id),nm='';
+    edAllRows(CUR).forEach(function(row){var rf=rowFor(A.swaps,row,CUR);if(rf.id===id){ex=rf.swapId||rf.exId;nm=rf.data.name;}});
+    var cur=(inp.dataset.lb!==undefined&&inp.dataset.lb!=='')?parseFloat(inp.dataset.lb)||0:inW(edCtx.val);
+    var nv=notchW(ex,nm,cur,dir<0);
+    if(nv<=0||nv===cur){edCtx=null;return;}
+    edCtx.lb=nv;big.value=fmtW(nv);
+  }else{
+    var st=edCtx.isSec?5:1;
+    big.value=Math.max(st,(edCtx.val||0)+dir*st);
+  }
+  saveEdit();
+  try{sfxTick&&sfxTick();}catch(e){}
 }
 function toggleSet(id,i,rest,unit){
   initAudio();stopRestAlert();
@@ -12238,6 +12297,7 @@ function sfApply(fresh){
       }
     });
   });
+  try{stepPlace(tgt);}catch(e){}
 }
 // The move to the next lift is SHOWN (v5.293, owner picked 2B and asked for it slow): the
 // finished card folds to its line, then the next one opens and is lit round its edge, so the
