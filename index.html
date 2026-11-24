@@ -8328,7 +8328,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.309';
+var APPV='v5.310';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -15438,7 +15438,7 @@ function weekAdd(d){
   }
   easeArm();                       // same for a week somebody sent (v5.251)
   mergeCustom();dayMap();saveDB();renderHome();
-  ask(added+' workout'+(added===1?' is':'s are')+' in Saved workouts, under the week. Hold one to put it on a day.',null,'Added');
+  ask(added+' workout'+(added===1?' is':'s are')+' in Saved workouts. Hold the lines on one, then drag it to a day.',null,'Added');
 }
 function historyText(){
   return APPNAME()+' \u00b7 full history\n'+DB.logs.length+' session'+(DB.logs.length===1?'':'s')+'\n\n'+
@@ -22279,7 +22279,7 @@ function ezForge(){
     lean:'The lifting stays heavy on purpose. It keeps your muscle while the weight comes off.',
     move:'This week will not maximise any one thing. It makes almost everything better at once, and it is the easiest plan to keep for years, which is the whole trick.'};
   var saved=(EZ.into==='saved');
-  var lead=saved?'It is waiting in Saved workouts. Hold one to put it on a day. ':'';
+  var lead=saved?'It is waiting in Saved workouts. Hold the lines on one, then drag it to a day. ':'';
   if(two&&!saved)lead+='Week 2 is behind this one. Flip to it under Saturday. ';
   // 900ms, so the line that says what the plan believes is not landed on by the next thing.
   // There used to BE a next thing: the tour offer arrived as a second dialog, then as a second
