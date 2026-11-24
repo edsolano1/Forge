@@ -8325,7 +8325,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.311';
+var APPV='v5.312';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -21865,15 +21865,19 @@ function ezDays(){
 var EZ_STEPS=[
   {t:'Have you followed a real program?',s:'A structured plan followed for a continuous stretch, not the odd gym visit.',
    k:'xp1',opts:function(){return [
-    [0,'Never','This would be my first',WZ.xp1[0]],
-    [1,'Up to 6 months','Started one, life happened',WZ.xp1[1]],
-    [2,'6 months to 2 years','A real stretch of real training',WZ.xp1[2]],
-    [3,'Over 2 years','Programs are how I train',WZ.xp1[3]]];}},
+    // Three choices (v5.312, owner): past six months the other two questions say more about a
+    // lifter than whether it has been eighteen months or three years. The score now tops out at
+    // six, so ADVANCED takes all three: more than six months, knows most of the weights, and
+    // training twice a week or more. Anything short of that is intermediate, the lighter and
+    // safer mistake. The cooled anvil is gone; the three lit ones remain.
+    [0,'Never','This would be my first',WZ.xp1[1]],
+    [1,'Less than 6 months','Started one, life happened',WZ.xp1[2]],
+    [2,'More than 6 months','Programs are how I train',WZ.xp1[3]]];}},
   {t:'Do you know your working weights?',s:'Roughly what you use on your main lifts, without checking anywhere.',
    k:'xp2',opts:function(){return [
     [0,'No, I don’t track','The weights and I are strangers',WZ.xp2[0]],
     [1,'For a couple of lifts','The big ones, roughly',WZ.xp2[1]],
-    [2,'Yes, for most','I could recite them',WZ.xp2[2]]];}},
+    [2,'Yes, for most','Burned into memory',WZ.xp2[2]]];}},
   {t:'The last three months, honestly?',s:'The week is built from what you actually do, not what you meant to.',
    k:'xp3',opts:function(){return [
     [0,'Not training right now','Starting fresh, or coming back',WZ.xp3[0]],
