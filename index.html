@@ -2840,7 +2840,7 @@ html.mo-off #hintBar{transition:none;}
    element's shadow and takes no taps, so nothing is ever blocked: the first touch anywhere puts
    the hint away, and touching the lit thing itself is the lesson learned. */
 #hintSpot{display:none;position:fixed;z-index:139;pointer-events:none;border-radius:999px;
-  box-shadow:0 0 0 5px rgba(255,138,31,.26),0 0 22px 6px rgba(255,138,31,.30),0 0 0 200vmax rgba(4,2,1,.74);}
+  box-shadow:0 0 0 5px rgba(255,138,31,.26),0 0 22px 6px rgba(255,138,31,.30),0 0 0 200vmax rgba(4,2,1,.6);}
 #hintSpot.on{display:block;}
 #hintBar{border-color:var(--gold);font-size:14px;flex-wrap:wrap;justify-content:flex-end;padding:13px 13px 12px 15px;}
 #hintBar .hint-w{flex:1 0 100%;min-width:0;}
@@ -8325,7 +8325,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.314';
+var APPV='v5.315';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11711,7 +11711,13 @@ function hintHide(){
 }
 // What each hint points at. The spot is aimed on a slow tick because the session is redrawn and
 // its cards fold and open under it; with nothing to aim at the hint is the plain bar at the foot.
-var HINT_TGT={log:'#session .exc:not(.shut) .srow.next .chk',exhold:'#session .exc:not(.shut) .ex-n',grip:'#weekCards .card .carddrag'};
+// The grip hint lights the whole CARD, not the grip (v5.315). The grip is twelve pixels of dim
+// grey, so lighting only that left the owner a black screen with nothing visibly lit, straight
+// after a workout. HINT_HIT is what counts as doing the thing; for the grip that is still the grip.
+var HINT_TGT={log:'#session .exc:not(.shut) .srow.next .chk',exhold:'#session .exc:not(.shut) .ex-n',grip:'#weekCards .card[data-base]:not(.sealed)'};
+var HINT_HIT={grip:'.carddrag'};
+// Nothing is taught in the minutes after a workout is finished: that is a moment for the result.
+var HINT_FIN=0,HINT_REST=10*60*1000;
 var HINTIV=null,HINTQUIET={};
 function hintSpotOff(){
   if(HINTIV){clearInterval(HINTIV);HINTIV=null;}
@@ -11727,10 +11733,10 @@ function hintAim(){
   if(!r||!r.width||!r.height||r.top<40||r.bottom>vh-40||document.querySelector('.ovl.on')){
     sp.classList.remove('on');e.style.top='';e.style.bottom='';return;
   }
-  var pad=HINTNOW==='exhold'?7:5;
+  var pad=HINTNOW==='exhold'?7:HINTNOW==='grip'?4:5;
   sp.style.left=(r.left-pad)+'px';sp.style.top=(r.top-pad)+'px';
   sp.style.width=(r.width+pad*2)+'px';sp.style.height=(r.height+pad*2)+'px';
-  sp.style.borderRadius=HINTNOW==='exhold'?'10px':'999px';
+  sp.style.borderRadius=HINTNOW==='exhold'?'10px':HINTNOW==='grip'?'9px':'999px';
   sp.classList.add('on');
   var bh=e.offsetHeight||90,top=r.bottom+pad+14;
   if(top+bh>vh-12)top=r.top-pad-14-bh;
@@ -11743,7 +11749,7 @@ document.addEventListener('pointerdown',function(ev){
   if(!HINTNOW)return;
   var sp=document.getElementById('hintSpot');if(!sp||!sp.classList.contains('on'))return;
   if(ev.target.closest&&ev.target.closest('#hintBar'))return;
-  var k=HINTNOW,hit=false;try{hit=!!ev.target.closest(HINT_TGT[k]);}catch(x){}
+  var k=HINTNOW,hit=false;try{hit=!!ev.target.closest(HINT_HIT[k]||HINT_TGT[k]);}catch(x){}
   if(hit)hintMark(k);else HINTQUIET[k]=1;
   hintHide();try{drawHintRow();}catch(x){}
 },true);
@@ -11769,6 +11775,7 @@ function hintGot(){
 // which shadowed this and made the call throw silently into its own catch (v5.273).
 function showHint(k,scr){
   if(hintsOff()||SANDBOX||!HINTS[k]||hintSeen(k)||HINTNOW||HINTQUIET[k])return;
+  if(k==='grip'&&HINT_FIN&&Date.now()-HINT_FIN<HINT_REST)return;
   // Not during the arrival. renderHome runs behind the splash and behind the welcome, so the
   // very first hint appeared over a man who had not answered the safety questions yet. Nothing
   // is taught until he is actually looking at his own week (v5.273).
@@ -14752,6 +14759,7 @@ function finishNow(){
   document.getElementById('session').classList.remove('on');
   stopTimer();renderHome();
   try{wearPush();}catch(e){}   // the wrist finds out the day is done
+  HINT_FIN=Date.now();
   sessionSeal(function(){document.getElementById('exportOvl').classList.add('on');});
 }
 // Forge's finish. The piece comes out white-hot, then goes under: the colour walks

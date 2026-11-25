@@ -324,6 +324,12 @@ main constraint on how to work in it. See **Traps** below before editing.
   no taps, `HINT_TGT` names what each hint points at and `hintAim` follows it on a 150ms tick.
   The first touch anywhere puts it away until next launch (`HINTQUIET`); touching the lit thing
   marks the hint learned. With nothing to aim at it is the old bar at the foot, now labelled TIP.
+  **A spotlight lights something big enough to see** (v5.315, owner on his own phone: the grip
+  hint came up straight after a workout and the screen was black). The grip is twelve pixels of
+  dim grey, so lighting only that lit nothing. `HINT_TGT.grip` is the whole card now, `HINT_HIT`
+  says what counts as doing the thing (still the grip), the dark is .6 not .74, and no grip hint
+  is shown for `HINT_REST` (ten minutes) after a finish (`HINT_FIN`): that moment is the result's.
+  A test script that declares a function called `R` breaks the app, which has its own.
   **Plus and minus live in the number sheet** (v5.309; v5.305 put them on the card under the
   waiting set and he rejected that the same evening: only when a number is picked, never on the
   exercise panel). `edStep(dir)` in `#editOvl`: reps by 1, seconds by 5, weight by `notchW`, one
