@@ -2660,7 +2660,7 @@ html.mo-off .fin-lvl::after{animation:none;display:none;}
 .lvl-row::before{display:none;}
 .lvl-row.landed{opacity:1;transform:none;}
 .lvl-row:hover{background:rgba(255,138,31,.08);}
-.lvl-n{flex:1;min-width:0;font-family:'Marcellus',serif;font-size:16px;font-weight:400;color:var(--txt);margin:0;white-space:normal;line-height:1.2;}
+.lvl-n{flex:1;min-width:0;font-family:'Marcellus',serif;font-size:15px;font-weight:400;color:var(--txt);margin:0;white-space:normal;line-height:1.2;}
 .lvl-nums{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
 .lvl-num{display:inline-flex;align-items:baseline;gap:3px;font-family:var(--mono);font-weight:700;font-size:24px;color:#fff6e6;border-radius:7px;padding:0 4px;white-space:nowrap;}
 .lvl-num small{font-size:10px;font-weight:500;color:var(--txt2);letter-spacing:.03em;}
@@ -8416,7 +8416,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.320';
+var APPV='v5.321';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
