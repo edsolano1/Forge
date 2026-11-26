@@ -14,7 +14,7 @@ prose and leave those identifiers alone.
 Ships as two halves:
 - **Web** — GitHub Pages serves `main`. This is the half that gets tested.
 - **Android** — a Capacitor wrapper (`com.edsolano.arcanum`) loading the same URL. Not in this repo:
-  it is its own git repo at `Desktop/Arcanum-Android`, started 2 Oct 2026 at phone 1.5 / watch 1.17
+  it is its own git repo at `Desktop/Dev Projects/Arcanum-Android`, started 2 Oct 2026 at phone 1.5 / watch 1.17
   (first commit `64425d1`), pushed to the PRIVATE repo `edsolano1/Forge-Android`. Private on
   purpose and it stays that way: the release notes put the Play upload key in that folder.
   **Commit AND push the Android and watch source there whenever a build ships**, the same way web

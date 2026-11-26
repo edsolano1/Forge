@@ -22,7 +22,7 @@ of it.
 It ends in a different place than it started. Backgrounded sound from a web page turned out to be
 unwinnable in every direction - even correctly filed as transient it would not reliably fire from
 a hidden page - so the page stopped trying, and Arcanum is now also a Capacitor Android app
-(`~/Desktop/Arcanum-Android`, `com.edsolano.arcanum`) that loads this live site. The app owns the
+(`~/Desktop/Dev Projects/Arcanum-Android`, `com.edsolano.arcanum`) that loads this live site. The app owns the
 notification channel, so it owns the vibration pattern a web page can never set, and it plays the
 alert itself on the media stream, where ringer mode has no say and no audio focus is requested -
 so it mixes over music instead of stopping it.
