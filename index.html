@@ -375,7 +375,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .foot a:hover{color:var(--txt);}
 
 /* ---------- REORDER ---------- */
-.blk{position:relative;transition:transform .19s cubic-bezier(.2,0,.2,1);}
+.blk{position:relative;transition:transform .22s cubic-bezier(.2,0,.2,1);}
 /* Day cards reorder by grabbing the grip, the same held-press the exercise handle uses. The
    others slide to open a gap rather than a line marking the spot - the cards are all one height,
    so the gap is unambiguous and reads as the place it will land. */
@@ -411,7 +411,7 @@ html.mo-off .daybox{transition:border-color .15s,background .15s;}
 .dropslot{border:1px dashed color-mix(in srgb,var(--go) 60%,var(--line));border-radius:var(--r);
   background:color-mix(in srgb,var(--go) 12%,transparent);margin-bottom:9px;
   box-sizing:border-box;overflow:hidden;
-  transition:height .26s cubic-bezier(.2,.7,.2,1),margin .26s cubic-bezier(.2,.7,.2,1),opacity .2s linear;}
+  transition:height .22s cubic-bezier(.2,.7,.2,1),margin .22s cubic-bezier(.2,.7,.2,1),opacity .22s linear;}
 /* The space it is leaving, closing as the new one opens, so the two days trade height over the
    same curve and everything between them slides (v5.243). 170ms was quick enough to read as a
    snap rather than a move: the owner said the days expanded really quickly and it felt like
@@ -430,7 +430,7 @@ html.mo-off .dropslot{transition:none;}
    rest day - not an absence. */
 .daybox{border:1px solid color-mix(in srgb,var(--line) 78%,#8a5a3a);border-radius:14px;padding:7px 8px 1px;margin-bottom:7px;
   background:color-mix(in srgb,var(--surface) 82%,var(--bg));
-  transition:border-color .15s,background .15s,min-height .24s cubic-bezier(.2,.7,.2,1);}
+  transition:border-color .15s,background .15s,min-height .22s cubic-bezier(.2,.7,.2,1);}
 /* A day holding a workout is solid (v5.120); only an empty day is clear. Done days keep their own quenched look. */
 .daybox.empty{padding-bottom:7px;background:transparent;border-style:dashed;}
 .dayhead{display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -619,7 +619,7 @@ body:not(:has(#session.on)) #timerPill{display:none;}
 .ssgrp .exc:last-child{margin-bottom:0;}
 .sslink{width:13px;height:13px;stroke:var(--c);stroke-width:1.7;fill:none;vertical-align:-2px;margin-right:6px;}
 
-.exc{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin-bottom:9px;overflow:hidden;transition:border-color .2s;}
+.exc{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin-bottom:9px;overflow:hidden;transition:border-color .22s;}
 .exc.alldone{border-color:color-mix(in srgb,var(--go) 32%,var(--line));}
 .ex-h{padding:15px 16px 12px;}
 .ex-nrow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
@@ -655,7 +655,7 @@ body:not(:has(#session.on)) #timerPill{display:none;}
 
 /* set rows */
 .sets{padding:0 10px 10px;}
-.srow{display:flex;align-items:center;gap:8px;padding:7px 6px;border-radius:11px;transition:background .18s;}
+.srow{display:flex;align-items:center;gap:8px;padding:7px 6px;border-radius:11px;transition:background .22s;}
 .srow.done{background:color-mix(in srgb,var(--match) 8%,transparent);}
 .srow.ispr{background:color-mix(in srgb,var(--gold) 10%,transparent);}
 .srow.isunder{background:color-mix(in srgb,var(--txt3) 14%,transparent);}
@@ -674,8 +674,8 @@ body:not(:has(#session.on)) #timerPill{display:none;}
 .srow.ispr .inp{color:var(--gold);border-bottom-color:transparent;}
 .mul{font-size:13px;color:var(--txt3);font-family:var(--mono);}
 .unit{font-size:13px;color:var(--txt3);}
-.chk{position:relative;width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:transparent;cursor:pointer;flex-shrink:0;margin-left:auto;display:flex;align-items:center;justify-content:center;transition:.16s;padding:0;}
-.chk svg{width:19px;height:19px;stroke:var(--txt3);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:.16s;}
+.chk{position:relative;width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:transparent;cursor:pointer;flex-shrink:0;margin-left:auto;display:flex;align-items:center;justify-content:center;transition:.15s;padding:0;}
+.chk svg{width:19px;height:19px;stroke:var(--txt3);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:.15s;}
 /* the theme's own mark stands in for the tick */
 .chk svg.glyph{width:22px;height:22px;color:var(--txt3);stroke:currentColor;fill:none;stroke-width:0;}
 .chk svg.glyph .f{fill:currentColor;stroke:none;}
@@ -688,7 +688,7 @@ body:not(:has(#session.on)) #timerPill{display:none;}
 .srow.done .chk svg{stroke:#0b0c0e;stroke-width:3;}
 .srow.ispr .chk{background:var(--gold);border-color:var(--gold);}
 .srow.ispr .chk svg{stroke:#0b0c0e;stroke-width:3;}
-.hold{width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:transparent;color:var(--txt3);font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.16s;}
+.hold{width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:transparent;color:var(--txt3);font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s;}
 .hold:hover{color:var(--txt);border-color:#3d434a;}
 .hold.running{background:var(--gold);border-color:var(--gold);color:#0b0c0e;}
 .hold.resume{border-color:var(--gold);color:var(--gold);}
@@ -981,7 +981,7 @@ body.light .dayact.del{--bad:#b1332c;}
 /* a set's own rest, on the set's own line */
 .mk-sr{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto;
   padding:5px 9px 5px 7px;border-radius:8px;border:1px solid var(--line);background:transparent;
-  color:var(--txt3);cursor:pointer;transition:.14s;
+  color:var(--txt3);cursor:pointer;transition:.15s;
   font-family:var(--mono);font-size:10px;letter-spacing:.04em;}
 .mk-sr svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.5;
   stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
@@ -1040,7 +1040,7 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-head-n{font-size:16px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mk-head-b{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
   color:var(--txt3);background:transparent;border:1px solid var(--line);border-radius:7px;
-  padding:6px 9px;cursor:pointer;transition:.14s;}
+  padding:6px 9px;cursor:pointer;transition:.15s;}
 .mk-head-b:hover{color:var(--go);border-color:var(--go);}
 /* Every exercise was a panel the same colour as the panel behind it, so three in a row read as
    one brown field with text in it. What separates them now is a lit left edge in the day's own
@@ -1065,7 +1065,7 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-rowacts{display:inline-flex;gap:4px;flex-shrink:0;margin-left:2px;}
 .mk-ic{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
   padding:0;border-radius:8px;border:1px solid transparent;background:transparent;
-  color:var(--txt3);cursor:pointer;transition:.14s;}
+  color:var(--txt3);cursor:pointer;transition:.15s;}
 .mk-ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;
   stroke-linecap:round;stroke-linejoin:round;}
 .mk-ic:hover{color:var(--go);border-color:color-mix(in srgb,var(--go) 40%,transparent);
@@ -1082,7 +1082,7 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-setadj > span{font-family:var(--mono);font-size:13px;letter-spacing:.09em;color:var(--txt3);
   min-width:52px;text-align:center;}
 .mk-adj{width:36px;height:36px;padding:0;border-radius:8px;border:1px solid var(--line);
-  background:transparent;color:var(--txt2);font-size:16px;line-height:1;cursor:pointer;transition:.14s;}
+  background:transparent;color:var(--txt2);font-size:16px;line-height:1;cursor:pointer;transition:.15s;}
 .mk-adj:hover:not(.off){color:var(--go);border-color:var(--go);}
 .mk-adj.off{opacity:.3;cursor:default;}
 /* the handle, and the only part of the row that starts a drag */
@@ -1097,7 +1097,7 @@ body.light .dayact.del{--bad:#b1332c;}
    hesitate over a control that actually throws work away. */
 .mk-x{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;
   flex-shrink:0;padding:0;border-radius:8px;border:1px solid transparent;background:transparent;
-  color:var(--txt3);cursor:pointer;transition:.14s;}
+  color:var(--txt3);cursor:pointer;transition:.15s;}
 .mk-x svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;
   stroke-linecap:round;stroke-linejoin:round;}
 .mk-x:hover{color:#e0736b;border-color:color-mix(in srgb,#e0736b 40%,transparent);
@@ -2216,7 +2216,7 @@ body.forge .daybox.quenched .dh-d{color:#84827f;}
 #histOvl .sheet{background:#0a0605;border-color:#4a2c1c;}
 body.forge .hsegb.on{background:#3a1d0c;color:#ffd9b5;}
 body.forge .hwk{gap:5px;margin-bottom:17px;}
-body.forge .hwk-c{aspect-ratio:1;border-radius:50%;border:1.5px solid #3a2214;background:#0e0806;padding:0;justify-content:center;gap:0;transition:transform .2s;}
+body.forge .hwk-c{aspect-ratio:1;border-radius:50%;border:1.5px solid #3a2214;background:#0e0806;padding:0;justify-content:center;gap:0;transition:transform .22s;}
 body.forge .hwk-c i{font-size:10px;letter-spacing:.08em;color:var(--txt3);}
 body.forge .hwk-c b{font-size:13px;font-weight:600;color:var(--txt2);}
 body.forge .hwk-c::after{display:none;}
@@ -2773,7 +2773,7 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hset.hed i{font-style:normal;color:var(--txt3);font-size:11px;}
 .hset.hed .mk-num.sm{font-size:13px;}
 .hnote{margin-top:14px;font-size:13px;color:var(--txt3);line-height:1.6;font-style:italic;}
-.hdel{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:13px;border-radius:11px;cursor:pointer;transition:.16s;
+.hdel{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:13px;border-radius:11px;cursor:pointer;transition:.15s;
   border:1px solid color-mix(in srgb,#ff5d6c 26%,var(--line));background:var(--surface);
   font-family:'Marcellus',serif;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,#ff5d6c 78%,var(--txt2));}
 .hdel svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;}
@@ -2785,10 +2785,10 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
    half in v5.195, so the pair is back and neither one is an island. */
 .footbar{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
 .fbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
-  padding:15px 6px 13px;border-radius:12px;border:1px solid var(--line);cursor:pointer;transition:.16s;
+  padding:15px 6px 13px;border-radius:12px;border:1px solid var(--line);cursor:pointer;transition:.15s;
   background:linear-gradient(180deg,rgba(190,214,255,.05),rgba(190,214,255,.008)),var(--surface);
   font-family:'Marcellus',serif;font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--txt2);text-align:center;line-height:1.25;}
-.fbtn svg{width:17px;height:17px;fill:none;stroke:var(--txt3);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;transition:.16s;}
+.fbtn svg{width:17px;height:17px;fill:none;stroke:var(--txt3);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;transition:.15s;}
 .fbtn:hover{color:var(--txt);border-color:color-mix(in srgb,var(--go) 40%,var(--line));
   box-shadow:0 0 22px -12px color-mix(in srgb,var(--go) 80%,transparent);}
 .fbtn:hover svg{stroke:var(--go);}
@@ -3160,14 +3160,14 @@ html.light .sp-mark .cut,body.light .sp-mark .cut{fill:#e9eef5;}
 .ez-in{max-width:430px;margin:0 auto;}
 .ez-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
 .ez-dots{display:flex;gap:7px;margin-left:auto;margin-right:4px;}
-.ez-dots i{width:7px;height:7px;border-radius:50%;background:color-mix(in srgb,var(--txt3) 40%,transparent);transition:.2s;}
+.ez-dots i{width:7px;height:7px;border-radius:50%;background:color-mix(in srgb,var(--txt3) 40%,transparent);transition:.22s;}
 .ez-dots i.on{background:var(--gold);box-shadow:0 0 8px -1px color-mix(in srgb,var(--gold) 70%,transparent);}
 .ez-t{font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--txt);margin:14px 2px 4px;}
 body.forge .ez-t{letter-spacing:.01em;text-transform:none;font-size:20px;}   /* v5.178: the question reads as written */
 .ez-s{font-size:13px;color:var(--txt2);margin:0 2px 18px;line-height:1.5;}
 .ez-card{display:flex;align-items:center;gap:15px;width:100%;text-align:left;cursor:pointer;
   background:var(--surface);border:1px solid var(--line);border-radius:14px;
-  padding:15px 16px;margin-bottom:11px;transition:border-color .15s,transform .1s;color:var(--txt);}
+  padding:15px 16px;margin-bottom:11px;transition:border-color .15s,transform .12s;color:var(--txt);}
 .ez-card:active{transform:scale(.985);}
 /* Wizard motion (v5.127): cards rise in with a stagger, every icon shares one slow breathe offset
    card to card, and the tapped icon answers once before the screen moves on. Each screen replaces
@@ -3306,7 +3306,7 @@ body.wcon{overflow:hidden;}
 .wc-pick{display:block;width:100%;text-align:left;cursor:pointer;
   padding:16px 17px;border-radius:13px;border:1px solid var(--line);
   background:linear-gradient(180deg,rgba(255,150,70,.05),rgba(255,150,70,.01)),var(--surface);
-  color:var(--txt);transition:border-color .16s,background .16s,transform .11s;}
+  color:var(--txt);transition:border-color .15s,background .15s,transform .12s;}
 .wc-pick b{display:block;font-size:15px;font-weight:600;letter-spacing:.01em;}
 .wc-pick small{display:block;margin-top:4px;font-size:13px;color:var(--txt3);letter-spacing:.01em;}
 .wc-pick:hover{border-color:color-mix(in srgb,var(--gold) 52%,var(--line));}
@@ -3318,7 +3318,7 @@ body.wcon{overflow:hidden;}
 .wc-yn{display:flex;gap:9px;margin-top:11px;}
 .wc-yn-b{flex:1;padding:10px 0;border-radius:10px;border:1px solid var(--line);cursor:pointer;
   background:none;color:var(--txt2);font-size:15px;font-weight:600;letter-spacing:.02em;
-  transition:border-color .14s,color .14s,background .14s;}
+  transition:border-color .15s,color .15s,background .15s;}
 .wc-yn-b:hover{border-color:color-mix(in srgb,var(--gold) 45%,var(--line));}
 .wc-yn-b.on{background:var(--gold);border-color:var(--gold);color:#1b1409;}
 .wc-go{margin-top:6px;text-align:center;}
@@ -3498,7 +3498,8 @@ body.forge .sheet-x:active{background:#1f130c;color:var(--gold);}
 .sheet-x.sx-auto{position:absolute;top:14px;right:14px;z-index:7;}
 body.forge .sheet.has-x>h3:first-of-type{padding-right:46px;}
 body.forge .sheet.edsheet.has-x>.ed-ex{padding:0 46px;}
-body.forge .sheet.has-x>.hh{padding-right:46px;}
+body.forge .sheet.has-x>.hh{flex-wrap:wrap;gap:10px 12px;}
+body.forge .sheet.has-x>.hh h3{flex:1 0 100%;padding-right:46px;}
 body.forge .sheet-head>.sheet-x,body.forge .dsh>.sheet-x,body.forge .sv-head .sheet-x{margin:-8px -8px 0 0;}
 /* A sheet names itself (v5.317). History, Your note and How to do it were all headed with the
    lift's name alone, so the heading did not say which one you had opened. The h3 still holds the
@@ -3534,6 +3535,18 @@ body.forge #settingsOvl .set-card.open .set-sec::after{transform:translateY(-70%
 body.forge #settingsOvl .set-body{padding-bottom:16px;}
 .set-body>.sfx-lbl:first-child{margin-top:12px;}
 html.mo-off body.forge #settingsOvl .set-sec::after{transition:none;}
+
+/* The safety questions are the first screen a new person sees, and their Yes, No and Continue
+   were a different shape and font from every button after them (v5.322, found by the audit;
+   built while the owner was away). They are the app's pills now, and a chosen answer is lit the
+   way a chosen setting is. */
+body.forge .wc-yn-b{border-radius:999px;min-height:40px;padding:0 14px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);
+  font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;}
+body.forge .wc-yn-b.on{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);border-color:#ff7a1a;color:#1b0f06;}
+body.forge .wc-go{border-radius:999px;padding:12px 18px;text-align:center;background:rgba(255,138,31,.08);border:1px solid #4a2c1c;}
+body.forge .wc-go:not(:disabled){border-color:#a0521c;}
+body.forge .wc-go b{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+body.forge .wc-go small{margin-top:2px;}
 </style>
 </head>
 <body class="booting">
@@ -8416,7 +8429,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.321';
+var APPV='v5.322';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
