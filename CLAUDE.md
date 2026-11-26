@@ -382,6 +382,23 @@ main constraint on how to work in it. See **Traps** below before editing.
   unsaved change guard, `tools/back-audit.js` (PASS), and a whole first run from the safety
   questions to the finish screen. **Nothing here has been seen on the phone, and the feel of the
   rise and the drag can only be judged there.**
+- **Three reviewers read the polish pass the same day and it had about a dozen real faults** (v5.323, 26 Nov).
+  The lesson is Trap 1 again: FOUR of my v5.316 hand edits did nothing because an untouched twin rule further
+  down the file won (the red on `.dayact.del`, the board grip at 60% strength, the builder grip at 20px, EASE ALL
+  not matching RAISE ALL). Grep the class in every state BEFORE editing, and measure the result after.
+  Fixed: the injected X sat on the bin of Pump Day and the built in day editor (`.exed-h` now makes room); the drag
+  bar covered the top third of an X that lives in its own header; a question and the finish screen no longer get
+  the bar (their only ways out are their answers and DONE, which does more than close); `sheetLeave(id)` is what
+  the X and the swipe call, and `SHEET_LEAVE` holds a sheet whose way out does more than close (the note sheet
+  redraws its card); `_instant` on an overlay skips its leave (a card lifted out of Saved); the z lift is kept
+  until the leave ends; `--kb` (`sheetKb`, visualViewport) lifts a bottom sheet clear of the keyboard where the
+  system does not resize the page. **`SETOPEN` is the open part's NAME, never an index**: Walks comes and goes
+  as Health Connect answers, and an index reopened the wrong part. **A hint belongs to its screen** (`hintAim`
+  hides it under the builder or the wizard), **dims once a launch** (`HINTDIM`), **counts one sighting a launch**
+  (`HINTONCE`), and its tip steps aside when its subject scrolls out of view (`.away`). `font-synthesis` is
+  `style`, not `none`, so the one italic note in the app still slants. v5.322 also gave the first run safety
+  screen the app's own pills and cut transition speeds to four steps (120, 150, 220, 300).
+  Not done from their list: a second finger and other rare drag edges beyond the guards above. All UNSEEN by him.
 - **Built on a walk, 23 Nov, and NOT YET REVIEWED BY HIM** (v5.302 to v5.306). He gave feedback by
   voice while walking, said to build and that he would evaluate everything at home, so these three
   went in on my pick from the mockups and any of them may change or come out:
