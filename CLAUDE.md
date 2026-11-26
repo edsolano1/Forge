@@ -317,6 +317,71 @@ main constraint on how to work in it. See **Traps** below before editing.
   more, now that one lift is open at a time). The coaching line, your note and Last are always
   on the open card; `exShow`, `exShowTick` and `exShowBox` no longer exist, and `DB.exShow` may
   sit in old data with nothing reading it. Do not bring the tick back.
+- **The polish pass, 26 Nov (v5.316 to v5.320), and MOST OF IT IS NOT YET REVIEWED BY HIM.** An audit
+  measured every screen (type, controls, sheets, colour, motion, sounds, hints) and he then picked
+  the first three decisions himself from mockups; for the rest he said, from the gym, *run these
+  through a few agents and select the best one and go ahead and implement them, and we will go by
+  them one by one afterwards*. Three reviewers voted, I built to the votes, and every item below
+  marked UNSEEN may change or come out. The mockups and the audit pages are listed in the memory
+  note `forge-polish-audit`.
+  **A sheet rises from the bottom and can be dragged away** (v5.317, HIS pick, and he tried the
+  drag in the mockup and said perfect). `sheetIn`/`sheetOut` are called from `ovlWatch` and put
+  `rise` and `leaving` on the overlay; **both are taken off by a timer, never by animationend**,
+  because a page that is not being painted fires none and a sheet stuck mid rise is a sheet off
+  the screen. `leaving` keeps a closed overlay drawn for 220ms with `pointer-events:none`, while
+  `.on` has already gone, so every `.ovl.on` test in the app still means what it meant. **The
+  overlay is still what scrolls**: `margin:auto auto 0` on the sheet seats a short one at the
+  bottom, and unlike `justify-content:flex-end` it never clips the top of a tall one.
+  `sheetDress(ovl)` runs on every open and adds the bar (`.sheet-grab`) and the X; `sheetGrab`
+  follows the finger, fades the sheet and the dark with distance, and past 30% of the height or
+  on a flick calls **`backCloses(id)`, the same thing the hardware back does**, so an unsaved
+  change still asks first and the sheet settles back. Motion Off skips all of it.
+  **One X on every sheet** (v5.317, his pick C): `.sheet-x` is 38px and one drawing (`SHEETX`).
+  Sheets that had none get one injected top right (`.sx-auto`, the sheet gains `has-x`); the three
+  older kinds (`.sheet-x` with a typed times sign, `.dsx`, `.sv-x`) are redrawn to match on open.
+  A question (`askOvl`) and the finish screen (`exportOvl`) get no X (`SHEET_NOX`). The word CLOSE
+  is gone from every sheet that had nothing to confirm. **A foot that stays in view on a long
+  sheet is NOT built.**
+  **A sheet names itself** (v5.317, his pick): History, Your note and How to do it carry
+  `data-ttl` on their h3. The h3 still holds the lift's name, which is what the setters write; CSS
+  draws the `data-ttl` as the title and the lift's name as the smaller line. The lift menu keeps
+  the lift's name, since that sheet IS the lift's menu.
+  **One set of type** (v5.319, his pick: compact, the title font for the missing one, no faked
+  bold). A script snapped every `font-size` in non theme rules: labels 10 and 11, text
+  13 and 15, titles 16 and 20, numbers 18 and up, nothing under 10. Measured after: about 19 font
+  and size pairings where there were 48, and no screen gained a clipped or overflowing element.
+  **`body.forge{font-synthesis:none}`** is what stops faked bold: Share Tech Mono exists at 400
+  only and was being asked for at 500 to 900. Never remove it to "fix" a label that looks thin;
+  load a real weight instead. Bricolage Grotesque was named in rules the theme never restyled and
+  was never in the Google Fonts request, so the day names and the Level up and dialog banners are
+  Marcellus now.
+  **UNSEEN: the bin is calm everywhere** (v5.316): no red on `.dsb.bad`, `.mk-x` or `.dayact.del`.
+  Deleting is recoverable, and red is kept for the question that asks if you are sure.
+  **UNSEEN: one drag handle** (v5.316): 18px in the warm tan on the board, the session and the
+  builder. **UNSEEN: the rest bar's buttons are 40 tall** and the bar is 60 (they were 28).
+  **UNSEEN: `mkNote` passes `onNo===false`**, so no notice shows CANCEL beside OK, which the
+  settled `ask()` rule already said.
+  **UNSEEN: a hint's dark points once, then a ring** (v5.318). `HINTDARK` is on for 1.7 seconds or
+  until the first touch, then `hintRelax()` removes `.dark` and it never returns for that showing.
+  A touch elsewhere no longer hides the hint (it used to set `HINTQUIET`): it only spends the dark,
+  and the ring and the tip stay until the thing is done or OK is tapped. The tip always sits at
+  the foot. The ring follows a scroll through a capture listener; the 150ms tick is the backstop.
+  **UNSEEN: the tick is silent in the Forge theme** (v5.318, three of three reviewers). The recipe
+  is left in a comment in `sfxTick`. **The set logged sound was NOT changed**: the reviewers split
+  and nobody, me included, has heard the drafts, so that one waits for his ear.
+  **UNSEEN: Settings is one part open at a time** (v5.320). `setFold()` wraps each `.set-card`'s
+  contents in `.set-body` ONCE and never rebuilds them, so every id inside is where the draw
+  functions left it; `SETOPEN` is the open part, `setSum` writes the line under a shut one from
+  its lit choices, and the fold is the app's own `svFold`. It went from 1733 tall to about 530.
+  **UNSEEN: main text is one cream** (v5.320): `--txt` is `#fff6e6`, what 279 pieces of text
+  already used. `--go` is still the duller orange and the four reds and five line browns are NOT
+  merged.
+  Not done from the audit: the first run safety screen still has its own button shape; the big
+  numbers are still eight sizes; spacing was not touched; 24 transition speeds remain.
+  Checked in the preview by clicking: every sheet's seat, X and bar, a swipe short and long, the
+  unsaved change guard, `tools/back-audit.js` (PASS), and a whole first run from the safety
+  questions to the finish screen. **Nothing here has been seen on the phone, and the feel of the
+  rise and the drag can only be judged there.**
 - **Built on a walk, 23 Nov, and NOT YET REVIEWED BY HIM** (v5.302 to v5.306). He gave feedback by
   voice while walking, said to build and that he would evaluate everything at home, so these three
   went in on my pick from the mockups and any of them may change or come out:
