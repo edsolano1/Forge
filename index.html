@@ -3494,12 +3494,24 @@ body.forge .sheet-x{width:38px;height:38px;border-radius:999px;border:1px solid 
   display:inline-grid;place-items:center;padding:0;flex:none;cursor:pointer;font-size:0;line-height:0;min-width:0;min-height:0;}
 body.forge .sheet-x svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;}
 body.forge .sheet-x:active{background:#1f130c;color:var(--gold);}
-.sheet-x.sx-auto{position:absolute;top:14px;right:14px;z-index:7;}
+.sheet-x.sx-auto{position:absolute;top:10px;right:10px;z-index:7;}
 body.forge .sheet.has-x>h3:first-of-type{padding-right:46px;}
+/* The X crowded whatever came first under the title: on the owner's phone it touched the corner
+   of the first Settings part and the first row of a menu (v5.325). It sits a little higher and
+   further out now, and the title keeps clear air under it. */
+body.forge .sheet.has-x>h3:first-of-type:not([data-ttl]){margin-bottom:14px;}
+body.forge .sheet-head{margin-bottom:12px;}
 body.forge .sheet.edsheet.has-x>.ed-ex{padding:0 46px;}
 body.forge .sheet.has-x>.hh{flex-wrap:wrap;gap:10px 12px;}
 body.forge .sheet.has-x>.hh h3{flex:1 0 100%;padding-right:46px;}
-body.forge .sheet-head>.sheet-x,body.forge .dsh>.sheet-x,body.forge .sv-head .sheet-x{margin:-8px -8px 0 0;}
+body.forge .sheet-head>.sheet-x,body.forge .dsh>.sheet-x{margin:-8px -8px 0 0;}
+/* Saved workouts carries two buttons in its head, the plus and the X (v5.325, owner: too close and
+   not lined up). The X had been pulled up 8px by itself, so it sat higher than the plus beside it,
+   and the plus was a smaller square. They are one size and one shape now, 12px apart, moved as a
+   pair, and the plus is gold because it is the one that does something. */
+body.forge .sv-head .sv-acts{gap:12px;margin:-8px -8px 0 0;}
+body.forge .sv-head .sheet-x{margin:0;}
+body.forge .sv-acts .sv-btn{width:38px;height:38px;min-width:38px;padding:0;border-radius:999px;border:1px solid #4a2c1c;border-top-color:#6a3f26;background:#130c09;color:var(--gold);}
 /* A sheet names itself (v5.317). History, Your note and How to do it were all headed with the
    lift's name alone, so the heading did not say which one you had opened. The h3 still holds the
    lift's name, which is what every setter writes; it is drawn as the smaller line under it. */
@@ -8441,7 +8453,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.324';
+var APPV='v5.325';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
