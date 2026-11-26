@@ -1303,7 +1303,7 @@ body.light .ovl{background:rgba(20,24,30,.5);}
    one cold thing on the screen". Day colours are deliberately left alone - tempering runs
    straw through bronze to violet to blue, so a spread of hues belongs. */
 html.forge,body.forge{--bg:#0e0806;--surface:#130c09;--surface2:#1a100b;--line:#4a2c1c;
-  --txt:#f8e6d4;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--match:#8f6fbe;
+  --txt:#fff6e6;--txt2:#bd9678;--txt3:#9d7c62;--go:#d97b2e;--gold:#ff8a1f;--match:#8f6fbe;
   /* v5.178 (T1): the theme names a mono everywhere and never defined one, so every var(--mono)
      rule - 114 of them, every label, count and chip - silently fell back to Barlow. */
   --mono:'Share Tech Mono',ui-monospace,monospace;
@@ -3517,6 +3517,23 @@ body.forge .sheet h3[data-ttl]::before{content:attr(data-ttl);display:block;font
    font exists at 400 only, and it was being asked for at 500 to 900. */
 body.forge{font-synthesis:none;}
 body.forge .lvl-beam b,body.forge .ask-beam b,body.forge .bk-beam b,body.forge .dh-n{font-family:'Marcellus',serif;font-weight:400;}
+
+/* ===== Settings is one part open at a time, v5.320 (two of three reviewers and my own pick,
+   built while the owner was away; he has not seen it) =====
+   It ran to more than two screens. Each part is a line now, with what it is set to underneath,
+   and opening one folds the others, the same idea as lifts in a session. setFold() wraps each
+   card's contents in .set-body once and never rebuilds them, so every id inside is where the
+   draw functions left it. */
+body.forge #settingsOvl .set-card{padding:0 14px;margin-top:8px;}
+body.forge #settingsOvl .set-sec{position:relative;cursor:pointer;text-align:left;margin:0 -14px;padding:12px 40px 12px 14px;border-bottom:1px solid transparent;user-select:none;}
+body.forge #settingsOvl .set-sec small{display:block;font-family:var(--sans);font-size:13px;line-height:1.3;color:var(--txt3);letter-spacing:0;margin-top:2px;}
+body.forge #settingsOvl .set-sec::after{content:"";position:absolute;right:18px;top:50%;width:7px;height:7px;border-right:1.8px solid var(--txt3);border-bottom:1.8px solid var(--txt3);transform:translateY(-70%) rotate(-45deg);transition:transform .2s ease;}
+body.forge #settingsOvl .set-card.open .set-sec{border-bottom-color:#2a1810;}
+body.forge #settingsOvl .set-card.open .set-sec small{display:none;}
+body.forge #settingsOvl .set-card.open .set-sec::after{transform:translateY(-70%) rotate(45deg);}
+body.forge #settingsOvl .set-body{padding-bottom:16px;}
+.set-body>.sfx-lbl:first-child{margin-top:12px;}
+html.mo-off body.forge #settingsOvl .set-sec::after{transition:none;}
 </style>
 </head>
 <body class="booting">
@@ -8399,7 +8416,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.319';
+var APPV='v5.320';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -21035,6 +21052,44 @@ function openSettings(){
   var ts=document.getElementById('themeSet');
   if(ts)ts.style.display=THEMES_ON?'':'none';
   document.getElementById('settingsOvl').classList.add('on');
+  setFold();
+}
+// One part of Settings open at a time (v5.320). The first open after a launch arrives folded
+// with no animation; after that a part opens and shuts with the app's own fold (svFold).
+var SETOPEN=0;
+function setCards(){
+  return [].filter.call(document.querySelectorAll('#settingsOvl .set-card'),function(c){
+    try{return getComputedStyle(c).display!=='none';}catch(e){return true;}
+  });
+}
+function setSum(c,nm){
+  var on=[].map.call(c.querySelectorAll('.preset.on'),function(p){return p.textContent.trim();}).slice(0,4);
+  if(on.length)return on.join(' \u00b7 ');
+  if(/data/i.test(nm))return 'Copies, history, and starting over';
+  if(/learn/i.test(nm)){try{return hintsOff()?'Hints are off':'Hints are on';}catch(e){}}
+  return '';
+}
+function setFold(){
+  try{
+    var cards=setCards();
+    if(SETOPEN>=cards.length)SETOPEN=0;
+    cards.forEach(function(c,i){
+      var sec=c.querySelector('.set-sec');if(!sec)return;
+      var body=null;
+      for(var k=0;k<c.children.length;k++)if(c.children[k].classList.contains('set-body'))body=c.children[k];
+      if(!body){
+        body=document.createElement('div');body.className='set-body';
+        [].slice.call(c.children).forEach(function(ch){if(ch!==sec)body.appendChild(ch);});
+        c.appendChild(body);
+        sec._nm=sec.textContent.trim();
+        sec.onclick=function(){var n=setCards().indexOf(c);SETOPEN=(SETOPEN===n?-1:n);setFold();};
+      }
+      var open=i===SETOPEN;
+      c.classList.toggle('open',open);
+      sec.innerHTML=esc(sec._nm)+'<small>'+esc(setSum(c,sec._nm))+'</small>';
+      svFold(body,open);
+    });
+  }catch(e){}
 }
 
 // ============================================================
