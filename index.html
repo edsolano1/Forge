@@ -2847,9 +2847,21 @@ html.mo-off #hintBar{transition:none;}
    hint is about stays lit, and the card is labelled TIP and sits beside it. The dark is one
    element's shadow and takes no taps, so nothing is ever blocked: the first touch anywhere puts
    the hint away, and touching the lit thing itself is the lesson learned. */
+/* Dark once, then a ring (v5.318, picked by two of three reviewers and by me while the owner was
+   away; he has not seen it). The dark points for a moment and then leaves for good, by itself or
+   on the first touch, and what stays is a quiet ring on the thing and the tip at the foot. It
+   used to snap off and back on whenever the lit thing scrolled out of view, which on a session
+   read as the screen flashing. */
 #hintSpot{display:none;position:fixed;z-index:139;pointer-events:none;border-radius:999px;
-  box-shadow:0 0 0 5px rgba(255,138,31,.26),0 0 22px 6px rgba(255,138,31,.30),0 0 0 200vmax rgba(4,2,1,.6);}
+  box-shadow:0 0 0 5px rgba(255,138,31,.26),0 0 22px 6px rgba(255,138,31,.30),0 0 0 200vmax rgba(4,2,1,0);
+  transition:box-shadow .6s ease;}
 #hintSpot.on{display:block;}
+#hintSpot.dark{box-shadow:0 0 0 5px rgba(255,138,31,.26),0 0 22px 6px rgba(255,138,31,.30),0 0 0 200vmax rgba(4,2,1,.6);transition:box-shadow .22s ease;}
+#hintSpot::after{content:"";position:absolute;inset:0;border-radius:inherit;animation:hintRing 1.7s ease-out infinite;}
+#hintSpot.dark::after{animation:none;}
+@keyframes hintRing{0%{box-shadow:0 0 0 0 rgba(255,138,31,.65)}70%{box-shadow:0 0 0 12px rgba(255,138,31,0)}100%{box-shadow:0 0 0 0 rgba(255,138,31,0)}}
+html.mo-off #hintSpot,html.mo-off #hintSpot.dark{transition:none;}
+html.mo-off #hintSpot::after{animation:none;}
 #hintBar{border-color:var(--gold);font-size:14px;flex-wrap:wrap;justify-content:flex-end;padding:13px 13px 12px 15px;}
 #hintBar .hint-w{flex:1 0 100%;min-width:0;}
 #hintBar .hint-tip{display:block;font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--gold);margin-bottom:3px;}
@@ -8376,7 +8388,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.317';
+var APPV='v5.318';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11769,30 +11781,40 @@ var HINT_TGT={log:'#session .exc:not(.shut) .srow.next .chk',exhold:'#session .e
 var HINT_HIT={grip:'.carddrag'};
 // Nothing is taught in the minutes after a workout is finished: that is a moment for the result.
 var HINT_FIN=0,HINT_REST=10*60*1000;
-var HINTIV=null,HINTQUIET={};
+var HINTIV=null,HINTQUIET={},HINTDARK=false,HINTDT=null;
 function hintSpotOff(){
   if(HINTIV){clearInterval(HINTIV);HINTIV=null;}
+  clearTimeout(HINTDT);HINTDARK=false;
   var sp=document.getElementById('hintSpot'),e=document.getElementById('hintBar');
-  if(sp)sp.classList.remove('on');
+  if(sp)sp.classList.remove('on','dark');
   if(e){e.style.top='';e.style.bottom='';}
+}
+// The dark goes and does not come back for this showing (v5.318). What is left is the ring.
+function hintRelax(){
+  clearTimeout(HINTDT);
+  if(!HINTDARK)return;HINTDARK=false;
+  var sp=document.getElementById('hintSpot');if(sp)sp.classList.remove('dark');
 }
 function hintAim(){
   var sp=document.getElementById('hintSpot'),e=document.getElementById('hintBar');
   if(!HINTNOW||!sp||!e)return;
   var t=null;try{t=document.querySelector(HINT_TGT[HINTNOW]);}catch(x){}
   var r=t&&t.getBoundingClientRect(),vh=window.innerHeight;
+  // The tip stays at the foot now. It used to sit under the lit thing, over the next two sets.
+  e.style.top='';e.style.bottom='';
   if(!r||!r.width||!r.height||r.top<40||r.bottom>vh-40||document.querySelector('.ovl.on')){
-    sp.classList.remove('on');e.style.top='';e.style.bottom='';return;
+    // out of view, or under a sheet: the ring simply is not drawn, and the dark is spent
+    sp.classList.remove('on');hintRelax();return;
   }
   var pad=HINTNOW==='exhold'?7:HINTNOW==='grip'?4:5;
   sp.style.left=(r.left-pad)+'px';sp.style.top=(r.top-pad)+'px';
   sp.style.width=(r.width+pad*2)+'px';sp.style.height=(r.height+pad*2)+'px';
   sp.style.borderRadius=HINTNOW==='exhold'?'10px':HINTNOW==='grip'?'9px':'999px';
-  sp.classList.add('on');
-  var bh=e.offsetHeight||90,top=r.bottom+pad+14;
-  if(top+bh>vh-12)top=r.top-pad-14-bh;
-  e.style.bottom='auto';e.style.top=Math.max(12,top)+'px';
+  sp.classList.add('on');sp.classList.toggle('dark',HINTDARK);
 }
+// The ring keeps up with a scroll instead of trailing it: the 150ms tick is only the backstop
+// for a card that folds or opens under it.
+document.addEventListener('scroll',function(){if(HINTNOW)hintAim();},true);
 // The first touch anywhere but the card puts the spotlight away, and it stays away until the
 // next launch, so an ignored hint never dims the screen twice in one sitting. Touching the lit
 // thing is doing what the hint says: that one is learned for good.
@@ -11801,7 +11823,10 @@ document.addEventListener('pointerdown',function(ev){
   var sp=document.getElementById('hintSpot');if(!sp||!sp.classList.contains('on'))return;
   if(ev.target.closest&&ev.target.closest('#hintBar'))return;
   var k=HINTNOW,hit=false;try{hit=!!ev.target.closest(HINT_HIT[k]||HINT_TGT[k]);}catch(x){}
-  if(hit)hintMark(k);else HINTQUIET[k]=1;
+  // A touch anywhere else is usually a scroll, not "I understand": it spends the dark and leaves
+  // the ring and the tip, which block nothing. Only doing the thing, or OK, retires the hint.
+  if(!hit){hintRelax();return;}
+  hintMark(k);
   hintHide();try{drawHintRow();}catch(x){}
 },true);
 // The session screen owes two hints. Never both in one sitting: the anvil on the first visit,
@@ -11851,6 +11876,7 @@ function showHint(k,scr){
   e.classList.add('on');
   if(HINTIV)clearInterval(HINTIV);
   HINTIV=setInterval(hintAim,150);
+  clearTimeout(HINTDT);HINTDARK=true;HINTDT=setTimeout(hintRelax,1700);
   requestAnimationFrame(hintAim);
 }
 function renderSession(){
@@ -19242,10 +19268,10 @@ function sfxTick(up){
     glass(t,up?1760:1480,0.1,0.085,0.022);
     nz(t,up?5600:4600,4,0.008,0.05);
   });
-  if(FG())return sfx(function(t){          // chisel tick
-    nz(t,up?4200:3000,3,0.013,0.19);
-    pt(t,up?1900:1480,0.03,0.07,'square');
-  });
+  // Silent in the Forge theme (v5.318, unreviewed by the owner). A tick in 21 places was the most
+  // dated sound in the app, and the phone's own buzz already says the tap landed. To bring it
+  // back: nz(t,up?4200:3000,3,0.013,0.19);pt(t,up?1900:1480,0.03,0.07,'square');
+  if(FG())return;
   sfx(function(t){
   nz(t,up?3400:2400,2,0.02,0.18);
   pt(t,up?1400:1050,0.05,0.13,'square');
