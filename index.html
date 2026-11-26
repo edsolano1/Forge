@@ -320,7 +320,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .card.bonus{opacity:.72;border-style:dashed;}
 .card.bonus:hover{opacity:.85;}
 .card.carry{border-style:dashed;border-color:color-mix(in srgb,var(--match) 60%,transparent);}
-.cardgap{display:inline-flex;width:23px;padding:13px 4px 13px 13px;margin:-13px -4px -13px 6px;
+.cardgap{display:inline-flex;width:29px;padding:13px 4px 13px 13px;margin:-13px -4px -13px 6px;
   border-left:1px solid transparent;pointer-events:none;}
 .card.waiting .card-name{color:var(--txt2);}
 /* Level up: a lit arrow rather than a word. The old RISE/ASCEND/HEAT labels made you read
@@ -2120,7 +2120,7 @@ body.forge .card-r .lvl{width:22px;height:22px;border-radius:7px;}
 body.forge .card-r .lvl svg{width:12px;height:12px;}
 /* One drag handle for the whole app (v5.316): 18px in the warm tan. This one was 12px at half
    strength, which is why the hint about it once lit a card with nothing visibly on it. */
-body.forge .card .carddrag{padding:13px 2px 13px 8px;margin:-13px -2px -13px 4px;color:var(--txt3);}
+body.forge .card .carddrag{padding:13px 2px 13px 8px;margin:-13px -2px -13px 4px;color:var(--txt3);opacity:1;}
 body.forge .card .carddrag svg{width:18px;height:18px;}
 body.forge .card .card-meta{color:var(--txt2);}
 body.forge .dayempty.dayadd,body.forge .dayempty.dayadd.quiet{border:1px solid #2a1810;border-radius:10px;background:#0e0806;
@@ -2351,7 +2351,7 @@ body.forge .mk-row .mk-ic{width:38px;height:38px;border-radius:12px;border:1px s
 /* One drag handle for the whole app (v5.307, owner): three lines, bare, the mark the board and
    the workout screen already use. The builder had six dots in a ring, which read as a button. */
 body.forge .mk-grip{width:26px;height:32px;border:0;background:transparent;color:var(--txt3);margin-left:-5px;}
-body.forge .mk-grip svg{width:20px;height:20px;stroke-width:1.6;stroke-linecap:round;}
+body.forge .mk-grip svg{width:18px;height:18px;stroke-width:1.8;stroke-linecap:round;}
 body.forge .mk-meas{display:flex;align-items:center;gap:8px;}
 body.forge .mk-meas > span:first-child{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);}
 body.forge .mk-row .mk-sel{border-radius:999px;background:#0e0806;border:1px solid #3a2214;color:var(--txt2);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px;}
@@ -2419,7 +2419,6 @@ body.forge .mk-slot.sel{border-color:var(--gold);background:rgba(255,138,31,.08)
 body.forge .mk-slot.sel b{color:var(--gold);}
 body.forge .dayact{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
 body.forge .dayact.on{border-color:#a0521c;color:var(--gold);background:rgba(255,138,31,.08);}
-body.forge .dayact.del{border-color:#7a2e26;color:#f0645a;background:transparent;}
 body.forge .mk-head-b{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);padding:7px 11px;}
 body.forge .mk-lbl{font-family:var(--mono);font-weight:600;letter-spacing:.16em;color:var(--txt3);}
 body.forge .finishbtn{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-radius:14px;font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.16em;
@@ -3452,7 +3451,7 @@ body.forge .exc{position:relative;}
 .bk-w small{font-size:10px;color:var(--txt2);}
 #backOvl .bk-note{margin:16px 0 0;text-align:center;font-size:13px;color:var(--txt2);}
 #backOvl .bk-foot{position:relative;margin-top:18px;}
-#backOvl .bk-go{width:100%;box-sizing:border-box;padding:14px;text-align:center;justify-content:center;font-weight:800;letter-spacing:.16em;font-size:13px;
+#backOvl .bk-go{width:100%;box-sizing:border-box;padding:0 14px;min-height:40px;border-radius:999px;display:flex;align-items:center;text-align:center;justify-content:center;font-weight:800;letter-spacing:.16em;font-size:11px;
   background:linear-gradient(180deg,#c9d8e6,#8fa6bd 60%,#6c8298);color:#0d141b;border-color:transparent;box-shadow:inset 0 1px 0 rgba(240,248,255,.7);}
 body.forge .exc .srow.next .inp{border-color:#6a3f26;}
 body.forge .ex-rest,body.forge .ex-pr{font-size:13px;}
@@ -3516,7 +3515,7 @@ body.forge .sheet h3[data-ttl]::before{content:attr(data-ttl);display:block;font
    downloaded, so each phone drew its own stand in; those are the title font now.
    font-synthesis stops the phone smearing a bold out of a font that has one thickness: the label
    font exists at 400 only, and it was being asked for at 500 to 900. */
-body.forge{font-synthesis:none;}
+body.forge{font-synthesis:style;}   /* no faked BOLD; a slanted note (.hnote) is still allowed, v5.323 */
 body.forge .lvl-beam b,body.forge .ask-beam b,body.forge .bk-beam b,body.forge .dh-n{font-family:'Marcellus',serif;font-weight:400;}
 
 /* ===== Settings is one part open at a time, v5.320 (two of three reviewers and my own pick,
@@ -3547,6 +3546,19 @@ body.forge .wc-go{border-radius:999px;padding:12px 18px;text-align:center;backgr
 body.forge .wc-go:not(:disabled){border-color:#a0521c;}
 body.forge .wc-go b{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
 body.forge .wc-go small{margin-top:2px;}
+
+/* ===== What three reviewers found in the polish pass, v5.323 =====
+   Each of these was a real fault in v5.316 to v5.322, found by reading the code the same day. */
+body.forge .dsd b{font-family:'Marcellus',serif;font-weight:400;}          /* the day sheet's plate matches the board's */
+/* the X no longer sits on a bin: Pump Day and the built in day editor keep theirs at the right */
+body.forge .sheet.has-x>.exed-h{padding-right:46px;}
+/* the drag bar covered the top third of the X on sheets with their own header */
+body.forge .sheet-x:not(.sx-auto){position:relative;z-index:7;}
+/* a sheet at the bottom sits ABOVE the keyboard: --kb is how much of the screen the keyboard
+   has taken (sheetKb), and it is zero wherever the system already resizes the page */
+body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var(--kb,0px));}
+/* a tip whose subject has scrolled out of view steps aside, so it never sits on Finish the day */
+#hintBar.on.away{display:none;}
 </style>
 </head>
 <body class="booting">
@@ -8429,7 +8441,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.322';
+var APPV='v5.323';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11822,13 +11834,13 @@ var HINT_TGT={log:'#session .exc:not(.shut) .srow.next .chk',exhold:'#session .e
 var HINT_HIT={grip:'.carddrag'};
 // Nothing is taught in the minutes after a workout is finished: that is a moment for the result.
 var HINT_FIN=0,HINT_REST=10*60*1000;
-var HINTIV=null,HINTQUIET={},HINTDARK=false,HINTDT=null;
+var HINTIV=null,HINTQUIET={},HINTDARK=false,HINTDT=null,HINTONCE={},HINTDIM={};
 function hintSpotOff(){
   if(HINTIV){clearInterval(HINTIV);HINTIV=null;}
   clearTimeout(HINTDT);HINTDARK=false;
   var sp=document.getElementById('hintSpot'),e=document.getElementById('hintBar');
   if(sp)sp.classList.remove('on','dark');
-  if(e){e.style.top='';e.style.bottom='';}
+  if(e){e.style.top='';e.style.bottom='';e.classList.remove('away');}
 }
 // The dark goes and does not come back for this showing (v5.318). What is left is the ring.
 function hintRelax(){
@@ -11839,14 +11851,21 @@ function hintRelax(){
 function hintAim(){
   var sp=document.getElementById('hintSpot'),e=document.getElementById('hintBar');
   if(!HINTNOW||!sp||!e)return;
+  // A hint belongs to the screen that raised it. The builder and the wizard are full screens,
+  // not sheets, and the ring used to pulse over them at the place of a card underneath (v5.323).
+  var ssOn=sessionOpen(),fullOn=onScr('make')||onScr('ez');
+  if(fullOn||(HINTSCR==='home'&&ssOn)||(HINTSCR==='session'&&!ssOn)){hintHide();return;}
   var t=null;try{t=document.querySelector(HINT_TGT[HINTNOW]);}catch(x){}
   var r=t&&t.getBoundingClientRect(),vh=window.innerHeight;
   // The tip stays at the foot now. It used to sit under the lit thing, over the next two sets.
   e.style.top='';e.style.bottom='';
   if(!r||!r.width||!r.height||r.top<40||r.bottom>vh-40||document.querySelector('.ovl.on')){
     // out of view, or under a sheet: the ring simply is not drawn, and the dark is spent
-    sp.classList.remove('on');hintRelax();return;
+    sp.classList.remove('on');hintRelax();
+    e.classList.toggle('away',!!(t&&r&&r.width));   // its subject is off screen: the tip steps aside too
+    return;
   }
+  e.classList.remove('away');
   var pad=HINTNOW==='exhold'?7:HINTNOW==='grip'?4:5;
   sp.style.left=(r.left-pad)+'px';sp.style.top=(r.top-pad)+'px';
   sp.style.width=(r.width+pad*2)+'px';sp.style.height=(r.height+pad*2)+'px';
@@ -11911,13 +11930,16 @@ function showHint(k,scr){
   // finishing a day with nothing logged, and the off switch was sitting on the wrong hint to
   // cause exactly that. Offer the exit beside the one hint that earns it.
   HINTNOW=k;HINTSCR=scr||null;
-  hintSaw(k);
+  // one sighting a launch, however many times the screen is come back to (v5.323): returning to
+  // the board three times used to retire a hint inside a minute
+  if(!HINTONCE[k]){HINTONCE[k]=1;hintSaw(k);}
   document.getElementById('hintTxt').textContent=HINTS[k];
   var no=document.getElementById('hintNo');if(no)no.hidden=(k!=='log');
   e.classList.add('on');
   if(HINTIV)clearInterval(HINTIV);
   HINTIV=setInterval(hintAim,150);
-  clearTimeout(HINTDT);HINTDARK=true;HINTDT=setTimeout(hintRelax,1700);
+  // and the dark once a launch: after that the hint comes back as the ring alone
+  clearTimeout(HINTDT);HINTDARK=!HINTDIM[k];HINTDIM[k]=1;if(HINTDARK)HINTDT=setTimeout(hintRelax,1700);
   requestAnimationFrame(hintAim);
 }
 function renderSession(){
@@ -17843,7 +17865,8 @@ function ovlWatch(){
         });
         if(top!==mz)el.style.zIndex=String(top);
       }
-      if(!on&&el._wasOn)el.style.zIndex='';
+      // the lift is kept until the sheet has finished leaving, or it drops behind its neighbour
+      if(!on&&el._wasOn)(function(z){setTimeout(function(){if(!z.classList.contains('on'))z.style.zIndex='';},240);})(el);
       if(on&&!el._wasOn)sheetIn(el);
       if(!on&&el._wasOn)sheetOut(el);
       el._wasOn=on;
@@ -17857,6 +17880,14 @@ function ovlWatch(){
 // ---- how a sheet arrives, leaves, and is dragged away (v5.317) ----
 var SHEETX='<svg viewBox="0 0 20 20"><path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/></svg>';
 var SHEET_NOX={askOvl:1,exportOvl:1};
+// Leaving a sheet by the X or the bar is the hardware back for it, unless the sheet's own way
+// out does more than close: the note sheet redraws the card it was written on.
+var SHEET_LEAVE={exNoteOvl:function(){saveExNote();}};
+function sheetLeave(id){
+  var f=SHEET_LEAVE[id],el=document.getElementById(id);
+  if(f){try{f();}catch(e){}if(el&&!el.classList.contains('on'))return;}
+  backCloses(id);
+}
 function sheetMotion(){try{return MOTION!=='off'&&!document.hidden;}catch(e){return false;}}
 function sheetClean(el){
   var sh=el.querySelector('.sheet');
@@ -17872,7 +17903,8 @@ function sheetIn(el){
 }
 function sheetOut(el){
   clearTimeout(el._rs);clearTimeout(el._lv);el.classList.remove('rise');
-  if(!sheetMotion()){sheetClean(el);return;}
+  // _instant: something is about to be shown where this sheet was (a card lifted out of Saved)
+  if(el._instant||!sheetMotion()){el._instant=0;sheetClean(el);return;}
   var sh=el.querySelector('.sheet');
   if(el._swiped&&sh){
     // dragged away: it carries on from where the finger left it instead of starting over
@@ -17887,13 +17919,15 @@ function sheetOut(el){
 function sheetDress(ovl){
   try{
     var sh=ovl.querySelector('.sheet');if(!sh)return;
-    if(!sh.querySelector('.sheet-grab')){var g=document.createElement('div');g.className='sheet-grab';sh.appendChild(g);sheetGrab(ovl,sh,g);}
+    // A question and the finish screen get neither the X nor the bar (v5.323): one has to be
+    // answered, and the other's DONE does more than close.
     if(SHEET_NOX[ovl.id])return;
+    if(!sh.querySelector('.sheet-grab')){var g=document.createElement('div');g.className='sheet-grab';sh.appendChild(g);sheetGrab(ovl,sh,g);}
     var x=sh.querySelector('.sheet-x,.dsx,.sv-x');
     if(x){if(!x._sx){x._sx=1;x.className='sheet-x';x.innerHTML=SHEETX;x.setAttribute('aria-label','Close');}}
     else{
       x=document.createElement('button');x._sx=1;x.className='sheet-x sx-auto';x.type='button';x.setAttribute('aria-label','Close');x.innerHTML=SHEETX;
-      x.onclick=function(){backCloses(ovl.id);};
+      x.onclick=function(){sheetLeave(ovl.id);};
       sh.appendChild(x);sh.classList.add('has-x');
     }
   }catch(e){}
@@ -17907,6 +17941,7 @@ function sheetGrab(ovl,sh,g){
     setTimeout(function(){if(!ovl.classList.contains('drag'))sh.style.transition='';},230);
   }
   g.addEventListener('pointerdown',function(e){
+    if(on||e.isPrimary===false)return;        // a second finger never restarts the drag
     on=true;y0=e.clientY;t0=Date.now();dy=0;h=sh.offsetHeight||1;
     try{g.setPointerCapture(e.pointerId);}catch(x){}
     g.classList.add('held');ovl.classList.remove('rise');ovl.classList.add('drag');
@@ -17919,15 +17954,29 @@ function sheetGrab(ovl,sh,g){
   });
   function end(){
     if(!on)return;on=false;g.classList.remove('held');
-    var fast=dy/Math.max(1,Date.now()-t0)>0.55&&dy>24,far=dy>h*0.3;
+    // closed by something else while it was held: nothing to settle, nothing to close twice
+    if(!ovl.classList.contains('on')){ovl.classList.remove('drag');return;}
+    // a third of the sheet, but never more than a hand's travel on a very tall one
+    var fast=dy/Math.max(1,Date.now()-t0)>0.55&&dy>24,far=dy>Math.min(h*0.3,180);
     if(!(fast||far)){settle();return;}
     ovl._swiped=1;
-    try{backCloses(ovl.id);}catch(x){}
+    try{sheetLeave(ovl.id);}catch(x){}
     // an unsaved change asks first and leaves the sheet up: put it back where it was
     if(ovl.classList.contains('on')){ovl._swiped=0;settle();}
   }
   g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
 }
+// How much of the screen the keyboard has taken. Where the system resizes the page for the
+// keyboard (the Android app) this stays zero; in a browser that does not, it lifts a bottom
+// sheet clear, so the number sheet's DONE is never under the keys.
+function sheetKb(){
+  try{
+    var vv=window.visualViewport;if(!vv)return;
+    var gap=Math.round(window.innerHeight-vv.height-vv.offsetTop);
+    document.documentElement.style.setProperty('--kb',(gap>80?gap:0)+'px');
+  }catch(e){}
+}
+try{if(window.visualViewport){window.visualViewport.addEventListener('resize',sheetKb);window.visualViewport.addEventListener('scroll',sheetKb);}}catch(e){}
 function topOvl(){
   var o=document.querySelectorAll('.ovl.on'),best=null;
   for(var i=0;i<o.length;i++)if(!best||(o[i]._openSeq||0)>=(best._openSeq||0))best=o[i];
@@ -21069,14 +21118,17 @@ function openSettings(){
 }
 // One part of Settings open at a time (v5.320). The first open after a launch arrives folded
 // with no animation; after that a part opens and shuts with the app's own fold (svFold).
-var SETOPEN=0;
+var SETOPEN=null;   // the open part's name. An index moved whenever Walks came and went (v5.323)
 function setCards(){
   return [].filter.call(document.querySelectorAll('#settingsOvl .set-card'),function(c){
     try{return getComputedStyle(c).display!=='none';}catch(e){return true;}
   });
 }
 function setSum(c,nm){
+  // a copy that failed must not hide inside a shut part
+  if(/could not be (written|sent)/i.test(c.textContent||''))return 'A copy could not be made. Open this to see.';
   var on=[].map.call(c.querySelectorAll('.preset.on'),function(p){return p.textContent.trim();}).slice(0,4);
+  try{if(DB.pumpHide&&c.querySelector('#pumpBackSec'))on.push('Pump Day removed');}catch(e){}
   if(on.length)return on.join(' \u00b7 ');
   if(/data/i.test(nm))return 'Copies, history, and starting over';
   if(/learn/i.test(nm)){try{return hintsOff()?'Hints are off':'Hints are on';}catch(e){}}
@@ -21085,7 +21137,7 @@ function setSum(c,nm){
 function setFold(){
   try{
     var cards=setCards();
-    if(SETOPEN>=cards.length)SETOPEN=0;
+    if(SETOPEN===null){var f0=cards[0]&&cards[0].querySelector('.set-sec');SETOPEN=f0?(f0._nm||f0.textContent.trim()):'';}
     cards.forEach(function(c,i){
       var sec=c.querySelector('.set-sec');if(!sec)return;
       var body=null;
@@ -21095,9 +21147,9 @@ function setFold(){
         [].slice.call(c.children).forEach(function(ch){if(ch!==sec)body.appendChild(ch);});
         c.appendChild(body);
         sec._nm=sec.textContent.trim();
-        sec.onclick=function(){var n=setCards().indexOf(c);SETOPEN=(SETOPEN===n?-1:n);setFold();};
+        sec.onclick=function(){SETOPEN=(SETOPEN===sec._nm?'':sec._nm);setFold();};
       }
-      var open=i===SETOPEN;
+      var open=sec._nm===SETOPEN;
       c.classList.toggle('open',open);
       sec.innerHTML=esc(sec._nm)+'<small>'+esc(setSum(c,sec._nm))+'</small>';
       svFold(body,open);
@@ -21488,6 +21540,7 @@ function cardGrab(el,sx,sy){
   if(!inSheet||!CDRAG||!CDRAG.el)return;
   document.body.appendChild(CDRAG.el);
   CDRAG.orphan=true;    // cardEnd has to bin it: nothing puts a body child back in the flow
+  try{document.getElementById('savedOvl')._instant=1;}catch(e){}   // no leave: the card is in the air over the board
   closeOvl('savedOvl');
 }
 function cardStart(el,sx,sy){
