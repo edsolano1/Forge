@@ -307,7 +307,9 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .dsb b{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:500;}
 @media (hover:hover){.dsb:hover{color:var(--gold);border-color:#6a3f26;}}
 .dsb:active{transform:scale(.97);}
-.dsb.bad{color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 34%,#3a2214);}
+/* .dsb.bad wore red until v5.316. The bin is calm everywhere now: deleting is recoverable (the
+   scrap heap), six red buttons shouted on every builder row, and red is kept for the question
+   that asks if you are sure. */
 .dsx{min-width:38px;min-height:38px;border:0;background:transparent;padding:0;}
 .dswide{width:100%;flex-direction:row;gap:9px;min-height:44px;}
 .dswide b{font-size:9.5px;}
@@ -565,7 +567,7 @@ body.light .daybox.today > .dayglow::after{animation-duration:4.8s;opacity:.45;}
   cursor:grab;touch-action:none;color:var(--txt3);flex-shrink:0;transition:.15s;}
 .exdrag:hover{color:var(--txt2);background:var(--surface2);}
 .exdrag:active{cursor:grabbing;}
-.exdrag svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;fill:none;}
+.exdrag svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;fill:none;}
 
 /* ---------- EXERCISE EDIT ---------- */
 .exed-n{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center;}
@@ -931,7 +933,8 @@ body:has(#make.on) .card-day::after,body:has(#make.on) .dayglow::before,body:has
   padding:9px 11px;margin-left:auto;}
 .dayact.del:hover{background:color-mix(in srgb,var(--bad) 12%,var(--surface));
   border-color:color-mix(in srgb,var(--bad) 65%,var(--line));}
-body.forge .dayact.del{--bad:#f0645a;}
+body.forge .dayact.del{color:var(--txt2);border-color:#4a2c1c;border-top-color:#6a3f26;border-radius:12px;background:#130c09;}
+body.forge .dayact.del:hover{color:var(--gold);background:#130c09;border-color:#6a3f26;}
 body.light .dayact.del{--bad:#b1332c;}
 .mk-in{width:100%;box-sizing:border-box;padding:13px 14px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-family:inherit;font-size:15px;}
 .mk-in::placeholder{color:var(--txt3);}
@@ -1086,7 +1089,7 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-grip{display:inline-flex;align-items:center;justify-content:center;width:32px;height:36px;
   flex-shrink:0;color:var(--txt3);cursor:grab;touch-action:none;}
 .mk-grip:active{cursor:grabbing;}
-.mk-grip svg{width:16px;height:16px;fill:none;stroke:currentColor;}
+.mk-grip svg{width:18px;height:18px;fill:none;stroke:currentColor;}
 .mk-grp-h .mk-grip{margin-left:-4px;}
 .mk-drag{opacity:.9;box-shadow:0 14px 34px -12px rgba(0,0,0,.6);transform:scale(1.012);
   position:relative;z-index:5;}
@@ -1127,7 +1130,7 @@ body.light .dayact.del{--bad:#b1332c;}
 .mk-acts .btn{padding:14px;text-align:center;font-size:13px;}
 
 /* value editor */
-.edsheet{max-width:340px;text-align:center;}
+.edsheet{text-align:center;}
 .ed-ex{font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:600;letter-spacing:-.02em;color:var(--txt);}
 .ed-set{font-size:12px;color:var(--txt3);margin-top:3px;}
 .ed-big{display:block;width:100%;box-sizing:border-box;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:54px;font-weight:500;color:var(--txt);line-height:1.1;margin-top:14px;letter-spacing:-.04em;text-align:center;background:transparent;border:none;border-bottom:2px dotted var(--line);padding:0 0 4px;border-radius:0;-webkit-appearance:none;}
@@ -1227,11 +1230,12 @@ body.light .dayact.del{--bad:#b1332c;}
 /* The muscle row in the exercise picker. One line that scrolls sideways rather than wrapping
    into a wall of buttons above the list you came to read. Must sit AFTER .preset.sm: the two
    have equal specificity, so order is what decides the padding. */
-/* the ADVANCED fold on the custom-exercise sheet - a quiet row, not a button */
-.mk-adv{margin-top:14px;padding:9px 2px;font-size:11.5px;font-weight:600;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--txt3);cursor:pointer;user-select:none;border-top:1px solid var(--line);}
+/* the ADVANCED fold on the custom-exercise sheet. It was bare text with a 9.6px sub line until
+   v5.316; anything tappable looks like a button. */
+.mk-adv{margin-top:14px;padding:11px 12px;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--txt2);cursor:pointer;user-select:none;border:1px solid var(--line);border-radius:10px;}
 .mk-adv:hover{color:var(--go);}
-.mk-adv small{font-weight:400;letter-spacing:0;text-transform:none;color:var(--txt3);margin-left:7px;}
+.mk-adv small{display:block;font-family:var(--sans);font-size:13px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--txt3);margin:3px 0 0;}
 .mfilt{display:flex;gap:6px;overflow-x:auto;padding:11px 0 3px;scrollbar-width:none;}
 .mfilt::-webkit-scrollbar{display:none;}
 /* min-height rather than padding, because padding plus a font metric is a guess and this is a
@@ -2114,8 +2118,10 @@ body.forge .card-r .pill{font-size:9px;letter-spacing:.04em;padding:3px 6px;}
 body.forge .card-r{gap:6px;}
 body.forge .card-r .lvl{width:22px;height:22px;border-radius:7px;}
 body.forge .card-r .lvl svg{width:12px;height:12px;}
-body.forge .card .carddrag{padding:13px 2px 13px 8px;margin:-13px -2px -13px 4px;opacity:.55;}
-body.forge .card .carddrag svg{width:12px;height:12px;}
+/* One drag handle for the whole app (v5.316): 18px in the warm tan. This one was 12px at half
+   strength, which is why the hint about it once lit a card with nothing visibly on it. */
+body.forge .card .carddrag{padding:13px 2px 13px 8px;margin:-13px -2px -13px 4px;color:var(--txt3);}
+body.forge .card .carddrag svg{width:18px;height:18px;}
 body.forge .card .card-meta{color:var(--txt2);}
 body.forge .dayempty.dayadd,body.forge .dayempty.dayadd.quiet{border:1px solid #2a1810;border-radius:10px;background:#0e0806;
   box-shadow:inset 0 2px 6px rgba(0,0,0,.9);color:#9d7c62;padding:10px 4px;}
@@ -2189,7 +2195,7 @@ body.forge .daybox.empty .dayempty.dayadd,body.forge .daybox.empty .dayempty.day
 /* The way to say a day is rest rather than unfilled (v5.192, F1). It sits on the empty row itself,
    because the moment you know a day is a rest day is the moment you are looking at it empty. */
 body.forge .dayrest{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;
-  color:#6b533f;font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;padding:6px 8px;cursor:pointer;line-height:1;}
+  color:var(--txt3);font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:6px 8px;cursor:pointer;line-height:1;}
 body.forge .dayrest:hover{color:var(--txt2);}
 body.forge .daybox.empty .dayempty.dayadd{position:relative;}
 /* A rest day is a decision, not a session, so it lies down like the empty rows rather than standing
@@ -2320,9 +2326,9 @@ body.forge .sect-t{color:var(--match);font-size:10px;letter-spacing:.16em;text-t
    pills with the chosen one in ember, cues marked with lit points, the usual mistake in a dashed box,
    CLOSE as a pill. The builder: each exercise the same warm plate, the name in Marcellus, every set one
    rounded row with the numbers in mono, the stepper and the superset link as pills, violet for the link. */
-body.forge #instrOvl .sheet.ins{position:relative;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;border-radius:14px;padding:18px 16px 16px;
+body.forge #instrOvl .sheet.ins{position:relative;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;border-radius:14px;padding:22px;
   box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
-body.forge #instrOvl .sheet.ins h3{font-family:'Marcellus',serif;font-weight:400;font-size:21px;line-height:1.15;letter-spacing:.01em;text-transform:none;color:#fff6e6;margin:0 0 12px;}
+body.forge #instrOvl .sheet.ins h3{font-family:'Marcellus',serif;font-weight:400;font-size:20px;line-height:1.15;letter-spacing:.01em;text-transform:none;color:#fff6e6;margin:0 0 12px;}
 body.forge #insAnim canvas{border-radius:12px;background:#0e0806;border:1px solid #3a2214;}
 /* The calm sheet (v5.297, owner picked C). Three named parts, Set up, Do, Avoid. The orange is the muscle at work on the
    lifter and those three headers (v5.298, his call: in that orange as headers, but that is it). Every word is the same cream. */
@@ -2341,7 +2347,7 @@ body.forge .mk-row{background:linear-gradient(180deg,#1a100b,#100907);border:1px
   box-shadow:inset 0 1px 0 rgba(255,215,170,.14),0 12px 24px -12px rgba(0,0,0,.95);}
 body.forge .mk-row.ing{border-left-color:#4a3a6a;}
 body.forge .mk-rn{font-family:'Marcellus',serif;font-weight:400;font-size:16px;color:#fff6e6;white-space:normal;line-height:1.2;}
-body.forge .mk-row .mk-ic{width:32px;height:32px;border-radius:50%;border:1px solid #4a2c1c;background:#130c09;color:var(--txt3);}
+body.forge .mk-row .mk-ic{width:38px;height:38px;border-radius:12px;border:1px solid #4a2c1c;border-top-color:#6a3f26;background:#130c09;color:var(--txt2);}
 /* One drag handle for the whole app (v5.307, owner): three lines, bare, the mark the board and
    the workout screen already use. The builder had six dots in a ring, which read as a button. */
 body.forge .mk-grip{width:26px;height:32px;border:0;background:transparent;color:var(--txt3);margin-left:-5px;}
@@ -2446,7 +2452,9 @@ body.forge .timer-pill{background:linear-gradient(180deg,#1f130c,#120b08);border
   box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 14px 26px -14px rgba(0,0,0,.9);}
 body.forge .timer-pill .ttime{font-size:22px;color:#fff6e6;text-shadow:0 0 14px rgba(255,200,120,.4);}
 body.forge .timer-pill .tbtn{border-radius:999px;border:1px solid #4a2c1c;background:#130c09;color:var(--txt2);
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;}
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:0 13px;min-height:40px;}
+/* The rest bar's buttons were 28 tall, the smallest in the app and the most pressed, with tired
+   hands (v5.316). They are 40 now and the bar grew to hold them. */
 body.forge .timer-pill .tskip{border-color:#6a3f26;color:var(--gold);}
 /* The GO state, after the three rules above and not before them (v5.252). The pill turns gold
    when a rest ends, and the forge restyle three lines up gives every button a near black fill
@@ -2668,7 +2676,7 @@ html.mo-off .fin-lvl::after{animation:none;display:none;}
 .lvl-row.xfer{background:linear-gradient(90deg,rgba(255,138,31,.25),transparent);}
 .lvl-row.xfer .lvl-num{animation:lvlPop .5s cubic-bezier(.3,1.6,.4,1) 1;text-shadow:0 0 16px rgba(255,200,120,.95);}
 .lvl-foot{position:relative;margin-top:22px;}
-.lvl-go{width:100%;box-sizing:border-box;padding:14px;font-weight:800;letter-spacing:.16em;font-size:13px;
+.lvl-go{width:100%;box-sizing:border-box;padding:0 14px;min-height:40px;border-radius:999px;font-weight:800;letter-spacing:.16em;font-size:11px;
   background:linear-gradient(180deg,#ffb35c,#e0842f 60%,#b85d20);color:#1b0f06;border-color:transparent;
   box-shadow:inset 0 1px 0 rgba(255,245,220,.7),0 0 24px -4px rgba(255,150,50,.7);}
 .lvl-hint{margin-top:10px;text-align:center;font-size:11.5px;color:var(--txt3);line-height:1.4;}
@@ -2827,7 +2835,7 @@ body.forge .side{border-radius:5px;
    10px and 140. They overlapped by 38px, and the bar is on top, so the countdown, the plus and
    minus and SKIP REST were covered AND unclickable, which is the one thing an interruption may
    never do. A gold set fires both on the same tick, so this was the common case. */
-body:has(.timer-pill.on) #hintBar{bottom:calc(86px + env(safe-area-inset-bottom,0px));}
+body:has(.timer-pill.on) #hintBar{bottom:calc(96px + env(safe-area-inset-bottom,0px));}
 #hintBar span{flex:1;min-width:0;}
 #hintBar button{flex:none;border-radius:999px;border:1px solid #6a3f26;background:#130c09;
   font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:7px 11px;cursor:pointer;color:var(--gold);}
@@ -8325,7 +8333,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.315';
+var APPV='v5.316';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -12857,7 +12865,8 @@ function mkParse(sets){
   }
   return o;
 }
-function mkNote(msg,title){ask(msg,function(){},title||'Hold on',"OK",null,null);}
+// A note is a statement with one answer, so it never shows CANCEL beside OK (v5.316).
+function mkNote(msg,title){ask(msg,function(){},title||'Hold on',"OK",false,null);}
 
 // ---------- open / close ----------
 function mkTap(wk,dk){if(LP.fired){LP.fired=false;return;}openW(wk,dk);}
