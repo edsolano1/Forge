@@ -8441,7 +8441,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.323';
+var APPV='v5.324';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -11833,7 +11833,7 @@ function hintHide(){
 var HINT_TGT={log:'#session .exc:not(.shut) .srow.next .chk',exhold:'#session .exc:not(.shut) .ex-n',grip:'#weekCards .card[data-base]:not(.sealed)'};
 var HINT_HIT={grip:'.carddrag'};
 // Nothing is taught in the minutes after a workout is finished: that is a moment for the result.
-var HINT_FIN=0,HINT_REST=10*60*1000;
+var HINT_FIN=(function(){try{return +localStorage.getItem('arc_hintfin')||0;}catch(e){return 0;}})(),HINT_REST=10*60*1000;
 var HINTIV=null,HINTQUIET={},HINTDARK=false,HINTDT=null,HINTONCE={},HINTDIM={};
 function hintSpotOff(){
   if(HINTIV){clearInterval(HINTIV);HINTIV=null;}
@@ -14898,9 +14898,12 @@ function finishNow(){
   syncPumpBtn();
   renderSummary(sum);
   document.getElementById('session').classList.remove('on');
+  // BEFORE renderHome, which is what raises the grip hint (v5.324). Set after it, the hint was
+  // already up by the time the quiet period began, so it still landed on the finish. It is kept
+  // across a relaunch too: closing and reopening the app used to forget the workout had just ended.
+  HINT_FIN=Date.now();try{localStorage.setItem('arc_hintfin',String(HINT_FIN));}catch(e){}
   stopTimer();renderHome();
   try{wearPush();}catch(e){}   // the wrist finds out the day is done
-  HINT_FIN=Date.now();
   sessionSeal(function(){document.getElementById('exportOvl').classList.add('on');});
 }
 // Forge's finish. The piece comes out white-hot, then goes under: the colour walks
