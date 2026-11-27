@@ -8457,7 +8457,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.327';
+var APPV='v5.328';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10247,7 +10247,7 @@ function dayMap(){
   // putting the same piece on a second day, so the explanation lands in the moment it means
   // something. Once only - after that the numeral on the card carries it - and never during the
   // boot migration, which splits old data before anybody has asked for anything.
-  if(changed&&typeof homeReady!=='undefined'&&homeReady){
+  if(changed&&typeof homeReady!=='undefined'&&homeReady&&!SANDBOX){
     var told=true;try{told=localStorage.getItem('arc_splitnote')==='1';}catch(e){}
     if(!told){
       try{localStorage.setItem('arc_splitnote','1');}catch(e){}
@@ -12450,8 +12450,15 @@ function sfApply(fresh){
   if(SF.wk!==CUR){SF.wk=CUR;SF.id=null;clearTimeout(SF.t);}
   var cur=-1,i,j;
   us.forEach(function(u,n){if(SF.id&&u.has(SF.id))cur=n;});
+  // The phone, the notification and the wrist answer from ONE place (v5.328). wearNext already
+  // knows which lift was walked past; the open card used to work it out for itself and disagree.
+  var wn=null,wu=-1;
+  try{wn=wearNext();if(wn&&!wn.redo)us.forEach(function(u,n){if(u.has(wn.id))wu=n;});}catch(e){wn=null;}
   if(cur<0){
-    for(i=0;i<us.length;i++)if(!us[i].done){cur=i;break;}
+    // The open lift is gone (binned in the builder mid session): go where the session is, not
+    // back to the first lift that was skipped.
+    if(wu>=0)cur=wu;
+    else for(i=0;i<us.length;i++)if(!us[i].done){cur=i;break;}
     if(cur<0)cur=0;
     SF.id=us[cur].cards[0].id.slice(4);SF.was=us[cur].done;
   }
@@ -12469,6 +12476,16 @@ function sfApply(fresh){
       SF.t=setTimeout(function(){if(SF.wk!==CUR)return;sfMove(to);},live?1050:700);
     }
   }else if(!us[cur].done)SF.was=false;
+  // A superset with one machine taken: when a half is finished and the session has moved on,
+  // the phone moves on too. Only on the set that finished that half, so tapping the skipped
+  // half later still opens it and keeps it open.
+  var hdN=us[cur].cards.filter(function(ex){return !ex.querySelector('.srow:not(.done)');}).length;
+  if(!fresh&&SF.hdId===SF.id&&hdN>(SF.hdN||0)&&!us[cur].done&&wu>=0&&wu!==cur){
+    var to2=us[wu].cards[0].id.slice(4);
+    clearTimeout(SF.t);
+    SF.t=setTimeout(function(){if(SF.wk!==CUR)return;sfMove(to2);},700);
+  }
+  SF.hdId=SF.id;SF.hdN=hdN;
   // The one bright button. In a superset it is on whichever half has done fewer, so it takes turns.
   var tgt=null,best=null,bestN=0;
   us[cur].cards.forEach(function(ex){
@@ -12477,6 +12494,8 @@ function sfApply(fresh){
     if(best===null||dn<bestN){best=ex;bestN=dn;}
   });
   if(best)tgt=best.querySelector('.srow:not(.done)');
+  // Inside the open lift the bright button is the set wearNext names, when it names one here.
+  try{if(wn&&wu===cur){var wr=document.getElementById('sr-'+wn.id+'-'+wn.i);if(wr&&!wr.classList.contains('done'))tgt=wr;}}catch(e){}
   us.forEach(function(u,n){
     u.cards.forEach(function(ex){
       ex.classList.toggle('shut',n!==cur);
@@ -14217,9 +14236,9 @@ function mkSetsUI(r,i){
        // words took is exactly what the rest chip needed to sit on its own set's line instead
        // of wrapping under it with a row to itself. Single-number rows keep their word - a
        // lone 10 has to say whether it is reps or seconds.
-       (u==='wr'?'<input class="mk-num" type="number" inputmode="decimal" step="0.5" value="'+fmtW(c.w)+'" oninput="'+wIn+'">'+
+       (u==='wr'?'<input class="mk-num" type="number" inputmode="decimal" step="0.5" value="'+fmtW(c.w)+'" oninput="'+wIn+'" onfocus="try{this.select();}catch(e){}">'+
                  '<span class="mk-ps-x">&times;</span>':'')+
-       '<input class="mk-num" type="number" inputmode="numeric" value="'+c.r+'" oninput="'+rIn+'">'+
+       '<input class="mk-num" type="number" inputmode="numeric" value="'+c.r+'" oninput="'+rIn+'" onfocus="try{this.select();}catch(e){}">'+
        (u==='wr'?'':'<span class="mk-ps-u">'+unitTxt+'</span>')+
        // and this set's own rest, on the line it belongs to
        (editing
@@ -14291,7 +14310,8 @@ function mkSetLine(i,k,f,v){
   var r=MK.rows[i];if(!r)return;
   r.lines=mkLinesFor(r);
   var c=mkLineVal(r.lines[k],r.hold);
-  if(f==='w')c.w=Math.round(inW(v)*100)/100;else c.r=parseInt(v,10)||0;
+  // No negative weights, no zero reps, and the number sheet's own ceiling (v5.328).
+  if(f==='w')c.w=Math.min(2000,Math.max(0,Math.round(inW(v)*100)/100||0));else c.r=Math.min(999,Math.max(r.hold?0:1,parseInt(v,10)||0));
   // The row's own unit, as mkLine writes it. This said ' sec' for every hold, so editing one set
   // of a 30-minute walk in SET EACH ONE turned that set into "25 sec".
   r.lines[k]=r.hold?((c.r||30)+' '+mkUnitOf(r)):((c.w||0)+'x'+(c.r||0));
