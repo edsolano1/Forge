@@ -1162,11 +1162,15 @@ body.light .dayact.del{--bad:#b1332c;}
    ring, so a ring is what you tap: sized against its neighbours, coloured like the one on the
    bar, and carrying its own number. The old three-wide grid of chips with a coloured dot in the
    corner is gone, and so are the labels over it, because a row of plates needs no caption. */
-.pl-donuts{display:flex;align-items:center;justify-content:center;gap:7px;margin:15px 0 5px;
-  overflow-x:auto;padding:11px 2px;}
+.pl-donuts{display:flex;align-items:center;justify-content:flex-start;gap:7px;margin:15px 0 5px;
+  overflow-x:auto;padding:11px 2px 19px;}
 .pl-dnt{position:relative;background:none;border:0;padding:0;line-height:0;flex:none;cursor:pointer;
   -webkit-tap-highlight-color:transparent;}
 .pl-dnt:active{transform:scale(.94);}
+/* Centred by margins, not justify-content (v5.327): a centred row that overflows cannot be
+   scrolled to its first plate, which hid half of the 25 on a 360 screen. */
+.pl-donuts>.pl-dnt:first-child{margin-left:auto;}
+.pl-donuts>.pl-dnt:last-child{margin-right:auto;}
 .pl-dnt svg{display:block;}
 .pl-dnt text{font-family:var(--mono,inherit);font-weight:600;}
 /* The plus and the minus sit ON the plate, so the control is the thing it controls. The minus
@@ -1175,7 +1179,7 @@ body.light .dayact.del{--bad:#b1332c;}
   border-radius:999px;border:1px solid var(--line);background:var(--surface2,var(--surface));
   color:var(--txt2);font-size:15px;line-height:19px;text-align:center;cursor:pointer;padding:0;}
 .pl-badge.up{top:-10px;border-color:var(--go);color:var(--go);}
-.pl-badge.dn{bottom:-10px;}
+.pl-badge.dn{bottom:-17px;}
 .pl-badge:active{background:rgba(255,255,255,.1);}
 /* One scrolling row, not six tiles. Which bar you are on still never leaves the sheet, which is
    the rule that killed hiding it behind a CHANGE BAR button; it just costs one row now. */
@@ -2590,7 +2594,7 @@ body.forge .inp::placeholder{color:#7a5c46;}
 #exportOvl .sheet.fin{background:#0a0605;border-color:#4a2c1c;}
 .fin-plate{position:relative;overflow:hidden;border-radius:14px;padding:18px 16px 16px;background:linear-gradient(180deg,#1f130c,#120b08);border:1px solid #6a3f26;border-top-color:#8a5433;box-shadow:inset 0 1px 0 rgba(255,215,170,.16),0 16px 30px -16px rgba(0,0,0,.9);}
 .fin-plate::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ffb35c,#ff7a1a 50%,#8a3f10);}
-.fin-eyebrow{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:0;}
+.fin-eyebrow{font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:0;padding-right:62px;}
 .fin-name{font-family:'Marcellus',serif;font-size:20px;font-weight:400;margin:4px 66px 0 0;color:#fff6e6;line-height:1.2;letter-spacing:.01em;text-transform:none;}
 .fin-date{font-size:13px;color:var(--txt3);margin-top:2px;}
 body.forge .sheet .fin-name,.sheet .fin-name{text-transform:none;letter-spacing:.01em;font-size:20px;}   /* the theme uppercases sheet headings; the workout name reads as written */
@@ -2640,7 +2644,7 @@ html.mo-off .fin-lvl::after{animation:none;display:none;}
    A beam of light cuts the dark with LEVEL UP on it, rays behind. The lifts land one at a time
    beneath it, numbers counting up, the gain in green. Tap a row to raise that lift, tap its number
    to change it, RAISE ALL for the lot. */
-#lvlOvl .sheet.lvl-s{position:relative;overflow:hidden;background:#0a0605;border-color:#4a2c1c;padding-top:30px;}
+#lvlOvl .sheet.lvl-s{position:relative;overflow:hidden;overflow:clip;background:#0a0605;border-color:#4a2c1c;padding-top:30px;}
 .lvl-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(70% 30% at 50% 16%,rgba(255,150,50,.45),transparent 70%),radial-gradient(90% 55% at 50% 108%,rgba(255,120,30,.28),transparent 70%);}
 .lvl-rays{position:absolute;left:-40%;right:-40%;top:-30%;height:90%;pointer-events:none;
   background:repeating-conic-gradient(from 0deg at 50% 40%,rgba(255,180,80,.16) 0deg 4deg,transparent 4deg 12deg);
@@ -2865,7 +2869,7 @@ html.mo-off #hintSpot::after{animation:none;}
 #hintBar .hint-w{flex:1 0 100%;min-width:0;}
 #hintBar .hint-tip{display:block;font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--gold);margin-bottom:3px;}
 #hintBar .hint-ok{background:var(--gold);border-color:var(--gold);color:#1a0d05;font-weight:500;}
-#sbxBar{display:none;position:fixed;left:0;right:0;top:0;z-index:150;
+#sbxBar{display:none;position:fixed;left:0;right:0;top:0;z-index:215;
   align-items:center;gap:9px;padding:calc(7px + env(safe-area-inset-top,0px)) 14px 7px;
   background:color-mix(in srgb,var(--gold) 16%,#120a05);
   border-bottom:1px solid color-mix(in srgb,var(--gold) 42%,transparent);
@@ -4101,7 +4105,7 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
     <div class="presets" style="grid-template-columns:1fr 1fr" id="distRow"></div>
     <div class="sfx-lbl" style="margin-top:14px"><span>Week</span></div>
     <div class="presets" style="grid-template-columns:1fr 1fr" id="twoRow"></div>
-    <div class="footnote" style="margin:6px 2px 0">Two weeks take turns by the calendar, and you flip to the other one from the week label.</div>
+    <div class="footnote" style="margin:6px 2px 0">Two weeks take turns by the calendar, and you flip to the other one with the button at the top of the week.</div>
     <div id="pumpBackSec" hidden>
     <div class="sfx-lbl" style="margin-top:14px"><span>Pump Day</span></div>
     <div class="presets" style="grid-template-columns:1fr"><button class="preset sm" onclick="pumpBack()">PUT IT BACK IN SAVED WORKOUTS</button></div>
@@ -4381,7 +4385,7 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
          it and a row of plates under it do not need telling. -->
     <div class="pl-typerow">
       <input class="mk-in pl-type" id="plType" type="number" inputmode="decimal"
-             placeholder="e.g. 145" oninput="plTypeLoad(this.value)">
+             placeholder="e.g. 145" oninput="plTypeLoad(this.value)" onfocus="try{this.select();}catch(e){}">
       <span class="pl-tu" id="plTypeUnit">lb</span>
     </div>
     <!-- Carries nothing for an ordinary bar. It only speaks when the arrangement is unusual:
@@ -8453,7 +8457,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.326';
+var APPV='v5.327';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -10855,15 +10859,17 @@ function weekHello(){
   var ws=String(weekStartTs()),seen='';
   try{seen=localStorage.getItem('arc_wkhello')||'';}catch(e){}
   if(seen===ws)return;
-  try{localStorage.setItem('arc_wkhello',ws);}catch(e){}
-  if(!seen)return;                        // the very first run has no last week to speak of
+  // The week is marked as greeted only once every question has an answer (v5.327). It used to be
+  // marked before asking, so closing the app on the question let every missed workout go.
+  var wkMark=function(){try{localStorage.setItem('arc_wkhello',ws);localStorage.removeItem('arc_wkans');}catch(e){}};
+  if(!seen){wkMark();return;}             // the very first run has no last week to speak of
   var prev=+seen,any=false;
   (DB.logs||[]).forEach(function(l){
     if(!l.sealed||l.unsealed)return;
     var t=new Date(l.date+'T12:00:00').getTime();
     if(t>=prev&&t<+ws)any=true;
   });
-  if(!any)return;
+  if(!any){wkMark();return;}
   // Name what did not happen, so the quiet reset never reads as the app not noticing (v5.108).
   // Judged against the board as it stands now: each placed workout with no finished log inside
   // last week. Rest and optional days are not things you miss.
@@ -10885,12 +10891,19 @@ function weekHello(){
   // He was a workout behind, the week turned over, and he no longer knew where he was. The
   // question is the notice: nothing else is said on a week that left something behind.
   if(missIds.length){
-    missIds.slice(0,3).forEach(function(id,i){
+    // What was already answered before the app was closed is not asked twice.
+    var ans=[];try{var a0=JSON.parse(localStorage.getItem('arc_wkans')||'null');if(a0&&a0.ws===ws)ans=a0.ids||[];}catch(e){}
+    var todo=[];missIds.slice(0,3).forEach(function(id,i){if(ans.indexOf(id)<0)todo.push([id,missed[i]]);});
+    if(!todo.length){wkMark();return;}
+    var left=todo.length;
+    var done=function(id){ans.push(id);if(--left<=0)wkMark();else{try{localStorage.setItem('arc_wkans',JSON.stringify({ws:ws,ids:ans}));}catch(e){}}};
+    todo.forEach(function(p){
       askCrest('NEW WEEK');
-      ask('',function(){carryAdd(id);},'You did not get to '+missed[i]+' last week','DO IT TODAY',function(){},null,'LET IT GO');
+      ask('',function(){carryAdd(p[0]);done(p[0]);},'You did not get to '+p[1]+' last week','DO IT TODAY',function(){done(p[0]);},null,'LET IT GO');
     });
     return;
   }
+  wkMark();
   // One sentence (owner, 30 Sep: "just say week has been reset, something super simple"). The
   // four line version was right about what it said and wrong about when it said it: this lands
   // at launch, before anybody has asked a question. It waits behind the i now.
@@ -11467,6 +11480,9 @@ function renderTagline(){
   var lx=document.getElementById('lxTag');if(lx&&!lx.innerHTML)lx.innerHTML=TAGPICK;
 }
 function renderHome(){
+  // Stamp every placement BEFORE the board is drawn (v5.327). A pair with no stamp reads as
+  // always there, so a week forged a second ago was drawn with Skipped on its past days.
+  try{putSync();}catch(e){}
   renderMark();renderName();renderPumpIcon();renderTagline();renderBg();
   // A live pump day is not part of the fixed week, so without a card of its own there is
   // nothing on this screen to carry you back into it.
@@ -11680,6 +11696,10 @@ function openW(wk,dk){
   pageTurn(false,function(){openWNow(wk,dk);});
 }
 function openWNow(wk,dk){
+  // Started from Saved workouts, the list used to stay up over the session (v5.327).
+  try{var svo=document.getElementById('savedOvl');if(svo&&svo.classList.contains('on')){svo._instant=1;closeOvl('savedOvl');}}catch(e){}
+  // A session with nothing in it yet opens on its first lift, not where the last one ended.
+  try{if(!DB.active[wk]||loggedCount(wk)===0){SF.wk=wk;SF.id=null;clearTimeout(SF.t);}}catch(e){}
   CUR=wk;
   var w=W[wk];
   // The session remembers which weekday it belongs to, because a workout can sit on two of
@@ -12620,7 +12640,7 @@ function exMoreGo(k){
   var id=XMCUR,m=XMORE[id];if(!m)return;
   closeOvl('exMoreOvl');
   if(k==='how'){if(m.ins)openInstr(m.ins);else if(m.rl)window.open(m.rl,'_blank','noopener');}
-  else if(k==='pl')openPlates(m.ex,m.pl,id);
+  else if(k==='pl')openPlates(m.ex,plRowW(id)||m.pl,id);
   else if(k==='hist')openExHist(m.ex);
   else if(k==='note')openExNote(m.ex);
   else if(k==='swap')openSwap(m.row);
@@ -13405,6 +13425,7 @@ function mkFlush(){
 function mkDuplicate(id){
   var src=DB.custom[id]||W[id];
   if(!src){mkNote('There is nothing here to copy yet.');return;}
+  if((DB.extra||[]).length>=BANK_MAX){mkNote('Saved workouts is full at '+BANK_MAX+'. Delete one first.');return;}
   var copy;
   try{copy=JSON.parse(JSON.stringify(src));}catch(e){mkNote('That workout could not be copied.');return;}
   copy.name=(copy.name||'Workout').replace(/^Optional: /,'')+' copy';
@@ -13538,6 +13559,11 @@ function planDropDay(id,dk){
   var arr=DB.days[dk]||[];
   var i=arr.indexOf(id);
   if(i>=0)arr.splice(i,1);
+  // Saved workouts has a limit and this way in used to walk past it (v5.327).
+  if(!onPlan(id)&&(DB.extra||[]).indexOf(id)<0&&(DB.extra||[]).length>=BANK_MAX){
+    if(i>=0)arr.splice(i,0,id);
+    closeOvl('savedOvl');mkNote('Saved workouts is full at '+BANK_MAX+'. Delete one first.');return;
+  }
   if(!onPlan(id))shelve(id);
   saveDB();mergeCustom();
   closeOvl('mkActOvl');renderHome();
@@ -13736,6 +13762,8 @@ function mkWantSlot(editId,want){
   return null;
 }
 function openMake(base,editId,blank,want){
+  // The builder is a full screen: Saved workouts must not stay up over it (v5.327).
+  try{var svm=document.getElementById('savedOvl');if(svm&&svm.classList.contains('on')){svm._instant=1;closeOvl('savedOvl');}}catch(e){}
   var isEdit=!!(editId&&DB.custom[editId]);
   var src=isEdit?DB.custom[editId]:(blank?null:W[effWk(base)]);
   if(src){
@@ -14625,7 +14653,7 @@ function mkCexInvToggle(){
 }
 function mkSaveCex(){
   var n=document.getElementById('mkCexName').value.trim();
-  if(!n){closeOvl('mkCexOvl');mkNote('Give it a name first.');return;}
+  if(!n){mkNote('Give it a name first.');return;}
   var link=document.getElementById('mkCexLink').value.trim();
   if(link&&!/^https?:\/\//i.test(link))link='https://'+link;
   var note=document.getElementById('mkCexNote').value.trim();
@@ -14668,7 +14696,7 @@ function mkSaveCex(){
 // ---------- save ----------
 function mkBuild(){
   return {
-    name:MK.name.trim(),tag:MK.tag||'Yours',color:MK.color,time:MK.time||'~9:00 PM',
+    name:MK.name.trim()||'Untitled workout',tag:MK.tag||'Yours',color:MK.color,time:MK.time||'~9:00 PM',
     custom:1,made:MK.made||Date.now(),kind:MK.kind||'lift',
     // The flat list becomes sections again on the way out, so nothing downstream - the session
     // grid, the export, the level-up walk - has to learn a new shape. A run of rows sharing a
@@ -16905,6 +16933,9 @@ function plDraw(){
   }
   document.getElementById('plRead').innerHTML=r;
   document.getElementById('plTypeUnit').textContent=u;
+  // The box says what the bar says (v5.327): after a plate is tapped it used to keep the old number.
+  var tbx=document.getElementById('plType');
+  if(tbx&&PL.want==null&&document.activeElement!==tbx)tbx.value=PL.on.length?plNum(tot):'';
   // Silent for an ordinary bar: a row of plates under a drawing of a bar explains itself. It
   // speaks only where the arrangement would otherwise mislead.
   var tl=document.getElementById('plTapLbl');
@@ -16955,6 +16986,7 @@ function plPickBar(k){
 function plTypeLoad(v){
   var n=parseFloat(v);
   if(v===''||isNaN(n)||n<0){PL.want=null;PL.on=[];plDraw();return;}
+  if(n>2000){n=2000;var tb0=document.getElementById('plType');if(tb0)tb0.value='2000';}
   PL.want=n;
   PL.on=plLoadFor(n);
   plDraw();
@@ -17008,7 +17040,19 @@ function plLand(){
     return;
   }
 }
-function plCancel(){closeOvl('plateOvl');}
+// The weight the next unlogged set of a row is showing, in pounds (v5.327): the calculator opens
+// on what he is about to lift, which he may have changed from the plan.
+function plRowW(row){
+  try{for(var i=0;i<60;i++){
+    var sr=document.getElementById('sr-'+row+'-'+i),w=document.getElementById('w-'+row+'-'+i);
+    if(!sr||!w)return 0;
+    if(sr.classList.contains('done')||w.type==='hidden')continue;
+    var lb=parseFloat(w.dataset.lb);if(!(lb>0))lb=inW(w.value);
+    return lb>0?lb:0;
+  }}catch(e){}
+  return 0;
+}
+function plCancel(){backCloses('plateOvl');}
 function plClear(){PL.want=null;PL.on=[];plDraw();try{sfxTick&&sfxTick();}catch(e){}}
 // Who gets the plate calculator: ANY lift measured in weight. Not a list of lifts I
 // picked, and not a switch the user has to find and set - both were versions of the app
@@ -17546,7 +17590,7 @@ function walksHtml(){
     '<div class="hscroll">'+
     '<div class="wk-h"><b>Walks</b>'+emberPill()+
       '<button class="wk-add" onclick="openWalkAdd()" title="Add a walk" aria-label="Add a walk"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg></button></div>'+
-    '<div class="wk-big"><i>'+(all?Math.round(mins/60):mins)+'</i><u>'+(all?'HOURS, ALL TIME':'MIN')+'</u></div>'+
+    '<div class="wk-big"><i>'+((all&&mins>=90)?Math.round(mins/60):mins)+'</i><u>'+(all?(mins>=90?'HOURS, ALL TIME':'MIN, ALL TIME'):'MIN')+'</u></div>'+
     (all?'':'<div class="wk-met"><i style="width:'+pct+'%"></i></div>')+
     '<div class="wk-sub">'+wl.length+(wl.length===1?' WALK':' WALKS')+(longest?' \u00b7 LONGEST '+longest:'')+
       (all?'':' \u00b7 '+pct+'% OF '+tgt+' MIN')+'</div>'+
@@ -17650,8 +17694,9 @@ function histMinsEdit(){
 function histMinsSave(){
   var L=DB.logs[HIST.sel];if(!L)return;
   var v=parseInt(document.getElementById('minsIn').value,10);
-  if(isNaN(v)||v<0){closeOvl('minsOvl');return;}
-  if(v===0)delete L.mins;else L.mins=Math.min(600,v);
+  var raw=String(document.getElementById('minsIn').value||'').trim();
+  if(raw!==''&&(isNaN(v)||v<0)){closeOvl('minsOvl');return;}
+  if(raw===''||v===0)delete L.mins;else L.mins=Math.min(600,v);
   saveDB();closeOvl('minsOvl');renderHist();
 }
 function histMon(d){
@@ -18029,7 +18074,7 @@ function leaveSession(){
 var BACK_RULES=[
   {n:'splash',       when:function(){return !splashGone;},                              act:function(){dismissSplash();}},
   {n:'the ritual',   when:function(){return onScr('ez');},                              act:function(){ezBack();}},
-  {n:'the welcome',  when:function(){return onScr('welcome');},                         act:function(){wcBack();}},
+  {n:'the welcome',  when:function(){return onScr('welcome')&&!topOvl();},                         act:function(){wcBack();}},
   {n:'a night in the history',when:function(){return tops('histOvl')&&HIST.sel!==null;},act:function(){histBack();}},
   {n:'the sheet on top',when:function(){return !!topOvl();},                            act:function(){backCloses(topOvl().id);}},
   {n:'a session',    when:function(){return sessionOpen();},                            act:function(){leaveSession();}},
@@ -21151,6 +21196,7 @@ function setSum(c,nm){
   if(/could not be (written|sent)/i.test(c.textContent||''))return 'A copy could not be made. Open this to see.';
   var on=[].map.call(c.querySelectorAll('.preset.on'),function(p){return p.textContent.trim();}).slice(0,4);
   try{if(DB.pumpHide&&c.querySelector('#pumpBackSec'))on.push('Pump Day removed');}catch(e){}
+  try{if(/sound/i.test(nm)&&alertMuted())return 'Muted';}catch(e){}
   if(on.length)return on.join(' \u00b7 ');
   if(/data/i.test(nm))return 'Copies, history, and starting over';
   if(/learn/i.test(nm)){try{return hintsOff()?'Hints are off':'Hints are on';}catch(e){}}
@@ -22630,7 +22676,7 @@ function ezForge(){
     move:'This week will not maximise any one thing. It makes almost everything better at once, and it is the easiest plan to keep for years, which is the whole trick.'};
   var saved=(EZ.into==='saved');
   var lead=saved?'It is waiting in Saved workouts. Hold the lines on one, then drag it to a day. ':'';
-  if(two&&!saved)lead+='Week 2 is behind this one. Flip to it under Saturday. ';
+  if(two&&!saved)lead+='Week 2 is behind this one. Flip to it with the button at the top of the week. ';
   // 900ms, so the line that says what the plan believes is not landed on by the next thing.
   // There used to BE a next thing: the tour offer arrived as a second dialog, then as a second
   // button here (v5.100), and the tour itself went in v5.273. One box, one way on.
