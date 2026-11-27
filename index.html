@@ -8453,7 +8453,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.325';
+var APPV='v5.326';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -18165,7 +18165,7 @@ function playClip(buf,at,opt){
   // off starts the buffer partway in: one blow out of a clip that holds two (v5.244)
   s.start(t0,off);                              // must precede stop() or it throws
   if(opt.dur){                                  // fade the cut so it does not click
-    g.gain.setValueAtTime(opt.vol===undefined?1:opt.vol,t0+end-0.09);
+    g.gain.setValueAtTime(opt.vol===undefined?1:opt.vol,t0+end-(opt.fade||0.09));
     g.gain.linearRampToValueAtTime(0.0001,t0+end);
     s.stop(t0+end+0.01);
   }
@@ -18704,9 +18704,16 @@ function sfx(fn){
 }
 function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
 // set logged - low struck weight in a stone room
+var LOG_DUR=0.42;
 function sfxLog(){
   if(!sfxAllowed('log'))return;
-  if(FG())return sfx(function(t){anvil(t,1180,0.42,0.55);});
+  // The real hammer, one light blow (v5.326, owner picked A by ear): the second onset of the rest
+  // alert's clip, 0.42s, pitched up a little so it is not mistaken for the alert. The synth is
+  // the fallback for a clip that has not decoded yet.
+  if(FG())return sfx(function(t){
+    if(hamBuf)playClip(hamBuf,t,{off:HAM_ONE,dur:LOG_DUR,vol:0.5,rate:1.12,fade:LOG_DUR*0.45,bus:BUS||mbus});
+    else anvil(t,1180,0.42,0.55);
+  });
   if(MW())return sfx(function(t){glass(t,196,0.9,0.16,0.2);});
   // Tundra kept borrowing this one, and it is the app's most-heard sound - which is most of why
   // the two themes sounded alike. Same gesture, its own material: a load set down on boards,
