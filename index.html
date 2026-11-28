@@ -710,6 +710,8 @@ body:not(:has(#session.on)) #timerPill{display:none;}
 .btn{font-size:13px;font-weight:500;cursor:pointer;padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--txt2);flex-shrink:0;transition:.15s;}
 .btn:hover{color:var(--txt);border-color:#33373d;}
 .btn-go{border-color:var(--go);color:var(--go);}
+/* Red is kept for one place: the button that confirms a delete which cannot be undone. */
+.btn.btn-danger,.btn.btn-danger:hover{border-color:#e25b4a;color:#e25b4a;}
 .btn-prime{background:var(--go);border-color:var(--go);color:#0b0c0e;font-weight:700;letter-spacing:.07em;}
 .btn-prime:hover{color:#0b0c0e;border-color:var(--go);filter:brightness(1.08);}
 /* A touch screen has no pointer to hover with, but it applies :hover to whatever you last
@@ -797,6 +799,12 @@ body.arriving .foot{animation-delay:.72s;}
 .timer-pill.ring2{background:var(--go);border-color:var(--go);color:#08130d;}
 .timer-pill.ring2 .tbtn{background:rgba(0,0,0,.12);border-color:rgba(0,0,0,.16);color:#08130d;}
 #flame{display:block;width:32px;height:52px;margin:-14px 0 -6px;flex-shrink:0;}
+/* The rest bar names the next set, the same line the notification and the watch carry. The line
+   sits above the buttons in room that is always kept, so the bar is one height with or without
+   it and the buttons never move. */
+.timer-pill{padding-top:27px;}
+.tnext{position:absolute;left:34px;right:34px;top:9px;height:14px;line-height:14px;font-size:11px;color:var(--txt2);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;}
+.timer-pill.ring2 .tnext{color:inherit;opacity:.8;}
 
 /* ---------- page turn ---------- */
 #turn{display:none;position:fixed;inset:0;z-index:190;perspective:1500px;perspective-origin:0% 50%;pointer-events:none;}
@@ -1100,8 +1108,7 @@ body.light .dayact.del{--bad:#b1332c;}
   color:var(--txt3);cursor:pointer;transition:.15s;}
 .mk-x svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;
   stroke-linecap:round;stroke-linejoin:round;}
-.mk-x:hover{color:#e0736b;border-color:color-mix(in srgb,#e0736b 40%,transparent);
-  background:color-mix(in srgb,#e0736b 10%,transparent);}
+.mk-x:hover{color:var(--txt);border-color:var(--line);}
 /* .mk-inv is declared once, above, as text. The bordered chip that used to be declared HERE was
    later in the sheet and therefore winning - the third time a duplicate class has quietly beaten
    its own replacement in this file. Worth checking for before styling anything that already
@@ -2397,6 +2404,7 @@ body.forge .sheet-btns .btn,body.forge .mk-acts .btn{border-radius:999px;min-hei
   display:flex;align-items:center;justify-content:center;text-align:center;
   font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
 body.forge .sheet-btns .btn-go,body.forge .mk-acts .btn-go{border-color:#a0521c;color:var(--gold);background:rgba(255,138,31,.08);}
+body.forge .sheet-btns .btn.btn-danger{border-color:#b3402f;color:#ff7a66;background:rgba(226,91,74,.12);}
 body.forge .sheet-btns .btn-prime,body.forge .mk-acts .btn-prime{background:linear-gradient(180deg,#ffb35c,#ff7a1a 62%,#c85a14);color:#1b0f06;border-color:#ff7a1a;box-shadow:inset 0 1px 0 rgba(255,240,210,.5);}
 /* fields */
 body.forge .mk-in{background:#0e0806;border:1px solid #3a2214;border-radius:12px;color:#fff6e6;}
@@ -2711,6 +2719,16 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hseg{display:flex;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex-shrink:0;}
 .hsegb{padding:7px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);cursor:pointer;background:transparent;transition:.15s;}
 .hsegb:hover{color:var(--txt2);}
+/* Touch sizes on Workouts finished. Nothing here changes what is drawn or how tall anything
+   is: each control gets an unseen area around it that takes the touch, 40px tall or more. The
+   tabs lose the frame's clipping to do it, so the end tabs carry the rounded corners instead. */
+.hseg{overflow:visible;}
+.hsegb,.hnav,.hback{position:relative;}
+.hsegb:first-child{border-radius:8px 0 0 8px;}
+.hsegb:last-child{border-radius:0 8px 8px 0;}
+.hsegb::after{content:'';position:absolute;left:0;right:0;top:-7px;bottom:-7px;}
+.hnav::after{content:'';position:absolute;inset:-5px;}
+.hback::after{content:'';position:absolute;left:-10px;right:-14px;top:-9px;bottom:-19px;}
 .hsegb.on{background:color-mix(in srgb,var(--go) 16%,transparent);color:var(--go);}
 .hscroll{max-height:calc(var(--usablevh) * .56);overflow-y:auto;}
 .hrow{display:flex;align-items:center;gap:11px;padding:12px 13px;border:1px solid var(--line);border-radius:11px;margin-bottom:6px;background:var(--surface);cursor:pointer;transition:.15s;}
@@ -2777,10 +2795,10 @@ body.light #wcover{background:linear-gradient(180deg,#04322f 0%,#021c1b 42%,#010
 .hset.hed .mk-num.sm{font-size:13px;}
 .hnote{margin-top:14px;font-size:13px;color:var(--txt3);line-height:1.6;font-style:italic;}
 .hdel{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:13px;border-radius:11px;cursor:pointer;transition:.15s;
-  border:1px solid color-mix(in srgb,#ff5d6c 26%,var(--line));background:var(--surface);
-  font-family:'Marcellus',serif;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,#ff5d6c 78%,var(--txt2));}
+  border:1px solid var(--line);background:var(--surface);
+  font-family:'Marcellus',serif;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt2);}
 .hdel svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;}
-.hdel:hover{color:#ff5d6c;border-color:color-mix(in srgb,#ff5d6c 55%,transparent);background:color-mix(in srgb,#ff5d6c 7%,var(--surface));}
+.hdel:hover{color:var(--gold);border-color:#6a3f26;}
 .hdel:active{transform:scale(.99);}
 
 /* ---------- footer: a real panel, not fine print ---------- */
@@ -2838,7 +2856,7 @@ body.forge .side{border-radius:5px;
    10px and 140. They overlapped by 38px, and the bar is on top, so the countdown, the plus and
    minus and SKIP REST were covered AND unclickable, which is the one thing an interruption may
    never do. A gold set fires both on the same tick, so this was the common case. */
-body:has(.timer-pill.on) #hintBar{bottom:calc(96px + env(safe-area-inset-bottom,0px));}
+body:has(.timer-pill.on) #hintBar{bottom:calc(114px + env(safe-area-inset-bottom,0px));}
 #hintBar span{flex:1;min-width:0;}
 #hintBar button{flex:none;border-radius:999px;border:1px solid #6a3f26;background:#130c09;
   font-family:var(--mono);font-size:10px;letter-spacing:.12em;padding:7px 11px;cursor:pointer;color:var(--gold);}
@@ -3403,7 +3421,7 @@ body.forge .ex-links{display:none;}
 body.forge .ex-more{width:38px;height:38px;border-radius:12px;border:1px solid #4a2c1c;background:#130c09;display:flex;align-items:center;justify-content:center;color:var(--txt2);cursor:pointer;}
 body.forge .ex-more svg{width:18px;height:18px;fill:currentColor;}
 body.forge .ex-more:active{transform:scale(.96);}
-body.forge .ex-mt{display:none;font-family:var(--mono);font-size:13px;color:var(--txt3);white-space:nowrap;margin-left:8px;}
+body.forge .ex-mt{display:none;font-family:var(--mono);font-size:13px;color:var(--txt3);white-space:nowrap;margin-left:8px;word-spacing:-3px;}
 body.forge .ex-mt.part{color:var(--txt2);}
 body.forge .ex-mt.all{color:var(--match);}
 body.forge .exc.shut{cursor:pointer;border-color:#2a1810;}
@@ -3711,6 +3729,7 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
   <span class="ttime" id="tTime">0:00</span>
   <button class="tbtn" onclick="adjustTimer(15)">+15</button>
   <button class="tbtn tskip" onclick="stopTimer()">SKIP</button>
+  <span class="tnext" id="tNext"></span>
 </div>
 
 <!-- The finish screen (v5.150, owner picked the seal): a stamped plate for the session, the sets as the
@@ -3964,7 +3983,7 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
     <div id="lvlList" class="lvl-list"></div>
     <div class="lvl-foot">
       <div class="btn btn-go lvl-go" id="lvlGo" onclick="applyLevel()">RAISE ALL</div>
-      <div class="lvl-hint" id="lvlHint">Tap a lift to raise just that one. Tap its number to change it first.</div>
+      <div class="lvl-hint" id="lvlHint">Tap an exercise to raise just that one. Tap its number to change it first.</div>
       <div class="lvl-skip" id="lvlSkipRow" onclick="skipLevel()">Not this time</div>
     </div>
   </div>
@@ -4131,7 +4150,7 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
     <div class="set-sec">Your data</div>
     <div class="ydstat" id="ydAuto" hidden>
       <svg viewBox="0 0 20 20"><path d="M16 10a6 6 0 1 1-2.2-4.6"/><path d="M16.2 3.6v3h-3"/></svg>
-      <span class="ydw"><b>Copying itself</b><span id="ydAutoSt"></span></span>
+      <span class="ydw"><b>Automatic backup</b><span id="ydAutoSt"></span></span>
       <button class="sfx-tog" id="ydAutoTog" onclick="autoBkToggle()">ON</button>
     </div>
     <!-- The app's own history (v5.285). Always here, on the web as well as the phone, because it
@@ -4147,19 +4166,19 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
          worse than no switch. -->
     <div class="ydstat" id="ydDrive" hidden>
       <svg viewBox="0 0 20 20"><path d="M6.4 16h7.8a3.2 3.2 0 0 0 .3-6.4A4.5 4.5 0 0 0 6.2 8.3 3.4 3.4 0 0 0 6.4 16z"/><path d="M10 14V8.4M10 8.4L8.2 10.2M10 8.4l1.8 1.8"/></svg>
-      <span class="ydw"><b>A copy in your Drive</b><span id="ydDriveSt"></span></span>
+      <span class="ydw"><b>A backup in your Drive</b><span id="ydDriveSt"></span></span>
       <button class="sfx-tog" id="ydDriveTog" onclick="driveToggle()">OFF</button>
     </div>
-    <div class="ydlbl">A COPY YOU KEEP</div>
+    <div class="ydlbl">A BACKUP YOU KEEP</div>
     <div class="ydg">
       <button class="yd" onclick="exportDest('backup')">
         <svg viewBox="0 0 20 20"><path d="M10 3v9M10 12l-3.4-3.4M10 12l3.4-3.4M3.5 14v2.5h13V14"/></svg>
-        <span class="ydw"><b>Save a copy now</b><span>Everything you have logged, in one file.</span></span>
+        <span class="ydw"><b>Make a backup</b><span>Everything you have logged, in one file.</span></span>
         <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
       </button>
       <button class="yd" onclick="exportDest('text')">
         <svg viewBox="0 0 20 20"><path d="M4 5.5h12v11H4z"/><path d="M7 9h6M7 12h4"/></svg>
-        <span class="ydw"><b>My history as text</b><span>Readable, for keeping or sending. Cannot be put back.</span></span>
+        <span class="ydw"><b>My history as text</b><span>Readable, for keeping or sending. Cannot be restored.</span></span>
         <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
       </button>
       <button class="yd" onclick="copyHistoryText()">
@@ -4172,7 +4191,7 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
     <div class="ydg">
       <button class="yd bad" onclick="restoreAsk()">
         <svg viewBox="0 0 20 20"><path d="M10 12V3M10 3L6.6 6.4M10 3l3.4 3.4M3.5 14v2.5h13V14"/></svg>
-        <span class="ydw"><b>Put a copy back</b><span>Everything on this phone is replaced by the file.</span></span>
+        <span class="ydw"><b>Restore a backup</b><span>Everything on this phone is replaced by the file.</span></span>
         <svg class="chv" viewBox="0 0 20 20"><path d="M8 5l5 5-5 5"/></svg>
       </button>
     </div>
@@ -4274,7 +4293,7 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
     <h3 id="mkCexTtl">Add your own exercise</h3>
     <div class="presets" style="grid-template-columns:1fr 1fr;margin-bottom:4px" id="mkCexKindRow"></div>
     <p id="mkCexKind"></p>
-    <p>It joins the library and can be used on any day. Progress and personal bests track it like any other lift.</p>
+    <p>It joins the library and can be used on any day. Progress and personal bests track it like any other exercise.</p>
     <input class="mk-in" id="mkCexName" placeholder="Exercise name" autocomplete="off">
     <input class="mk-in" id="mkCexNote" placeholder="Setup note (optional)" style="margin-top:9px" autocomplete="off">
     <input class="mk-in" id="mkCexLink" placeholder="Link to a demo (optional)" style="margin-top:9px" autocomplete="off" inputmode="url">
@@ -4410,7 +4429,7 @@ body.forge .ovl{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px) + var
 <!-- How long a session took, in minutes, corrected by hand (v5.177). Stacks over Workouts finished. -->
 <div class="ovl" id="minsOvl" style="z-index:300">
   <div class="sheet" style="max-width:360px">
-    <h3>Session length</h3>
+    <h3>Workout length</h3>
     <p>Minutes from the first set to the finish. Save it empty or as 0 to remove it.</p>
     <input class="mk-in" id="minsIn" type="number" inputmode="numeric" min="0" max="600" placeholder="Minutes">
     <div class="sheet-btns">
@@ -4867,7 +4886,7 @@ function edBlocksDefault(wk){
 function edBlocks(wk){
   var map=edRowMap(wk),def=edBlocksDefault(wk);
   var plan=edGet(wk,'_','plan');
-  if(!plan||!plan.length)return def;
+  if(!plan||!plan.length)return edSplit(wk,def);
   var used={},out=[];
   function push(ids,title,ss){
     ids=ids.filter(function(id){return map[id]&&!used[id];});
@@ -4886,7 +4905,7 @@ function edBlocks(wk){
   plan.forEach(function(p){push(p.ids||[],p.title,p.ss);});
   // anything the plan has never seen - a lift added since - keeps its own place at the end
   def.forEach(function(b){push(b.ids,b.title,b.ss);});
-  return out;
+  return edSplit(wk,out);
 }
 function edWritePlan(wk,blocks){
   var t=edKept(wk);
@@ -4897,9 +4916,65 @@ function edWritePlan(wk,blocks){
 function edAllRows(wk){
   var w=W[wk],rows=[];
   if(!w)return rows;
-  w.sections.forEach(function(sec){edRows(wk,sec).forEach(function(r){rows.push(r);});});
-  edAdded(wk).forEach(function(id){rows.push(id);});
+  function put(r){rows.push(r);splitRows(wk,r).forEach(function(c){rows.push(c);});}
+  w.sections.forEach(function(sec){edRows(wk,sec).forEach(put);});
+  edAdded(wk).forEach(put);
   return rows;
+}
+// ---- an exercise swapped AFTER sets were logged on it (owner, Nov 2026) ----
+// The logged sets stay with the exercise they were done on. The row keeps only those sets, and
+// a second row for the new exercise stands right after it with the sets that were left. It is
+// today only and lives on the open session: A.split.rows maps a slot to the slots that follow
+// it, A.split.n is how many sets a slot has today, A.split.off is how many rounds were already
+// done before a following row began (so a superset keeps taking turns). A following row is the
+// SAME plan row under a slot of its own, "lpress~x1", with the new exercise in A.swaps like any
+// other swap, so the session, the wrist, the finish and history all read it as they read a swap.
+function splitOf(wk){
+  if(typeof DB==='undefined'||!wk)return null;
+  var A=DB.active&&DB.active[wk];
+  return (A&&A.split)||null;
+}
+function splitSlot(s){return /~x\d+$/.test(String(s||''));}
+function splitN(wk,slot){var sp=splitOf(wk);return (sp&&sp.n&&sp.n[slot])||0;}
+function splitOff(wk,slot){var sp=splitOf(wk);return (sp&&sp.off&&sp.off[slot])||0;}
+function setsFit(sets,n){
+  var l=String(sets).split('\n'),out=[];
+  for(var i=0;i<n;i++)out.push(l[Math.min(i,l.length-1)]);
+  return out.join('\n');
+}
+function splitRows(wk,row){
+  var sp=splitOf(wk);if(!sp||!sp.rows)return [];
+  var base=typeof row==='string'?row:row[0],ov=typeof row==='string'?null:row[1];
+  var out=[];
+  (sp.rows[(ov&&ov.slot)||base]||[]).forEach(function(c){
+    var o={};if(ov)for(var k in ov)o[k]=ov[k];
+    o.slot=c;
+    var cr=[base,o];
+    out.push(cr);out=out.concat(splitRows(wk,cr));
+  });
+  return out;
+}
+// The same thing for the session's blocks: inside a superset the new row joins the run right
+// after the old one; standing alone it is a block of its own right after it.
+function edSplit(wk,blocks){
+  if(!splitOf(wk))return blocks;
+  var res=[];
+  blocks.forEach(function(b){
+    if(b.ss){
+      var rows=[],ids=[];
+      b.rows.forEach(function(r,n){
+        rows.push(r);ids.push(b.ids[n]);
+        splitRows(wk,r).forEach(function(c){rows.push(c);ids.push(c[0]);});
+      });
+      b.rows=rows;b.ids=ids;res.push(b);
+    }else{
+      res.push(b);
+      b.rows.forEach(function(r){splitRows(wk,r).forEach(function(c){
+        res.push({k:c[1].slot,title:b.title,ss:false,ids:[c[0]],rows:[c]});
+      });});
+    }
+  });
+  return res;
 }
 function R(ref,wk){
   var id = typeof ref === 'string' ? ref : ref[0];
@@ -4922,6 +4997,8 @@ function R(ref,wk){
   if(wk){
     var es=edGet(wk,id,'sets');if(es)out.sets=es;
     var er=edGet(wk,id,'rest');if(er!=null)out.rest=er;
+    // a row split by a swap after logging has its own number of sets today (see splitOf)
+    var cn=splitN(wk,(ov&&ov.slot)||id);if(cn)out.sets=setsFit(out.sets,cn);
   }
   return out;
 }
@@ -4970,7 +5047,7 @@ var W = {
     name:"Shoulders + Arms + Core + Cardio",tag:"Day 4",color:"#ff9152",time:"~9:00 PM",
     sections:[
       {title:"Shoulders, straight sets",tip:"No shoulder press. Front delts already get hammered on chest days. Lead with the elbows.",ss:false,rows:["dblat","clat","revfly"]},
-      {title:"Superset A, 60 sec rest after both",tip:"Same preacher weight as Wednesday. Shared lifts always use the higher number.",ss:true,rows:["preacher","vbar"]},
+      {title:"Superset A, 60 sec rest after both",tip:"Same preacher weight as Wednesday. Shared exercises always use the higher number.",ss:true,rows:["preacher","vbar"]},
       {title:"Superset B, 60 sec rest after both",tip:"Skull crusher: lower behind head, not to forehead.",ss:true,rows:[["sdbcurl",{rest:""}],"skull"]},
       {title:"Finisher, 30 sec rest after each",tip:"Pump focused, not heavy.",ss:true,rows:[["cbcurl",{sets:"42.5x15\n42.5x15",rest:""}],["rope",{sets:"42.5x15\n42.5x15",rest:"30 sec"}]]},
       {title:"Core: total finisher",tip:"Saturday core mixes all three patterns. Straight through, 45 sec after the round.",ss:true,rows:[
@@ -8457,7 +8534,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.329';
+var APPV='v5.330';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -8500,7 +8577,7 @@ function persistNow(){
     Store.set(KEY,DB).then(function(ok2){
       if(ok2!==false||SAVEFAIL)return;
       SAVEFAIL=1;
-      ask('Forge could not save just now, because the storage this app is allowed is full. What you log still shows, but it will be gone when the app closes. In Settings, under Your data, save a copy now.',
+      ask('Forge could not save just now, because the storage this app is allowed is full. What you log still shows, but it will be gone when the app closes. In Settings, under Your data, make a backup.',
         null,'This was not saved',"OK",false);
     });
   });
@@ -9111,7 +9188,7 @@ function backAsk(wk){
   var mn=plan[0].gap,mixed=false;
   plan.forEach(function(p){if(p.gap<mn)mn=p.gap;if(Math.floor(p.gap/7)!==Math.floor(plan[0].gap/7))mixed=true;});
   var n=plan.length,wks=Math.floor(mn/7);
-  document.getElementById('bkTitle').textContent=(n===1?'1 lift has':n+' lifts have')+' waited '+wks+' weeks'+(mixed?' or more':'');
+  document.getElementById('bkTitle').textContent=(n===1?'1 exercise has':n+' exercises have')+' waited '+wks+' weeks'+(mixed?' or more':'');
   document.getElementById('bkGo').textContent=n===1?'EASE IT':'EASE ALL '+n;
   document.getElementById('bkList').innerHTML=plan.map(function(p){
     var inv=!!invEx(p.id);
@@ -9892,7 +9969,7 @@ function easeRender(){
   var q=EASEQ[EASEI];
   if(!q){easeEnd();return;}
   document.getElementById('easeSub').textContent=
-    EASEQ.length===1?'One lift to look at.':('Lift '+(EASEI+1)+' of '+EASEQ.length+'.');
+    EASEQ.length===1?'One exercise to look at.':('Exercise '+(EASEI+1)+' of '+EASEQ.length+'.');
   document.getElementById('easeName').textContent=q.name;
   document.getElementById('easeH').textContent=q.off?'Not on the machine':'Out of reach';
   document.getElementById('easeBestL').firstChild.nodeValue=q.off?'the machine has ':'your best is ';
@@ -9995,9 +10072,9 @@ function easeNotice(){
         // mixed sentence is the one thing true of every row: the weight is wrong, and the
         // replacement is one he has lifted.
         var mixed=offN<hn;
-        ask((mixed?(hn+' lifts are asking for the wrong weight.')
-                  :(hn===1?'One lift asks for a weight its machine does not have.'
-                          :hn+' lifts ask for weights their machines do not have.'))+oeg+
+        ask((mixed?(hn+' exercises are asking for the wrong weight.')
+                  :(hn===1?'One exercise asks for a weight its machine does not have.'
+                          :hn+' exercises ask for weights their machines do not have.'))+oeg+
             (mixed?' They can each go to a weight you have actually lifted, one at a time, keeping the same reps.'
                   :(hn===1?' It can go to the nearest real weight, keeping the same reps.'
                           :' They can go to the nearest real weight, one at a time, keeping the same reps.')),
@@ -10012,8 +10089,8 @@ function easeNotice(){
       // the raise was arrived at, which is the app talking about itself.
       var heg=hw?(' Your '+String(hw.name).toLowerCase()+' asks for '+fmtW(hw.ask)+
                   ' and your best is '+fmtW(hw.best)+'.'):'';
-      ask((hn===1?'One lift was raised to a weight you have not made since.'
-                :hn+' lifts were raised to weights you have not made since.')+heg+
+      ask((hn===1?'One exercise was raised to a weight you have not made since.'
+                :hn+' exercises were raised to weights you have not made since.')+heg+
           (hn===1?' It can come back down to your best, keeping the same reps.'
                  :' They can come back down to your best, one at a time, keeping the same reps.'),
           // SHOW ME records nothing by itself: easeEnd records when the list is walked to the
@@ -10042,8 +10119,8 @@ function easeNotice(){
     // LEAVE THEM settles it until the list itself changes.
     // It is about the file, not about the lifter: these numbers arrived, nobody here has lifted
     // them, and the only question is whether to keep them (v5.251).
-    ask((n===1?'One lift that came in with the file asks for more weight than has ever been logged here.'
-             :n+' lifts that came in with the file ask for more weight than has ever been logged here.')+eg+
+    ask((n===1?'One exercise that came in with the file asks for more weight than has ever been logged here.'
+             :n+' exercises that came in with the file ask for more weight than has ever been logged here.')+eg+
         ' They can be set to the best in your history, one at a time, keeping the same reps.',
         function(){openEase(null);},
         'Worth a look after the import','SHOW ME',
@@ -10853,6 +10930,24 @@ function weekAllDone(){
 // A new week greets you unlocked (user note, Aug 23): the locks expire silently at the
 // turnover, and without a word that quiet reset could read as lost work. Said once per
 // week, and only when last week actually ended with locked days.
+// At most ONE automatic notice per app opening (owner, Nov 2026). Everything the launch may say
+// by itself goes through autoRun: the first one that actually opens a sheet takes the turn and
+// the rest wait for the next opening. They are not run at all, so none of them is marked as
+// seen. Never over an open sheet and never over a running workout. The order is the launch
+// timers' own: the new week, the finished week, the backup nudge, the Drive offer, the targets
+// check. Anything the user asked for by tapping does not come through here.
+var AUTOSAID=false;
+function autoOK(){
+  if(AUTOSAID)return false;
+  if(document.querySelector('.ovl.on'))return false;
+  try{if(sessionOpen())return false;}catch(e){}
+  return true;
+}
+function autoRun(fn){
+  if(!autoOK())return;
+  try{fn();}catch(e){}
+  if(document.querySelector('.ovl.on'))AUTOSAID=true;
+}
 function weekHello(){
   if(SANDBOX)return;
   if(document.querySelector('.ovl.on'))return;
@@ -10897,7 +10992,9 @@ function weekHello(){
     if(!todo.length){wkMark();return;}
     var left=todo.length;
     var done=function(id){ans.push(id);if(--left<=0)wkMark();else{try{localStorage.setItem('arc_wkans',JSON.stringify({ws:ws,ids:ans}));}catch(e){}}};
-    todo.forEach(function(p){
+    // One question per opening (owner, Nov 2026); the answers already given are kept, so the
+    // next workout left behind is asked about the next time the app is opened.
+    todo.slice(0,1).forEach(function(p){
       askCrest('NEW WEEK');
       ask('',function(){carryAdd(p[0]);done(p[0]);},'You did not get to '+p[1]+' last week','DO IT TODAY',function(){done(p[0]);},null,'LET IT GO');
     });
@@ -11544,7 +11641,7 @@ function renderHome(){
   var pumpCard=pumpGone?'':plock
     ?'<div class="card pumpcard pumplk" onclick="openPump()"><div class="card-top"><span class="card-name">'+esc(W.pump.name)+'</span>'+
       '<span class="card-r"><span class="pill">LOCKED</span></span></div>'+
-      '<div class="card-meta">Three to earn, each built from your own lifts</div>'+
+      '<div class="card-meta">Three to earn, each built from your own exercises</div>'+
       ['upper','lower','full'].map(function(k){var st=pu[k];
         return '<div class="pump-row"><span>'+PUMP_LBL[k]+'</span><i class="pump-bar"><u style="width:'+Math.round(st.have/st.need*100)+'%"></u></i><b>'+st.have+' of '+st.need+'</b></div>';
       }).join('')+'</div>'
@@ -11730,7 +11827,10 @@ function rowFor(swaps,row,wk){
   // nothing about existing sessions, logs or swaps changes shape.
   var slot=(typeof row==='string'?null:((row[1]||{}).slot))||base;
   // swaps made before slots existed are filed under the base, so both are consulted
-  var sw=(swaps||{})[slot]||(swaps||{})[base];
+  // A row that follows a split (see splitOf) never reads the base's swap, and a swap that
+  // names the row's own exercise means "the exercise as planned".
+  var sw=(swaps||{})[slot]||(splitSlot(slot)?null:(swaps||{})[base]);
+  if(sw===base)sw=null;
   // id   = the plan slot the sets are filed under - unique within the day
   // baseId = the row's own library id, which day-edits and the swap sheet key on
   // exId = the lift actually performed, which is what history and grading key on
@@ -11738,7 +11838,8 @@ function rowFor(swaps,row,wk){
     // an override is filed against the slot, not the lift standing in it, or swapping
     // out and back would quietly drop the change
     var d=R(sw,null);
-    if(wk){var s=edGet(wk,base,'sets');if(s)d.sets=s;var r=edGet(wk,base,'rest');if(r!=null)d.rest=r;}
+    if(wk){var s=edGet(wk,base,'sets');if(s)d.sets=s;var r=edGet(wk,base,'rest');if(r!=null)d.rest=r;
+      var cn=splitN(wk,slot);if(cn)d.sets=setsFit(d.sets,cn);}
     return {id:slot,baseId:base,exId:sw,swapId:sw,data:d};
   }
   return {id:slot,baseId:base,exId:base,swapId:null,data:R(row,wk)};
@@ -12014,7 +12115,10 @@ function renderSession(){
       var L=lastFor(rf.exId),ready=isReady(rf.exId,tg,rf.id),bst=bestEver(rf.exId);
       // The folded line: the plan until something is logged, then how far in you are (sfApply).
       var t0=tg[0]||{};
-      var planTxt=tg.length+' × '+(t0.r!=null?t0.r:'')+(t0.unit?' '+t0.unit:'')+((t0.type==='wr'&&!r.bw&&t0.w)?' · '+fmtW(t0.w):'');
+      var planAmt=t0.unit?(t0.r+' '+(t0.unit==='sec'?'s':t0.unit))
+        :(t0.type==='wr'&&!r.bw&&t0.w)?(fmtW(t0.w)+' '+wUnitName()+(t0.r?' × '+t0.r:''))
+        :(t0.r?t0.r+(t0.r===1?' rep':' reps'):'');
+      var planTxt=tg.length+(tg.length===1?' set':' sets')+(planAmt?' · '+planAmt:'');
       html+='<div class="exc'+(allDone?' alldone':'')+'" id="exc-'+id+'" onclick="sfTap(\''+id+'\')">';
       // ex-body groups everything a press-and-hold actually acts on - the name and the
       // target/last/best under it - as one box. Ringing the name alone read
@@ -12121,7 +12225,7 @@ function renderSession(){
         // rest, the cup is the best, both at the size of the words beside them.
         html+='<div class="ex-foot">'+
               '<span class="ex-rest">'+FOOT_REST+esc(restTxt)+'</span>'+
-              (prTxt?'<span class="ex-pr" title="Your best set ever on this lift">'+FOOT_BEST+'Best <b>'+prTxt+'</b></span>':'')+
+              (prTxt?'<span class="ex-pr" title="Your best set ever on this exercise">'+FOOT_BEST+'Best <b>'+prTxt+'</b></span>':'')+
               '</div>';
       }
       html+='</div>';
@@ -12143,7 +12247,7 @@ function renderSession(){
   // destructive button cost more trust than the rare wrong-day accident it saved.
   // The button stopped saying "export" (Aug 23): finishing LOGS the day, and the plain-text
   // copy on the next sheet is an option, not an obligation the label implies.
-  html+='<div class="finish-inline"><button class="finishbtn" onclick="finishSession()">Finish the day</button></div>';
+  html+='<div class="finish-inline"><button class="finishbtn" onclick="finishSession()">Finish workout</button></div>';
   document.getElementById('sBody').innerHTML=html;
   // The ledger (v5.157): the tool row sits under the name, top left, as icon buttons. The markup
   // is built with the links after the stats; moving the node keeps every inline handler intact.
@@ -12650,7 +12754,7 @@ function openExMore(id){
   if(m.pl>=0)h+=row('pl','Plate calculator',m.pl>0?fmtW(m.pl)+' '+wUnitName():'');
   if(m.hist)h+=row('hist','History');
   h+=row('note','Your note',m.note?'Saved':'');
-  h+=row('swap','Swap this lift');
+  h+=row('swap','Swap this exercise');
   h+=row('edit','Edit this workout');
   document.getElementById('exMoreList').innerHTML=h;
   document.getElementById('exMoreOvl').classList.add('on');
@@ -12819,10 +12923,39 @@ function swapList(){
 function doSwap(k){
   // swapTarget is a SLOT, so a day running the same lift twice can swap one block and leave the
   // other alone. On every other workout the slot is the base id and this is what it always was.
-  var A=DB.active[CUR],prev=A.swaps[swapTarget]||slotBase(swapTarget),next=k||slotBase(swapTarget);
+  var A=DB.active[CUR],next=k||slotBase(swapTarget);
+  var prev=A.swaps[swapTarget]||(splitSlot(swapTarget)?null:A.swaps[slotBase(swapTarget)])||slotBase(swapTarget);
+  // Sets were already logged here (owner, Nov 2026): they stay with the exercise they were done
+  // on. This row keeps only its logged sets and the new exercise stands right after it with the
+  // sets that were left, at its own suggested weight. Nothing is asked. See splitOf.
+  // This replaces the old rule, which kept the sets in the slot and regraded them against the
+  // new exercise, so a Leg Press set landed in the Dumbbell Squat's history.
+  var done=(A.entries[swapTarget]||[]).filter(function(e){return !!e;});
+  if(prev!==next&&done.length){
+    var planned=0;
+    edAllRows(CUR).forEach(function(row){
+      var rf=rowFor(A.swaps,row,CUR);
+      if(rf.id===swapTarget)planned=String(rf.data.sets).split('\n').length;
+    });
+    var sp=A.split=A.split||{};sp.rows=sp.rows||{};sp.n=sp.n||{};sp.off=sp.off||{};
+    var c,ci=1;
+    do{c=swapTarget+'~x'+(ci++);}while(sp.n[c]||A.entries[c]||A.swaps[c]);
+    A.entries[swapTarget]=done;                 // only what was logged, closed up
+    if(A.draft)delete A.draft[swapTarget];
+    sp.n[swapTarget]=done.length;
+    sp.n[c]=Math.max(1,planned-done.length);
+    sp.off[c]=(sp.off[swapTarget]||0)+done.length;
+    (sp.rows[swapTarget]=sp.rows[swapTarget]||[]).unshift(c);
+    A.swaps[c]=next;
+    if(SF.wk===CUR){SF.id=c;SF.was=false;clearTimeout(SF.t);}
+    try{if(WEARFOCUS===swapTarget){WEARFOCUS=null;WEARSET=null;}}catch(e){}
+    saveDB();closeOvl('swapOvl');renderSession();
+    return;
+  }
   if(k)A.swaps[swapTarget]=k;
+  else if(splitSlot(swapTarget))A.swaps[swapTarget]=slotBase(swapTarget);
   else delete A.swaps[swapTarget];
-  // sets already logged in this slot stay put and are regraded against the new lift
+  // nothing is logged in this slot, so this only matters for a set unticked and left behind
   if(prev!==next&&A.entries[swapTarget]){
     A.entries[swapTarget].forEach(function(e){
       if(!e)return;
@@ -13052,7 +13185,30 @@ function mkParse(sets){
 function mkNote(msg,title){ask(msg,function(){},title||'Hold on',"OK",false,null);}
 
 // ---------- open / close ----------
-function mkTap(wk,dk){if(LP.fired){LP.fired=false;return;}openW(wk,dk);}
+// A workout already finished this week opens the page of what was done, in Workouts finished,
+// not a blank session (owner, Nov 2026): one stray tap in that blank session used to turn
+// LOCKED IN into Resume. Unlocking it from the hold menu (unsealOne) is still how it is opened
+// to log again. A day only marked done has no page to show, so it opens as it always did.
+function lockedLog(id,dk){
+  if(dk==='undefined'||dk==='null')dk=null;
+  if(!W[id]||twoOff()||loggedCount(id)>0)return -1;
+  var ws=weekStartTs(),best=-1;
+  (DB.logs||[]).forEach(function(l,i){
+    if(!l||l.day!==id||!l.sealed||l.unsealed)return;
+    if(dk&&l.wk&&l.wk!==dk)return;
+    if(!Object.keys(l.entries||{}).length)return;
+    var t=new Date(l.date+'T12:00:00').getTime();
+    if(isNaN(t)||t<ws)return;
+    best=i;
+  });
+  return best;
+}
+function mkTap(wk,dk){
+  if(LP.fired){LP.fired=false;return;}
+  var li=-1;try{li=lockedLog(wk,dk);}catch(e){}
+  if(li>=0){showHistory();try{histOpen(li);}catch(e){}return;}
+  openW(wk,dk);
+}
 var LP={t:null,fired:false,x:0,y:0};
 function mkBindCards(){
   [].forEach.call(document.querySelectorAll('#weekCards .card,#extraCards .card'),function(el){
@@ -13121,7 +13277,7 @@ function dfAsk(k){
     '<button class="ez-card" style="--i:0" onclick="dfBuild()"><span class="ez-art">'+WZ.fd[0]+'</span><span><b>I\'ll build it</b>'+
     '<small>Pick the exercises yourself</small></span></button>'+
     '<button class="ez-card" style="--i:1" onclick="dfForge()"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Forge it for me</b>'+
-    '<small>The day your week is missing</small></span></button>';
+    '<small>The workout your week is missing</small></span></button>';
   document.getElementById('dfOvl').classList.add('on');
 }
 function dfBuild(){closeOvl('dfOvl');openNewDayNow(DFDAY);}
@@ -13261,8 +13417,8 @@ function svAdd(){
     '<small>A balanced week, built for you</small></span></button>'+
     // Forging one day lived only on each day's plus, so somebody looking here for it found a week
     // or nothing (v5.308, owner). Same forge, it just asks which day first.
-    '<button class="ez-card" style="--i:2" onclick="svForgeDay()"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Forge me a day</b>'+
-    '<small>The day your week is missing</small></span></button>'+
+    '<button class="ez-card" style="--i:2" onclick="svForgeDay()"><span class="ez-art">'+WZ.xp1[2]+'</span><span><b>Forge me a workout</b>'+
+    '<small>The workout your week is missing</small></span></button>'+
     '<button class="ez-card" style="--i:3" onclick="closeOvl(\'dfOvl\');openBring()"><span class="ez-art">'+SV_IN+'</span><span><b>Bring one in</b>'+
     '<small>A file or a code somebody sent you</small></span></button>';
   document.getElementById('dfOvl').classList.add('on');
@@ -13496,11 +13652,14 @@ function dsActions(id,dk){
   h+=dsBtn('edit','Edit','closeOvl(\'dayOvl\');openMake(\''+id+'\',\''+(mine?id:'')+'\')');
   h+=dsBtn('copy','Duplicate','closeOvl(\'dayOvl\');mkDuplicate(\''+id+'\')');
   h+=dsBtn('send','Send','closeOvl(\'dayOvl\');shareOne(\''+id+'\')');
-  h+=dsBtn('shelf',mine?'Save it':'Off the week','closeOvl(\'dayOvl\');savedOpen();planDropDay(\''+id+'\',\''+dk+'\')');
+  h+=dsBtn('shelf',mine?'Move to Saved':'Off the week','closeOvl(\'dayOvl\');savedOpen();planDropDay(\''+id+'\',\''+dk+'\');dsMoved(\''+id+'\')');
   if(mine)h+=dsBtn('bin','Delete','dsDelete(\''+id+'\')','bad');
   return h+'</div>';
 }
 function dsDelete(id){closeOvl('dayOvl');mkDelete(id);}
+// Says so only when it really landed in Saved workouts: not when it was refused, and not when
+// it still sits on another day.
+function dsMoved(id){if(!onPlan(id)&&(DB.extra||[]).indexOf(id)>=0)mkNote('Moved to Saved workouts.','Moved');}
 // A card inside the sheet reads like the card on the board and does the same thing: it opens the
 // workout. Nothing here is a second way to start a session, it IS the session.
 function dsCard(id,dk){
@@ -13568,7 +13727,7 @@ function mkActions(id,dk){
     // Adding a second workout to this day moved here from the day column (v5.145).
     (held&&held.k!=='rest'&&(DB.days[held.k]||[]).length<DAY_MAX?'<div class="btn" onclick="closeOvl(\'mkActOvl\');openNewDay(\''+held.k+'\')">ADD ANOTHER WORKOUT TO '+held.n.toUpperCase()+'</div>':'')+
     off+
-    (mine?'<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDelete(\''+id+'\')">DELETE THIS WORKOUT</div>':'');
+    (mine?'<div class="btn" onclick="mkDelete(\''+id+'\')">DELETE THIS WORKOUT</div>':'');
   openHeld('mkActOvl');
 }
 // Off ONE day, everything else untouched. If that was its last placement it lands on the
@@ -13601,7 +13760,7 @@ function mkActionsX(id){
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');openMake(null,\''+id+'\')">EDIT THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');mkDuplicate(\''+id+'\')">DUPLICATE THIS WORKOUT</div>'+
     '<div class="btn" onclick="closeOvl(\'mkActOvl\');shareOne(\''+id+'\')">SEND THIS WORKOUT</div>'+
-    '<div class="btn" style="color:#e25b4a;border-color:color-mix(in srgb,#e25b4a 40%,var(--line))" onclick="mkDeleteX(\''+id+'\')">DELETE THIS WORKOUT</div>';
+    '<div class="btn" onclick="mkDeleteX(\''+id+'\')">DELETE THIS WORKOUT</div>';
   openHeld('mkActOvl');
 }
 // opened from a long press: its buttons stay dead until the finger that opened it is up
@@ -13694,6 +13853,7 @@ function scrapBack(i){
 }
 function scrapBurn(i){
   var e=(DB.scrap||[])[i];if(!e)return;
+  askDanger();
   var nm=String((e.w&&e.w.name)||'this workout').replace('Optional: ','');
   ask('Delete '+nm+' for good? This one cannot be undone.',function(){
     (DB.scrap||[]).splice(i,1);
@@ -14315,7 +14475,7 @@ function mkSetLine(i,k,f,v){
   // The row's own unit, as mkLine writes it. This said ' sec' for every hold, so editing one set
   // of a 30-minute walk in SET EACH ONE turned that set into "25 sec".
   r.lines[k]=r.hold?((c.r||30)+' '+mkUnitOf(r)):((c.w||0)+'x'+(c.r||0));
-  r.custom=1;mkTouch();
+  r.custom=1;r.typed=1;mkTouch();   // typed: the bin asks before it throws these away (mkDelRow)
 }
 // Everything sharing a group id, in the order they sit in the list.
 function mkGroupRows(g){return MK.rows.filter(function(r){return r.g===g;});}
@@ -14400,7 +14560,30 @@ function mkTidyGroups(){
   MK.rows.forEach(function(r){if(r.g)seen[r.g]=(seen[r.g]||0)+1;});
   MK.rows.forEach(function(r){if(r.g&&seen[r.g]<2)r.g=null;});
 }
-function mkDelRow(i){MK.rows.splice(i,1);mkTidyGroups();mkTouch();mkRender();}
+// The bin asks first, but only when something would be lost (owner, Nov 2026): numbers typed
+// into this row since the builder opened, or sets logged on the exercise today. A row nobody
+// has touched still goes at once.
+function mkRowLogged(r){
+  var A=MK.id&&DB.active&&DB.active[MK.id];
+  if(!A||!A.entries)return false;
+  for(var k in A.entries){
+    if(slotBase(k)===r.id&&(A.entries[k]||[]).some(function(e){return !!e;}))return true;
+  }
+  return false;
+}
+function mkDelRow(i){
+  var r=MK.rows[i];if(!r)return;
+  function go(){
+    var j=MK.rows.indexOf(r);if(j<0)return;
+    MK.rows.splice(j,1);mkTidyGroups();mkTouch();mkRender();
+  }
+  var b=r.base,typed=!!r.typed||!!(b&&(r.w!==b.w||r.r!==b.r));
+  if(typed||mkRowLogged(r)){
+    ask('Its sets go with it.',go,'Remove '+(EX[r.id]?EX[r.id].name:r.id)+'?','REMOVE',null,null,'KEEP');
+    return;
+  }
+  go();
+}
 function mkUnlink(g){MK.rows.forEach(function(r){if(r.g===g)r.g=null;});mkTouch();mkRender();}
 // ---------- running exercises together ----------
 // Three was the old ceiling and it was the wrong shape of limit: a superset is two, a triset is
@@ -14807,8 +14990,17 @@ function buildExport(wk,A){
   w.sections.forEach(function(sec){
     sec.rows.forEach(function(row){
       var rf=rowFor(A.swaps,row),id=rf.id,ent=(A.entries[id]||[]).filter(function(x){return x;});
-      if(!ent.length)return;
-      out+=rf.data.name+(rf.swapId?' (swap)':'')+': '+fmtSets(ent,true)+'\n';
+      if(ent.length)out+=rf.data.name+(rf.swapId?' (swap)':'')+': '+fmtSets(ent,true)+'\n';
+      // rows that followed a swap made after logging (see splitOf): filed under "slot~x1"
+      (function kids(p){
+        Object.keys(A.entries||{}).forEach(function(k2){
+          var at=k2.lastIndexOf('~x');
+          if(at<0||k2.slice(0,at)!==p||!splitSlot(k2))return;
+          var e2=(A.entries[k2]||[]).filter(function(x){return x;}),x2=exOfKey(A,k2);
+          if(e2.length)out+=((EX[x2]||{}).name||k2)+(x2!==slotBase(k2)?' (swap)':'')+': '+fmtSets(e2,true)+'\n';
+          kids(k2);
+        });
+      })(id);
     });
   });
   if(out.indexOf('*')>-1)out+='\n* hold broken by a pause over 10s';
@@ -15420,7 +15612,7 @@ function doRestore(input){
   rd.onload=function(){
     var d=null;
     try{d=JSON.parse(String(rd.result));}catch(e){}
-    if(!d||!d.db||!Array.isArray(d.db.logs)){ask('That file is not a Forge backup. The one Put a copy back needs is the forge-backup file ending in .json, made by Save a copy now.',null,'Could not read it');return;}
+    if(!d||!d.db||!Array.isArray(d.db.logs)){ask('That file is not a Forge backup. The one Restore a backup needs is the forge-backup file ending in .json, made by Make a backup.',null,'Could not read it');return;}
     var inN=d.db.logs.length,haveN=(DB.logs||[]).length;
     ask('The backup holds '+inN+' logged session'+(inN===1?'':'s')+', from '+bkWhen(d.at)+
         '. Restoring replaces everything currently in this app'+
@@ -15754,7 +15946,7 @@ function autoBkDraw(){
   if(st){
     var okT=0,failT=0;try{okT=+localStorage.getItem('arc_autobk_ok')||0;failT=+localStorage.getItem('arc_autobk_fail')||0;}catch(e){}
     st.textContent=!on?'Off. Nothing is being written.':
-      (failT>okT?'It could not be written last time. Save a copy below and send it off the phone.':
+      (failT>okT?'It could not be written last time. Make a backup below and send it off the phone.':
       (okT?'Saved '+pretty(new Date(okT).toISOString().slice(0,10))+', in Documents under a Forge folder.':
            'On. It writes itself after your next workout.'));
     st.style.color=(on&&failT>okT)?'#f0645a':'';
@@ -15780,11 +15972,11 @@ function autoBk(first){
   function write(t){return window.Capacitor.Plugins.Filesystem.writeFile({path:nameFor(t),data:data,directory:'DOCUMENTS',encoding:'utf8',recursive:true});}
   function ok(){
     try{localStorage.setItem('arc_lastbk',String(Date.now()));localStorage.setItem('arc_autobk_ok',String(Date.now()));localStorage.removeItem('arc_autobk_warned');}catch(e){}
-    if(first)mkNote('A safety copy now refreshes itself after every finished workout. It lives in My Files, under Documents, in the Forge folder.','Safety copy on');
+    if(first)mkNote('A backup now refreshes itself after every finished workout. It lives in My Files, under Documents, in the Forge folder.','Backup on');
   }
   function fail(){
     var warned=false;try{localStorage.setItem('arc_autobk_fail',String(Date.now()));warned=!!localStorage.getItem('arc_autobk_warned');localStorage.setItem('arc_autobk_warned','1');}catch(e){}
-    if(!warned)mkNote('The automatic safety copy could not be written to Documents this time. Open Settings, Your data, tap Save a copy now, and send the file off the phone to be safe.','Safety copy not saved');
+    if(!warned)mkNote('The automatic backup could not be written to Documents this time. Open Settings, Your data, tap Make a backup, and send the file off the phone to be safe.','Backup not saved');
   }
   try{
     write(tag).then(ok).catch(function(){
@@ -16094,7 +16286,7 @@ async function drivePush(interactive,quiet){
       localStorage.removeItem('arc_drive_fail');
     }catch(e){}
     driveDraw();
-    if(interactive&&!quiet)mkNote('Your training is in a Forge folder in your Drive, and it refreshes itself after every workout from now on.','Copied to Drive');
+    if(interactive&&!quiet)mkNote('Your training is in a Forge folder in your Drive, and it refreshes itself after every workout from now on.','Backed up to Drive');
     return true;
   }catch(e){
     try{localStorage.setItem('arc_drive_fail',String(Date.now()));}catch(e2){}
@@ -16102,7 +16294,7 @@ async function drivePush(interactive,quiet){
     // An automatic copy that failed says so ONCE, in Settings, and never interrupts. The usual
     // reason is no signal, which fixes itself by the next workout.
     if(interactive&&!quiet){
-      ask('Forge could not reach your Drive just now. It will try again after your next workout, and Save a copy now still works.',
+      ask('Forge could not reach your Drive just now. It will try again after your next workout, and Make a backup still works.',
         null,'Could not reach Drive',"OK",false);
     }
     return false;
@@ -16171,7 +16363,7 @@ function driveAsk(){
   askAlso('It goes to a Forge folder in your own Google Drive, where you can open it, move it or '+
           'delete it. Forge is only ever given reach over the one file it makes, so the rest of '+
           'your Drive stays its own business. You can turn it off again in Settings, under Your data.');
-  ask('Keep a copy of your training in your Google Drive? It refreshes itself after every workout, so there is nothing to remember.',
+  ask('Keep a backup of your training in your Google Drive? It refreshes itself after every workout, so there is nothing to remember.',
     function(){driveStart();},
     'Back it up for you?','BACK ME UP',null,null,'KEEP ME OFFLINE');
 }
@@ -16459,7 +16651,7 @@ function vaultGo(t){
   if(i<0){vaultDrawList();ask('That day moved while the list was open. It is listed again now.',null,'Try it again',"OK",false);return;}
   var st=vAt(i);
   if(!st||!Array.isArray(st.logs)){
-    ask('That day could not be rebuilt. Try a checkpoint instead, or put a saved file back.',null,'Could not read it',"OK",false);
+    ask('That day could not be rebuilt. Try a checkpoint instead, or restore a backup.',null,'Could not read it',"OK",false);
     return;
   }
   var e=VAULT.e[i],inN=st.logs.length,haveN=(DB.logs||[]).length;
@@ -17419,7 +17611,7 @@ function showProgress(){
     }
     body.innerHTML=weekStrip()+bwStrip()+walkStrip()+block('VS LAST SESSION','dLast')+block('VS YOUR BEST EVER','dBest');
   }
-  document.getElementById('progSub').textContent=DB.logs.length+' session'+(DB.logs.length===1?'':'s')+' logged · tap a lift for its chart';
+  document.getElementById('progSub').textContent=DB.logs.length+' session'+(DB.logs.length===1?'':'s')+' logged · tap an exercise for its chart';
   document.getElementById('progOvl').classList.add('on');
 }
 function showHistory(){
@@ -17557,7 +17749,7 @@ function histWeekHtml(){
     var col='';
     if(sess){var L0=DB.logs[list.filter(function(x){return x.log!==undefined;})[0].log];col=' style="--hc:'+dayC(L0.day)+'"';}
     strip+='<div class="hwk-c'+(sess?' has':'')+(walk&&!sess?' walk':'')+(pr?' pr':'')+(iso===todayIso?' now':'')+(t>Date.now()?' fut':'')+(HIST.day===iso?' sel':'')+'"'+col+
-      (list.length?' onclick="histDay(\''+iso+'\')"':'')+'><i>'+DW[new Date(t).getDay()].slice(0,1)+'</i><b>'+new Date(t).getDate()+'</b></div>';
+      ((list.length||histMissed(iso).length)?' onclick="histDay(\''+iso+'\')"':'')+'><i>'+DW[new Date(t).getDay()].slice(0,1)+'</i><b>'+new Date(t).getDate()+'</b></div>';
   }
   var off=Math.round((ws-wk0)/(7*day));   // how many weeks back, for the forward arrow and the empty line
   var title=histWeekName(wk0);
@@ -17584,7 +17776,7 @@ function histWeekHtml(){
     if(it.log===undefined)return;
     var L=DB.logs[it.log],s=histSetsOf(L);
     if(L.marked||!s.n)return;
-    sess++;sets+=s.n;recs+=s.pr;mins+=(L.mins||0);doneIds[L.day]=1;
+    if(L.sealed){sess++;doneIds[L.day]=1;}sets+=s.n;recs+=s.pr;mins+=(L.mins||0);
   });
   var planned=0,done=0;
   DAYS.forEach(function(d){(DB.days[d.k]||[]).forEach(function(id){if(wkVar(id)||!W[id])return;planned++;if(doneIds[id])done++;});});
@@ -17685,6 +17877,7 @@ function deleteLog(i){
   var L=DB.logs[i];
   if(!L)return;
   var w=W[L.day],s=histSetsOf(L);
+  askDanger();
   ask('This erases '+s.n+' set'+(s.n===1?'':'s')+' from '+pretty(L.date)+' and cannot be undone.',function(){
     DB.logs.splice(i,1);
     saveDB();
@@ -17761,11 +17954,11 @@ function renderHist(){
           return '<span class="hset'+((s.pr||isTop(s.g))?' pr':(s.g==='match'?' mt':''))+'" onclick="histEditSet(\''+id+'\','+si+')" title="Tap to correct this set">'+v+'</span>';
         }).join('')+'</div></div>';
     }
-    body.innerHTML='<div class="hback" onclick="histBack()">&larr; All sessions</div>'+
+    body.innerHTML='<div class="hback" onclick="histBack()">&larr; All finished workouts</div>'+
       '<div class="hdet-n">'+esc(w?w.name.replace('Optional: ',''):(L.name||'A deleted workout'))+'</div>'+
       (L.marked?'':'<button class="hdet-t" onclick="histMinsEdit()">'+MK_GLASS+'<span>'+(L.mins?fmtMins(L.mins):'Add the time')+'</span></button>')+
       '<div class="hscroll">'+rows+(L.note?'<div class="hnote">'+esc(L.note)+'</div>':'')+'</div>'+
-      '<div class="hdel" onclick="deleteLog('+HIST.sel+')"><svg viewBox="0 0 20 20"><path d="M4 6h12M8.5 6V4.5h3V6M6 6l.8 10h6.4L14 6M8.4 8.6v4.8M11.6 8.6v4.8"/></svg>Delete this session</div>';
+      '<div class="hdel" onclick="deleteLog('+HIST.sel+')"><svg viewBox="0 0 20 20"><path d="M4 6h12M8.5 6V4.5h3V6M6 6l.8 10h6.4L14 6M8.4 8.6v4.8M11.6 8.6v4.8"/></svg>Delete this finished workout</div>';
     return;
   }
   seg.style.visibility='';
@@ -17826,14 +18019,14 @@ function ask(msg,onYes,title,yesLabel,onNo,alt,noLabel){
     // Clear the one shot extras BEFORE the dedupe returns (v5.267). Both guards below bail out,
     // and an askAlso or askCrest set for a question that then gets suppressed as a duplicate
     // would have survived and landed on whatever dialog opened next.
-    if(ASKCUR===sig){ASKI=null;ASKB=null;return;}
-    for(var i=0;i<ASKQ.length;i++)if(ASKQ[i][7]===sig){ASKI=null;ASKB=null;return;}
-    ASKQ.push([msg,onYes,title,yesLabel,onNo,alt,noLabel,sig,ASKI,ASKB]);
-    ASKI=null;ASKB=null;
+    if(ASKCUR===sig){ASKI=null;ASKB=null;ASKD=0;return;}
+    for(var i=0;i<ASKQ.length;i++)if(ASKQ[i][7]===sig){ASKI=null;ASKB=null;ASKD=0;return;}
+    ASKQ.push([msg,onYes,title,yesLabel,onNo,alt,noLabel,sig,ASKI,ASKB,ASKD]);
+    ASKI=null;ASKB=null;ASKD=0;
     return;
   }
-  var info=ASKI,crest=ASKB;ASKI=null;ASKB=null;
-  askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info,crest);
+  var info=ASKI,crest=ASKB,danger=ASKD;ASKI=null;ASKB=null;ASKD=0;
+  askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info,crest,danger);
 }
 // Every exit from the sheet comes through closeOvl, which calls this. The short delay lets the
 // sheet finish closing so the next question reads as a new question rather than a flicker.
@@ -17841,7 +18034,7 @@ function askDrain(){
   ASKCUR=null;
   if(!ASKQ.length)return;
   var a=ASKQ.shift();
-  setTimeout(function(){askNow(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[8],a[9]);},120);
+  setTimeout(function(){askNow(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[8],a[9],a[10]);},120);
 }
 // The long version of a short question, behind an i beside the title. Set it on the line before
 // the ask and it belongs to that question alone (v5.238).
@@ -17851,12 +18044,16 @@ function askAlso(t){ASKI=t;}
 // It names the sheet the question came off, so the question looks like part of it.
 var ASKB=null;
 function askCrest(t){ASKB=t;}
+// The next question confirms a delete that cannot be undone, so its answer wears red. Set on the
+// line before the ask, the same way.
+var ASKD=0;
+function askDanger(){ASKD=1;}
 function askMore(){
   var m=document.getElementById('askMore'),b=document.getElementById('askInfo');
   if(m)m.hidden=false;
   if(b)b.hidden=true;
 }
-function askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info,crest){
+function askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info,crest,danger){
   ASKCUR=String(title)+' '+String(msg);   // what is on screen, so a repeat of it is not queued
   document.getElementById('askTitle').textContent=title||'Are you sure?';
   document.getElementById('askMsg').textContent=msg||'';
@@ -17876,6 +18073,7 @@ function askNow(msg,onYes,title,yesLabel,onNo,alt,noLabel,info,crest){
     a.style.display='none';a.onclick=null;a.textContent='';
   }
   y.classList.add('btn-go');
+  y.classList.toggle('btn-danger',!!danger);
   n.onclick=function(){closeOvl('askOvl');if(onNo)onNo();};
   n.textContent=noLabel||'CANCEL';
   if(onYes){
@@ -18111,7 +18309,13 @@ function tops(id){var o=topOvl();return !!(o&&o.id===id);}
 function wcBack(){
   var wc=document.getElementById('welcome');
   if(document.getElementById('wcGo'))return;                         // the safety questions ignore back
-  if(wc.querySelector('.ez-card')){wcPick(0);return;}                // the start question: the empty week
+  // The start cards: back goes back one step, to the two safety questions with the answers
+  // still lit (owner, Nov 2026). It used to pick the empty week, as if the first card was tapped.
+  if(wc.querySelector('.ez-card')){
+    if(WC_SAFE.q1===null&&WC_SAFE.q2===null&&DB.safety)WC_SAFE={q1:!!DB.safety.q1,q2:!!DB.safety.q2};
+    wcSafetyDraw();wcSafeSet('q1',WC_SAFE.q1);
+    return;
+  }
   if(wc.querySelector('.wc-pick[onclick^="wcAsk"]')){wcAsk();return;}
   if(wc.querySelector('.wc-pick'))wcPick(0);
 }
@@ -18457,9 +18661,55 @@ function drawDistRow(){
     return '<button class="preset sm'+(on?' on':'')+'" onclick="distSet('+u[0]+')">'+u[1]+'</button>';
   }).join('');
 }
+// Changing the unit lands every target that has never been lifted on a weight the new unit can
+// load: 70 lb reads 32 kg, which no kilogram plates make, so it becomes 32.5. A weight that was
+// really logged for that exercise stays exactly as it is, and logged sets are never touched.
+// A learned machine stack wins; otherwise it is the 2.5 kg lattice natW uses. Going back to
+// pounds only mends what pounds cannot show cleanly (66.14), on plateNext's own steps.
+function unitSnap(){
+  var done={},n=0;
+  (DB.logs||[]).forEach(function(L){
+    for(var k in (L.entries||{})){
+      var id=exOfKey(L,k);
+      (L.entries[k]||[]).forEach(function(s){if(s&&s.w>0)(done[id]=done[id]||{})[Math.round(s.w*10)]=1;});
+    }
+  });
+  function fix(id,sets){
+    if(typeof sets!=='string'||!sets||!EX[id]||EX[id].cardio)return sets;
+    return sets.split('\n').map(function(l){
+      var m=l.match(/^([\d.]+)x(.*)$/);if(!m)return l;
+      var w=parseFloat(m[1]),t=w;
+      if(!(w>0)||(done[id]&&done[id][Math.round(w*10)]))return l;
+      if(!UNIT_KG&&Math.abs(w*2-Math.round(w*2))<0.001)return l;
+      var s=stackU(id),r=s?latRes(id,s):null;
+      if(s&&r!==null){
+        if(offLattice(id,w))t=lw(Math.max(s,r+Math.round((lu(w)-r)/s)*s));
+      }else if(UNIT_KG){
+        var q=Math.max(2.5,Math.round(w/LB_PER_KG/2.5)*2.5);
+        if(Math.abs(dspW(w)-q)>0.01)t=Math.round(q*LB_PER_KG*100)/100;
+      }else{
+        var st=w>=40?5:2.5;t=Math.max(st,Math.round(w/st)*st);
+      }
+      if(t===w)return l;
+      n++;return t+'x'+m[2];
+    }).join('\n');
+  }
+  for(var wk in (DB.custom||{}))((DB.custom[wk]||{}).sections||[]).forEach(function(sec){
+    (sec.rows||[]).forEach(function(row){
+      if(row&&typeof row!=='string'&&row[1]&&row[1].sets)row[1].sets=fix(row[0],row[1].sets);
+    });
+  });
+  for(var u in (DB.up||{}))DB.up[u]=fix(u,DB.up[u]);
+  for(var d in (DB.dayEdit||{})){var es=(DB.dayEdit[d]||{}).sets;for(var x in (es||{}))es[x]=fix(x,es[x]);}
+  if(n)saveDB();
+  return n;
+}
 function kgSet(on){
+  var was=UNIT_KG,snapped=0;
   UNIT_KG=!!on;
   try{localStorage.setItem('arc_kg',on?'1':'0');}catch(e){}
+  try{if(was!==UNIT_KG)snapped=unitSnap();}catch(e){}
+  if(snapped)mkNote(UNIT_KG?'Targets rounded to kilogram plates.':'Targets rounded to pound plates.',UNIT_KG?'Kilograms':'Pounds');
   drawUnitRow();
   // An unanswered distance follows the weight unit, so it moves with it - once the
   // distance switch has been touched it is explicit and stops following.
@@ -19632,7 +19882,7 @@ function wearRows(){
     (b.rows||[]).forEach(function(row){
       var rf=rowFor(A.swaps,row,wk);
       var tg=rf.swapId?rf.data.sets.split(String.fromCharCode(10)).map(parseTarget):targetsOf(row,wk);
-      mem.push({row:row,rf:rf,id:rf.id,tg:tg,ent:A.entries[rf.id]||[]});
+      mem.push({row:row,rf:rf,id:rf.id,tg:tg,ent:A.entries[rf.id]||[],off:splitOff(wk,rf.id)});
     });
     if(mem.length)blocks.push({ss:!!b.ss&&mem.length>1,mem:mem});
   });
@@ -19664,8 +19914,9 @@ function wearNext(){
   blocks.forEach(function(b){
     var order=[];
     if(b.ss){
-      var maxN=0;b.mem.forEach(function(m){if(m.tg.length>maxN)maxN=m.tg.length;});
-      for(var s=0;s<maxN;s++)b.mem.forEach(function(m){if(m.tg[s])order.push([m,s]);});
+      // m.off: a row that follows a split starts at the round its old exercise stopped on
+      var maxN=0;b.mem.forEach(function(m){if(m.tg.length+m.off>maxN)maxN=m.tg.length+m.off;});
+      for(var s=0;s<maxN;s++)b.mem.forEach(function(m){if(m.tg[s-m.off])order.push([m,s-m.off]);});
     }else b.mem.forEach(function(m){m.tg.forEach(function(_,s){order.push([m,s]);});});
     // An aim on either half of a superset aims the whole pair, so the wrist keeps alternating
     // instead of running one half to the end.
@@ -20180,6 +20431,7 @@ function walkAddSave(){
 // straight back and the removal would look ignored.
 function walkRm(i){
   var w=(DB.walks||[])[i];if(!w)return;
+  askDanger();
   ask(pretty(w.date)+', '+(w.min||0)+' min. Sessions are untouched; only this walk goes.',function(){
     // The tombstone keeps its time window now, not just its id: with two apps writing,
     // the same outing can come back later under a different id, and a removal has to
@@ -20914,7 +21166,9 @@ function startTimer(secs,exName){
   function tick(){
     flFrac=Math.max(0,(timerEnd-Date.now())/span);
     var left=timerEnd-Date.now();
-    lbl.textContent=fmtT(left);
+    var tx=fmtT(left);
+    if(lbl.textContent!==tx)try{document.getElementById('tNext').textContent=restNextLine();}catch(e){}
+    lbl.textContent=tx;
     if(left<=0){
       clearInterval(timerInt);timerInt=null;
       lbl.textContent='GO';
@@ -20933,6 +21187,7 @@ function startTimer(secs,exName){
     }
   }
   restTick=tick;restEndedAt=0;clearTimeout(restHideT);restHideT=null;
+  try{document.getElementById('tNext').textContent=restNextLine();}catch(e){}
   tick();pill.classList.add('on');pill.classList.remove('ring2');
   startRestNotif();
   timerInt=setInterval(tick,250);
@@ -21103,7 +21358,7 @@ function pumpHello(seedOnly){
   if(first||seedOnly||!fresh.length||DB.pumpHide)return;
   var names=fresh.map(function(k){return PUMP_LBL[k].toLowerCase();}).join(' and ');
   askCrest('Unlocked');
-  ask('Pump Day, '+names+', is in Saved workouts. It is built from the lifts you have been doing.',
+  ask('Pump Day, '+names+', is in Saved workouts. It is built from the exercises you have been doing.',
     function(){try{renderHome();savedShow();}catch(e){}},'You earned a Pump Day','SHOW ME',null,null,'LATER');
 }
 // Pump Day can be taken off the shelf and put back (v5.308, owner). Nothing is deleted: it is a
@@ -21213,12 +21468,12 @@ function setCards(){
 }
 function setSum(c,nm){
   // a copy that failed must not hide inside a shut part
-  if(/could not be (written|sent)/i.test(c.textContent||''))return 'A copy could not be made. Open this to see.';
+  if(/could not be (written|sent)/i.test(c.textContent||''))return 'A backup could not be made. Open this to see.';
   var on=[].map.call(c.querySelectorAll('.preset.on'),function(p){return p.textContent.trim();}).slice(0,4);
   try{if(DB.pumpHide&&c.querySelector('#pumpBackSec'))on.push('Pump Day removed');}catch(e){}
   try{if(/sound/i.test(nm)&&alertMuted())return 'Muted';}catch(e){}
   if(on.length)return on.join(' \u00b7 ');
-  if(/data/i.test(nm))return 'Copies, history, and starting over';
+  if(/data/i.test(nm))return 'Backups, history, and starting over';
   if(/learn/i.test(nm)){try{return hintsOff()?'Hints are off':'Hints are on';}catch(e){}}
   return '';
 }
@@ -22252,7 +22507,7 @@ function ezDays(){
 // app). Two stay, because each explains a term the question cannot be answered without: what
 // working weights are, and what alternating weeks means. An empty s draws nothing.
 var EZ_STEPS=[
-  {t:'Have you followed a real program?',s:'',
+  {t:'Have you followed a training plan before?',s:'',
    k:'xp1',opts:function(){return [
     // Three choices (v5.312, owner): past six months the other two questions say more about a
     // lifter than whether it has been eighteen months or three years. The score now tops out at
@@ -22262,7 +22517,7 @@ var EZ_STEPS=[
     [0,'Never','This would be my first',WZ.xp1[1]],
     [1,'Less than 6 months','Started one, life happened',WZ.xp1[2]],
     [2,'More than 6 months','Programs are how I train',WZ.xp1[3]]];}},
-  {t:'Do you know your working weights?',s:'Roughly what you use on your main lifts, without checking anywhere.',
+  {t:'Do you know the weights you normally use?',s:'Roughly what you use on your main exercises, without checking anywhere.',
    k:'xp2',opts:function(){return [
     [0,'No, I don’t track','The weights and I are strangers',WZ.xp2[0]],
     [1,'For a couple of lifts','The big ones, roughly',WZ.xp2[1]],
@@ -22703,7 +22958,7 @@ function ezForge(){
   if(EZ_WHY[goal]){
     setTimeout(function(){
       // No CANCEL: the week is already written, so a cancel promised an undo that did not exist.
-      ask(lead+EZ_WHY[goal],function(){},'Your week is forged','SHOW ME THE WEEK',false);
+      ask(lead+(EZ.xp1===0?'The weights are a starting guess. If one feels too heavy, tap it and lower it. Do any workout on any day.':EZ_WHY[goal])+(wid?' Your walk is in Saved workouts.':''),function(){},'Your week is forged','SHOW ME THE WEEK',false);
     },900);
   }
 }
@@ -22809,7 +23064,7 @@ function sbEnd(){
     DB.walks.push({date:iso(new Date()),min:Math.max(1,Math.round((Date.now()-DB.walkRun.start)/60000)),dist:null,steps:null,feel:null,ts:Date.now()});
     DB.walkRun=null;try{saveDB();}catch(e){}
   }
-  setTimeout(weekHello,900);
+  setTimeout(function(){autoRun(weekHello);},900);
   initBack();
   // Android 13 and up will not deliver a notification until the app has asked. That ask used to
   // happen here, a second into the very first launch, on top of the welcome: a permission box
@@ -22830,14 +23085,14 @@ function sbEnd(){
   setTimeout(function(){try{wearPush();}catch(e){}},1500);
   // The one-time backup nudge waits for the app to settle; it refuses to fire inside the
   // sandbox, a tour, or any life that already has a backup.
-  setTimeout(function(){try{bkNudge();}catch(e){}},6000);
+  setTimeout(function(){autoRun(bkNudge);},6000);
   // And the targets check (v5.225). It runs on its own, says nothing at all when every target is
   // reachable, and asks only once for any given list.
-  setTimeout(function(){try{easeNotice();}catch(e){}},8000);
+  setTimeout(function(){autoRun(easeNotice);},8000);
   // The offer to keep a copy off the phone. It waits for the launch AFTER a finished workout
   // rather than landing on the finish screen, where the level up offer and the missed lifts
   // are already competing for the same moment.
-  setTimeout(function(){try{driveAsk();}catch(e){}},7000);
+  setTimeout(function(){autoRun(driveAsk);},7000);
   // A week left with a session stranded on the day a workout used to stand on (v5.240).
   try{if(bonusHeal())renderHome();}catch(e){}
   try{pumpHello(true);}catch(e){}
@@ -22849,7 +23104,7 @@ function sbEnd(){
   setTimeout(function(){if(STARTPEND)offerStart();},1600);
   // And, if the week is finished, the offer to run it again. After the tour offer, and it stands
   // down if that one is up: two questions on one launch is one too many.
-  setTimeout(offerReopen,2400);
+  setTimeout(function(){autoRun(offerReopen);},2400);
 })();
 </script>
 </body>

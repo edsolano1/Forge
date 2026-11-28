@@ -1216,6 +1216,9 @@ writes through — `mkTouch()`, debounced 500ms. There is no "unsaved" state in 
    Build-out status:
    - **Unit choice stays in Settings** — decided (Aug 22): no first-run question. Switching
      is always safe because storage is canonical-lb; the toggle is a lens, never a migration.
+     **Changed by the owner Nov 28 2026 (v5.330):** on a switch, targets he has never lifted
+     are rounded to plates the new unit can load (`unitSnap`, called from `kgSet`), then a
+     notice says so. Logged sets and weights he has really lifted are never altered.
    - **The generator speaks the unit** — shipped v4.144 (`natW`): kg-mode wizard weights land
      on 2.5 kg plates (45 lb bar → 20 kg bar), stored as exact pounds.
    - **Plate-math fallback is unit-aware** — shipped v4.144 (`plateNext`): level-up steps of
