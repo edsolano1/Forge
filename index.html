@@ -8457,7 +8457,7 @@ function insAnimShow(exId){
     insAnimRAF=requestAnimationFrame(lf);
   }
 }
-var APPV='v5.328';
+var APPV='v5.329';
 var DB={logs:[],active:{},custom:{},slots:{},plan:[],cex:{},up:{},upSkip:{},extra:[],dayEdit:{},vOvr:{},walks:[],walkRun:null};
 async function loadDB(){
   var d=await Store.get(KEY),bak=null;
@@ -14900,7 +14900,7 @@ function renderSummary(s){
   // The first real session gets the one place the colours are explained (v5.99).
   var real=(DB.logs||[]).filter(function(l){return !l.marked;}).length;
   var t=document.getElementById('sumTitle'),note=document.getElementById('sumNote');
-  if(t)t.textContent=real<=1?'Your first one is in the book':'Session logged';
+  if(t)t.textContent='Session logged';   // the first finish says what every finish says (owner, 27 Nov)
   if(note)note.hidden=true;
 }
 function finRecs(){var l=document.getElementById('finRecList'),b=document.getElementById('finRec');if(!l)return;l.hidden=!l.hidden;b.classList.toggle('open',!l.hidden);}
